@@ -118,7 +118,7 @@ export default function Hero() {
 
             {/* Subheadline */}
             <p className="mt-5 text-base sm:text-lg text-slate-300 leading-relaxed max-w-xl">
-              Zerify connects top eCommerce brands directly with creators. Send briefs, manage invitations, track campaign reach, and automate payouts — without ad agency overhead.
+              Zerify connects brands directly with creators. Send briefs, manage invitations, track campaign reach, and automate payouts — without ad agency overhead.
             </p>
 
             {/* Role Switcher Toggle (Zero Emojis) */}

@@ -28,7 +28,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="text-slate-400 text-center sm:text-left">
-          © 2026 Zerify Inc. All rights reserved. Direct Collaboration Platform for eCommerce Brands & Influencers.
+          © 2026 Zerify Inc. All rights reserved. Direct Collaboration Platform for Brands & Influencers.
         </div>
 
         {/* Back to top */}

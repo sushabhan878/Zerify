@@ -3,8 +3,8 @@ import './globals.css';
 
 export const metadata = {
   title: 'Zerify — Direct Collaboration Platform for Brands & Influencers',
-  description: 'Zerify is the direct collaboration platform connecting top eCommerce brands with high-converting creators & influencers. No agency overhead.',
-  keywords: ['influencer collaboration', 'brand creator platform', 'direct influencer marketing', 'UGC video ads', 'brand influencer platform', 'eCommerce creator network'],
+  description: 'Zerify is the direct collaboration platform connecting top brands with high-converting creators & influencers. No agency overhead.',
+  keywords: ['influencer collaboration', 'brand creator platform', 'direct influencer marketing', 'UGC video ads', 'brand influencer platform', 'brand creator network'],
   openGraph: {
     title: 'Zerify — Direct Brand & Creator Collaboration',
     description: 'Connect directly with top-performing creators & manage video campaigns seamlessly.',

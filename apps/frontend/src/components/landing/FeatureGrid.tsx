@@ -9,7 +9,7 @@ export default function FeatureGrid() {
       icon: Handshake,
       color: 'from-purple-500 to-indigo-500',
       title: 'Direct Creator Collaboration',
-      description: 'Connect directly with verified influencers and eCommerce brands. No middleman ad agencies or manual outreach required.',
+      description: 'Connect directly with verified influencers and brands. No middleman ad agencies or manual outreach required.',
     },
     {
       icon: MessageSquare,

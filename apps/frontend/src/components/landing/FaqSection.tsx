@@ -9,7 +9,7 @@ export default function FaqSection() {
   const faqs = [
     {
       question: 'What is Zerify and how does it differ from traditional ad agencies?',
-      answer: 'Zerify is a direct collaboration platform that connects eCommerce brands and content creators directly. We are not an ad agency — we provide the end-to-end infrastructure for direct briefs, verified reach stats, automated campaign management, and escrow payouts without agency fees or hidden markups.',
+      answer: 'Zerify is a direct collaboration platform that connects brands and content creators directly. We are not an ad agency — we provide the end-to-end infrastructure for direct briefs, verified reach stats, automated campaign management, and escrow payouts without agency fees or hidden markups.',
     },
     {
       question: 'How do creators and influencers collaborate on Zerify?',
