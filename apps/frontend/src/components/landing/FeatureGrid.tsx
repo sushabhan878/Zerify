@@ -1,33 +1,33 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, ShieldCheck, Zap, Video, BarChart3, Users, DollarSign, Bot } from 'lucide-react';
+import { ShieldCheck, Zap, Users, BarChart3, MessageSquare, Handshake } from 'lucide-react';
 
 export default function FeatureGrid() {
   const features = [
     {
-      icon: Bot,
+      icon: Handshake,
       color: 'from-purple-500 to-indigo-500',
-      title: 'AI Smart Creator Matching',
-      description: 'Our AI engine analyzes millions of creator data points, past ROAS, engagement rates, and audience demographics to instantly match your brand with top-converting influencers.',
+      title: 'Direct Creator Collaboration',
+      description: 'Connect directly with verified influencers and eCommerce brands. No middleman ad agencies or manual outreach required.',
     },
     {
-      icon: Video,
+      icon: MessageSquare,
       color: 'from-pink-500 to-rose-500',
-      title: 'Turnkey UGC Video Production',
-      description: 'Order authentic 15-60 second video ads tailored for TikTok, Instagram Reels, YouTube Shorts, and Meta Ads. Delivered in high resolution within 5 days.',
+      title: 'Structured Campaign Briefs',
+      description: 'Brands send clear campaign conditions and product details directly to creators. Creators accept and submit content within set timelines.',
     },
     {
       icon: ShieldCheck,
       color: 'from-emerald-500 to-teal-500',
-      title: 'Escrow Payments & Usage Rights',
-      description: 'Funds are securely held in Stripe Escrow until you approve the final video. All videos come with full commercial rights and whitelisting support.',
+      title: 'Escrow Protection & Usage Rights',
+      description: 'Campaign funds are held securely until content is reviewed and approved. Includes full commercial usage and digital licensing rights.',
     },
     {
       icon: BarChart3,
-      color: 'from-amber-500 to-orange-500',
-      title: 'Real-Time ROAS & Analytics',
-      description: 'Track ad engagement, click-through rates, and conversion metrics in your unified Zerify dashboard. Double down on winning creator videos.',
+      color: 'from-purple-500 to-pink-500',
+      title: 'Verified Performance Analytics',
+      description: 'Track reach, engagements, and ROAS metrics directly within your unified Zerify dashboard to scale successful partnerships.',
     },
   ];
 
@@ -35,16 +35,18 @@ export default function FeatureGrid() {
     <section id="features" className="py-24 relative overflow-hidden bg-[#07090E]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs font-bold text-purple-400 mb-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs font-semibold text-purple-400 mb-4">
             <Zap className="w-3.5 h-3.5" />
-            <span>Built for Modern eCommerce & Creators</span>
+            <span>Built for Direct Brand & Creator Partnerships</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
-            Everything You Need to Scale <br className="hidden sm:block" />
-            <span className="text-gradient-accent">Creator Content on Autopilot</span>
+            A Platform Built for Collaboration, <br className="hidden sm:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400">
+              Not Agency Markups
+            </span>
           </h2>
           <p className="mt-4 text-slate-400 text-base sm:text-lg">
-            Say goodbye to endless DMs, agency markups, and unvetted creators. Zerify automates the entire UGC workflow from brief to high-ROAS ad.
+            Zerify provides the infrastructure for brands and creators to discover each other, send briefs, verify performance, and manage payouts directly.
           </p>
         </div>
 
@@ -54,9 +56,9 @@ export default function FeatureGrid() {
             return (
               <div
                 key={index}
-                className="group relative rounded-3xl p-8 glass-card glass-card-hover border border-white/10 hover:border-purple-500/30 transition-all"
+                className="group relative rounded-3xl p-8 bg-slate-900/80 border border-white/10 backdrop-blur-xl hover:border-purple-500/40 transition-all duration-300 shadow-xl"
               >
-                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-tr ${feature.color} p-0.5 shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-tr ${feature.color} p-0.5 shadow-lg mb-6 group-hover:scale-105 transition-transform duration-300`}>
                   <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
                     <Icon className="w-7 h-7 text-white" />
                   </div>

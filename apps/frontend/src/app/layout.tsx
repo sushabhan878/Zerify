@@ -2,12 +2,12 @@ import React from 'react';
 import './globals.css';
 
 export const metadata = {
-  title: 'Zerify — The #1 AI Creator Marketplace for Brands & Influencers',
-  description: 'Zerify connects top eCommerce brands with high-converting video creators & influencers. Join the VIP waitlist today.',
-  keywords: ['influencer marketing', 'creator marketplace', 'billo alternative', 'UGC video ads', 'brand influencer platform', 'AI creator matching'],
+  title: 'Zerify — Direct Collaboration Platform for Brands & Influencers',
+  description: 'Zerify is the direct collaboration platform connecting top eCommerce brands with high-converting creators & influencers. No agency overhead.',
+  keywords: ['influencer collaboration', 'brand creator platform', 'direct influencer marketing', 'UGC video ads', 'brand influencer platform', 'eCommerce creator network'],
   openGraph: {
-    title: 'Zerify — The #1 AI Creator Marketplace',
-    description: 'Connect with top-performing creators & generate high-converting video ads in minutes.',
+    title: 'Zerify — Direct Brand & Creator Collaboration',
+    description: 'Connect directly with top-performing creators & manage video campaigns seamlessly.',
     type: 'website',
   },
 };

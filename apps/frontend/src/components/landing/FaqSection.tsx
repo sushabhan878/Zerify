@@ -8,24 +8,24 @@ export default function FaqSection() {
 
   const faqs = [
     {
-      question: 'What is Zerify and how does it compare to Billo or traditional agencies?',
-      answer: 'Zerify is an AI-powered creator marketplace that connects eCommerce brands directly with vetted video creators. Unlike traditional agencies that charge thousands in upfront retainers, Zerify gives you pay-per-video pricing, direct communication with creators, instant escrow payment protection, and videos delivered in under 5 days.',
+      question: 'What is Zerify and how does it differ from traditional ad agencies?',
+      answer: 'Zerify is a direct collaboration platform that connects eCommerce brands and content creators directly. We are not an ad agency — we provide the end-to-end infrastructure for direct briefs, verified reach stats, automated campaign management, and escrow payouts without agency fees or hidden markups.',
     },
     {
-      question: 'How do creators join Zerify and get paid?',
-      answer: 'Creators apply to the Zerify Creator Network by linking their social accounts (Instagram, TikTok, YouTube). Once vetted, creators can accept video briefs from top brands, film authentic UGC content, submit videos directly through our portal, and receive instant payouts via Stripe as soon as the brand approves.',
+      question: 'How do creators and influencers collaborate on Zerify?',
+      answer: 'Creators join the Zerify network by connecting their social accounts (Instagram, TikTok, YouTube). Brands send structured campaign briefs or direct invitations. Once accepted, creators film authentic content, submit deliverables through the portal, and receive instant payouts upon brand approval.',
     },
     {
-      question: 'Do I get full commercial usage rights for the videos?',
-      answer: 'Yes! Every video created on Zerify includes full digital ad rights, enabling you to run the content on Meta Ads (Facebook/Instagram), TikTok Ads, YouTube Shorts, Google Ads, Amazon, and your own website storefront without additional royalty fees.',
+      question: 'Are commercial usage and digital ad rights included?',
+      answer: 'Yes. Every campaign conducted through Zerify includes full commercial licensing and digital rights, allowing brands to run the content across digital ad channels, social platforms, and website storefronts.',
     },
     {
-      question: 'How does the VIP Waitlist work?',
-      answer: 'Joining the VIP Waitlist guarantees you early access to the Zerify V1 platform prior to public launch, plus an exclusive 50% discount on your first creator video campaign or initial creator payout bonus.',
+      question: 'How does the Priority VIP Waitlist work?',
+      answer: 'Joining the VIP Waitlist grants your brand or creator account priority queue status for early platform access prior to public release, alongside early access onboarding support.',
     },
     {
-      question: 'Can I request revisions if I need changes to a video?',
-      answer: 'Absolutely. Zerify includes 1 free round of revisions for every video brief to ensure the messaging, hook, and call-to-action align perfectly with your brand guidelines.',
+      question: 'How are campaign payments secured?',
+      answer: 'Campaign payments are held securely in Escrow until the final content is reviewed and approved by the brand, protecting both brands and creators throughout the collaboration.',
     },
   ];
 
@@ -33,15 +33,15 @@ export default function FaqSection() {
     <section id="faq" className="py-24 relative overflow-hidden bg-[#07090E]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs font-bold text-purple-400 mb-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs font-semibold text-purple-400 mb-4">
             <HelpCircle className="w-3.5 h-3.5" />
-            <span>Got Questions?</span>
+            <span>Platform FAQs</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
-            Frequently Asked <span className="text-gradient-accent">Questions</span>
+            Frequently Asked <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Questions</span>
           </h2>
           <p className="mt-4 text-slate-400 text-base sm:text-lg">
-            Everything you need to know about joining Zerify as a Brand or Creator.
+            Everything you need to know about direct collaboration on Zerify.
           </p>
         </div>
 
@@ -51,7 +51,7 @@ export default function FaqSection() {
             return (
               <div
                 key={index}
-                className="rounded-2xl glass-card border border-white/10 overflow-hidden transition-all duration-300"
+                className="rounded-2xl bg-slate-900/80 border border-white/10 overflow-hidden transition-all duration-300 shadow-xl"
               >
                 <button
                   type="button"
@@ -66,7 +66,7 @@ export default function FaqSection() {
                   />
                 </button>
                 {isOpen && (
-                  <div className="px-6 pb-6 text-slate-300 text-sm leading-relaxed border-t border-white/5 pt-4 animate-fade-in">
+                  <div className="px-6 pb-6 text-slate-300 text-sm leading-relaxed border-t border-white/5 pt-4">
                     {faq.answer}
                   </div>
                 )}

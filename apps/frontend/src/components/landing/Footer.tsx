@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Video, Heart, ArrowUp } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowUp } from 'lucide-react';
 
 export default function Footer() {
   const scrollToTop = () => {
@@ -11,22 +12,23 @@ export default function Footer() {
   return (
     <footer className="py-12 bg-[#05070B] border-t border-white/10 relative overflow-hidden text-slate-400 text-xs sm:text-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-        {/* Brand */}
+        {/* Brand Logo & Name */}
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600 via-pink-500 to-indigo-600 p-[1px]">
-            <div className="w-full h-full bg-[#07090E] rounded-[7px] flex items-center justify-center">
-              <Video className="w-4 h-4 text-pink-400" />
-            </div>
-          </div>
+          <Image
+            src="/logo.png"
+            alt="Zerify Logo"
+            width={28}
+            height={28}
+            className="object-contain"
+          />
           <span className="font-extrabold text-white text-base tracking-tight">
-            ZERIFY<span className="text-pink-500">.</span>
+            ZERIFY<span className="text-purple-500">.</span>
           </span>
         </div>
 
         {/* Copyright */}
-        <div className="flex items-center gap-1 text-slate-400">
-          <span>© 2026 Zerify Inc. All rights reserved. Designed for Brands & Creators with</span>
-          <Heart className="w-3.5 h-3.5 fill-pink-500 text-pink-500 inline" />
+        <div className="text-slate-400 text-center sm:text-left">
+          © 2026 Zerify Inc. All rights reserved. Direct Collaboration Platform for eCommerce Brands & Influencers.
         </div>
 
         {/* Back to top */}
