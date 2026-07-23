@@ -196,31 +196,16 @@ flowchart TD
 | Profile Photo | ✓ |
 | Bio | Optional |
 | Country | ✓ |
-| State | Optional |
-| City | Optional |
-| Languages | ✓ |
 | Phone Number | Optional |
 | Gender | Optional |
 | DOB | Optional |
 
 ### Step 3 — Creator Category *(multi-select)*
-Fashion, Beauty, Lifestyle, Travel, Gaming, Tech, Finance, Education, Fitness, Food, Photography, Comedy, Music, Dance, Parenting, Pets, Luxury, Automobile
+Fashion, Beauty, Lifestyle, Travel, Gaming, Tech, Finance, Education, Entertainment, Sports, Fitness, Food, Photography, Comedy, Music, Dance, Parenting, Pets, Luxury, Automobile, Other
 
 **Stores:** `categories[]`
 
-### Step 4 — Content Details
-
-| Field |
-|---|
-| Primary Content Type |
-| Secondary Content Type |
-| Posting Frequency |
-| Years of Experience |
-| UGC Creator (bool) |
-| Open to Affiliate Marketing (bool) |
-| Open to Paid Collaborations (bool) |
-
-### Step 5 — Social Accounts
+### Step 4 — Social Accounts
 
 Supports multiple accounts across: Instagram, TikTok, YouTube, LinkedIn, Twitter/X, Facebook, Pinterest, Twitch, Website.
 
