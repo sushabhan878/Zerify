@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, CheckCircle2, ArrowRight, Play, Star, TrendingUp, ShieldCheck, Users, Zap } from 'lucide-react';
+import { Sparkles, CheckCircle2, ArrowRight, Play, Star, TrendingUp, ShieldCheck, Users, Zap, Loader2 } from 'lucide-react';
 
 export default function Hero() {
   const [role, setRole] = useState<'brand' | 'creator'>('brand');
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [count, setCount] = useState(2840);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   // Countdown timer state
   const [timeLeft, setTimeLeft] = useState({
@@ -30,11 +32,39 @@ export default function Hero() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    setSubmitted(true);
-    setCount((prev) => prev + 1);
+
+    setLoading(true);
+    setErrorMsg('');
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+      const response = await fetch(`${apiUrl}/vip-access`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          type: role,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to join waitlist. Please try again.');
+      }
+
+      setSubmitted(true);
+      setCount((prev) => prev + 1);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -117,31 +147,49 @@ export default function Hero() {
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="relative flex flex-col sm:flex-row gap-3 p-2 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl shadow-2xl focus-within:border-purple-500/50 transition-all">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={
-                    role === 'brand'
-                      ? 'Enter your work email for early access...'
-                      : 'Enter email to join creator monetization program...'
-                  }
-                  required
-                  className="flex-1 bg-transparent px-4 py-3 text-sm text-white placeholder-slate-400 outline-none w-full"
-                />
-                <button
-                  type="submit"
-                  className={`px-7 py-3 rounded-xl text-sm font-bold text-white shadow-lg transition-all duration-300 flex items-center justify-center gap-2 ${
-                    role === 'brand'
-                      ? 'bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:opacity-90 shadow-purple-500/30'
-                      : 'bg-gradient-to-r from-pink-600 via-amber-500 to-pink-600 hover:opacity-90 shadow-pink-500/30'
-                  }`}
-                >
-                  <span>Join Waitlist</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </form>
+              <div className="flex flex-col gap-3 text-left">
+                <form onSubmit={handleSubmit} className="relative flex flex-col sm:flex-row gap-3 p-2 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl shadow-2xl focus-within:border-purple-500/50 transition-all">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={
+                      role === 'brand'
+                        ? 'Enter your work email for early access...'
+                        : 'Enter email to join creator monetization program...'
+                    }
+                    required
+                    disabled={loading}
+                    className="flex-1 bg-transparent px-4 py-3 text-sm text-white placeholder-slate-400 outline-none w-full disabled:opacity-50"
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className={`px-7 py-3 rounded-xl text-sm font-bold text-white shadow-lg transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-75 ${
+                      role === 'brand'
+                        ? 'bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:opacity-90 shadow-purple-500/30'
+                        : 'bg-gradient-to-r from-pink-600 via-amber-500 to-pink-600 hover:opacity-90 shadow-pink-500/30'
+                    }`}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Joining...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Join Waitlist</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                </form>
+                {errorMsg && (
+                  <p className="text-rose-400 text-xs font-semibold px-2 animate-pulse">
+                    ⚠️ {errorMsg}
+                  </p>
+                )}
+              </div>
             )}
           </div>
 

@@ -60,7 +60,6 @@ flowchart LR
 ### 3.1 Supported Methods
 - Google OAuth
 - Email + Password
-- GitHub (Optional)
 - Apple (Future)
 
 ### 3.2 Authentication Flow
@@ -79,7 +78,7 @@ sequenceDiagram
         BE->>BE: Hash password, validate email
         BE->>BE: Create User record (emailVerified=false)
         BE-->>FE: 201 Created + verification email queued
-    else Google / GitHub OAuth
+    else Google OAuth
         U->>FE: Click "Continue with Google"
         FE->>OAuth: Redirect to provider
         OAuth-->>FE: Auth code callback
@@ -110,11 +109,11 @@ flowchart LR
 ### 3.4 `User` Table (Core Auth Entity)
 
 | Field | Type | Notes |
-|---|---|---|
+|-------|------|-------|
 | `id` | UUID | Primary key |
 | `email` | String | Unique |
 | `passwordHash` | Nullable String | Null for OAuth-only accounts |
-| `authProvider` | Enum | `email`, `google`, `github`, `apple` |
+| `authProvider` | Enum | `email`, `google`, `apple` |
 | `emailVerified` | Boolean | |
 | `createdAt` | Timestamp | |
 | `updatedAt` | Timestamp | |

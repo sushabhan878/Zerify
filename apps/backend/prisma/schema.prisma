@@ -62,3 +62,18 @@ model InfluencerProfile {
 
   @@map("influencer_profiles")
 }
+
+enum VipType {
+  BRAND
+  INFLUENCER
+}
+
+model VipAccess {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  type      VipType
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("vip_access")
+}
