@@ -1,5 +1,12 @@
 import React from 'react';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
 
 export const metadata = {
   title: 'Zerify — Direct Collaboration Platform for Brands & Influencers',
@@ -18,8 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="bg-[#07090E] text-slate-100 antialiased selection:bg-purple-500 selection:text-white">
+    <html lang="en" className={`dark ${plusJakartaSans.variable}`}>
+      <body className={`${plusJakartaSans.className} bg-[#07090E] text-slate-100 antialiased selection:bg-purple-500 selection:text-white`}>
         {children}
       </body>
     </html>
