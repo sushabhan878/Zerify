@@ -8,57 +8,13 @@ import {
   CheckCircle2,
   ArrowRight,
   TrendingUp,
-  Building2,
-  Video,
-  Loader2,
   Send,
   BarChart3,
-  ShieldCheck,
   Zap,
 } from 'lucide-react';
 
 export default function Hero() {
-  const [role, setRole] = useState<'brand' | 'creator'>('brand');
-  const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [count, setCount] = useState(2840);
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-
-    setLoading(true);
-    setErrorMsg('');
-
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
-      const response = await fetch(`${apiUrl}/vip-access`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          type: role,
-        }),
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to join waitlist. Please try again.');
-      }
-
-      setSubmitted(true);
-      setCount((prev) => prev + 1);
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [count] = useState(2840);
 
   return (
     <section id="waitlist" className="relative min-h-screen pt-36 pb-24 md:pt-44 md:pb-32 overflow-hidden bg-[#07090E]">
@@ -121,108 +77,35 @@ export default function Hero() {
               Zerify connects brands directly with creators. Send briefs, manage invitations, track campaign reach, and automate payouts — without ad agency overhead.
             </p>
 
-            {/* Role Switcher Toggle (Zero Emojis) */}
-            <div className="mt-8">
-              <div className="inline-flex p-1.5 rounded-full bg-slate-900/90 border border-white/10 backdrop-blur-xl items-center gap-2 shadow-2xl">
-                <button
-                  type="button"
-                  onClick={() => setRole('brand')}
-                  className={`px-5 py-2 rounded-full text-xs font-bold transition-all duration-300 flex items-center gap-2 ${
-                    role === 'brand'
-                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <Building2 className="w-3.5 h-3.5" />
-                  <span>Brands & Businesses</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole('creator')}
-                  className={`px-5 py-2 rounded-full text-xs font-bold transition-all duration-300 flex items-center gap-2 ${
-                    role === 'creator'
-                      ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-lg shadow-pink-500/30'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <Video className="w-3.5 h-3.5" />
-                  <span>Creators & Influencers</span>
-                </button>
+            {/* Call to Action Button */}
+            <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 max-w-lg">
+              <a
+                href="/register"
+                className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl text-base font-bold text-white bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:opacity-95 shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 transform hover:-translate-y-0.5"
+              >
+                <span>Get Started for Free</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
+              </a>
+            </div>
+
+            {/* Feature Highlights / Trust Badges */}
+            <div className="mt-4 flex flex-wrap items-center gap-5 text-xs text-slate-400 font-medium">
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span>No credit card required</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-purple-400" />
+                <span>14-day free trial</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-pink-400" />
+                <span>Setup in 2 minutes</span>
               </div>
             </div>
 
-            {/* Waitlist Signup Form */}
-            <div className="mt-6 max-w-lg">
-              {submitted ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-xl text-left shadow-2xl"
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                      <CheckCircle2 className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-white">You are on the VIP Waitlist</h3>
-                      <p className="text-xs text-slate-300">
-                        Priority queue spot #{count}. We will notify you when early access opens.
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  <form
-                    onSubmit={handleSubmit}
-                    className="relative flex flex-col sm:flex-row gap-2 p-2 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl shadow-2xl focus-within:border-purple-500/50 transition-all"
-                  >
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder={
-                        role === 'brand'
-                          ? 'Enter work email for early platform access...'
-                          : 'Enter email to join creator network...'
-                      }
-                      required
-                      disabled={loading}
-                      className="flex-1 bg-transparent px-4 py-3 text-sm text-white placeholder-slate-400 outline-none w-full disabled:opacity-50"
-                    />
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className={`px-6 py-3 rounded-xl text-xs sm:text-sm font-bold text-white shadow-lg transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-75 ${
-                        role === 'brand'
-                          ? 'bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:opacity-90 shadow-purple-500/30'
-                          : 'bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:opacity-90 shadow-pink-500/30'
-                      }`}
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Joining...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Join Waitlist</span>
-                          <ArrowRight className="w-4 h-4" />
-                        </>
-                      )}
-                    </button>
-                  </form>
-                  {errorMsg && (
-                    <p className="text-rose-400 text-xs font-semibold px-2 animate-pulse">
-                      {errorMsg}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-
             {/* Social Proof */}
-            <div className="mt-6 flex items-center gap-4 text-slate-400 text-xs font-medium">
+            <div className="mt-8 flex items-center gap-4 text-slate-400 text-xs font-medium">
               <div className="flex -space-x-2">
                 <img className="w-7 h-7 rounded-full border-2 border-[#07090E]" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Creator" />
                 <img className="w-7 h-7 rounded-full border-2 border-[#07090E]" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" alt="Creator" />
@@ -230,7 +113,7 @@ export default function Hero() {
                 <img className="w-7 h-7 rounded-full border-2 border-[#07090E]" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80" alt="Creator" />
               </div>
               <div>
-                <span className="font-bold text-white">{count.toLocaleString()}+</span> Brands & Creators on Waitlist
+                <span className="font-bold text-white">{count.toLocaleString()}+</span> Brands & Creators already joined
               </div>
             </div>
           </div>
