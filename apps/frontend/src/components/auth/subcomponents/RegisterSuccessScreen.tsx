@@ -30,10 +30,10 @@ export default function RegisterSuccessScreen({ role }: RegisterSuccessScreenPro
 
       <div className="pt-2">
         <Link
-          href="/"
+          href="/dashboard"
           className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white font-bold text-xs shadow-lg shadow-purple-600/30 hover:opacity-95 transition-all"
         >
-          <span>Go to Home Dashboard</span>
+          <span>Go to Dashboard</span>
           <ArrowRight className="w-4 h-4" />
         </Link>
       </div>

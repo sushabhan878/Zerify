@@ -63,7 +63,7 @@ export default function LoginModal() {
       setSuccess(true);
 
       setTimeout(() => {
-        router.push('/');
+        router.push('/dashboard');
       }, 1800);
     } catch (err: any) {
       setErrorMessage(err.message || 'Sign in failed. Please try again.');
