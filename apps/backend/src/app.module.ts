@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './database/prisma.module';
 import { VipAccessModule } from './modules/vip-access/vip-access.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { VipAccessModule } from './modules/vip-access/vip-access.module';
     }),
     PrismaModule,
     VipAccessModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],

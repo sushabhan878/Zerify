@@ -15,12 +15,14 @@ enum UserRole {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  neonAuthId    String?        @unique
-  role          UserRole       @default(BRAND)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id            String             @id @default(uuid())
+  email         String             @unique
+  name          String?
+  password      String?
+  neonAuthId    String?            @unique
+  role          UserRole           @default(BRAND)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
   brandProfile  BrandProfile?
   influencer    InfluencerProfile?
 
@@ -40,7 +42,7 @@ model BrandProfile {
   id          String   @id @default(uuid())
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyName String
+  companyName String?
   website     String?
   logoUrl     String?  // Cloudinary image URL
   createdAt   DateTime @default(now())
@@ -53,8 +55,8 @@ model InfluencerProfile {
   id          String   @id @default(uuid())
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  handle      String
-  platform    String
+  handle      String?
+  platform    String?  @default("Instagram")
   avatarUrl   String?  // Cloudinary image URL
   bio         String?
   createdAt   DateTime @default(now())
