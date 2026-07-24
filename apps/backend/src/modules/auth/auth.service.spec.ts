@@ -13,7 +13,8 @@ describe('AuthService', () => {
   beforeEach(async () => {
     authRepository = {
       findByEmail: jest.fn(),
-      createUserWithRoleProfile: jest.fn(),
+      createBrandUser: jest.fn(),
+      createInfluencerUser: jest.fn(),
     };
 
     jwtService = {
@@ -35,70 +36,82 @@ describe('AuthService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should throw ConflictException if email is already taken', async () => {
-    (authRepository.findByEmail as jest.Mock).mockResolvedValue({ id: 'existing-id', email: 'test@example.com' });
+  it('should throw ConflictException if brand email is already taken', async () => {
+    (authRepository.findByEmail as jest.Mock).mockResolvedValue({ id: 'existing-id', email: 'brand@example.com' });
 
     await expect(
-      service.register({
-        email: 'test@example.com',
+      service.registerBrand({
+        email: 'brand@example.com',
         password: 'password123',
-        role: UserRole.BRAND,
+        name: 'Brand Owner',
       }),
     ).rejects.toThrow(ConflictException);
   });
 
-  it('should successfully register a BRAND user and return JWT + sanitized user', async () => {
+  it('should successfully register a BRAND user via registerBrand', async () => {
     (authRepository.findByEmail as jest.Mock).mockResolvedValue(null);
-    (authRepository.createUserWithRoleProfile as jest.Mock).mockResolvedValue({
-      id: 'user-uuid-1',
-      email: 'brand@company.com',
+    (authRepository.createBrandUser as jest.Mock).mockResolvedValue({
+      id: 'brand-user-uuid',
+      email: 'agency@zerify.com',
       password: 'hashedpassword',
       role: UserRole.BRAND,
       brandProfile: {
-        id: 'brand-uuid-1',
-        companyName: 'Acme Corp',
+        id: 'brand-profile-uuid',
+        companyName: 'Zerify Agency',
       },
     });
 
-    const result = await service.register({
-      email: 'brand@company.com',
+    const result = await service.registerBrand({
+      email: 'agency@zerify.com',
       password: 'password123',
-      name: 'Acme Owner',
-      role: UserRole.BRAND,
-      companyName: 'Acme Corp',
+      name: 'Agency Leader',
+      companyName: 'Zerify Agency',
     });
 
     expect(result.accessToken).toBe('mocked-jwt-access-token');
-    expect(result.user.email).toBe('brand@company.com');
+    expect(result.user.email).toBe('agency@zerify.com');
     expect(result.user.password).toBeUndefined();
-    expect(result.user.brandProfile.companyName).toBe('Acme Corp');
+    expect(result.user.brandProfile.companyName).toBe('Zerify Agency');
   });
 
-  it('should successfully register an INFLUENCER user and return JWT + sanitized user', async () => {
+  it('should successfully register an INFLUENCER user via registerInfluencer with optional profile fields', async () => {
     (authRepository.findByEmail as jest.Mock).mockResolvedValue(null);
-    (authRepository.createUserWithRoleProfile as jest.Mock).mockResolvedValue({
-      id: 'user-uuid-2',
-      email: 'creator@instagram.com',
+    (authRepository.createInfluencerUser as jest.Mock).mockResolvedValue({
+      id: 'creator-user-uuid',
+      email: 'creator@zerify.com',
       password: 'hashedpassword',
       role: UserRole.INFLUENCER,
       influencer: {
-        id: 'influencer-uuid-1',
+        id: 'influencer-profile-uuid',
         handle: '@creator',
-        platform: 'Instagram',
+        platform: 'YouTube',
+        gender: 'Female',
+        category: 'Fashion & Beauty',
+        openToAffiliate: true,
+        openToUgc: true,
+        pricingRange: '$200 - $500',
       },
     });
 
-    const result = await service.register({
-      email: 'creator@instagram.com',
+    const result = await service.registerInfluencer({
+      email: 'creator@zerify.com',
       password: 'password123',
-      name: 'Alex Creator',
-      role: UserRole.INFLUENCER,
+      name: 'Creator Star',
       handle: '@creator',
+      platform: 'YouTube',
+      gender: 'Female',
+      category: 'Fashion & Beauty',
+      openToAffiliate: true,
+      openToUgc: true,
+      pricingRange: '$200 - $500',
     });
 
     expect(result.accessToken).toBe('mocked-jwt-access-token');
-    expect(result.user.email).toBe('creator@instagram.com');
+    expect(result.user.email).toBe('creator@zerify.com');
     expect(result.user.password).toBeUndefined();
     expect(result.user.influencer.handle).toBe('@creator');
+    expect(result.user.influencer.openToAffiliate).toBe(true);
+    expect(result.user.influencer.openToUgc).toBe(true);
+    expect(result.user.influencer.category).toBe('Fashion & Beauty');
   });
 });

@@ -52,15 +52,21 @@ model BrandProfile {
 }
 
 model InfluencerProfile {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  handle      String?
-  platform    String?  @default("Instagram")
-  avatarUrl   String?  // Cloudinary image URL
-  bio         String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  handle          String?
+  platform        String?  @default("Instagram")
+  avatarUrl       String?  // Cloudinary image URL
+  bio             String?
+  gender          String?
+  category        String?
+  openToAffiliate Boolean  @default(false)
+  openToUgc       Boolean  @default(false)
+  contactInfo     String?
+  pricingRange    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@map("influencer_profiles")
 }
