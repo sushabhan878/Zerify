@@ -35,12 +35,27 @@ Zerify follows a modern, dark-mode-first aesthetic with dynamic glow elements, g
 
 ---
 
-## 3. Directory Layout in `apps/frontend`
+## 3. Component Modularization & File Length Guidelines
+
+Whenever creating or modifying frontend code, follow these strict modularization rules:
+
+1. **Short File Limit**: Aim to keep component files short, clean, and under 150-200 lines.
+2. **Sub-Component Extraction**: Instead of putting complex forms, headers, navigation bars, cards, or modal views in a single monolithic file:
+   - Break down the UI into small, focused sub-components.
+   - Place feature-specific sub-components in sub-folders (e.g. `components/auth/subcomponents/` or `components/landing/subcomponents/`).
+   - Place generic components in `components/ui/`.
+3. **Clean Composition**: The parent/main file should serve primarily as an orchestrator that imports and composes small sub-components.
+4. **Export Cleanliness**: Use named exports or default exports consistently, keeping prop interfaces small and explicit.
+
+---
+
+## 4. Directory Layout in `apps/frontend`
 
 ```
 src/
 ├── app/                  # Next.js 14 App Router (pages & layouts)
 ├── components/           # UI components grouped by feature domain
+│   ├── auth/             # Login & Register modals + sub-components
 │   ├── landing/          # Hero, Navbar, FaqSection, etc.
 │   ├── dashboard/        # Creator & Brand dashboard UI components
 │   └── ui/               # Generic reusable components (Button, Input, Modal)
