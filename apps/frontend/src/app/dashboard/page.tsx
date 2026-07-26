@@ -11,7 +11,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeRoute, setActiveRoute] = useState('profile-overview');
+  const [activeRoute, setActiveRoute] = useState<string>('');
 
   useEffect(() => {
     try {
@@ -23,7 +23,9 @@ export default function DashboardPage() {
         return;
       }
 
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      setActiveRoute(parsedUser.role === 'BRAND' ? 'search-creators' : 'profile-overview');
     } catch {
       router.push('/login');
     } finally {
@@ -53,6 +55,7 @@ export default function DashboardPage() {
   const userRole: 'BRAND' | 'INFLUENCER' = user.role === 'BRAND' ? 'BRAND' : 'INFLUENCER';
   const userName = user.name || user.email?.split('@')[0] || 'User';
   const userHandle = user.handle || `@${userName.toLowerCase().replace(/\s+/g, '')}`;
+  const companyName = user.companyName || user.name || 'Apex Gear Inc';
 
   return (
     <div className="min-h-screen bg-[#07090E] text-slate-100 flex selection:bg-purple-500 selection:text-white overflow-x-hidden">
@@ -62,6 +65,7 @@ export default function DashboardPage() {
         userName={userName}
         userEmail={user.email}
         userHandle={userHandle}
+        companyName={companyName}
         onLogout={handleLogout}
         activeRoute={activeRoute}
         onSelectRoute={setActiveRoute}
@@ -70,7 +74,7 @@ export default function DashboardPage() {
       {/* Main Content View */}
       <main className="flex-1 p-6 sm:p-10 max-w-7xl mx-auto overflow-y-auto">
         {userRole === 'BRAND' ? (
-          <BrandDashboardView userName={userName} />
+          <BrandDashboardView userName={userName} activeRoute={activeRoute} />
         ) : (
           <InfluencerDashboardView userName={userName} activeRoute={activeRoute} />
         )}
