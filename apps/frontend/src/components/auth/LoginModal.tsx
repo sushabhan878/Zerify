@@ -53,6 +53,7 @@ export default function LoginModal() {
 
       if (data.accessToken) {
         localStorage.setItem('zerify_token', data.accessToken);
+        document.cookie = `zerify_token=${data.accessToken}; path=/; max-age=604800; SameSite=Lax`;
       }
       if (data.user) {
         localStorage.setItem('zerify_user', JSON.stringify(data.user));

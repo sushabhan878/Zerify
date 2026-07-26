@@ -1,13 +1,40 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import RegisterModal from '@/components/auth/RegisterModal';
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    try {
+      const storedToken = localStorage.getItem('zerify_token');
+      const storedUser = localStorage.getItem('zerify_user');
+
+      if (storedToken && storedUser) {
+        router.replace('/dashboard');
+        return;
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+    setCheckingAuth(false);
+  }, [router]);
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-[#07090E] flex flex-col items-center justify-center text-white">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-500 mb-3" />
+        <span className="text-xs text-slate-400 font-semibold tracking-wide">Loading Zerify...</span>
+      </div>
+    );
+  }
   return (
     <main className="relative min-h-screen bg-[#07090E] flex flex-col justify-between overflow-hidden selection:bg-purple-500 selection:text-white">
       {/* Motion Background Graphics */}

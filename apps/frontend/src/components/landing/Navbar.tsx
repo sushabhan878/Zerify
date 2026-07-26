@@ -40,6 +40,7 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('zerify_token');
     localStorage.removeItem('zerify_user');
+    document.cookie = 'zerify_token=; path=/; max-age=0; SameSite=Lax';
     setUser(null);
     window.dispatchEvent(new Event('zerify_auth_change'));
   };

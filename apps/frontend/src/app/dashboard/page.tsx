@@ -11,6 +11,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeRoute, setActiveRoute] = useState('profile-overview');
 
   useEffect(() => {
     try {
@@ -33,6 +34,7 @@ export default function DashboardPage() {
   const handleLogout = () => {
     localStorage.removeItem('zerify_token');
     localStorage.removeItem('zerify_user');
+    document.cookie = 'zerify_token=; path=/; max-age=0; SameSite=Lax';
     window.dispatchEvent(new Event('zerify_auth_change'));
     router.push('/login');
   };
@@ -50,6 +52,7 @@ export default function DashboardPage() {
 
   const userRole: 'BRAND' | 'INFLUENCER' = user.role === 'BRAND' ? 'BRAND' : 'INFLUENCER';
   const userName = user.name || user.email?.split('@')[0] || 'User';
+  const userHandle = user.handle || `@${userName.toLowerCase().replace(/\s+/g, '')}`;
 
   return (
     <div className="min-h-screen bg-[#07090E] text-slate-100 flex selection:bg-purple-500 selection:text-white overflow-x-hidden">
@@ -58,7 +61,10 @@ export default function DashboardPage() {
         userRole={userRole}
         userName={userName}
         userEmail={user.email}
+        userHandle={userHandle}
         onLogout={handleLogout}
+        activeRoute={activeRoute}
+        onSelectRoute={setActiveRoute}
       />
 
       {/* Main Content View */}
@@ -66,7 +72,7 @@ export default function DashboardPage() {
         {userRole === 'BRAND' ? (
           <BrandDashboardView userName={userName} />
         ) : (
-          <InfluencerDashboardView userName={userName} />
+          <InfluencerDashboardView userName={userName} activeRoute={activeRoute} />
         )}
       </main>
     </div>

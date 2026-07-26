@@ -8,25 +8,46 @@ import {
   Megaphone,
   Users,
   DollarSign,
-  Briefcase,
-  Sparkles,
   Settings,
   LogOut,
 } from 'lucide-react';
+import InfluencerSidebar from '../influencer-sidebar/InfluencerSidebar';
 
 interface DashboardSidebarProps {
   userRole: 'BRAND' | 'INFLUENCER';
   userName: string;
   userEmail: string;
+  userHandle?: string;
+  avatarUrl?: string;
   onLogout: () => void;
+  activeRoute?: string;
+  onSelectRoute?: (routeId: string) => void;
 }
 
 export default function DashboardSidebar({
   userRole,
   userName,
   userEmail,
+  userHandle,
+  avatarUrl,
   onLogout,
+  activeRoute,
+  onSelectRoute,
 }: DashboardSidebarProps) {
+  if (userRole === 'INFLUENCER') {
+    return (
+      <InfluencerSidebar
+        userName={userName}
+        userEmail={userEmail}
+        userHandle={userHandle}
+        avatarUrl={avatarUrl}
+        onLogout={onLogout}
+        activeRoute={activeRoute}
+        onSelectRoute={onSelectRoute}
+      />
+    );
+  }
+
   const brandNavItems = [
     { label: 'Dashboard', icon: LayoutDashboard, active: true },
     { label: 'Campaigns', icon: Megaphone, active: false },
@@ -35,15 +56,6 @@ export default function DashboardSidebar({
     { label: 'Settings', icon: Settings, active: false },
   ];
 
-  const influencerNavItems = [
-    { label: 'Dashboard', icon: LayoutDashboard, active: true },
-    { label: 'Deal Invites', icon: Sparkles, active: false },
-    { label: 'Active Collaborations', icon: Briefcase, active: false },
-    { label: 'Earnings', icon: DollarSign, active: false },
-    { label: 'Settings', icon: Settings, active: false },
-  ];
-
-  const navItems = userRole === 'BRAND' ? brandNavItems : influencerNavItems;
   const avatarChar = userName.charAt(0).toUpperCase();
 
   return (
@@ -63,14 +75,14 @@ export default function DashboardSidebar({
           <div>
             <span className="text-lg font-black tracking-tight text-white block">Zerify</span>
             <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest block">
-              {userRole === 'BRAND' ? 'Brand Portal' : 'Creator Studio'}
+              Brand Portal
             </span>
           </div>
         </Link>
 
         {/* Navigation Items */}
         <nav className="space-y-1.5">
-          {navItems.map((item, idx) => {
+          {brandNavItems.map((item, idx) => {
             const Icon = item.icon;
             return (
               <a
