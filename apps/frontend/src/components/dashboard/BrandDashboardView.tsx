@@ -17,6 +17,10 @@ import ProfileCompletionBanner from './subcomponents/ProfileCompletionBanner';
 
 interface BrandDashboardViewProps {
   userName: string;
+  userEmail?: string;
+  userHandle?: string;
+  companyName?: string;
+  avatarUrl?: string;
   activeRoute?: string;
   onSelectRoute?: (routeId: string) => void;
   completionPercentage?: number;
@@ -24,6 +28,10 @@ interface BrandDashboardViewProps {
 
 export default function BrandDashboardView({
   userName,
+  userEmail,
+  userHandle,
+  companyName,
+  avatarUrl,
   activeRoute = 'search-creators',
   onSelectRoute,
   completionPercentage = 65,
@@ -51,7 +59,15 @@ export default function BrandDashboardView({
       case 'payouts-escrow':
         return <BrandPayoutsSection />;
       case 'brand-settings':
-        return <BrandSettingsSection />;
+        return (
+          <BrandSettingsSection
+            userName={userName}
+            userEmail={userEmail}
+            userHandle={userHandle}
+            companyName={companyName}
+            avatarUrl={avatarUrl}
+          />
+        );
       case 'search-creators':
       default:
         return <SearchCreatorsSection />;

@@ -1,114 +1,107 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Settings, Save, Shield, Bell, CreditCard, User } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Settings, User, Sliders, Globe, Briefcase, CreditCard, Sparkles } from 'lucide-react';
+import BasicInfoTab from '../settings-tabs/BasicInfoTab';
+import CreatorDetailsTab from '../settings-tabs/CreatorDetailsTab';
+import SocialAccountsTab from '../settings-tabs/SocialAccountsTab';
+import PortfolioTab from '../settings-tabs/PortfolioTab';
+import PaymentSettingsTab from '../settings-tabs/PaymentSettingsTab';
 
-export default function SettingsSection() {
-  const [rateYoutube, setRateYoutube] = useState('2500');
-  const [rateInstagram, setRateInstagram] = useState('1200');
-  const [rateTiktok, setRateTiktok] = useState('850');
-  const [saved, setSaved] = useState(false);
+interface SettingsSectionProps {
+  userName?: string;
+  userEmail?: string;
+  userHandle?: string;
+  avatarUrl?: string;
+}
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+export default function SettingsSection({
+  userName,
+  userEmail,
+  userHandle,
+  avatarUrl,
+}: SettingsSectionProps = {}) {
+  const [activeTab, setActiveTab] = useState<'basic' | 'creator' | 'social' | 'portfolio' | 'payment'>('basic');
+  const [completion, setCompletion] = useState(65);
+
+  const tabs = [
+    { id: 'basic', label: 'Basic Info', icon: User },
+    { id: 'creator', label: 'Creator Details', icon: Sliders },
+    { id: 'social', label: 'Social Accounts', icon: Globe },
+    { id: 'portfolio', label: 'Portfolio', icon: Briefcase },
+    { id: 'payment', label: 'Payment & Payouts', icon: CreditCard },
+  ];
+
+  const handleTabSave = () => {
+    // Dynamically increase profile completion score as sections are completed!
+    setCompletion((prev) => Math.min(prev + 10, 100));
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
             <Settings className="w-5 h-5 text-purple-400" />
-            <span>Creator Studio Settings</span>
+            <span>Profile & Account Settings</span>
           </h2>
-          <p className="text-xs text-slate-400">Configure your default rates, payout accounts & preferences</p>
+          <p className="text-xs text-slate-400">
+            Manage your personal profile, creator niche details, social links & Cashfree payout preferences
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 bg-slate-900/80 px-3.5 py-1.5 rounded-xl border border-white/10 shrink-0">
+          <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
+          <span className="text-xs font-black text-white">Profile {completion}% Setup</span>
         </div>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-6">
-        {/* Rate Cards */}
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl space-y-4">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <CreditCard className="w-4 h-4 text-purple-400" />
-            <span>Default Rate Card Pricing (USD)</span>
-          </h3>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">YouTube Dedicated Video</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-bold">$</span>
-                <input
-                  type="number"
-                  value={rateYoutube}
-                  onChange={(e) => setRateYoutube(e.target.value)}
-                  className="w-full pl-7 pr-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500"
+      {/* Glassmorphic Tab Navigation Bar */}
+      <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl overflow-x-auto no-scrollbar">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              type="button"
+              className={`relative px-4 py-2 rounded-xl text-xs transition-colors shrink-0 flex items-center gap-2 ${
+                isActive ? 'text-white font-black' : 'text-slate-400 hover:text-white font-bold hover:bg-white/5'
+              }`}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="activeSettingsTabHighlight"
+                  className="absolute inset-0 bg-gradient-to-r from-purple-600/30 via-indigo-600/20 to-pink-600/30 border border-purple-500/40 rounded-xl shadow-lg shadow-purple-950/40"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                 />
-              </div>
-            </div>
+              )}
+              <Icon className={`w-4 h-4 relative z-10 ${isActive ? 'text-purple-300' : 'text-slate-400'}`} />
+              <span className="relative z-10">{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
-            <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">Instagram Reel / Post</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-bold">$</span>
-                <input
-                  type="number"
-                  value={rateInstagram}
-                  onChange={(e) => setRateInstagram(e.target.value)}
-                  className="w-full pl-7 pr-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">TikTok Video Sponsorship</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-bold">$</span>
-                <input
-                  type="number"
-                  value={rateTiktok}
-                  onChange={(e) => setRateTiktok(e.target.value)}
-                  className="w-full pl-7 pr-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Notifications & Security */}
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl space-y-4">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <Bell className="w-4 h-4 text-purple-400" />
-            <span>Notification Preferences</span>
-          </h3>
-
-          <div className="space-y-2">
-            {[
-              'Email alert when brand submits a campaign invitation',
-              'Instant push notification for new messages',
-              'Weekly earnings & analytics summary email',
-            ].map((pref, idx) => (
-              <label key={idx} className="flex items-center gap-3 text-xs text-slate-300 cursor-pointer">
-                <input type="checkbox" defaultChecked className="rounded accent-purple-500 w-4 h-4 bg-slate-950" />
-                <span>{pref}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex items-center justify-end gap-3">
-          {saved && <span className="text-xs text-emerald-400 font-bold">Settings saved successfully!</span>}
-          <button
-            type="submit"
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-105 text-xs font-extrabold text-white flex items-center gap-2 transition-all shadow-lg shadow-purple-950/50"
-          >
-            <Save className="w-4 h-4" />
-            <span>Save Preferences</span>
-          </button>
-        </div>
-      </form>
+      {/* Tab Content Panels */}
+      <div className="relative">
+        {activeTab === 'basic' && (
+          <BasicInfoTab
+            userName={userName}
+            userEmail={userEmail}
+            userHandle={userHandle}
+            avatarUrl={avatarUrl}
+            onSaveSuccess={handleTabSave}
+          />
+        )}
+        {activeTab === 'creator' && <CreatorDetailsTab onSaveSuccess={handleTabSave} />}
+        {activeTab === 'social' && <SocialAccountsTab onSaveSuccess={handleTabSave} />}
+        {activeTab === 'portfolio' && <PortfolioTab onSaveSuccess={handleTabSave} />}
+        {activeTab === 'payment' && <PaymentSettingsTab onSaveSuccess={handleTabSave} />}
+      </div>
     </div>
   );
 }

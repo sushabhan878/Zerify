@@ -1,101 +1,108 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Settings, Save, Building2, ShieldCheck, CreditCard, Bell } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Settings, Building2, Sliders, Globe, Briefcase, CreditCard, Sparkles } from 'lucide-react';
+import BasicInfoTab from '../settings-tabs/BasicInfoTab';
+import CreatorDetailsTab from '../settings-tabs/CreatorDetailsTab';
+import SocialAccountsTab from '../settings-tabs/SocialAccountsTab';
+import PortfolioTab from '../settings-tabs/PortfolioTab';
+import PaymentSettingsTab from '../settings-tabs/PaymentSettingsTab';
 
-export default function BrandSettingsSection() {
-  const [companyName, setCompanyName] = useState('Apex Gear Inc');
-  const [industry, setIndustry] = useState('Tech & Consumer AI');
-  const [website, setWebsite] = useState('https://apexgear.com');
-  const [saved, setSaved] = useState(false);
+interface BrandSettingsSectionProps {
+  userName?: string;
+  userEmail?: string;
+  userHandle?: string;
+  companyName?: string;
+  avatarUrl?: string;
+}
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+export default function BrandSettingsSection({
+  userName,
+  userEmail,
+  userHandle,
+  companyName,
+  avatarUrl,
+}: BrandSettingsSectionProps = {}) {
+  const [activeTab, setActiveTab] = useState<'basic' | 'creator' | 'social' | 'portfolio' | 'payment'>('basic');
+  const [completion, setCompletion] = useState(65);
+
+  const tabs = [
+    { id: 'basic', label: 'Company Info', icon: Building2 },
+    { id: 'creator', label: 'Campaign Preferences', icon: Sliders },
+    { id: 'social', label: 'Brand Socials', icon: Globe },
+    { id: 'portfolio', label: 'Past Campaigns', icon: Briefcase },
+    { id: 'payment', label: 'Cashfree & Escrow', icon: CreditCard },
+  ];
+
+  const handleTabSave = () => {
+    setCompletion((prev) => Math.min(prev + 10, 100));
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
             <Settings className="w-5 h-5 text-purple-400" />
             <span>Brand Enterprise Settings</span>
           </h2>
-          <p className="text-xs text-slate-400">Manage company details, team seats & billing options</p>
+          <p className="text-xs text-slate-400">
+            Manage company profile, campaign requirements, official brand socials & Cashfree escrow billing options
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 bg-slate-900/80 px-3.5 py-1.5 rounded-xl border border-white/10 shrink-0">
+          <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
+          <span className="text-xs font-black text-white">Brand Setup {completion}%</span>
         </div>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-6">
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl space-y-4">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-purple-400" />
-            <span>Company Profile & Industry</span>
-          </h3>
+      {/* Tab Navigation Bar */}
+      <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl overflow-x-auto no-scrollbar">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              type="button"
+              className={`relative px-4 py-2 rounded-xl text-xs transition-colors shrink-0 flex items-center gap-2 ${
+                isActive ? 'text-white font-black' : 'text-slate-400 hover:text-white font-bold hover:bg-white/5'
+              }`}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="activeBrandSettingsTabHighlight"
+                  className="absolute inset-0 bg-gradient-to-r from-purple-600/30 via-indigo-600/20 to-pink-600/30 border border-purple-500/40 rounded-xl shadow-lg shadow-purple-950/40"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
+              <Icon className={`w-4 h-4 relative z-10 ${isActive ? 'text-purple-300' : 'text-slate-400'}`} />
+              <span className="relative z-10">{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">Company Name</label>
-              <input
-                type="text"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">Industry Sector</label>
-              <input
-                type="text"
-                value={industry}
-                onChange={(e) => setIndustry(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500"
-              />
-            </div>
-
-            <div className="sm:col-span-2">
-              <label className="text-xs font-semibold text-slate-400 block mb-1">Official Website URL</label>
-              <input
-                type="url"
-                value={website}
-                onChange={(e) => setWebsite(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl space-y-4">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <Bell className="w-4 h-4 text-purple-400" />
-            <span>Brand Notifications</span>
-          </h3>
-
-          <div className="space-y-2 text-xs text-slate-300">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" defaultChecked className="rounded accent-purple-500 w-4 h-4" />
-              <span>Email notification when creator submits content draft for approval</span>
-            </label>
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" defaultChecked className="rounded accent-purple-500 w-4 h-4" />
-              <span>Alert when AI algorithm matches new creator candidates for active campaign</span>
-            </label>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-end gap-3">
-          {saved && <span className="text-xs text-emerald-400 font-bold">Brand settings updated!</span>}
-          <button
-            type="submit"
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:scale-105 text-xs font-extrabold text-white flex items-center gap-2 transition-all shadow-lg shadow-purple-950/50"
-          >
-            <Save className="w-4 h-4" />
-            <span>Save Company Profile</span>
-          </button>
-        </div>
-      </form>
+      {/* Tab Content Panels */}
+      <div className="relative">
+        {activeTab === 'basic' && (
+          <BasicInfoTab
+            userName={companyName || userName}
+            userEmail={userEmail}
+            userHandle={userHandle}
+            avatarUrl={avatarUrl}
+            onSaveSuccess={handleTabSave}
+          />
+        )}
+        {activeTab === 'creator' && <CreatorDetailsTab onSaveSuccess={handleTabSave} />}
+        {activeTab === 'social' && <SocialAccountsTab onSaveSuccess={handleTabSave} />}
+        {activeTab === 'portfolio' && <PortfolioTab onSaveSuccess={handleTabSave} />}
+        {activeTab === 'payment' && <PaymentSettingsTab onSaveSuccess={handleTabSave} />}
+      </div>
     </div>
   );
 }

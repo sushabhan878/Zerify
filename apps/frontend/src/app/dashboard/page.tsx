@@ -51,23 +51,31 @@ export default function DashboardPage() {
   }, [isResizing]);
 
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem('zerify_user');
-      const storedToken = localStorage.getItem('zerify_token');
+    const loadUser = () => {
+      try {
+        const storedUser = localStorage.getItem('zerify_user');
+        const storedToken = localStorage.getItem('zerify_token');
 
-      if (!storedUser || !storedToken) {
+        if (!storedUser || !storedToken) {
+          router.push('/login');
+          return;
+        }
+
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setActiveRoute((currentRoute) =>
+          currentRoute || (parsedUser.role === 'BRAND' ? 'search-creators' : 'profile-overview')
+        );
+      } catch {
         router.push('/login');
-        return;
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      setActiveRoute(parsedUser.role === 'BRAND' ? 'search-creators' : 'profile-overview');
-    } catch {
-      router.push('/login');
-    } finally {
-      setLoading(false);
-    }
+    loadUser();
+    window.addEventListener('zerify_auth_change', loadUser);
+    return () => window.removeEventListener('zerify_auth_change', loadUser);
   }, [router]);
 
   const handleLogout = () => {
@@ -91,7 +99,7 @@ export default function DashboardPage() {
   const userRole: 'BRAND' | 'INFLUENCER' = user.role === 'BRAND' ? 'BRAND' : 'INFLUENCER';
   const userName = user.name || user.email?.split('@')[0] || 'User';
   const userHandle = user.handle || `@${userName.toLowerCase().replace(/\s+/g, '')}`;
-  const companyName = user.companyName || user.name || 'Apex Gear Inc';
+  const companyName = user.companyName || user.name || 'Enterprise Partner';
 
   return (
     <ThemeProvider>
@@ -125,6 +133,7 @@ export default function DashboardPage() {
           userEmail={user.email}
           userHandle={userHandle}
           companyName={companyName}
+          avatarUrl={user.avatarUrl}
           onLogout={handleLogout}
           activeRoute={activeRoute}
           onSelectRoute={(route) => {
@@ -157,6 +166,7 @@ export default function DashboardPage() {
                 userEmail={user.email}
                 userHandle={userHandle}
                 companyName={companyName}
+                avatarUrl={user.avatarUrl}
                 onLogout={handleLogout}
                 activeRoute={activeRoute}
                 onSelectRoute={(route) => {
@@ -174,12 +184,19 @@ export default function DashboardPage() {
           {userRole === 'BRAND' ? (
             <BrandDashboardView
               userName={userName}
+              userEmail={user.email}
+              userHandle={userHandle}
+              companyName={companyName}
+              avatarUrl={user.avatarUrl}
               activeRoute={activeRoute}
               onSelectRoute={(route) => setActiveRoute(route)}
             />
           ) : (
             <InfluencerDashboardView
               userName={userName}
+              userEmail={user.email}
+              userHandle={userHandle}
+              avatarUrl={user.avatarUrl}
               activeRoute={activeRoute}
               onSelectRoute={(route) => setActiveRoute(route)}
             />

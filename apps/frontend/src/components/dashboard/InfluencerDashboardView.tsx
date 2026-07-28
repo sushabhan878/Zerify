@@ -18,6 +18,9 @@ import ProfileCompletionBanner from './subcomponents/ProfileCompletionBanner';
 
 interface InfluencerDashboardViewProps {
   userName: string;
+  userEmail?: string;
+  userHandle?: string;
+  avatarUrl?: string;
   activeRoute?: string;
   onSelectRoute?: (routeId: string) => void;
   completionPercentage?: number;
@@ -25,6 +28,9 @@ interface InfluencerDashboardViewProps {
 
 export default function InfluencerDashboardView({
   userName,
+  userEmail,
+  userHandle,
+  avatarUrl,
   activeRoute = 'profile-overview',
   onSelectRoute,
   completionPercentage = 65,
@@ -54,7 +60,14 @@ export default function InfluencerDashboardView({
       case 'payments':
         return <PaymentsSection />;
       case 'settings':
-        return <SettingsSection />;
+        return (
+          <SettingsSection
+            userName={userName}
+            userEmail={userEmail}
+            userHandle={userHandle}
+            avatarUrl={avatarUrl}
+          />
+        );
       case 'profile-overview':
       default:
         return <ProfileOverviewSection userName={userName} />;
