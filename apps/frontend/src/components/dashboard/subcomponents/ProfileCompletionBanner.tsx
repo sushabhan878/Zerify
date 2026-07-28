@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sparkles, ArrowRight, X, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { Sparkles, ArrowRight, X } from 'lucide-react';
 
 interface ProfileCompletionBannerProps {
   completionPercentage?: number;
@@ -20,34 +20,34 @@ export default function ProfileCompletionBanner({
   }
 
   return (
-    <div className="relative overflow-hidden mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-950/60 via-indigo-950/40 to-slate-900/80 border border-purple-500/30 backdrop-blur-xl shadow-2xl transition-all">
+    <div className="relative overflow-hidden mb-5 p-4 rounded-xl bg-gradient-to-r from-purple-950/50 via-indigo-950/40 to-slate-900/80 border border-purple-500/30 backdrop-blur-xl shadow-xl transition-all">
       {/* Background Accent Glow */}
-      <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-purple-600/20 blur-3xl pointer-events-none" />
+      <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-purple-600/15 blur-3xl pointer-events-none" />
 
       <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         {/* Left Side: Icon & Setup Progress Info */}
         <div className="flex items-start gap-3.5 flex-1 min-w-0">
-          <div className="p-3 rounded-2xl bg-gradient-to-tr from-purple-600/30 via-indigo-600/20 to-pink-600/30 border border-purple-500/40 text-purple-300 shrink-0 shadow-lg shadow-purple-950/40">
-            <Sparkles className="w-5 h-5 text-purple-300 animate-pulse" />
+          <div className="p-2.5 rounded-lg bg-gradient-to-tr from-purple-600/30 via-indigo-600/20 to-pink-600/30 border border-purple-500/40 text-purple-300 shrink-0 shadow-md">
+            <Sparkles className="w-4 h-4 text-purple-300 animate-pulse" />
           </div>
 
-          <div className="space-y-2 flex-1 min-w-0">
+          <div className="space-y-1.5 flex-1 min-w-0">
             <div className="flex items-center gap-2.5">
-              <h3 className="text-sm sm:text-base font-black text-white tracking-tight">
-                Complete Your Profile Setup
+              <h3 className="text-xs sm:text-sm font-bold text-white tracking-tight">
+                Complete Profile Setup
               </h3>
-              <span className="px-2 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 text-[10px] font-black uppercase tracking-wider shrink-0">
+              <span className="px-2 py-0.5 rounded-md bg-purple-500/20 border border-purple-500/30 text-purple-300 text-[10px] font-semibold uppercase tracking-wider shrink-0">
                 {completionPercentage}% Complete
               </span>
             </div>
 
-            <p className="text-xs text-slate-300/90 leading-relaxed max-w-xl">
-              Your profile is <strong className="text-purple-300 font-extrabold">{completionPercentage}% setup</strong>. Complete your social handles & payout preferences to get 3x higher AI matching scores.
+            <p className="text-xs text-slate-300/80 leading-relaxed max-w-xl">
+              Your profile is <strong className="text-purple-300 font-semibold">{completionPercentage}% setup</strong>. Complete your social handles & payout preferences to unlock 3x higher AI matching scores.
             </p>
 
             {/* Progress Bar Container */}
-            <div className="w-full max-w-md space-y-1 pt-1">
-              <div className="w-full h-2 rounded-full bg-slate-950 overflow-hidden p-[1px] border border-white/10">
+            <div className="w-full max-w-md pt-0.5">
+              <div className="w-full h-1.5 rounded-full bg-slate-950 overflow-hidden p-[1px] border border-white/10">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 transition-all duration-500 shadow-md shadow-purple-500/50"
                   style={{ width: `${completionPercentage}%` }}
@@ -62,7 +62,7 @@ export default function ProfileCompletionBanner({
           <button
             onClick={onCompleteProfile}
             type="button"
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-black tracking-wide shadow-xl shadow-purple-950/60 transition-all hover:scale-105 flex items-center justify-center gap-2 group border border-purple-400/30"
+            className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold tracking-wide shadow-lg shadow-purple-950/50 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 group border border-purple-400/20"
           >
             <span>Complete Profile</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -72,7 +72,7 @@ export default function ProfileCompletionBanner({
             onClick={() => setDismissed(true)}
             type="button"
             title="Dismiss notification"
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors shrink-0"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
