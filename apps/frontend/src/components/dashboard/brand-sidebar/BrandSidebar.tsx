@@ -57,7 +57,7 @@ export default function BrandSidebar({
     <aside
       style={isCollapsed ? { ...style, width: '80px' } : style}
       className={`h-full bg-slate-950/90 border-r border-white/10 flex flex-col shrink-0 selection:bg-purple-500 selection:text-white transition-all duration-200 ${
-        isCollapsed ? 'w-20 overflow-visible z-30' : 'w-72 overflow-hidden'
+        isCollapsed ? 'w-20' : 'w-72'
       } ${isMobileDrawer ? 'flex w-full' : 'hidden md:flex'}`}
     >
       {/* Sticky Top Header: Zerify Logo + Collapse Button & Profile Card */}
@@ -110,7 +110,7 @@ export default function BrandSidebar({
       </div>
 
       {/* Scrollable Body: Nav Menu (includes ThemeToggle in Settings), Messages & CTA Card */}
-      <div className={`flex-1 ${isCollapsed ? 'overflow-visible' : 'overflow-y-auto no-scrollbar'} p-3.5 space-y-3 flex flex-col justify-between min-h-0`}>
+      <div className="flex-1 overflow-y-auto no-scrollbar p-3.5 space-y-3 flex flex-col justify-between min-h-0">
         <div className="space-y-3">
           {/* Main Navigation Menu */}
           <BrandNavMenu

@@ -172,9 +172,17 @@ export default function DashboardPage() {
         {/* Main Content View - Right Independent Scroll Container */}
         <main className="flex-1 h-full overflow-y-auto no-scrollbar p-4 sm:p-8 md:p-10 max-w-7xl mx-auto">
           {userRole === 'BRAND' ? (
-            <BrandDashboardView userName={userName} activeRoute={activeRoute} />
+            <BrandDashboardView
+              userName={userName}
+              activeRoute={activeRoute}
+              onSelectRoute={(route) => setActiveRoute(route)}
+            />
           ) : (
-            <InfluencerDashboardView userName={userName} activeRoute={activeRoute} />
+            <InfluencerDashboardView
+              userName={userName}
+              activeRoute={activeRoute}
+              onSelectRoute={(route) => setActiveRoute(route)}
+            />
           )}
         </main>
       </div>

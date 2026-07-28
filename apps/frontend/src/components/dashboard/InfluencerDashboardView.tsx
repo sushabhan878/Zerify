@@ -14,43 +14,63 @@ import SettingsSection from './influencer-views/SettingsSection';
 import ActivityView from './sub-views/ActivityView';
 import TrafficView from './sub-views/TrafficView';
 import StatisticView from './sub-views/StatisticView';
+import ProfileCompletionBanner from './subcomponents/ProfileCompletionBanner';
 
 interface InfluencerDashboardViewProps {
   userName: string;
   activeRoute?: string;
+  onSelectRoute?: (routeId: string) => void;
+  completionPercentage?: number;
 }
 
 export default function InfluencerDashboardView({
   userName,
   activeRoute = 'profile-overview',
+  onSelectRoute,
+  completionPercentage = 65,
 }: InfluencerDashboardViewProps) {
-  switch (activeRoute) {
-    case 'activity':
-      return <ActivityView />;
-    case 'traffic':
-      return <TrafficView />;
-    case 'statistic':
-      return <StatisticView />;
-    case 'company-discovery':
-      return <CompanyDiscoverySection />;
-    case 'ai-profile-match':
-      return <AiProfileMatchSection />;
-    case 'campaign-invitations':
-      return <CampaignInvitationsSection />;
-    case 'active-campaigns':
-      return <ActiveCampaignsSection />;
-    case 'messages':
-      return <MessagesSection />;
-    case 'applications':
-      return <ApplicationsSection />;
-    case 'my-network':
-      return <MyNetworkSection />;
-    case 'payments':
-      return <PaymentsSection />;
-    case 'settings':
-      return <SettingsSection />;
-    case 'profile-overview':
-    default:
-      return <ProfileOverviewSection userName={userName} />;
-  }
+  const renderSection = () => {
+    switch (activeRoute) {
+      case 'activity':
+        return <ActivityView />;
+      case 'traffic':
+        return <TrafficView />;
+      case 'statistic':
+        return <StatisticView />;
+      case 'company-discovery':
+        return <CompanyDiscoverySection />;
+      case 'ai-profile-match':
+        return <AiProfileMatchSection />;
+      case 'campaign-invitations':
+        return <CampaignInvitationsSection />;
+      case 'active-campaigns':
+        return <ActiveCampaignsSection />;
+      case 'messages':
+        return <MessagesSection />;
+      case 'applications':
+        return <ApplicationsSection />;
+      case 'my-network':
+        return <MyNetworkSection />;
+      case 'payments':
+        return <PaymentsSection />;
+      case 'settings':
+        return <SettingsSection />;
+      case 'profile-overview':
+      default:
+        return <ProfileOverviewSection userName={userName} />;
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Profile Completion Setup Banner (Visible on all pages until setup reaches >= 90%) */}
+      <ProfileCompletionBanner
+        completionPercentage={completionPercentage}
+        onCompleteProfile={() => onSelectRoute?.('settings')}
+      />
+
+      {/* Active Section Content */}
+      {renderSection()}
+    </div>
+  );
 }

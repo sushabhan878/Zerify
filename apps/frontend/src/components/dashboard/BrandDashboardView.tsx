@@ -13,41 +13,61 @@ import BrandSettingsSection from './brand-views/BrandSettingsSection';
 import ActivityView from './sub-views/ActivityView';
 import TrafficView from './sub-views/TrafficView';
 import StatisticView from './sub-views/StatisticView';
+import ProfileCompletionBanner from './subcomponents/ProfileCompletionBanner';
 
 interface BrandDashboardViewProps {
   userName: string;
   activeRoute?: string;
+  onSelectRoute?: (routeId: string) => void;
+  completionPercentage?: number;
 }
 
 export default function BrandDashboardView({
   userName,
   activeRoute = 'search-creators',
+  onSelectRoute,
+  completionPercentage = 65,
 }: BrandDashboardViewProps) {
-  switch (activeRoute) {
-    case 'activity':
-      return <ActivityView />;
-    case 'traffic':
-      return <TrafficView />;
-    case 'statistic':
-      return <StatisticView />;
-    case 'ai-recommendations':
-      return <BrandAiRecommendationsSection />;
-    case 'saved-creators':
-      return <SavedCreatorsSection />;
-    case 'shortlists':
-      return <ShortlistsSection />;
-    case 'my-campaigns':
-      return <MyCampaignsSection />;
-    case 'active-deals':
-      return <ActiveDealsSection />;
-    case 'brand-messages':
-      return <BrandMessagesSection />;
-    case 'payouts-escrow':
-      return <BrandPayoutsSection />;
-    case 'brand-settings':
-      return <BrandSettingsSection />;
-    case 'search-creators':
-    default:
-      return <SearchCreatorsSection />;
-  }
+  const renderSection = () => {
+    switch (activeRoute) {
+      case 'activity':
+        return <ActivityView />;
+      case 'traffic':
+        return <TrafficView />;
+      case 'statistic':
+        return <StatisticView />;
+      case 'ai-recommendations':
+        return <BrandAiRecommendationsSection />;
+      case 'saved-creators':
+        return <SavedCreatorsSection />;
+      case 'shortlists':
+        return <ShortlistsSection />;
+      case 'my-campaigns':
+        return <MyCampaignsSection />;
+      case 'active-deals':
+        return <ActiveDealsSection />;
+      case 'brand-messages':
+        return <BrandMessagesSection />;
+      case 'payouts-escrow':
+        return <BrandPayoutsSection />;
+      case 'brand-settings':
+        return <BrandSettingsSection />;
+      case 'search-creators':
+      default:
+        return <SearchCreatorsSection />;
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Profile Completion Setup Banner (Visible on all pages until setup reaches >= 90%) */}
+      <ProfileCompletionBanner
+        completionPercentage={completionPercentage}
+        onCompleteProfile={() => onSelectRoute?.('brand-settings')}
+      />
+
+      {/* Active Section Content */}
+      {renderSection()}
+    </div>
+  );
 }

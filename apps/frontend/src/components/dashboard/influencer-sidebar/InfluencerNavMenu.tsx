@@ -131,7 +131,7 @@ export default function InfluencerNavMenu({
 
                 {/* Collapsed Flyout Submenu with Curved Branch Lines & Hover Bridge */}
                 {hasSubItems && (
-                  <div className="absolute left-full top-0 ml-3 hidden group-hover/collapsed:flex flex-col bg-slate-900/95 border border-white/10 p-3 rounded-2xl shadow-2xl z-50 w-48 backdrop-blur-xl before:absolute before:-left-4 before:top-0 before:bottom-0 before:w-4 before:content-[''] pointer-events-auto">
+                  <div className="fixed left-[84px] -mt-1 hidden group-hover/collapsed:flex flex-col bg-slate-900/95 border border-white/10 p-3 rounded-2xl shadow-2xl z-[100] w-48 backdrop-blur-xl before:absolute before:-left-5 before:top-0 before:bottom-0 before:w-5 before:content-[''] pointer-events-auto">
                     <div className="text-[10px] font-black uppercase tracking-wider text-purple-400 mb-2 pb-1 border-b border-white/10 px-1 flex items-center justify-between">
                       <span>{route.label}</span>
                       <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
