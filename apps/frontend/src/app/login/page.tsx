@@ -5,7 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import LottieLoader from '@/components/ui/LottieLoader';
+import { ArrowLeft } from 'lucide-react';
 import LoginModal from '@/components/auth/LoginModal';
 
 export default function LoginPage() {
@@ -30,8 +31,7 @@ export default function LoginPage() {
   if (checkingAuth) {
     return (
       <div className="min-h-screen bg-[#07090E] flex flex-col items-center justify-center text-white">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-500 mb-3" />
-        <span className="text-xs text-slate-400 font-semibold tracking-wide">Loading Zerify...</span>
+        <LottieLoader size={220} message="Preparing Login..." />
       </div>
     );
   }

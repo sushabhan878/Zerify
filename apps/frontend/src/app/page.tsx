@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import LottieLoader from '@/components/ui/LottieLoader';
 import Navbar from '@/components/landing/Navbar';
 import Hero from '@/components/landing/Hero';
 import FeatureGrid from '@/components/landing/FeatureGrid';
@@ -33,8 +33,7 @@ export default function Home() {
   if (checkingAuth) {
     return (
       <div className="min-[#07090E] min-h-screen bg-[#07090E] flex flex-col items-center justify-center text-white">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-500 mb-3" />
-        <span className="text-xs text-slate-400 font-semibold tracking-wide">Loading Zerify...</span>
+        <LottieLoader size={220} message="Loading Zerify Studio..." />
       </div>
     );
   }

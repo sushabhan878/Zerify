@@ -15,6 +15,8 @@ interface DashboardSidebarProps {
   onLogout: () => void;
   activeRoute?: string;
   onSelectRoute?: (routeId: string) => void;
+  isMobileDrawer?: boolean;
+  style?: React.CSSProperties;
 }
 
 export default function DashboardSidebar({
@@ -28,6 +30,8 @@ export default function DashboardSidebar({
   onLogout,
   activeRoute,
   onSelectRoute,
+  isMobileDrawer = false,
+  style,
 }: DashboardSidebarProps) {
   if (userRole === 'BRAND') {
     return (
@@ -40,6 +44,8 @@ export default function DashboardSidebar({
         onLogout={onLogout}
         activeRoute={activeRoute}
         onSelectRoute={onSelectRoute}
+        isMobileDrawer={isMobileDrawer}
+        style={style}
       />
     );
   }
@@ -53,6 +59,8 @@ export default function DashboardSidebar({
       onLogout={onLogout}
       activeRoute={activeRoute}
       onSelectRoute={onSelectRoute}
+      isMobileDrawer={isMobileDrawer}
+      style={style}
     />
   );
 }

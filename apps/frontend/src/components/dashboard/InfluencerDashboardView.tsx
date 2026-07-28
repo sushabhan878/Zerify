@@ -11,6 +11,9 @@ import ApplicationsSection from './influencer-views/ApplicationsSection';
 import MyNetworkSection from './influencer-views/MyNetworkSection';
 import PaymentsSection from './influencer-views/PaymentsSection';
 import SettingsSection from './influencer-views/SettingsSection';
+import ActivityView from './sub-views/ActivityView';
+import TrafficView from './sub-views/TrafficView';
+import StatisticView from './sub-views/StatisticView';
 
 interface InfluencerDashboardViewProps {
   userName: string;
@@ -22,6 +25,12 @@ export default function InfluencerDashboardView({
   activeRoute = 'profile-overview',
 }: InfluencerDashboardViewProps) {
   switch (activeRoute) {
+    case 'activity':
+      return <ActivityView />;
+    case 'traffic':
+      return <TrafficView />;
+    case 'statistic':
+      return <StatisticView />;
     case 'company-discovery':
       return <CompanyDiscoverySection />;
     case 'ai-profile-match':

@@ -10,6 +10,9 @@ import ActiveDealsSection from './brand-views/ActiveDealsSection';
 import BrandMessagesSection from './brand-views/BrandMessagesSection';
 import BrandPayoutsSection from './brand-views/BrandPayoutsSection';
 import BrandSettingsSection from './brand-views/BrandSettingsSection';
+import ActivityView from './sub-views/ActivityView';
+import TrafficView from './sub-views/TrafficView';
+import StatisticView from './sub-views/StatisticView';
 
 interface BrandDashboardViewProps {
   userName: string;
@@ -21,6 +24,12 @@ export default function BrandDashboardView({
   activeRoute = 'search-creators',
 }: BrandDashboardViewProps) {
   switch (activeRoute) {
+    case 'activity':
+      return <ActivityView />;
+    case 'traffic':
+      return <TrafficView />;
+    case 'statistic':
+      return <StatisticView />;
     case 'ai-recommendations':
       return <BrandAiRecommendationsSection />;
     case 'saved-creators':

@@ -1,17 +1,54 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import DashboardSidebar from '@/components/dashboard/subcomponents/DashboardSidebar';
 import BrandDashboardView from '@/components/dashboard/BrandDashboardView';
 import InfluencerDashboardView from '@/components/dashboard/InfluencerDashboardView';
-import { Loader2 } from 'lucide-react';
+import LottieLoader from '@/components/ui/LottieLoader';
+import { Menu, X } from 'lucide-react';
+
+import { ThemeProvider } from '@/context/ThemeContext';
 
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeRoute, setActiveRoute] = useState<string>('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Dynamic Sidebar Resizing State
+  const [sidebarWidth, setSidebarWidth] = useState<number>(288); // Default 288px (w-72)
+  const [isResizing, setIsResizing] = useState<boolean>(false);
+
+  const startResizing = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+      // Clamp sidebar width between 200px and 450px
+      const newWidth = Math.min(Math.max(e.clientX, 200), 450);
+      setSidebarWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
 
   useEffect(() => {
     try {
@@ -43,9 +80,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#07090E] flex flex-col items-center justify-center text-white">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-500 mb-3" />
-        <span className="text-xs text-slate-400 font-semibold">Loading Dashboard...</span>
+      <div className="h-screen w-screen bg-[#07090E] dark:bg-[#07090E] light:bg-slate-50 flex flex-col items-center justify-center text-white">
+        <LottieLoader size={220} message="Loading Zerify Dashboard..." />
       </div>
     );
   }
@@ -58,27 +94,91 @@ export default function DashboardPage() {
   const companyName = user.companyName || user.name || 'Apex Gear Inc';
 
   return (
-    <div className="min-h-screen bg-[#07090E] text-slate-100 flex selection:bg-purple-500 selection:text-white overflow-x-hidden">
-      {/* Sidebar Navigation */}
-      <DashboardSidebar
-        userRole={userRole}
-        userName={userName}
-        userEmail={user.email}
-        userHandle={userHandle}
-        companyName={companyName}
-        onLogout={handleLogout}
-        activeRoute={activeRoute}
-        onSelectRoute={setActiveRoute}
-      />
+    <ThemeProvider>
+      <div
+        className={`h-screen w-screen bg-[#07090E] text-slate-100 flex flex-col md:flex-row overflow-hidden selection:bg-purple-500 selection:text-white ${
+          isResizing ? 'select-none cursor-col-resize' : ''
+        }`}
+      >
+        {/* Mobile Top Header */}
+        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-slate-950/90 border-b border-white/10 shrink-0 z-30">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg overflow-hidden relative">
+              <Image src="/logo.png" alt="Zerify Logo" width={28} height={28} className="object-contain" />
+            </div>
+            <span className="text-sm font-black text-white tracking-tight">Zerify</span>
+          </div>
 
-      {/* Main Content View */}
-      <main className="flex-1 p-6 sm:p-10 max-w-7xl mx-auto overflow-y-auto">
-        {userRole === 'BRAND' ? (
-          <BrandDashboardView userName={userName} activeRoute={activeRoute} />
-        ) : (
-          <InfluencerDashboardView userName={userName} activeRoute={activeRoute} />
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 rounded-xl bg-slate-900 border border-white/10 text-slate-300 hover:text-white transition-colors"
+            aria-label="Toggle Navigation Menu"
+          >
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+
+        {/* Left Sidebar Navigation - Desktop Independent Scroll Container with Resizable Width */}
+        <DashboardSidebar
+          userRole={userRole}
+          userName={userName}
+          userEmail={user.email}
+          userHandle={userHandle}
+          companyName={companyName}
+          onLogout={handleLogout}
+          activeRoute={activeRoute}
+          onSelectRoute={(route) => {
+            setActiveRoute(route);
+            setIsMobileMenuOpen(false);
+          }}
+          style={{ width: `${sidebarWidth}px` }}
+        />
+
+        {/* Resizable Divider Handle (Desktop) */}
+        <div
+          onMouseDown={startResizing}
+          className="hidden md:flex w-2 hover:w-2.5 bg-slate-950/40 hover:bg-purple-500/30 cursor-col-resize items-center justify-center transition-all shrink-0 z-20 group relative border-r border-white/5"
+          title="Click & drag to resize sidebar width"
+        >
+          <div className="w-[3px] h-10 rounded-full bg-slate-700/60 group-hover:bg-purple-400 transition-colors" />
+        </div>
+
+        {/* Mobile Sidebar Overlay Drawer */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden fixed inset-0 z-40 flex">
+            <div
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <div className="relative z-50 w-72 h-full bg-slate-950 border-r border-white/10 flex flex-col">
+              <DashboardSidebar
+                userRole={userRole}
+                userName={userName}
+                userEmail={user.email}
+                userHandle={userHandle}
+                companyName={companyName}
+                onLogout={handleLogout}
+                activeRoute={activeRoute}
+                onSelectRoute={(route) => {
+                  setActiveRoute(route);
+                  setIsMobileMenuOpen(false);
+                }}
+                isMobileDrawer
+              />
+            </div>
+          </div>
         )}
-      </main>
-    </div>
+
+        {/* Main Content View - Right Independent Scroll Container */}
+        <main className="flex-1 h-full overflow-y-auto no-scrollbar p-4 sm:p-8 md:p-10 max-w-7xl mx-auto">
+          {userRole === 'BRAND' ? (
+            <BrandDashboardView userName={userName} activeRoute={activeRoute} />
+          ) : (
+            <InfluencerDashboardView userName={userName} activeRoute={activeRoute} />
+          )}
+        </main>
+      </div>
+    </ThemeProvider>
   );
 }
+
