@@ -1,8 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Image from 'next/image';
-import { Camera, User, Mail, Calendar, ChevronDown, Users } from 'lucide-react';
+import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
+import * as Flags from 'country-flag-icons/react/3x2';
+import { Camera, User, Mail, Calendar, Users, Phone } from 'lucide-react';
 import LocationAutocomplete from './LocationAutocomplete';
 import CustomSelect from './CustomSelect';
 
@@ -51,13 +53,38 @@ export default function SingleBasicInfoCard({
   onAvatarChange,
   onRemoveAvatar,
 }: SingleBasicInfoCardProps) {
-  const phoneCodeOptions = [
-    { value: '+1', label: '+1 (US)' },
-    { value: '+91', label: '+91 (IN)' },
-    { value: '+44', label: '+44 (UK)' },
-    { value: '+61', label: '+61 (AU)' },
-    { value: '+81', label: '+81 (JP)' },
-  ];
+  const phoneCodeOptions = useMemo(() => {
+    const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+    const popularCodes = ['IN', 'US', 'GB', 'CA', 'AU'];
+
+    const allMapped = getCountries().map((countryCode) => {
+      const dialCode = getCountryCallingCode(countryCode);
+      const countryName = regionNames.of(countryCode) ?? countryCode;
+      const flagKey = countryCode.toUpperCase().replace(/-/g, '_') as keyof typeof Flags;
+      const FlagComponent = Flags[flagKey];
+      
+      return {
+        value: `+${dialCode}`,
+        label: `+${dialCode} ${countryName}`,
+        triggerLabel: `+${dialCode} (${countryCode})`,
+        keywords: `${countryCode} ${countryName} ${dialCode}`,
+        countryCode,
+        icon: FlagComponent ? (
+          <FlagComponent className="w-4.5 h-3.5 object-cover rounded-[1px] shadow-sm shrink-0" />
+        ) : undefined,
+      };
+    });
+
+    const popular = allMapped
+      .filter((opt) => popularCodes.includes(opt.countryCode))
+      .sort((a, b) => popularCodes.indexOf(a.countryCode) - popularCodes.indexOf(b.countryCode));
+
+    const rest = allMapped
+      .filter((opt) => !popularCodes.includes(opt.countryCode))
+      .sort((a, b) => a.label.localeCompare(b.label));
+
+    return [...popular, ...rest];
+  }, []);
 
   const genderOptions = [
     { value: 'Male', label: 'Male' },
@@ -191,15 +218,22 @@ export default function SingleBasicInfoCard({
             options={phoneCodeOptions}
             value={phoneCode}
             onChange={setPhoneCode}
-            className="w-32 shrink-0 animate-none"
+            searchable
+            searchPlaceholder="Search country or code..."
+            dropdownHeight="max-h-64"
+            className="w-40 shrink-0"
+            showCheckmark={false}
           />
-          <input
-            type="text"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            placeholder="415-555-0192"
-            className="flex-1 px-3.5 py-2.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs text-white placeholder:text-slate-600/70 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all font-medium shadow-inner"
-          />
+          <div className="relative flex-1">
+            <Phone className="w-4 h-4 text-slate-500/70 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="415-555-0192"
+              className="w-full pl-10 pr-3.5 py-2.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs text-white placeholder:text-slate-600/70 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all font-medium shadow-inner"
+            />
+          </div>
         </div>
       </div>
 
