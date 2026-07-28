@@ -2,20 +2,18 @@
 
 import React, { useState } from 'react';
 import { Check, Sparkles } from 'lucide-react';
-import NicheLanguageForm from './subcomponents/NicheLanguageForm';
-import PricingPreferencesForm from './subcomponents/PricingPreferencesForm';
-import FlexibilityToggles from './subcomponents/FlexibilityToggles';
+import SingleCreatorDetailsCard from './subcomponents/SingleCreatorDetailsCard';
 
 interface CreatorDetailsTabProps {
   onSaveSuccess?: () => void;
 }
 
 export default function CreatorDetailsTab({ onSaveSuccess }: CreatorDetailsTabProps) {
-  const [categories, setCategories] = useState<string[]>(['Tech & AI', 'Lifestyle']);
-  const [languages, setLanguages] = useState<string[]>(['English', 'Hindi']);
-  const [minAmount, setMinAmount] = useState('1500');
-  const [currency, setCurrency] = useState('USD');
-  const [collabTypes, setCollabTypes] = useState<string[]>(['Dedicated Video', 'Instagram Reel', 'Integrated Sponsorship']);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [languages, setLanguages] = useState<string[]>([]);
+  const [minAmount, setMinAmount] = useState('');
+  const [currency, setCurrency] = useState('INR');
+  const [collabTypes, setCollabTypes] = useState<string[]>([]);
   const [barterAvailable, setBarterAvailable] = useState(false);
   const [travelReady, setTravelReady] = useState(true);
   const [responseTime, setResponseTime] = useState('Within 24 hours');
@@ -35,29 +33,23 @@ export default function CreatorDetailsTab({ onSaveSuccess }: CreatorDetailsTabPr
 
   return (
     <form onSubmit={handleSave} className="space-y-5">
-      <NicheLanguageForm
+      <SingleCreatorDetailsCard
         categories={categories}
         setCategories={setCategories}
         languages={languages}
         setLanguages={setLanguages}
-      />
-
-      <PricingPreferencesForm
         minAmount={minAmount}
         setMinAmount={setMinAmount}
         currency={currency}
         setCurrency={setCurrency}
-        responseTime={responseTime}
-        setResponseTime={setResponseTime}
         collabTypes={collabTypes}
         setCollabTypes={setCollabTypes}
-      />
-
-      <FlexibilityToggles
         barterAvailable={barterAvailable}
         setBarterAvailable={setBarterAvailable}
         travelReady={travelReady}
         setTravelReady={setTravelReady}
+        responseTime={responseTime}
+        setResponseTime={setResponseTime}
       />
 
       {/* Save Button */}
@@ -80,3 +72,4 @@ export default function CreatorDetailsTab({ onSaveSuccess }: CreatorDetailsTabPr
     </form>
   );
 }
+

@@ -62,7 +62,7 @@ export default function SingleBasicInfoCard({
       const countryName = regionNames.of(countryCode) ?? countryCode;
       const flagKey = countryCode.toUpperCase().replace(/-/g, '_') as keyof typeof Flags;
       const FlagComponent = Flags[flagKey];
-      
+
       return {
         value: `+${dialCode}`,
         label: `+${dialCode} ${countryName}`,
@@ -93,7 +93,7 @@ export default function SingleBasicInfoCard({
   ];
 
   return (
-    <div className="p-5 sm:p-6 rounded-xl bg-slate-900/70 border border-white/10 backdrop-blur-xl space-y-6 shadow-xl">
+    <div className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-4 shadow-xl">
       {/* 1. Profile Picture & Avatar Header */}
       <div className="flex flex-col sm:flex-row items-center gap-5 pb-4 border-b border-white/10">
         <div className="relative group shrink-0">

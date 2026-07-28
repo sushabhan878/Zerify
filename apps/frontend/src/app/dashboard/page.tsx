@@ -179,29 +179,38 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Main Content View - Right Independent Scroll Container */}
-        <main className="flex-1 h-full overflow-y-auto no-scrollbar p-4 sm:p-8 md:p-10 max-w-7xl mx-auto">
-          {userRole === 'BRAND' ? (
-            <BrandDashboardView
-              userName={userName}
-              userEmail={user.email}
-              userHandle={userHandle}
-              companyName={companyName}
-              avatarUrl={user.avatarUrl}
-              activeRoute={activeRoute}
-              onSelectRoute={(route) => setActiveRoute(route)}
-            />
-          ) : (
-            <InfluencerDashboardView
-              userName={userName}
-              userEmail={user.email}
-              userHandle={userHandle}
-              avatarUrl={user.avatarUrl}
-              activeRoute={activeRoute}
-              onSelectRoute={(route) => setActiveRoute(route)}
-            />
-          )}
-        </main>
+        {/* Main Content View - Right Independent Scroll Container with Purplish Grid Background */}
+        <div className="relative flex-1 h-full overflow-hidden bg-[#07090E] bg-gradient-to-b from-purple-950/25 via-[#07090E] to-[#05060a]">
+          {/* Right-Side Purple Glow Spotlights */}
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[130px] pointer-events-none" />
+          <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+
+          {/* Prominent High-Tech Grid Pattern Background */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(168,85,247,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(168,85,247,0.12)_1px,transparent_1px)] bg-[size:36px_36px] pointer-events-none" />
+
+          <main className="relative z-10 h-full overflow-y-auto no-scrollbar p-4 sm:p-8 md:p-10 max-w-7xl mx-auto">
+            {userRole === 'BRAND' ? (
+              <BrandDashboardView
+                userName={userName}
+                userEmail={user.email}
+                userHandle={userHandle}
+                companyName={companyName}
+                avatarUrl={user.avatarUrl}
+                activeRoute={activeRoute}
+                onSelectRoute={(route) => setActiveRoute(route)}
+              />
+            ) : (
+              <InfluencerDashboardView
+                userName={userName}
+                userEmail={user.email}
+                userHandle={userHandle}
+                avatarUrl={user.avatarUrl}
+                activeRoute={activeRoute}
+                onSelectRoute={(route) => setActiveRoute(route)}
+              />
+            )}
+          </main>
+        </div>
       </div>
     </ThemeProvider>
   );
