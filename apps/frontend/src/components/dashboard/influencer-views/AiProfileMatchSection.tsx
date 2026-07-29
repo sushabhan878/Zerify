@@ -39,7 +39,7 @@ export default function AiProfileMatchSection() {
             initial={{ opacity: 0, x: -15 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: idx * 0.1 }}
-            className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-purple-500/40 transition-all"
+            className="p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-purple-500/40 transition-all"
           >
             <div className="space-y-1.5 flex-1">
               <div className="flex items-center gap-2.5">

@@ -48,7 +48,7 @@ export default function ActiveCampaignsSection() {
             key={c.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl space-y-4 hover:border-purple-500/30 transition-all"
+            className="p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-4 hover:border-purple-500/30 transition-all"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>

@@ -72,7 +72,7 @@ export default function CompanyDiscoverySection() {
             key={company.id}
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl flex flex-col justify-between space-y-4 hover:border-purple-500/40 transition-all group"
+            className="p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl flex flex-col justify-between space-y-4 hover:border-purple-500/40 transition-all group"
           >
             <div>
               <div className="flex items-center justify-between mb-3">

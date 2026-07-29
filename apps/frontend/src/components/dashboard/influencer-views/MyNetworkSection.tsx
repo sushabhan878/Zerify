@@ -29,7 +29,7 @@ export default function MyNetworkSection() {
             key={m.id}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl space-y-3 hover:border-purple-500/30 transition-all"
+            className="p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-3 hover:border-purple-500/30 transition-all"
           >
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-black text-sm flex items-center justify-center border border-white/20 shrink-0">

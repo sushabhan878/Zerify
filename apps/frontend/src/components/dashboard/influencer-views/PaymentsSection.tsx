@@ -24,21 +24,20 @@ export default function PaymentsSection() {
           </button>
         </div>
 
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl">
-          <span className="text-xs font-semibold text-slate-400 block mb-1">Pending Escrow</span>
-          <div className="text-2xl font-black text-amber-400 mb-2">$2,800.00</div>
-          <span className="text-[11px] text-slate-500">Released upon brand deliverable approval</span>
+        <div className="p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl">
+          <span className="text-xs font-semibold text-slate-400">Available Balance</span>
+          <div className="text-2xl font-black text-white mt-1">$4,850.00</div>
+          <span className="text-[11px] font-bold text-purple-400 mt-1 block">Ready for payout</span>
         </div>
-
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl">
-          <span className="text-xs font-semibold text-slate-400 block mb-1">Total Lifetime Payout</span>
-          <div className="text-2xl font-black text-emerald-400 mb-2">$42,910.00</div>
-          <span className="text-[11px] text-emerald-400/90 font-bold">+18.5% compared to last quarter</span>
+        <div className="p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl">
+          <span className="text-xs font-semibold text-slate-400">In Escrow</span>
+          <div className="text-2xl font-black text-white mt-1">$13,600.00</div>
+          <span className="text-[11px] font-bold text-slate-400 mt-1 block">Pending deliverable approval</span>
         </div>
       </div>
 
       {/* Transaction History */}
-      <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl space-y-4">
+      <div className="p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-purple-400" />
