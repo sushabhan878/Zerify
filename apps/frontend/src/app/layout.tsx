@@ -1,11 +1,11 @@
 import React from 'react';
-import { Plus_Jakarta_Sans } from 'next/font/google';
+import { Syne } from 'next/font/google';
 import './globals.css';
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const syne = Syne({
   subsets: ['latin'],
-  variable: '--font-sans',
-  display: 'swap',
+  weight: ['700', '800'],
+  variable: '--font-syne',
 });
 
 export const metadata = {
@@ -25,10 +25,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`dark ${plusJakartaSans.variable}`}>
-      <body className={`${plusJakartaSans.className} bg-[#07090E] text-slate-100 antialiased selection:bg-purple-500 selection:text-white`}>
+    <html lang="en" className={`dark ${syne.variable}`}>
+      <body className="bg-[#07090E] text-slate-100 antialiased selection:bg-purple-500 selection:text-white">
         {children}
       </body>
     </html>
   );
 }
+

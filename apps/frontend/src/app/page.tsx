@@ -1,11 +1,11 @@
 import React from 'react';
 import Navbar from '@/components/landing/Navbar';
 import Hero from '@/components/landing/Hero';
+import PlatformShowcase from '@/components/landing/PlatformShowcase';
 import FeatureGrid from '@/components/landing/FeatureGrid';
 import ComparisonSection from '@/components/landing/ComparisonSection';
 import FaqSection from '@/components/landing/FaqSection';
 import Footer from '@/components/landing/Footer';
-import NotificationToast from '@/components/landing/NotificationToast';
 
 export default function Home() {
   return (
@@ -13,12 +13,12 @@ export default function Home() {
       <Navbar />
       <main className="flex-1">
         <Hero />
+        <PlatformShowcase />
         <FeatureGrid />
         <ComparisonSection />
         <FaqSection />
       </main>
       <Footer />
-      <NotificationToast />
     </div>
   );
 }
