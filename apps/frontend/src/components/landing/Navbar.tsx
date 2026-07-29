@@ -1,48 +1,85 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
+import { ChevronDown } from 'lucide-react';
 
 export default function Navbar() {
-  return (
-    <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-6xl transition-all duration-300">
-      <div className="px-5 py-3 rounded-full bg-slate-950/75 border border-white/10 backdrop-blur-xl shadow-2xl shadow-purple-950/30 flex items-center justify-between">
-        {/* Brand Logo */}
-        <a href="#" className="flex items-center gap-3 group" aria-label="Zerify Home">
-          <div className="relative w-12 h-12 rounded-xl overflow-hidden group-hover:scale-105 transition-transform duration-300">
-            <Image
-              src="/logo.png"
-              alt="Zerify Logo"
-              width={48}
-              height={48}
-              className="object-contain w-full h-full"
-            />
-          </div>
-        </a>
+  const [platformOpen, setPlatformOpen] = useState(false);
 
-        {/* Desktop Nav Links */}
-        <nav className="hidden md:flex items-center gap-7 text-xs font-semibold text-slate-300">
-          <a href="#features" className="hover:text-white transition-colors duration-200">
-            For Brands
+  return (
+    <header className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-6xl transition-all duration-300">
+      {/* 3D Glass Pill Container with Full-Width Bottom Lighting & Downward Shadow */}
+      <div className="relative px-6 py-3.5 rounded-full bg-white/[0.05] border-none backdrop-blur-xl shadow-[0_8px_16px_-2px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-between transition-all duration-300 hover:bg-white/[0.08]">
+
+        {/* Full-Width Bottom Ambient Lighting Rim */}
+        <div className="absolute -bottom-0.5 left-4 right-4 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent blur-[2px] rounded-full pointer-events-none" />
+
+        {/* Brand Logo Only */}
+        <div className="flex items-center gap-3 z-10">
+          <a href="#" className="flex items-center gap-3 group" aria-label="Zerify Home">
+            <div className="relative w-10 h-10 rounded-xl group-hover:scale-110 transition-transform duration-300">
+              <Image
+                src="/logo.png"
+                alt="Zerify Logo"
+                width={56}
+                height={56}
+                className="object-contain w-full h-full scale-125 drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
+              />
+            </div>
           </a>
-          <a href="#creators" className="hover:text-white transition-colors duration-200">
-            For Influencers
+        </div>
+
+        {/* Center Nav Links */}
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-white/90 z-10">
+          <div className="relative">
+            <button
+              onClick={() => setPlatformOpen(!platformOpen)}
+              className="flex items-center gap-1.5 text-white/90 hover:text-white transition-colors duration-200 focus:outline-none py-1 drop-shadow-sm"
+            >
+              <span>Platform</span>
+              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${platformOpen ? 'rotate-180 text-white' : 'text-white/70'}`} />
+            </button>
+
+            {platformOpen && (
+              <div className="absolute top-full left-0 mt-3 w-52 rounded-2xl bg-slate-950/85 border border-white/25 backdrop-blur-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.3)] flex flex-col gap-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <a
+                  href="#features"
+                  className="px-3.5 py-2 text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
+                  onClick={() => setPlatformOpen(false)}
+                >
+                  Features & Workflow
+                </a>
+                <a
+                  href="#analytics"
+                  className="px-3.5 py-2 text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
+                  onClick={() => setPlatformOpen(false)}
+                >
+                  Analytics & Escrow
+                </a>
+              </div>
+            )}
+          </div>
+
+          <a href="#creators" className="hover:text-white transition-colors duration-200 py-1 drop-shadow-sm">
+            Creators
           </a>
-          <a href="#why-zerify" className="hover:text-white transition-colors duration-200">
-            Why Zerify
+          <a href="#success-stories" className="hover:text-white transition-colors duration-200 py-1 drop-shadow-sm">
+            Success stories
           </a>
-          <a href="#faq" className="hover:text-white transition-colors duration-200">
-            FAQ
+          <a href="#creative-insider" className="hover:text-white transition-colors duration-200 py-1 drop-shadow-sm">
+            Creative insider
           </a>
         </nav>
 
-        {/* Coming Soon Tag */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-[11px] font-medium text-purple-300">
-            <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+        {/* Right Actions - Coming Soon Tag */}
+        <div className="flex items-center gap-3 z-10">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/15 border border-purple-400/30 text-xs font-medium text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+            <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse shadow-[0_0_8px_rgba(192,132,252,0.8)]"></span>
             <span>Coming Soon</span>
           </div>
         </div>
+
       </div>
     </header>
   );
