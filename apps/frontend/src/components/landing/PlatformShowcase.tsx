@@ -12,10 +12,7 @@ export default function PlatformShowcase() {
   const [activeTab, setActiveTab] = useState<TabType>('analytics');
 
   return (
-    <section className="py-24 relative overflow-hidden bg-[#07090E]">
-      {/* Rich Purplish Ambient Background Tone */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[950px] h-[600px] bg-purple-600/25 rounded-full blur-[170px] pointer-events-none" />
-      <div className="absolute top-1/3 left-1/3 w-[600px] h-[400px] bg-pink-600/15 rounded-full blur-[150px] pointer-events-none" />
+    <section className="py-24 relative overflow-hidden bg-transparent">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}

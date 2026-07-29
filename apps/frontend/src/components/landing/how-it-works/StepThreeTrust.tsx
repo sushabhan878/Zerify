@@ -9,10 +9,6 @@ export default function StepThreeTrust() {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
       {/* Left Column: Step Details */}
       <div className="lg:col-span-6 space-y-6">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-bold text-amber-400 uppercase tracking-widest backdrop-blur-md">
-          <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-          <span>03 / TRUST AND HIRE</span>
-        </div>
 
         <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-[1.15] [font-family:'Playfair_Display',Georgia,serif]">
           Every Creator Is Vetted. Your Search Starts With Confidence.

@@ -107,10 +107,6 @@ export default function StepTwoVerify() {
 
       {/* Right Column: Step Details */}
       <div className="lg:col-span-6 space-y-6 lg:order-2 order-1">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs font-bold text-purple-400 uppercase tracking-widest backdrop-blur-md">
-          <BarChart3 className="w-3.5 h-3.5 text-purple-400" />
-          <span>02 / VIEW AND VERIFY</span>
-        </div>
 
         <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-[1.15] [font-family:'Playfair_Display',Georgia,serif]">
           See Exactly Who You Are Hiring Before Any Money Moves.

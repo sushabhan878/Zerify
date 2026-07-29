@@ -6,10 +6,7 @@ import { ArrowRight, Sparkles, TrendingUp, Star, ShieldCheck, Heart } from 'luci
 
 export default function TestimonialCta() {
   return (
-    <section className="py-28 relative overflow-hidden bg-[#07090E]">
-      {/* Background Ambient Glows */}
-      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[700px] h-[500px] bg-purple-600/20 rounded-full blur-[170px] pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 w-[500px] h-[400px] bg-pink-600/15 rounded-full blur-[150px] pointer-events-none" />
+    <section className="py-28 relative overflow-hidden bg-transparent">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Main Crazy Overlapping Card Container */}

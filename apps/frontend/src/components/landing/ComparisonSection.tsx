@@ -39,18 +39,11 @@ export default function ComparisonSection() {
   ];
 
   return (
-    <section id="why-zerify" className="py-28 relative overflow-hidden bg-[#07090E]">
-      {/* Background Glow Effects */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[550px] bg-purple-600/15 rounded-full blur-[170px] pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-[450px] h-[350px] bg-pink-600/10 rounded-full blur-[150px] pointer-events-none" />
+    <section id="why-zerify" className="py-28 relative overflow-hidden bg-transparent">
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs font-bold text-purple-300 uppercase tracking-widest backdrop-blur-md">
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-            <span>Why Brands &amp; Creators Choose Zerify</span>
-          </div>
 
           <h2 className="text-3xl sm:text-5xl font-bold text-white tracking-tight leading-[1.15] [font-family:'Playfair_Display',Georgia,serif]">
             Traditional Agency Overhead vs.{' '}

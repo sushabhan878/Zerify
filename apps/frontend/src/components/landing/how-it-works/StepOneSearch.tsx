@@ -9,10 +9,6 @@ export default function StepOneSearch() {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
       {/* Left Column: Step Details */}
       <div className="lg:col-span-6 space-y-6">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/20 text-xs font-bold text-pink-400 uppercase tracking-widest backdrop-blur-md">
-          <Sparkles className="w-3.5 h-3.5 text-pink-400" />
-          <span>01 / SEARCH AND FILTER</span>
-        </div>
 
         <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-[1.15] [font-family:'Playfair_Display',Georgia,serif]">
           Find The Right Creator Before You Commit.
