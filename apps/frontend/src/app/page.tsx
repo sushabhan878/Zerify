@@ -4,7 +4,7 @@ import Hero from '@/components/landing/Hero';
 import PlatformShowcase from '@/components/landing/PlatformShowcase';
 import TestimonialCta from '@/components/landing/TestimonialCta';
 import MotionFeatures from '@/components/landing/MotionFeatures';
-import FeatureGrid from '@/components/landing/FeatureGrid';
+import HowItWorksSteps from '@/components/landing/HowItWorksSteps';
 import ComparisonSection from '@/components/landing/ComparisonSection';
 import FaqSection from '@/components/landing/FaqSection';
 import Footer from '@/components/landing/Footer';
@@ -18,7 +18,7 @@ export default function Home() {
         <PlatformShowcase />
         <TestimonialCta />
         <MotionFeatures />
-        <FeatureGrid />
+        <HowItWorksSteps />
         <ComparisonSection />
         <FaqSection />
       </main>
