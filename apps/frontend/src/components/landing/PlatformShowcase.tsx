@@ -21,10 +21,10 @@ export default function PlatformShowcase() {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-12">
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-normal text-white tracking-tight leading-[1.15] [font-family:'Playfair_Display',Georgia,serif]">
-            The all-in-one creator platform
+            The All-in-One Platform for Brands &amp; Creators
           </h2>
           <p className="mt-4 text-base sm:text-lg text-slate-300 font-normal">
-            Everything your creator program needs, from AI discovery to real-time analytics.
+            Everything brands and creators need to connect, collaborate, scale campaigns, and track real-time ROI.
           </p>
         </div>
 

@@ -3,6 +3,7 @@ import Navbar from '@/components/landing/Navbar';
 import Hero from '@/components/landing/Hero';
 import PlatformShowcase from '@/components/landing/PlatformShowcase';
 import TestimonialCta from '@/components/landing/TestimonialCta';
+import MotionFeatures from '@/components/landing/MotionFeatures';
 import FeatureGrid from '@/components/landing/FeatureGrid';
 import ComparisonSection from '@/components/landing/ComparisonSection';
 import FaqSection from '@/components/landing/FaqSection';
@@ -16,6 +17,7 @@ export default function Home() {
         <Hero />
         <PlatformShowcase />
         <TestimonialCta />
+        <MotionFeatures />
         <FeatureGrid />
         <ComparisonSection />
         <FaqSection />

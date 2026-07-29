@@ -118,10 +118,11 @@ export default function Hero() {
 
             {/* Headline */}
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-white leading-[1.15] [font-family:'Playfair_Display',Georgia,serif]">
-              Direct Collaboration for{' '}
-              <span className="italic font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300">
-                Brands & Influencers.
-              </span>
+              The Fastest & Easiest Way for{' '}
+              <span className="italic font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 whitespace-nowrap">
+                Brands & Influencers
+              </span>{' '}
+              to Connect.
             </h1>
 
 
@@ -243,28 +244,18 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Right Column: Floating Hero Image */}
-          <div className="lg:col-span-7 relative flex justify-center items-center">
-            <motion.div
-              animate={{
-                y: [0, -10, 0],
-              }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-              className="relative w-full max-h-[70vh] flex items-center justify-center drop-shadow-[0_20px_50px_rgba(168,85,247,0.22)] transition-transform duration-500"
-            >
+          {/* Right Column: Hero Image (Fixed, No Floating Motion) */}
+          <div className="lg:col-span-7 relative flex justify-center lg:justify-end items-center lg:translate-x-20 lg:-mr-10">
+            <div className="relative w-full max-h-[82vh] flex items-center justify-center lg:justify-end lg:scale-115 xl:scale-125 origin-center lg:origin-right drop-shadow-[0_25px_60px_rgba(168,85,247,0.25)] transition-transform duration-500">
               <Image
                 src="/ChatGPT Image Jul 29, 2026, 10_52_30 PM.png"
                 alt="Zerify Platform Showcase"
-                width={1400}
-                height={950}
+                width={1600}
+                height={1050}
                 priority
-                className="w-full h-auto max-h-[68vh] object-contain transform transition-transform duration-500 hover:scale-[1.02]"
+                className="w-full h-auto max-h-[80vh] object-contain transform transition-transform duration-500 hover:scale-[1.02]"
               />
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
