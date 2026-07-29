@@ -11,6 +11,11 @@ const syne = Syne({
 export const metadata = {
   title: 'Zerify — Direct Collaboration Platform for Brands & Influencers',
   description: 'Zerify is the direct collaboration platform connecting top brands with high-converting creators & influencers. No agency overhead.',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
   keywords: ['influencer collaboration', 'brand creator platform', 'direct influencer marketing', 'UGC video ads', 'brand influencer platform', 'brand creator network'],
   openGraph: {
     title: 'Zerify — Direct Brand & Creator Collaboration',
