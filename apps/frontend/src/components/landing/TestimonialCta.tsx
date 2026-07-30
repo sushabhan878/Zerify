@@ -6,7 +6,7 @@ import { ArrowRight, Sparkles, TrendingUp, Star, ShieldCheck, Heart } from 'luci
 
 export default function TestimonialCta() {
   return (
-    <section className="py-28 relative overflow-hidden bg-transparent">
+    <section id="success-stories" className="py-28 relative overflow-hidden bg-transparent">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Main Crazy Overlapping Card Container */}

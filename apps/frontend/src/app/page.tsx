@@ -6,6 +6,7 @@ import TestimonialCta from '@/components/landing/TestimonialCta';
 import MotionFeatures from '@/components/landing/MotionFeatures';
 import HowItWorksSteps from '@/components/landing/HowItWorksSteps';
 import ComparisonSection from '@/components/landing/ComparisonSection';
+import FaqSection from '@/components/landing/FaqSection';
 import Footer from '@/components/landing/Footer';
 
 export default function Home() {
@@ -26,6 +27,7 @@ export default function Home() {
           <MotionFeatures />
           <HowItWorksSteps />
           <ComparisonSection />
+          <FaqSection />
         </div>
       </main>
       <Footer />
