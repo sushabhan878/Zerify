@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ArrowRight } from 'lucide-react';
 
 export default function Navbar() {
   const [platformOpen, setPlatformOpen] = useState(false);
@@ -92,14 +92,14 @@ export default function Navbar() {
           </a>
         </nav>
 
-        {/* Right Actions - Coming Soon & Early Access Button */}
+        {/* Right Actions - Sign In Button */}
         <div className="flex items-center gap-3 z-10">
           <a
-            href="#waitlist"
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/15 border border-purple-400/30 hover:bg-purple-500/25 text-xs font-semibold text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.2)] transition-all"
+            href="/login"
+            className="flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:opacity-95 text-xs font-bold text-white shadow-lg shadow-purple-500/25 transition-all group"
           >
-            <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse shadow-[0_0_8px_rgba(192,132,252,0.8)]"></span>
-            <span>Early Access</span>
+            <span>Sign In</span>
+            <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" />
           </a>
         </div>
 

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck } from 'lucide-react';
 import AuthGoogleButton from './AuthGoogleButton';
 import AuthAlert from './AuthAlert';
 
@@ -44,24 +44,18 @@ export default function RegisterCredentialsStep({
       transition={{ duration: 0.25 }}
       className="space-y-4"
     >
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Create your Credentials</h2>
-          <p className="text-xs text-slate-400">
-            Account Role:{' '}
-            <span className="font-semibold text-purple-300">
-              {role === 'INFLUENCER' ? 'Influencer / Creator' : 'Brand / Agency'}
-            </span>
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onBack}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 hover:border-white/20 text-xs font-semibold text-slate-300 hover:text-white transition-all"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Change Role</span>
-        </button>
+      <div className="text-center mb-4">
+        <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight [font-family:'Playfair_Display',Georgia,serif]">
+          Create Your <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300">Credentials</span>
+        </h2>
+      </div>
+
+      {/* Business Email Verified Badge Instructions Note */}
+      <div className="p-3 sm:p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-xs text-purple-200 flex items-center gap-3 shadow-inner">
+        <ShieldCheck className="w-4.5 h-4.5 text-purple-400 flex-shrink-0" />
+        <p className="leading-snug">
+          Use your official <span className="font-bold text-white">business email</span> address to automatically earn your <span className="font-bold text-purple-300">Verified Account Badge</span> upon sign-up.
+        </p>
       </div>
 
       <AuthAlert message={errorMessage} />
