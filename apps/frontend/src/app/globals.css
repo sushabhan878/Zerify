@@ -1,9 +1,11 @@
 /* Zerify Core Styling System - Database Registration Fixed */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Instrument+Serif:ital@0;1&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
 
 :root {
   --font-sans: 'Plus Jakarta Sans', sans-serif;
@@ -57,6 +59,7 @@ body {
 /* Gradient Text Effect */
 .text-gradient {
   background: linear-gradient(135deg, #FFFFFF 0%, #CBD5E1 50%, #8B5CF6 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
