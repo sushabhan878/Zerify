@@ -9,13 +9,56 @@ import {
   CheckCircle2,
   ArrowRight,
   TrendingUp,
+  Building2,
+  Video,
+  Loader2,
   Send,
   BarChart3,
   Zap,
 } from 'lucide-react';
 
 export default function Hero() {
-  const [count] = useState(2840);
+  const [role, setRole] = useState<'brand' | 'creator'>('brand');
+  const [email, setEmail] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const [count, setCount] = useState(2840);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setLoading(true);
+    setErrorMsg('');
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+      const response = await fetch(`${apiUrl}/vip-access`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          type: role,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to join waitlist. Please try again.');
+      }
+
+      setSubmitted(true);
+      setCount((prev) => prev + 1);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <section id="waitlist" className="relative min-h-screen lg:min-h-0 lg:h-screen lg:max-h-[980px] flex items-center pt-36 pb-20 lg:pt-28 lg:pb-16 overflow-hidden bg-[#07090E]">
