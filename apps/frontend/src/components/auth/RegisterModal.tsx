@@ -45,11 +45,14 @@ export default function RegisterModal({
   // Brand fields
   const [companyName, setCompanyName] = useState('');
   const [website, setWebsite] = useState('');
+  const [budget, setBudget] = useState(0);
 
   // Influencer fields
   const [handle, setHandle] = useState('');
   const [platform, setPlatform] = useState('Instagram');
   const [category, setCategory] = useState('Fashion & Beauty');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(['Fashion & Beauty']);
+  const [pricePerReel, setPricePerReel] = useState(250);
   const [gender, setGender] = useState('Prefer not to say');
   const [openToAffiliate, setOpenToAffiliate] = useState(false);
   const [openToUgc, setOpenToUgc] = useState(false);
@@ -154,9 +157,9 @@ export default function RegisterModal({
 
   return (
     <div className={`relative w-full mx-auto p-1 transition-all duration-300 ${step === 1 ? 'max-w-3xl sm:max-w-4xl' : 'max-w-lg'}`}>
-      <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/40 via-pink-600/40 to-indigo-600/40 rounded-3xl blur-xl opacity-10 animate-pulse pointer-events-none" />
+      <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-indigo-600/20 rounded-3xl blur-xl opacity-[0.04] pointer-events-none" />
 
-      <div className="relative rounded-3xl bg-[#07090e]/60 border border-white/10 backdrop-blur-xl p-6 sm:p-10 shadow-2xl shadow-purple-950/20 overflow-hidden">
+      <div className="relative rounded-3xl bg-[#07090e]/30 border border-white/10 backdrop-blur-2xl p-6 sm:p-10 shadow-2xl overflow-hidden transition-all duration-300">
         <RegisterProgressHeader step={step} />
 
         <AnimatePresence mode="wait">
@@ -165,6 +168,8 @@ export default function RegisterModal({
           {step === 2 && (
             <RegisterCredentialsStep
               role={role}
+              companyName={companyName}
+              setCompanyName={setCompanyName}
               fullName={fullName}
               setFullName={setFullName}
               email={email}
@@ -180,10 +185,10 @@ export default function RegisterModal({
 
           {step === 3 && role === 'BRAND' && (
             <RegisterBrandStep
-              companyName={companyName}
-              setCompanyName={setCompanyName}
               website={website}
               setWebsite={setWebsite}
+              budget={budget}
+              setBudget={setBudget}
               loading={loading}
               errorMessage={errorMessage}
               onSubmit={handleCompleteRegistration}
@@ -193,22 +198,10 @@ export default function RegisterModal({
 
           {step === 3 && role === 'INFLUENCER' && (
             <RegisterInfluencerStep
-              handle={handle}
-              setHandle={setHandle}
-              platform={platform}
-              setPlatform={setPlatform}
-              category={category}
-              setCategory={setCategory}
-              gender={gender}
-              setGender={setGender}
-              openToAffiliate={openToAffiliate}
-              setOpenToAffiliate={setOpenToAffiliate}
-              openToUgc={openToUgc}
-              setOpenToUgc={setOpenToUgc}
-              contactInfo={contactInfo}
-              setContactInfo={setContactInfo}
-              pricingRange={pricingRange}
-              setPricingRange={setPricingRange}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
+              pricePerReel={pricePerReel}
+              setPricePerReel={setPricePerReel}
               loading={loading}
               errorMessage={errorMessage}
               onSubmit={handleCompleteRegistration}

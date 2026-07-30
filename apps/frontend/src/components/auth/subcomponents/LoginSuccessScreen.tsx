@@ -2,7 +2,9 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, ShieldCheck } from 'lucide-react';
+import Lottie from 'lottie-react';
+import { ShieldCheck } from 'lucide-react';
+import successAnimation from '../../../../public/kOr3pk2jUY.json';
 
 interface LoginSuccessScreenProps {
   userEmail: string;
@@ -11,22 +13,31 @@ interface LoginSuccessScreenProps {
 export default function LoginSuccessScreen({ userEmail }: LoginSuccessScreenProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="text-center py-10 flex flex-col items-center justify-center space-y-5"
+      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+      className="text-center py-6 flex flex-col items-center justify-center space-y-4"
     >
-      <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-xl shadow-emerald-500/20 animate-pulse">
-        <CheckCircle2 className="w-10 h-10" />
+      <div className="relative w-36 h-36 mx-auto flex items-center justify-center">
+        <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-2xl animate-pulse pointer-events-none" />
+        <Lottie
+          animationData={successAnimation}
+          loop={false}
+          autoplay={true}
+          style={{ width: 140, height: 140 }}
+        />
       </div>
 
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-white tracking-tight">Welcome Back!</h2>
-        <p className="text-sm text-slate-300">
-          Logged in as <span className="font-semibold text-purple-300">{userEmail}</span>
+      <div className="space-y-1.5">
+        <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight [font-family:'Playfair_Display',Georgia,serif]">
+          Welcome <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300">Back!</span>
+        </h2>
+        <p className="text-xs sm:text-sm text-slate-300">
+          Authenticated as <span className="font-semibold text-purple-300">{userEmail}</span>
         </p>
       </div>
 
-      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs text-slate-400">
+      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 shadow-inner">
         <ShieldCheck className="w-4 h-4 text-emerald-400" />
         <span>Redirecting to your dashboard...</span>
       </div>

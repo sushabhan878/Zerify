@@ -17,7 +17,7 @@ export default function Navbar() {
 
         {/* Brand Logo */}
         <div className="flex items-center gap-3 z-10">
-          <a href="#waitlist" className="flex items-center gap-3 group" aria-label="Zerify Home">
+          <a href="/" className="flex items-center gap-3 group" aria-label="Zerify Home">
             <div className="relative w-10 h-10 rounded-xl group-hover:scale-110 transition-transform duration-300">
               <Image
                 src="/logo.png"
