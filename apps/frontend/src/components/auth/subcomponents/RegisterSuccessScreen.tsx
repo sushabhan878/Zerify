@@ -22,7 +22,7 @@ export default function RegisterSuccessScreen({ role }: RegisterSuccessScreenPro
     >
       {/* Process Completed Lottie Animation with Glow */}
       <div className="relative w-36 h-36 mx-auto flex items-center justify-center">
-        <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-2xl animate-pulse pointer-events-none" />
+        <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-2xl animate-pulse pointer-events-none" />
         <Lottie
           animationData={successAnimation}
           loop={false}
@@ -33,13 +33,13 @@ export default function RegisterSuccessScreen({ role }: RegisterSuccessScreenPro
 
       {/* Account Created Title with Playfair Display Typography */}
       <div className="space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-bold text-emerald-300 shadow-inner">
-          <Sparkles className="w-3.5 h-3.5" />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-[11px] font-bold text-purple-300 shadow-inner">
+          <Sparkles className="w-3.5 h-3.5 text-pink-400" />
           <span>Registration Complete</span>
         </div>
 
         <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight [font-family:'Playfair_Display',Georgia,serif]">
-          Account Created <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300">Successfully!</span>
+          Account Created <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300">Successfully!</span>
         </h2>
 
         <p className="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed">
@@ -51,11 +51,11 @@ export default function RegisterSuccessScreen({ role }: RegisterSuccessScreenPro
       <div className="pt-3">
         <Link
           href="/dashboard"
-          className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 text-white font-bold text-xs shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden"
+          className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white font-bold text-xs shadow-xl shadow-purple-600/30 hover:shadow-purple-600/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden"
         >
           <span className="relative z-10">Go to Dashboard</span>
           <ArrowRight className="relative z-10 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </Link>
       </div>
     </motion.div>
