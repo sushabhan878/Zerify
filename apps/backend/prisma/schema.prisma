@@ -52,23 +52,101 @@ model BrandProfile {
 }
 
 model InfluencerProfile {
-  id              String   @id @default(uuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  handle          String?
-  platform        String?  @default("Instagram")
-  avatarUrl       String?  // Cloudinary image URL
-  bio             String?
-  gender          String?
-  category        String?
-  openToAffiliate Boolean  @default(false)
-  openToUgc       Boolean  @default(false)
-  contactInfo     String?
-  pricingRange    String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                      String                        @id @default(uuid())
+  userId                  String                        @unique
+  user                    User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic Information
+  handle                  String?
+  bio                     String?
+  location                String?
+  phoneCode               String?                       @default("+1")
+  phoneNumber             String?
+  dob                     DateTime?
+  gender                  String?
+  
+  // Niche & Language Attributes (niches stores categories/niches)
+  niches                  String[]                      @default([])
+  contentLanguages        String[]                      @default([])
+  
+  // Collaboration Preferences & Pricing
+  availableForBarter      Boolean                       @default(false)
+  availableForRelocation  Boolean                       @default(false)
+  collaborationTypes      String[]                      @default([])
+  minPricePerReel         Float?
+  currency                String?                       @default("USD")
+  responseTime            String?                       @default("Within 24 hours")
+  
+  // Social Platforms (blank array initially) & Quick Attributes
+  platforms               String[]                      @default([])
+  avatarUrl               String?
+  openToAffiliate         Boolean                       @default(false)
+  openToUgc               Boolean                       @default(false)
+  pricingRange            String?
+
+  // Portfolio Links
+  portfolioLinks          String[]                      @default([])
+
+  // Connected Accounts, Deliverables & Payment Relations
+  connectedAccounts       InfluencerConnectedAccount[]
+  pastDeliverables        InfluencerPastDeliverable[]
+  paymentDetails          InfluencerPaymentDetails?
+
+  createdAt               DateTime                      @default(now())
+  updatedAt               DateTime                      @updatedAt
 
   @@map("influencer_profiles")
+}
+
+model InfluencerConnectedAccount {
+  id             String            @id @default(uuid())
+  influencerId   String
+  influencer     InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  platform       String            // e.g. "Instagram", "YouTube", "TikTok"
+  handle         String?
+  followerCount  Int?              @default(0)
+  engagementRate Float?
+  profileUrl     String?
+  isVerified     Boolean           @default(false)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@map("influencer_connected_accounts")
+}
+
+model InfluencerPastDeliverable {
+  id           String            @id @default(uuid())
+  influencerId String
+  influencer   InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  title        String?
+  brandName    String?
+  contentUrl   String
+  contentType  String?           // e.g. "Reel", "Video", "Post"
+  thumbnailUrl String?
+  viewsCount   Int?              @default(0)
+  likesCount   Int?              @default(0)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@map("influencer_past_deliverables")
+}
+
+model InfluencerPaymentDetails {
+  id            String            @id @default(uuid())
+  influencerId  String            @unique
+  influencer    InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  payoutMethod  String?           @default("Cashfree")
+  accountHolder String?
+  accountNumber String?
+  ifscCode      String?
+  upiId         String?
+  paypalEmail   String?
+  gstin         String?
+  panNumber     String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@map("influencer_payment_details")
 }
 
 enum VipType {

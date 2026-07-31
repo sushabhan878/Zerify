@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Check, Sparkles } from 'lucide-react';
+import { Check, Sparkles, Loader2 } from 'lucide-react';
 import SingleBasicInfoCard from './subcomponents/SingleBasicInfoCard';
 
 interface BasicInfoTabProps {
@@ -19,6 +19,8 @@ export default function BasicInfoTab({
   avatarUrl: initialAvatar = null,
   onSaveSuccess,
 }: BasicInfoTabProps) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
   const [name, setName] = useState(userName);
   const [handle, setHandle] = useState(userHandle.replace(/^@/, ''));
   const [bio, setBio] = useState('');
@@ -28,51 +30,168 @@ export default function BasicInfoTab({
   const [dob, setDob] = useState('1996-08-14');
   const [gender, setGender] = useState('Female');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatar);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Fetch saved profile from DB on mount
   useEffect(() => {
-    setName(userName);
-    setHandle(userHandle.replace(/^@/, ''));
-    if (initialAvatar) setAvatarUrl(initialAvatar);
-  }, [userName, userHandle, initialAvatar]);
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-    setTimeout(() => {
+    async function loadProfile() {
       try {
-        const stored = localStorage.getItem('zerify_user');
-        const userObj = stored ? JSON.parse(stored) : {};
-        const updated = {
-          ...userObj,
-          name,
-          handle: `@${handle.replace(/^@/, '')}`,
-          location,
-          avatarUrl,
-        };
-        localStorage.setItem('zerify_user', JSON.stringify(updated));
-        window.dispatchEvent(new Event('zerify_auth_change'));
+        const token = localStorage.getItem('zerify_token');
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const res = await fetch(`${apiUrl}/influencer/profile`, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user?.name) setName(data.user.name);
+          if (data.handle) setHandle(data.handle.replace(/^@/, ''));
+          if (data.bio !== undefined && data.bio !== null) setBio(data.bio);
+          if (data.location) setLocation(data.location);
+          if (data.phoneCode) setPhoneCode(data.phoneCode);
+          if (data.phoneNumber) setPhoneNumber(data.phoneNumber);
+          if (data.dob) setDob(new Date(data.dob).toISOString().split('T')[0]);
+          if (data.gender) setGender(data.gender);
+          if (data.avatarUrl) setAvatarUrl(data.avatarUrl);
+        }
       } catch (err) {
-        console.error(err);
+        console.warn('Could not connect to backend API, using initial props');
+      }
+    }
+    loadProfile();
+  }, [apiUrl]);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Instant local preview
+    const tempPreview = URL.createObjectURL(file);
+    setAvatarUrl(tempPreview);
+    setIsUploadingAvatar(true);
+    setErrorMsg(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const token = localStorage.getItem('zerify_token');
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
       }
 
-      setIsSaving(false);
-      setSaved(true);
-      if (onSaveSuccess) onSaveSuccess();
-      setTimeout(() => setSaved(false), 2500);
-    }, 600);
+      const res = await fetch(`${apiUrl}/file-upload/upload`, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        const msg = Array.isArray(errData.message) ? errData.message.join(', ') : errData.message;
+        throw new Error(msg || 'Failed to upload image');
+      }
+
+      const data = await res.json();
+      if (data.url) {
+        setAvatarUrl(data.url);
+      }
+    } catch (err: any) {
+      console.error('Image upload error:', err);
+      setErrorMsg(err.message || 'Image upload failed.');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setAvatarUrl(URL.createObjectURL(file));
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setErrorMsg(null);
+
+    const payload = {
+      name,
+      handle: `@${handle.replace(/^@/, '')}`,
+      bio,
+      location,
+      phoneCode,
+      phoneNumber,
+      dob,
+      gender,
+      avatarUrl: avatarUrl || null,
+    };
+
+    try {
+      const token = localStorage.getItem('zerify_token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(`${apiUrl}/influencer/profile`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        const msg = Array.isArray(errData.message) ? errData.message.join(', ') : errData.message;
+        throw new Error(msg || 'Failed to save basic info to database');
+      }
+
+      const updatedData = await res.json();
+      if (updatedData) {
+        if (updatedData.user?.name) setName(updatedData.user.name);
+        if (updatedData.handle) setHandle(updatedData.handle.replace(/^@/, ''));
+        if (updatedData.bio !== undefined && updatedData.bio !== null) setBio(updatedData.bio);
+        if (updatedData.location) setLocation(updatedData.location);
+        if (updatedData.phoneCode) setPhoneCode(updatedData.phoneCode);
+        if (updatedData.phoneNumber) setPhoneNumber(updatedData.phoneNumber);
+        if (updatedData.dob) setDob(new Date(updatedData.dob).toISOString().split('T')[0]);
+        if (updatedData.gender) setGender(updatedData.gender);
+        if (updatedData.avatarUrl) setAvatarUrl(updatedData.avatarUrl);
+      }
+
+      // Sync local storage for top bar
+      const stored = localStorage.getItem('zerify_user');
+      const userObj = stored ? JSON.parse(stored) : {};
+      const updatedUser = {
+        ...userObj,
+        name: updatedData.user?.name || name,
+        handle: `@${(updatedData.handle || handle).replace(/^@/, '')}`,
+        location: updatedData.location || location,
+        avatarUrl: updatedData.avatarUrl || avatarUrl,
+      };
+      localStorage.setItem('zerify_user', JSON.stringify(updatedUser));
+      window.dispatchEvent(new Event('zerify_auth_change'));
+
+      setSaved(true);
+      if (onSaveSuccess) onSaveSuccess();
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err: any) {
+      console.error('Error saving profile:', err);
+      setErrorMsg(err.message || 'Failed to save settings to database.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
     <form onSubmit={handleSave} className="space-y-5">
+      {errorMsg && (
+        <div className="p-3 rounded-lg bg-pink-500/10 border border-pink-500/30 text-xs text-pink-300 font-medium">
+          {errorMsg}
+        </div>
+      )}
+
       {/* Single Unified Card containing image upload, name, username, bio, location suggestions, contact & gender */}
       <SingleBasicInfoCard
         name={name}
@@ -99,19 +218,34 @@ export default function BasicInfoTab({
 
       {/* Save Button */}
       <div className="flex items-center justify-end gap-3 pt-2">
+        {isUploadingAvatar && (
+          <span className="text-xs font-semibold text-purple-300 flex items-center gap-1.5 bg-purple-500/10 px-3 py-1.5 rounded-lg border border-purple-500/20">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading to Cloudinary...
+          </span>
+        )}
+
         {saved && (
           <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
-            <Check className="w-4 h-4" /> Basic Information Saved!
+            <Check className="w-4 h-4" /> Basic Information Saved to DB!
           </span>
         )}
 
         <button
           type="submit"
-          disabled={isSaving}
-          className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-purple-950/50 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 border border-purple-400/20"
+          disabled={isSaving || isUploadingAvatar}
+          className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-purple-950/50 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 border border-purple-400/20 disabled:opacity-50"
         >
-          <Sparkles className="w-4 h-4" />
-          <span>{isSaving ? 'Saving...' : 'Save Basic Info'}</span>
+          {isSaving ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Saving to DB...</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4" />
+              <span>Save Basic Info</span>
+            </>
+          )}
         </button>
       </div>
     </form>

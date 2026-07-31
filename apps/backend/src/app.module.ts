@@ -4,6 +4,8 @@ import { AppController } from './app.controller';
 import { PrismaModule } from './database/prisma.module';
 import { VipAccessModule } from './modules/vip-access/vip-access.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { FileUploadModule } from './modules/file-upload/file-upload.module';
+import { InfluencerModule } from './modules/influencer/influencer.module';
 
 @Module({
   imports: [
@@ -13,6 +15,8 @@ import { AuthModule } from './modules/auth/auth.module';
     PrismaModule,
     VipAccessModule,
     AuthModule,
+    FileUploadModule,
+    InfluencerModule,
   ],
   controllers: [AppController],
   providers: [],

@@ -20,6 +20,43 @@ export class FileUploadService {
     return { timestamp, signature, folder, cloudName: process.env.CLOUDINARY_CLOUD_NAME };
   }
 
+  async uploadImageBuffer(
+    file: { buffer: Buffer; mimetype?: string; originalname?: string },
+    folder: string = 'zerify_avatars',
+  ): Promise<{ url: string; publicId?: string }> {
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+    if (cloudName && apiKey && apiSecret) {
+      return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder, resource_type: 'image' },
+          (error, result) => {
+            if (error) {
+              // On error fallback to base64 data URI
+              const mime = file.mimetype || 'image/png';
+              const base64 = file.buffer.toString('base64');
+              return resolve({ url: `data:${mime};base64,${base64}` });
+            }
+            if (result) {
+              return resolve({ url: result.secure_url, publicId: result.public_id });
+            }
+            const mime = file.mimetype || 'image/png';
+            const base64 = file.buffer.toString('base64');
+            return resolve({ url: `data:${mime};base64,${base64}` });
+          },
+        );
+        uploadStream.end(file.buffer);
+      });
+    }
+
+    // Fallback if no Cloudinary keys set locally
+    const mime = file.mimetype || 'image/png';
+    const base64 = file.buffer.toString('base64');
+    return { url: `data:${mime};base64,${base64}` };
+  }
+
   async deleteFile(publicId: string) {
     return cloudinary.uploader.destroy(publicId);
   }

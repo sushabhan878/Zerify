@@ -50,4 +50,53 @@ export class RegisterInfluencerDto {
   @IsString()
   @IsOptional()
   pricingRange?: string;
+
+  @IsOptional()
+  platforms?: string[];
+
+  @IsOptional()
+  niches?: string[];
+
+  @IsString()
+  @IsOptional()
+  location?: string;
+
+  @IsString()
+  @IsOptional()
+  phoneCode?: string;
+
+  @IsString()
+  @IsOptional()
+  phoneNumber?: string;
+
+  @IsOptional()
+  dob?: Date | string;
+
+  @IsOptional()
+  contentLanguages?: string[];
+
+  @IsBoolean()
+  @IsOptional()
+  availableForBarter?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  availableForRelocation?: boolean;
+
+  @IsOptional()
+  collaborationTypes?: string[];
+
+  @IsOptional()
+  minPricePerReel?: number;
+
+  @IsString()
+  @IsOptional()
+  currency?: string;
+
+  @IsString()
+  @IsOptional()
+  responseTime?: string;
+
+  @IsOptional()
+  portfolioLinks?: string[];
 }
