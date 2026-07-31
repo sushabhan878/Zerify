@@ -21,7 +21,7 @@ export default function BasicInfoTab({
 }: BasicInfoTabProps) {
   const [name, setName] = useState(userName);
   const [handle, setHandle] = useState(userHandle.replace(/^@/, ''));
-  const [bio, setBio] = useState('Content Creator focusing on technology, productivity, and modern aesthetics.');
+  const [bio, setBio] = useState('');
   const [location, setLocation] = useState('San Francisco, CA, United States');
   const [phoneCode, setPhoneCode] = useState('+1');
   const [phoneNumber, setPhoneNumber] = useState('415-555-0192');

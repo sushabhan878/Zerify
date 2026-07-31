@@ -171,7 +171,7 @@ export default function SingleBasicInfoCard({
           rows={3}
           value={bio}
           onChange={(e) => setBio(e.target.value)}
-          placeholder="Describe your creative content style and audience..."
+          placeholder="e.g. Content creator focused on tech gadgets, productivity workflows, and modern lifestyle aesthetics..."
           className="w-full px-3.5 py-2.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs text-white placeholder:text-slate-600/70 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all leading-relaxed shadow-inner"
         />
         <span className="text-[10px] text-slate-500/80 font-medium block text-right mt-1">
