@@ -99,7 +99,7 @@ Create an `.env` file inside `apps/backend/`:
 
 ```env
 # Database Connection (Neon PostgreSQL)
-DATABASE_URL="postgresql://neondb_owner:YOUR_PASSWORD@ep-crimson-dream-az0b7qo0-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
+DATABASE_URL="postgresql://username:password@ep-demo-pooler.region.aws.neon.tech/neondb?sslmode=require"
 
 # NestJS Server Settings
 PORT=4000
@@ -107,12 +107,12 @@ NODE_ENV="development"
 FRONTEND_URL="http://localhost:3000"
 
 # JWT Authentication
-JWT_SECRET="zerify-dev-secret-key-super-secure"
+JWT_SECRET="your-super-secure-jwt-secret-key"
 
 # Cloudinary Storage Credentials
-CLOUDINARY_CLOUD_NAME="v5ebsj5p"
-CLOUDINARY_API_KEY="484824411815543"
-CLOUDINARY_API_SECRET="YOUR_CLOUDINARY_SECRET"
+CLOUDINARY_CLOUD_NAME="your-cloudinary-cloud-name"
+CLOUDINARY_API_KEY="your-cloudinary-api-key"
+CLOUDINARY_API_SECRET="your-cloudinary-api-secret"
 ```
 
 #### 2. Frontend Environment (`apps/frontend/.env`)
