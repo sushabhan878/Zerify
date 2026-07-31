@@ -174,8 +174,10 @@ export default function BasicInfoTab({
       window.dispatchEvent(new Event('zerify_auth_change'));
 
       setSaved(true);
-      if (onSaveSuccess) onSaveSuccess();
-      setTimeout(() => setSaved(false), 3000);
+      setTimeout(() => {
+        setSaved(false);
+        if (onSaveSuccess) onSaveSuccess();
+      }, 700);
     } catch (err: any) {
       console.error('Error saving profile:', err);
       setErrorMsg(err.message || 'Failed to save settings to database.');
@@ -226,7 +228,7 @@ export default function BasicInfoTab({
 
         {saved && (
           <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
-            <Check className="w-4 h-4" /> Basic Information Saved to DB!
+            <Check className="w-4 h-4" /> Basic Information Saved! Redirecting...
           </span>
         )}
 
@@ -238,7 +240,7 @@ export default function BasicInfoTab({
           {isSaving ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Saving to DB...</span>
+              <span>Saving Basic Info...</span>
             </>
           ) : (
             <>

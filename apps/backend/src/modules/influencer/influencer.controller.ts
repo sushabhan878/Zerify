@@ -42,4 +42,34 @@ export class InfluencerController {
     const userId = this.extractUserId(req);
     return this.influencerService.updateProfile(userId, dto);
   }
+
+  @Put('creator-details')
+  @ApiOperation({ summary: 'Update creator niche details, rates and languages' })
+  async updateCreatorDetails(@Req() req: any, @Body() dto: UpdateInfluencerProfileDto) {
+    const userId = this.extractUserId(req);
+    return this.influencerService.updateProfile(userId, dto);
+  }
+
+  @Put('social-accounts')
+  @ApiOperation({ summary: 'Update connected social accounts' })
+  async updateSocialAccounts(@Req() req: any, @Body() body: any) {
+    const userId = this.extractUserId(req);
+    const accounts = Array.isArray(body) ? body : body.accounts || [];
+    return this.influencerService.updateSocialAccounts(userId, accounts);
+  }
+
+  @Put('portfolio')
+  @ApiOperation({ summary: 'Update portfolio deliverables' })
+  async updatePortfolio(@Req() req: any, @Body() body: any) {
+    const userId = this.extractUserId(req);
+    const items = Array.isArray(body) ? body : body.items || [];
+    return this.influencerService.updatePortfolio(userId, items);
+  }
+
+  @Put('payment-details')
+  @ApiOperation({ summary: 'Update payout bank and tax details' })
+  async updatePaymentDetails(@Req() req: any, @Body() body: any) {
+    const userId = this.extractUserId(req);
+    return this.influencerService.updatePaymentDetails(userId, body);
+  }
 }

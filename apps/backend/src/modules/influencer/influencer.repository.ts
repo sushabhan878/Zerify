@@ -128,7 +128,6 @@ export class InfluencerRepository {
     if (dto.minPricePerReel !== undefined && dto.minPricePerReel !== null) dataToUpdate.minPricePerReel = Number(dto.minPricePerReel);
     if (dto.currency !== undefined && dto.currency !== null) dataToUpdate.currency = dto.currency;
     if (dto.responseTime !== undefined && dto.responseTime !== null) dataToUpdate.responseTime = dto.responseTime;
-    if (dto.portfolioLinks !== undefined && dto.portfolioLinks !== null) dataToUpdate.portfolioLinks = dto.portfolioLinks;
 
     if (dto.dob) {
       const parsedDate = new Date(dto.dob);
@@ -159,6 +158,70 @@ export class InfluencerRepository {
         pastDeliverables: true,
         paymentDetails: true,
       },
+    });
+  }
+
+  async syncConnectedAccounts(influencerId: string, accounts: any[]) {
+    await this.prisma.influencerConnectedAccount.deleteMany({ where: { influencerId } });
+
+    for (const acc of accounts) {
+      if (acc.connected || acc.handle) {
+        const followerCount = acc.followers ? parseInt(String(acc.followers).replace(/,/g, ''), 10) : 0;
+        const engagementRate = acc.engagementRate ? parseFloat(String(acc.engagementRate).replace(/%/g, '')) : 0;
+
+        await this.prisma.influencerConnectedAccount.create({
+          data: {
+            influencerId,
+            platform: acc.name || acc.platform || 'Other',
+            handle: acc.handle || null,
+            followerCount: isNaN(followerCount) ? 0 : followerCount,
+            engagementRate: isNaN(engagementRate) ? 0 : engagementRate,
+            isVerified: true,
+          },
+        });
+      }
+    }
+
+    return this.prisma.influencerProfile.findUnique({
+      where: { id: influencerId },
+      include: { user: true, connectedAccounts: true, pastDeliverables: true, paymentDetails: true },
+    });
+  }
+
+  async syncPastDeliverables(influencerId: string, items: any[]) {
+    await this.prisma.influencerPastDeliverable.deleteMany({ where: { influencerId } });
+
+    for (const item of items) {
+      await this.prisma.influencerPastDeliverable.create({
+        data: {
+          influencerId,
+          brandName: item.brandName || null,
+          title: item.campaignTitle || item.title || null,
+          contentUrl: item.deliverableLink || 'https://zerify.io',
+          contentType: item.category || item.contentType || 'Reel',
+        },
+      });
+    }
+
+    return this.prisma.influencerProfile.findUnique({
+      where: { id: influencerId },
+      include: { user: true, connectedAccounts: true, pastDeliverables: true, paymentDetails: true },
+    });
+  }
+
+  async upsertPaymentDetails(influencerId: string, paymentDto: any) {
+    await this.prisma.influencerPaymentDetails.upsert({
+      where: { influencerId },
+      update: paymentDto,
+      create: {
+        influencerId,
+        ...paymentDto,
+      },
+    });
+
+    return this.prisma.influencerProfile.findUnique({
+      where: { id: influencerId },
+      include: { user: true, connectedAccounts: true, pastDeliverables: true, paymentDetails: true },
     });
   }
 }

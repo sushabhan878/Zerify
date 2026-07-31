@@ -51,7 +51,4 @@ export class UpdateInfluencerProfileDto {
 
   @IsOptional()
   responseTime?: string;
-
-  @IsOptional()
-  portfolioLinks?: string[];
 }

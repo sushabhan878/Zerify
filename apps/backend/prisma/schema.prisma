@@ -77,15 +77,8 @@ model InfluencerProfile {
   currency                String?                       @default("USD")
   responseTime            String?                       @default("Within 24 hours")
   
-  // Social Platforms (blank array initially) & Quick Attributes
-  platforms               String[]                      @default([])
   avatarUrl               String?
-  openToAffiliate         Boolean                       @default(false)
-  openToUgc               Boolean                       @default(false)
   pricingRange            String?
-
-  // Portfolio Links
-  portfolioLinks          String[]                      @default([])
 
   // Connected Accounts, Deliverables & Payment Relations
   connectedAccounts       InfluencerConnectedAccount[]

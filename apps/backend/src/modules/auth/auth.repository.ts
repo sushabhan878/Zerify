@@ -72,9 +72,6 @@ export class AuthRepository {
       bio,
       gender,
       category,
-      openToAffiliate,
-      openToUgc,
-      contactInfo,
       pricingRange,
     } = dto;
 
@@ -88,7 +85,7 @@ export class AuthRepository {
         },
       });
 
-      await tx.influencerProfile.create({
+      const profile = await tx.influencerProfile.create({
         data: {
           userId: user.id,
           handle: handle || `@${(name || 'creator').toLowerCase().replace(/\s+/g, '')}`,
@@ -96,7 +93,6 @@ export class AuthRepository {
           bio: bio || null,
           gender: gender || null,
           niches: dto.niches || (category ? [category] : []),
-          platforms: (dto as any).platforms || (platform ? [platform] : []),
           location: dto.location || null,
           phoneCode: dto.phoneCode || '+1',
           phoneNumber: dto.phoneNumber || null,
@@ -108,12 +104,20 @@ export class AuthRepository {
           minPricePerReel: dto.minPricePerReel ? Number(dto.minPricePerReel) : null,
           currency: dto.currency || 'USD',
           responseTime: dto.responseTime || 'Within 24 hours',
-          openToAffiliate: Boolean(openToAffiliate),
-          openToUgc: Boolean(openToUgc),
           pricingRange: pricingRange || null,
-          portfolioLinks: dto.portfolioLinks || [],
-        } as any,
+        },
       });
+
+      if (platform) {
+        await tx.influencerConnectedAccount.create({
+          data: {
+            influencerId: profile.id,
+            platform,
+            handle: handle || `@${(name || 'creator').toLowerCase().replace(/\s+/g, '')}`,
+            isVerified: true,
+          },
+        });
+      }
 
       return tx.user.findUnique({
         where: { id: user.id },

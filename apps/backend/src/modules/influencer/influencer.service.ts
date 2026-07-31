@@ -38,4 +38,19 @@ export class InfluencerService {
       throw new BadRequestException(err.message || 'Could not update influencer profile in database.');
     }
   }
+
+  async updateSocialAccounts(userId: string | undefined, accounts: any[]) {
+    const profile = await this.getProfile(userId);
+    return this.influencerRepository.syncConnectedAccounts(profile.id, accounts);
+  }
+
+  async updatePortfolio(userId: string | undefined, items: any[]) {
+    const profile = await this.getProfile(userId);
+    return this.influencerRepository.syncPastDeliverables(profile.id, items);
+  }
+
+  async updatePaymentDetails(userId: string | undefined, paymentDto: any) {
+    const profile = await this.getProfile(userId);
+    return this.influencerRepository.upsertPaymentDetails(profile.id, paymentDto);
+  }
 }

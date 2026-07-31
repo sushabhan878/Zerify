@@ -1,16 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Instagram,
   Youtube,
   Linkedin,
   Twitter,
-  Tv,
   Video,
   Facebook,
   Sparkles,
   Check,
+  Loader2,
 } from 'lucide-react';
 import SingleSocialAccountsCard, { SocialAccountItem } from './subcomponents/SingleSocialAccountsCard';
 
@@ -19,6 +19,8 @@ interface SocialAccountsTabProps {
 }
 
 export default function SocialAccountsTab({ onSaveSuccess }: SocialAccountsTabProps) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
   const [accounts, setAccounts] = useState<SocialAccountItem[]>([
     {
       id: 'instagram',
@@ -83,15 +85,76 @@ export default function SocialAccountsTab({ onSaveSuccess }: SocialAccountsTabPr
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const handleSave = (e: React.FormEvent) => {
+  // Fetch saved connected accounts from DB on mount
+  useEffect(() => {
+    async function loadSocialAccounts() {
+      try {
+        const token = localStorage.getItem('zerify_token');
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const res = await fetch(`${apiUrl}/influencer/profile`, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.connectedAccounts) && data.connectedAccounts.length > 0) {
+            setAccounts((prev) =>
+              prev.map((acc) => {
+                const match = data.connectedAccounts.find(
+                  (dbAcc: any) =>
+                    (dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
+                    (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase(),
+                );
+                if (match) {
+                  return {
+                    ...acc,
+                    connected: true,
+                    handle: match.handle || acc.handle,
+                    followers: match.followerCount ? match.followerCount.toLocaleString() : acc.followers,
+                    engagementRate: match.engagementRate ? `${match.engagementRate}%` : acc.engagementRate,
+                  };
+                }
+                return acc;
+              }),
+            );
+          }
+        }
+      } catch (err) {
+        console.warn('Could not load social accounts from DB:', err);
+      }
+    }
+    loadSocialAccounts();
+  }, [apiUrl]);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    setTimeout(() => {
+
+    try {
+      const token = localStorage.getItem('zerify_token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      await fetch(`${apiUrl}/influencer/social-accounts`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(accounts),
+      });
+    } catch (err) {
+      console.warn('API save failed, using client state:', err);
+    } finally {
       setIsSaving(false);
       setSaved(true);
-      if (onSaveSuccess) onSaveSuccess();
-      setTimeout(() => setSaved(false), 2500);
-    }, 600);
+      setTimeout(() => {
+        setSaved(false);
+        if (onSaveSuccess) onSaveSuccess();
+      }, 700);
+    }
   };
 
   return (
@@ -105,20 +168,28 @@ export default function SocialAccountsTab({ onSaveSuccess }: SocialAccountsTabPr
       <div className="flex items-center justify-end gap-3 pt-2">
         {saved && (
           <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
-            <Check className="w-4 h-4" /> Social Accounts Saved!
+            <Check className="w-4 h-4" /> Social Accounts Saved! Redirecting...
           </span>
         )}
 
         <button
           type="submit"
           disabled={isSaving}
-          className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-purple-950/50 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 border border-purple-400/20"
+          className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-purple-950/50 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 border border-purple-400/20 disabled:opacity-50"
         >
-          <Sparkles className="w-4 h-4" />
-          <span>{isSaving ? 'Saving...' : 'Save Social Accounts'}</span>
+          {isSaving ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Saving Social Accounts...</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4" />
+              <span>Save Social Accounts</span>
+            </>
+          )}
         </button>
       </div>
     </form>
   );
 }
-

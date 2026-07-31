@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, User, Sliders, Globe, Briefcase, CreditCard, Sparkles } from 'lucide-react';
 import BasicInfoTab from '../settings-tabs/BasicInfoTab';
 import CreatorDetailsTab from '../settings-tabs/CreatorDetailsTab';
@@ -16,13 +16,18 @@ interface SettingsSectionProps {
   avatarUrl?: string;
 }
 
+type TabType = 'basic' | 'creator' | 'social' | 'portfolio' | 'payment';
+
+const TAB_ORDER: TabType[] = ['basic', 'creator', 'social', 'portfolio', 'payment'];
+
 export default function SettingsSection({
   userName,
   userEmail,
   userHandle,
   avatarUrl,
 }: SettingsSectionProps = {}) {
-  const [activeTab, setActiveTab] = useState<'basic' | 'creator' | 'social' | 'portfolio' | 'payment'>('basic');
+  const [activeTab, setActiveTab] = useState<TabType>('basic');
+  const [direction, setDirection] = useState<number>(1);
   const [completion, setCompletion] = useState(65);
 
   const tabs = [
@@ -33,8 +38,19 @@ export default function SettingsSection({
     { id: 'payment', label: 'Payment & Payouts', icon: CreditCard },
   ];
 
-  const handleTabSave = () => {
+  const changeTab = (newTab: TabType) => {
+    if (newTab === activeTab) return;
+    const currentIndex = TAB_ORDER.indexOf(activeTab);
+    const newIndex = TAB_ORDER.indexOf(newTab);
+    setDirection(newIndex > currentIndex ? 1 : -1);
+    setActiveTab(newTab);
+  };
+
+  const handleTabSave = (nextTabId?: TabType) => {
     setCompletion((prev) => Math.min(prev + 10, 100));
+    if (nextTabId) {
+      changeTab(nextTabId);
+    }
   };
 
   return (
@@ -65,7 +81,7 @@ export default function SettingsSection({
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => changeTab(tab.id as TabType)}
               type="button"
               className={`relative px-3.5 py-2 rounded-lg text-xs transition-all shrink-0 flex items-center gap-2 ${
                 isActive ? 'text-white font-bold' : 'text-slate-400/90 hover:text-white font-medium hover:bg-white/5'
@@ -85,21 +101,32 @@ export default function SettingsSection({
         })}
       </div>
 
-      {/* Tab Content Panels */}
-      <div className="relative">
-        {activeTab === 'basic' && (
-          <BasicInfoTab
-            userName={userName}
-            userEmail={userEmail}
-            userHandle={userHandle}
-            avatarUrl={avatarUrl}
-            onSaveSuccess={handleTabSave}
-          />
-        )}
-        {activeTab === 'creator' && <CreatorDetailsTab onSaveSuccess={handleTabSave} />}
-        {activeTab === 'social' && <SocialAccountsTab onSaveSuccess={handleTabSave} />}
-        {activeTab === 'portfolio' && <PortfolioTab onSaveSuccess={handleTabSave} />}
-        {activeTab === 'payment' && <PaymentSettingsTab onSaveSuccess={handleTabSave} />}
+      {/* Sliding Animated Tab Content Panels */}
+      <div className="relative min-h-[420px]">
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={activeTab}
+            custom={direction}
+            initial={{ opacity: 0, x: direction * 40, scale: 0.99 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: direction * -40, scale: 0.99 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {activeTab === 'basic' && (
+              <BasicInfoTab
+                userName={userName}
+                userEmail={userEmail}
+                userHandle={userHandle}
+                avatarUrl={avatarUrl}
+                onSaveSuccess={() => handleTabSave('creator')}
+              />
+            )}
+            {activeTab === 'creator' && <CreatorDetailsTab onSaveSuccess={() => handleTabSave('social')} />}
+            {activeTab === 'social' && <SocialAccountsTab onSaveSuccess={() => handleTabSave('portfolio')} />}
+            {activeTab === 'portfolio' && <PortfolioTab onSaveSuccess={() => handleTabSave('payment')} />}
+            {activeTab === 'payment' && <PaymentSettingsTab onSaveSuccess={() => handleTabSave()} />}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
