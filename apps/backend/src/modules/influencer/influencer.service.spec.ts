@@ -1,11 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { InfluencerService } from './influencer.service';
 import { InfluencerRepository } from './influencer.repository';
-import { NotFoundException } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 describe('InfluencerService', () => {
   let service: InfluencerService;
   let repository: Partial<InfluencerRepository>;
+  let mockCacheManager: any;
 
   const mockProfile = {
     id: 'prof-123',
@@ -32,10 +33,17 @@ describe('InfluencerService', () => {
       ),
     };
 
+    mockCacheManager = {
+      get: jest.fn().mockResolvedValue(null),
+      set: jest.fn().mockResolvedValue(undefined),
+      del: jest.fn().mockResolvedValue(undefined),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         InfluencerService,
         { provide: InfluencerRepository, useValue: repository },
+        { provide: CACHE_MANAGER, useValue: mockCacheManager },
       ],
     }).compile();
 
@@ -60,7 +68,7 @@ describe('InfluencerService', () => {
     expect(repository.findFirstProfile).toHaveBeenCalled();
   });
 
-  it('should update influencer basic profile information', async () => {
+  it('should update influencer basic profile information and purge cache', async () => {
     const updateDto = {
       name: 'Updated Creator',
       bio: 'New Tech Bio',
@@ -70,5 +78,6 @@ describe('InfluencerService', () => {
     const updated = await service.updateProfile('user-123', updateDto);
     expect(updated).toBeDefined();
     expect(repository.updateProfile).toHaveBeenCalledWith('user-123', updateDto);
+    expect(mockCacheManager.del).toHaveBeenCalledWith('influencer:profile:user-123');
   });
 });

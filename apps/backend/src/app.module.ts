@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { CacheModule } from '@nestjs/cache-manager';
 import { AppController } from './app.controller';
 import { PrismaModule } from './database/prisma.module';
 import { VipAccessModule } from './modules/vip-access/vip-access.module';
@@ -11,6 +12,10 @@ import { InfluencerModule } from './modules/influencer/influencer.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 300 * 1000, // 5 minutes default TTL
     }),
     PrismaModule,
     VipAccessModule,
