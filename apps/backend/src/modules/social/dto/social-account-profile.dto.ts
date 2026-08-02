@@ -6,6 +6,7 @@ export class SocialAccountProfileDto {
   username?: string;
   displayName?: string;
   avatar?: string;
+  followerCount?: number;
   accessToken: string;
   refreshToken?: string;
   expiresAt?: Date;

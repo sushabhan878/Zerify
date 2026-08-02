@@ -26,11 +26,14 @@ export interface SocialAccountItem {
   followers: string;
   engagementRate?: string;
   avgViews?: string;
+  avatar?: string;
+  dbId?: string;
 }
 
 interface SingleSocialAccountsCardProps {
   accounts: SocialAccountItem[];
   setAccounts: React.Dispatch<React.SetStateAction<SocialAccountItem[]>>;
+  onRefreshAccounts?: () => void;
 }
 
 // 3D Styled Logo Badge Components
@@ -91,8 +94,115 @@ const Social3DLogo = ({ id }: { id: string }) => {
 export default function SingleSocialAccountsCard({
   accounts,
   setAccounts,
+  onRefreshAccounts,
 }: SingleSocialAccountsCardProps) {
   const [connectingId, setConnectingId] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
+  // Listen to OAuth popup postMessage
+  React.useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'ZERIFY_SOCIAL_CONNECTED') {
+        if (event.data.status === 'success') {
+          if (onRefreshAccounts) onRefreshAccounts();
+        } else if (event.data.message) {
+          setErrorMsg(decodeURIComponent(event.data.message));
+        }
+        setConnectingId(null);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [onRefreshAccounts]);
+
+  const handleActionClick = async (acc: SocialAccountItem) => {
+    setErrorMsg(null);
+
+    // Disconnect handling
+    if (acc.connected) {
+      if (acc.dbId) {
+        setConnectingId(acc.id);
+        try {
+          const token = localStorage.getItem('zerify_token');
+          const headers: Record<string, string> = {};
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
+
+          await fetch(`${apiUrl}/social/accounts/${acc.dbId}`, {
+            method: 'DELETE',
+            headers,
+          });
+
+          if (onRefreshAccounts) onRefreshAccounts();
+        } catch (err) {
+          console.error('Disconnect account failed:', err);
+        } finally {
+          setConnectingId(null);
+        }
+      }
+      handleToggleConnection(acc.id);
+      return;
+    }
+
+    // Connect handling for Meta (Instagram & Facebook)
+    if (acc.id === 'instagram' || acc.id === 'facebook') {
+      setConnectingId(acc.id);
+      try {
+        const token = localStorage.getItem('zerify_token');
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const res = await fetch(`${apiUrl}/social/meta/login`, { headers });
+        const json = await res.json();
+
+        if (!res.ok || !json.data?.url) {
+          throw new Error(json.message || json.data?.message || 'Failed to initialize Meta OAuth');
+        }
+
+        const authUrl = json.data.url;
+
+        // Open centered popup window
+        const width = 600;
+        const height = 750;
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2;
+
+        const popup = window.open(
+          authUrl,
+          'ZerifyMetaOAuth',
+          `width=${width},height=${height},left=${left},top=${top},status=yes,scrollbars=yes`,
+        );
+
+        if (!popup) {
+          setErrorMsg('Popup window blocked. Please allow popups for Zerify to connect your account.');
+          setConnectingId(null);
+          return;
+        }
+
+        // Monitor popup close event
+        const timer = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(timer);
+            setConnectingId(null);
+            if (onRefreshAccounts) onRefreshAccounts();
+          }
+        }, 1000);
+
+      } catch (err: any) {
+        console.error('Meta OAuth popup launch error:', err);
+        setErrorMsg(err.message || 'Could not launch OAuth window');
+        setConnectingId(null);
+      }
+    } else {
+      // Fallback toggle for non-Meta social platforms
+      handleToggleConnection(acc.id);
+    }
+  };
 
   // Toggle connection state
   const handleToggleConnection = (id: string) => {
@@ -105,18 +215,8 @@ export default function SingleSocialAccountsCard({
             return {
               ...acc,
               connected: nextConnected,
-              handle: nextConnected
-                ? acc.handle || `@${acc.id}_creator`
-                : acc.handle,
-              followers: nextConnected
-                ? acc.followers || '125,000'
-                : acc.followers,
-              engagementRate: nextConnected
-                ? acc.engagementRate || '4.8%'
-                : acc.engagementRate,
-              avgViews: nextConnected
-                ? acc.avgViews || '18.5K'
-                : acc.avgViews,
+              handle: nextConnected ? acc.handle || `@${acc.id}_account` : '',
+              followers: nextConnected ? acc.followers || '0' : '',
             };
           }
           return acc;
@@ -127,6 +227,8 @@ export default function SingleSocialAccountsCard({
   };
 
   const connectedCount = accounts.filter((a) => a.connected).length;
+  // Always display connected accounts first at the top
+  const sortedAccounts = [...accounts].sort((a, b) => (b.connected ? 1 : 0) - (a.connected ? 1 : 0));
 
   return (
     <div className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-8 shadow-xl">
@@ -155,9 +257,23 @@ export default function SingleSocialAccountsCard({
         </div>
       </div>
 
+      {/* Error Alert Banner */}
+      {errorMsg && (
+        <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 flex items-center justify-between">
+          <span>{errorMsg}</span>
+          <button
+            type="button"
+            onClick={() => setErrorMsg(null)}
+            className="text-slate-400 hover:text-white font-bold px-1.5"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* 2. Grid of Small 3D Social Account Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {accounts.map((acc) => {
+        {sortedAccounts.map((acc) => {
           const isConnecting = connectingId === acc.id;
 
           return (
@@ -171,13 +287,27 @@ export default function SingleSocialAccountsCard({
             >
               {/* Small Card Top Header with 3D Logo */}
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <Social3DLogo id={acc.id} />
-                  <div>
-                    <h4 className="text-xs font-bold text-white">{acc.name}</h4>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  {acc.connected && acc.avatar ? (
+                    <div className="relative shrink-0">
+                      <img
+                        src={acc.avatar}
+                        alt={acc.handle || acc.name}
+                        className="w-9 h-9 rounded-xl object-cover border border-purple-500/40 shadow-md"
+                      />
+                      <div className="absolute -bottom-1 -right-1 scale-75">
+                        <Social3DLogo id={acc.id} />
+                      </div>
+                    </div>
+                  ) : (
+                    <Social3DLogo id={acc.id} />
+                  )}
+                  <div className="min-w-0">
+                    <h4 className="text-xs font-bold text-white truncate">{acc.name}</h4>
                     {acc.connected ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400">
-                        <CheckCircle2 className="w-2.5 h-2.5" /> Connected
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 truncate">
+                        <CheckCircle2 className="w-2.5 h-2.5 shrink-0" />
+                        <span className="truncate">{acc.handle || 'Connected'}</span>
                       </span>
                     ) : (
                       <span className="text-[10px] text-slate-400/80 font-medium block">
@@ -191,7 +321,7 @@ export default function SingleSocialAccountsCard({
                 <button
                   type="button"
                   disabled={isConnecting}
-                  onClick={() => handleToggleConnection(acc.id)}
+                  onClick={() => handleActionClick(acc)}
                   className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 shrink-0 ${
                     acc.connected
                       ? 'bg-red-500/15 hover:bg-red-500/30 text-red-300 border border-red-500/30'
@@ -207,48 +337,6 @@ export default function SingleSocialAccountsCard({
                   )}
                 </button>
               </div>
-
-              {/* Read-Only Non-Editable Metrics Display */}
-              {acc.connected ? (
-                <div className="pt-2.5 border-t border-white/10 space-y-2">
-                  {/* Read-only Username Handle Badge */}
-                  <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-slate-900/80 border border-white/10 shadow-inner">
-                    <span className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">
-                      Handle
-                    </span>
-                    <span className="text-xs font-bold text-purple-300 font-mono tracking-tight flex items-center gap-1 truncate">
-                      {acc.handle || `@${acc.id}_creator`}
-                    </span>
-                  </div>
-
-                  {/* Read-only Stat Cards Grid */}
-                  <div className="grid grid-cols-2 gap-2">
-                    {/* Stat 1: Followers */}
-                    <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20 text-center">
-                      <span className="text-[9.5px] font-bold text-purple-300 uppercase tracking-wider block">
-                        Followers
-                      </span>
-                      <span className="text-xs font-black text-white block mt-0.5 tracking-tight">
-                        {acc.followers || '125,000'}
-                      </span>
-                    </div>
-
-                    {/* Stat 2: Engagement */}
-                    <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-center">
-                      <span className="text-[9.5px] font-bold text-emerald-400 uppercase tracking-wider block">
-                        Engagement
-                      </span>
-                      <span className="text-xs font-black text-emerald-300 block mt-0.5 tracking-tight">
-                        {acc.engagementRate || '4.8%'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="pt-2 text-[10.5px] text-slate-400/80 italic">
-                  Link {acc.name} to showcase live verified audience metrics.
-                </div>
-              )}
             </div>
           );
         })}

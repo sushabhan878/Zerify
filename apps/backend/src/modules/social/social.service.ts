@@ -49,14 +49,14 @@ export class SocialService {
     if (error || !code || !state) {
       this.logger.warn(`Meta OAuth Callback received error: ${error} - ${errorDescription}`);
       const reason = encodeURIComponent(errorDescription || error || 'Authorization was cancelled or denied');
-      return `${frontendUrl}/dashboard/connected-accounts?status=error&message=${reason}`;
+      return `${frontendUrl}/social/callback?status=error&message=${reason}`;
     }
 
     const { userId, isValid } = verifyOAuthState(state);
     if (!isValid || !userId) {
       this.logger.warn('Meta OAuth callback received invalid or expired state token');
       const reason = encodeURIComponent('Invalid or expired OAuth state parameter. Please try connecting again.');
-      return `${frontendUrl}/dashboard/connected-accounts?status=error&message=${reason}`;
+      return `${frontendUrl}/social/callback?status=error&message=${reason}`;
     }
 
     const redirectUri = this.getMetaRedirectUri();
@@ -78,6 +78,7 @@ export class SocialService {
           username: profile.username,
           displayName: profile.displayName,
           avatar: profile.avatar,
+          followerCount: profile.followerCount,
           accessToken: encryptedAccessToken,
           refreshToken: encryptedRefreshToken,
           expiresAt: profile.expiresAt,
@@ -86,11 +87,11 @@ export class SocialService {
         savedCount++;
       }
 
-      return `${frontendUrl}/dashboard/connected-accounts?status=success&count=${savedCount}`;
+      return `${frontendUrl}/social/callback?status=success&count=${savedCount}`;
     } catch (err: any) {
       this.logger.error('Error during Meta OAuth callback processing:', err?.stack || err);
       const message = encodeURIComponent(err?.message || 'Failed to connect Meta account');
-      return `${frontendUrl}/dashboard/connected-accounts?status=error&message=${message}`;
+      return `${frontendUrl}/social/callback?status=error&message=${message}`;
     }
   }
 

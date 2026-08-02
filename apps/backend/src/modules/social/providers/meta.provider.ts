@@ -30,6 +30,7 @@ interface MetaPageAccount {
     username?: string;
     name?: string;
     profile_picture_url?: string;
+    followers_count?: number;
   };
 }
 
@@ -46,7 +47,7 @@ interface MetaAccountsResponse {
 export class MetaProvider implements ISocialProvider {
   private readonly logger = new Logger(MetaProvider.name);
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) { }
 
   getPlatform(): SocialPlatform {
     return SocialPlatform.INSTAGRAM;
@@ -69,23 +70,20 @@ export class MetaProvider implements ISocialProvider {
   }
 
   private getGraphApiUrl(): string {
-    const graphUrl = this.configService.get<string>('META_GRAPH_URL') || 'https://graph.facebook.com/v19.0';
+    const graphUrl = this.configService.get<string>('META_GRAPH_URL') || 'https://graph.facebook.com/v23.0';
     return graphUrl.replace(/\/+$/, '');
   }
 
   getAuthUrl(redirectUri: string, state: string): string {
     const appId = this.getAppId();
-    const scopes = [
-      'public_profile',
-      'email',
-      'pages_show_list',
-      'pages_read_engagement',
-      'instagram_basic',
-      'instagram_manage_insights',
-      'business_management',
-    ].join(',');
+    const customScopes = this.configService.get<string>('META_OAUTH_SCOPES');
+    const scopes = customScopes || 'public_profile,email';
 
-    const url = new URL('https://www.facebook.com/v19.0/dialog/oauth');
+    const dialogUrl =
+      this.configService.get<string>('META_OAUTH_DIALOG_URL') ||
+      'https://www.facebook.com/v23.0/dialog/oauth';
+
+    const url = new URL(dialogUrl);
     url.searchParams.append('client_id', appId);
     url.searchParams.append('redirect_uri', redirectUri);
     url.searchParams.append('state', state);
@@ -129,7 +127,7 @@ export class MetaProvider implements ISocialProvider {
     const expiresAt = new Date(Date.now() + expiresInSeconds * 1000);
 
     // 3. Fetch connected Facebook Pages and Instagram Business accounts
-    const accountsUrl = `${graphUrl}/me/accounts?fields=id,name,access_token,picture{url},instagram_business_account{id,username,name,profile_picture_url}&access_token=${userAccessToken}`;
+    const accountsUrl = `${graphUrl}/me/accounts?fields=id,name,access_token,picture{url},instagram_business_account{id,username,name,profile_picture_url,followers_count}&access_token=${userAccessToken}`;
 
     const accountsRes = await fetch(accountsUrl);
     const accountsData = (await accountsRes.json()) as MetaAccountsResponse;
@@ -142,36 +140,54 @@ export class MetaProvider implements ISocialProvider {
     }
 
     const pages = accountsData.data || [];
-    if (pages.length === 0) {
-      throw new BadRequestException('No Facebook Pages or Instagram Business accounts found for this Meta user.');
-    }
-
     const profiles: SocialAccountProfileDto[] = [];
 
-    for (const page of pages) {
-      // Add Facebook Page
-      profiles.push({
-        platform: SocialPlatform.FACEBOOK,
-        platformUserId: page.id,
-        username: page.name,
-        displayName: page.name,
-        avatar: page.picture?.data?.url,
-        accessToken: page.access_token || userAccessToken,
-        expiresAt,
-      });
+    if (pages.length === 0) {
+      // Fallback: Fetch primary Facebook user profile if no Facebook Pages are connected or permitted
+      const userMeUrl = `${graphUrl}/me?fields=id,name,picture{url}&access_token=${userAccessToken}`;
+      const userMeRes = await fetch(userMeUrl);
 
-      // Add linked Instagram Business Account if present
-      if (page.instagram_business_account) {
-        const ig = page.instagram_business_account;
+      if (userMeRes.ok) {
+        const userData = (await userMeRes.json()) as { id: string; name: string; picture?: { data?: { url?: string } } };
         profiles.push({
-          platform: SocialPlatform.INSTAGRAM,
-          platformUserId: ig.id,
-          username: ig.username || ig.name || `ig_${ig.id}`,
-          displayName: ig.name || ig.username || 'Instagram Account',
-          avatar: ig.profile_picture_url,
+          platform: SocialPlatform.FACEBOOK,
+          platformUserId: userData.id,
+          username: userData.name,
+          displayName: userData.name,
+          avatar: userData.picture?.data?.url,
           accessToken: userAccessToken,
           expiresAt,
         });
+      } else {
+        throw new BadRequestException('No Facebook Pages or Instagram Business accounts found for this Meta user.');
+      }
+    } else {
+      for (const page of pages) {
+        // Add Facebook Page
+        profiles.push({
+          platform: SocialPlatform.FACEBOOK,
+          platformUserId: page.id,
+          username: page.name,
+          displayName: page.name,
+          avatar: page.picture?.data?.url,
+          accessToken: page.access_token || userAccessToken,
+          expiresAt,
+        });
+
+        // Add linked Instagram Business Account if present
+        if (page.instagram_business_account) {
+          const ig = page.instagram_business_account;
+          profiles.push({
+            platform: SocialPlatform.INSTAGRAM,
+            platformUserId: ig.id,
+            username: ig.username || ig.name || `ig_${ig.id}`,
+            displayName: ig.name || ig.username || 'Instagram Account',
+            avatar: ig.profile_picture_url,
+            followerCount: ig.followers_count,
+            accessToken: userAccessToken,
+            expiresAt,
+          });
+        }
       }
     }
 

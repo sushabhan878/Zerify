@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Instagram,
   Youtube,
@@ -27,22 +27,27 @@ export default function SocialAccountsTab({ onSaveSuccess }: SocialAccountsTabPr
       name: 'Instagram',
       icon: Instagram,
       gradientColor: 'from-pink-500 via-purple-600 to-indigo-600',
-      connected: true,
-      handle: '@elena_ugc',
-      followers: '148,500',
-      engagementRate: '5.2%',
-      avgViews: '24.1K',
+      connected: false,
+      handle: '',
+      followers: '',
+    },
+    {
+      id: 'facebook',
+      name: 'Facebook Page',
+      icon: Facebook,
+      gradientColor: 'from-blue-600 to-indigo-700',
+      connected: false,
+      handle: '',
+      followers: '',
     },
     {
       id: 'youtube',
       name: 'YouTube',
       icon: Youtube,
       gradientColor: 'from-red-600 to-rose-700',
-      connected: true,
-      handle: 'youtube.com/@elenaugc',
-      followers: '320,000',
-      engagementRate: '4.6%',
-      avgViews: '45.8K',
+      connected: false,
+      handle: '',
+      followers: '',
     },
     {
       id: 'tiktok',
@@ -71,61 +76,92 @@ export default function SocialAccountsTab({ onSaveSuccess }: SocialAccountsTabPr
       handle: '',
       followers: '',
     },
-    {
-      id: 'facebook',
-      name: 'Facebook Page',
-      icon: Facebook,
-      gradientColor: 'from-blue-600 to-indigo-700',
-      connected: false,
-      handle: '',
-      followers: '',
-    },
   ]);
 
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  // Fetch saved connected accounts from DB on mount
-  useEffect(() => {
-    async function loadSocialAccounts() {
-      try {
-        const token = localStorage.getItem('zerify_token');
-        const headers: Record<string, string> = {};
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-
-        const res = await fetch(`${apiUrl}/influencer/profile`, { headers });
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data.connectedAccounts) && data.connectedAccounts.length > 0) {
-            setAccounts((prev) =>
-              prev.map((acc) => {
-                const match = data.connectedAccounts.find(
-                  (dbAcc: any) =>
-                    (dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
-                    (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase(),
-                );
-                if (match) {
-                  return {
-                    ...acc,
-                    connected: true,
-                    handle: match.handle || acc.handle,
-                    followers: match.followerCount ? match.followerCount.toLocaleString() : acc.followers,
-                    engagementRate: match.engagementRate ? `${match.engagementRate}%` : acc.engagementRate,
-                  };
-                }
-                return acc;
-              }),
-            );
-          }
-        }
-      } catch (err) {
-        console.warn('Could not load social accounts from DB:', err);
+  // Fetch saved connected accounts from DB on mount and after OAuth redirect
+  const fetchAccounts = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('zerify_token');
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
       }
+
+      // Fetch both profile and raw social accounts
+      const [profileRes, socialRes] = await Promise.allSettled([
+        fetch(`${apiUrl}/influencer/profile`, { headers }),
+        fetch(`${apiUrl}/social/accounts`, { headers }),
+      ]);
+
+      if (socialRes.status === 'fulfilled' && socialRes.value.ok) {
+        const socialData = await socialRes.value.json();
+        const dbAccounts = socialData.data || [];
+
+        if (Array.isArray(dbAccounts) && dbAccounts.length > 0) {
+          setAccounts((prev) =>
+            prev.map((acc) => {
+              const matched = dbAccounts.find(
+                (item: any) =>
+                  (item.platform || '').toLowerCase() === acc.id.toLowerCase() ||
+                  (item.platform || '').toLowerCase() === acc.name.toLowerCase() ||
+                  (acc.id === 'instagram' && item.platform === 'INSTAGRAM') ||
+                  (acc.id === 'facebook' && item.platform === 'FACEBOOK'),
+              );
+              if (matched) {
+                const formattedHandle = matched.username
+                  ? (matched.username.startsWith('@') ? matched.username : `@${matched.username}`)
+                  : (matched.displayName || `@${acc.id}_user`);
+
+                return {
+                  ...acc,
+                  connected: matched.status === 'CONNECTED',
+                  handle: formattedHandle,
+                  avatar: matched.avatar || acc.avatar,
+                  followers: matched.followerCount ? matched.followerCount.toLocaleString() : '',
+                  dbId: matched.id,
+                };
+              }
+              return acc;
+            }),
+          );
+        }
+      }
+
+      if (profileRes.status === 'fulfilled' && profileRes.value.ok) {
+        const data = await profileRes.value.json();
+        if (Array.isArray(data.connectedAccounts) && data.connectedAccounts.length > 0) {
+          setAccounts((prev) =>
+            prev.map((acc) => {
+              const match = data.connectedAccounts.find(
+                (dbAcc: any) =>
+                  (dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
+                  (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase(),
+              );
+              if (match) {
+                return {
+                  ...acc,
+                  connected: true,
+                  handle: match.handle || acc.handle,
+                  followers: match.followerCount ? match.followerCount.toLocaleString() : acc.followers,
+                  engagementRate: match.engagementRate ? `${match.engagementRate}%` : acc.engagementRate,
+                };
+              }
+              return acc;
+            }),
+          );
+        }
+      }
+    } catch (err) {
+      console.warn('Could not load social accounts from DB:', err);
     }
-    loadSocialAccounts();
   }, [apiUrl]);
+
+  useEffect(() => {
+    fetchAccounts();
+  }, [fetchAccounts]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,6 +198,7 @@ export default function SocialAccountsTab({ onSaveSuccess }: SocialAccountsTabPr
       <SingleSocialAccountsCard
         accounts={accounts}
         setAccounts={setAccounts}
+        onRefreshAccounts={fetchAccounts}
       />
 
       {/* Save Button */}

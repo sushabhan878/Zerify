@@ -8,6 +8,7 @@ export class SocialAccountResponseDto {
   username?: string | null;
   displayName?: string | null;
   avatar?: string | null;
+  followerCount?: number | null;
   expiresAt?: Date | null;
   status: SocialAccountStatus;
   connectedAt: Date;

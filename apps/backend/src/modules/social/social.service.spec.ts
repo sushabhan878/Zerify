@@ -96,13 +96,13 @@ describe('SocialService', () => {
       'User cancelled login',
     );
 
-    expect(redirectUrl).toContain('http://localhost:3000/dashboard/connected-accounts?status=error');
+    expect(redirectUrl).toContain('http://localhost:3000/social/callback?status=error');
     expect(redirectUrl).toContain('User%20cancelled%20login');
   });
 
   it('should handle invalid state in callback by returning error redirect', async () => {
     const redirectUrl = await service.handleMetaCallback('valid_code', 'invalid_state');
-    expect(redirectUrl).toContain('http://localhost:3000/dashboard/connected-accounts?status=error');
+    expect(redirectUrl).toContain('http://localhost:3000/social/callback?status=error');
     expect(redirectUrl).toContain('Invalid%20or%20expired%20OAuth%20state');
   });
 
@@ -139,7 +139,7 @@ describe('SocialService', () => {
 
     const redirectUrl = await service.handleMetaCallback('sample_code', validState);
 
-    expect(redirectUrl).toEqual('http://localhost:3000/dashboard/connected-accounts?status=success&count=1');
+    expect(redirectUrl).toEqual('http://localhost:3000/social/callback?status=success&count=1');
     expect(repository.upsertAccount).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: mockUserId,

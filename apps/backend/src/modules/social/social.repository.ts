@@ -9,6 +9,7 @@ export interface UpsertSocialAccountData {
   username?: string | null;
   displayName?: string | null;
   avatar?: string | null;
+  followerCount?: number | null;
   accessToken: string;
   refreshToken?: string | null;
   expiresAt?: Date | null;
@@ -19,7 +20,7 @@ export class SocialRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async upsertAccount(data: UpsertSocialAccountData): Promise<SocialAccount> {
-    return this.prisma.socialAccount.upsert({
+    const account = await this.prisma.socialAccount.upsert({
       where: {
         userId_platform_platformUserId: {
           userId: data.userId,
@@ -50,6 +51,46 @@ export class SocialRepository {
         updatedAt: new Date(),
       },
     });
+
+    try {
+      const influencer = await this.prisma.influencerProfile.findUnique({
+        where: { userId: data.userId },
+      });
+      if (influencer) {
+        const platformName = data.platform === SocialPlatform.INSTAGRAM ? 'Instagram' : 'Facebook';
+        const existingConnected = await this.prisma.influencerConnectedAccount.findFirst({
+          where: {
+            influencerId: influencer.id,
+            platform: platformName,
+          },
+        });
+
+        if (existingConnected) {
+          await this.prisma.influencerConnectedAccount.update({
+            where: { id: existingConnected.id },
+            data: {
+              handle: data.username ? `@${data.username}` : existingConnected.handle,
+              followerCount: data.followerCount ?? existingConnected.followerCount,
+              isVerified: true,
+            },
+          });
+        } else {
+          await this.prisma.influencerConnectedAccount.create({
+            data: {
+              influencerId: influencer.id,
+              platform: platformName,
+              handle: data.username ? `@${data.username}` : `@${data.platformUserId}`,
+              followerCount: data.followerCount ?? 0,
+              isVerified: true,
+            },
+          });
+        }
+      }
+    } catch {
+      // Ignore secondary sync errors gracefully
+    }
+
+    return account;
   }
 
   async findByUserId(userId: string): Promise<SocialAccount[]> {
