@@ -7,6 +7,7 @@ import { VipAccessModule } from './modules/vip-access/vip-access.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { FileUploadModule } from './modules/file-upload/file-upload.module';
 import { InfluencerModule } from './modules/influencer/influencer.module';
+import { SocialModule } from './modules/social/social.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { InfluencerModule } from './modules/influencer/influencer.module';
     AuthModule,
     FileUploadModule,
     InfluencerModule,
+    SocialModule,
   ],
   controllers: [AppController],
   providers: [],
