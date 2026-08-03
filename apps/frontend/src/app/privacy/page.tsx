@@ -6,6 +6,27 @@ import { ShieldCheck, Lock, Eye, Mail, Database, UserCheck, Bell, Server, MapPin
 export const metadata = {
   title: 'Privacy Policy — Zerify',
   description: 'Understand how Zerify collects, uses, and protects your personal data when using our direct brand & creator collaboration platform.',
+  openGraph: {
+    title: 'Privacy Policy — Zerify',
+    description: 'Understand how Zerify collects, uses, and protects your personal data when using our direct brand & creator collaboration platform.',
+    url: 'https://zerify.in/privacy',
+    siteName: 'Zerify',
+    images: [
+      {
+        url: '/logo.png',
+        width: 800,
+        height: 800,
+        alt: 'Zerify Logo',
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Privacy Policy — Zerify',
+    description: 'Understand how Zerify collects, uses, and protects your personal data when using our direct brand & creator collaboration platform.',
+    images: ['/logo.png'],
+  },
 };
 
 export default function PrivacyPolicyPage() {
