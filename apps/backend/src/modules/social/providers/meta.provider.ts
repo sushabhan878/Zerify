@@ -139,16 +139,15 @@ export class MetaProvider implements ISocialProvider {
       );
     }
 
-    const pages = accountsData.data || [];
     const profiles: SocialAccountProfileDto[] = [];
 
-    if (pages.length === 0) {
-      // Fallback: Fetch primary Facebook user profile if no Facebook Pages are connected or permitted
-      const userMeUrl = `${graphUrl}/me?fields=id,name,picture{url}&access_token=${userAccessToken}`;
+    // 1. Fetch Primary Facebook User Profile (FR-2 per Zerify_Meta_Integration_PRD)
+    try {
+      const userMeUrl = `${graphUrl}/me?fields=id,name,email,picture{url}&access_token=${userAccessToken}`;
       const userMeRes = await fetch(userMeUrl);
 
       if (userMeRes.ok) {
-        const userData = (await userMeRes.json()) as { id: string; name: string; picture?: { data?: { url?: string } } };
+        const userData = (await userMeRes.json()) as { id: string; name: string; email?: string; picture?: { data?: { url?: string } } };
         profiles.push({
           platform: SocialPlatform.FACEBOOK,
           platformUserId: userData.id,
@@ -158,37 +157,58 @@ export class MetaProvider implements ISocialProvider {
           accessToken: userAccessToken,
           expiresAt,
         });
-      } else {
-        throw new BadRequestException('No Facebook Pages or Instagram Business accounts found for this Meta user.');
       }
-    } else {
-      for (const page of pages) {
-        // Add Facebook Page
-        profiles.push({
-          platform: SocialPlatform.FACEBOOK,
-          platformUserId: page.id,
-          username: page.name,
-          displayName: page.name,
-          avatar: page.picture?.data?.url,
-          accessToken: page.access_token || userAccessToken,
-          expiresAt,
-        });
+    } catch (err) {
+      this.logger.warn('Could not fetch primary Meta user profile:', err);
+    }
 
-        // Add linked Instagram Business Account if present
-        if (page.instagram_business_account) {
-          const ig = page.instagram_business_account;
-          profiles.push({
-            platform: SocialPlatform.INSTAGRAM,
-            platformUserId: ig.id,
-            username: ig.username || ig.name || `ig_${ig.id}`,
-            displayName: ig.name || ig.username || 'Instagram Account',
-            avatar: ig.profile_picture_url,
-            followerCount: ig.followers_count,
-            accessToken: userAccessToken,
-            expiresAt,
-          });
+    // 2. Fetch all managed Facebook Pages and linked Instagram Business/Creator accounts (FR-3 & FR-4)
+    try {
+      const accountsUrl = `${graphUrl}/me/accounts?fields=id,name,category,access_token,picture{url},instagram_business_account{id,username,name,profile_picture_url,followers_count,follows_count,media_count,biography}&access_token=${userAccessToken}`;
+      const accountsRes = await fetch(accountsUrl);
+
+      if (accountsRes.ok) {
+        const accountsData = (await accountsRes.json()) as MetaAccountsResponse;
+        const pages = accountsData.data || [];
+
+        for (const page of pages) {
+          // Add Facebook Page asset if distinct from user profile
+          if (!profiles.some((p) => p.platformUserId === page.id)) {
+            profiles.push({
+              platform: SocialPlatform.FACEBOOK,
+              platformUserId: page.id,
+              username: page.name,
+              displayName: page.name,
+              avatar: page.picture?.data?.url,
+              accessToken: page.access_token || userAccessToken,
+              expiresAt,
+            });
+          }
+
+          // Add linked Instagram Business / Creator Account asset
+          if (page.instagram_business_account) {
+            const ig = page.instagram_business_account;
+            if (!profiles.some((p) => p.platformUserId === ig.id)) {
+              profiles.push({
+                platform: SocialPlatform.INSTAGRAM,
+                platformUserId: ig.id,
+                username: ig.username || ig.name || `ig_${ig.id}`,
+                displayName: ig.name || ig.username || 'Instagram Account',
+                avatar: ig.profile_picture_url,
+                followerCount: ig.followers_count,
+                accessToken: userAccessToken,
+                expiresAt,
+              });
+            }
+          }
         }
       }
+    } catch (err) {
+      this.logger.warn('Could not fetch managed Facebook Pages or Instagram accounts:', err);
+    }
+
+    if (profiles.length === 0) {
+      throw new BadRequestException('Failed to discover any Meta assets for this user.');
     }
 
     return profiles;
