@@ -6,10 +6,12 @@ import { AuthService } from './auth.service';
 import { AuthRepository } from './auth.repository';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { PrismaModule } from '../../database/prisma.module';
+import { SocialModule } from '../social/social.module';
 
 @Module({
   imports: [
     PrismaModule,
+    SocialModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'zerify-secret-key-super-secure-jwt',

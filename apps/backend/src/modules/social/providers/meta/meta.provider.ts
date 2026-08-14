@@ -1,8 +1,8 @@
 import { Injectable, BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SocialPlatform } from '@prisma/client';
-import { ISocialProvider } from './social-provider.interface';
-import { SocialAccountProfileDto } from '../dto/social-account-profile.dto';
+import { ISocialProvider } from '../social-provider.interface';
+import { SocialAccountProfileDto } from '../../dto/social-account-profile.dto';
 
 interface MetaShortTokenResponse {
   access_token: string;
@@ -50,7 +50,7 @@ export class MetaProvider implements ISocialProvider {
   constructor(private readonly configService: ConfigService) { }
 
   getPlatform(): SocialPlatform {
-    return SocialPlatform.INSTAGRAM;
+    return SocialPlatform.META;
   }
 
   private getAppId(): string {
@@ -76,19 +76,32 @@ export class MetaProvider implements ISocialProvider {
 
   getAuthUrl(redirectUri: string, state: string): string {
     const appId = this.getAppId();
-    const customScopes = this.configService.get<string>('META_OAUTH_SCOPES');
-    const scopes = customScopes || 'public_profile,email';
+
+    const configId = this.configService.get<string>('META_CONFIG_ID');
+    if (!configId) {
+      throw new InternalServerErrorException(
+        'META_CONFIG_ID environment variable is missing',
+      );
+    }
 
     const dialogUrl =
       this.configService.get<string>('META_OAUTH_DIALOG_URL') ||
       'https://www.facebook.com/v23.0/dialog/oauth';
 
     const url = new URL(dialogUrl);
+
     url.searchParams.append('client_id', appId);
     url.searchParams.append('redirect_uri', redirectUri);
     url.searchParams.append('state', state);
-    url.searchParams.append('scope', scopes);
+    url.searchParams.append('config_id', configId);
     url.searchParams.append('response_type', 'code');
+    url.searchParams.append('override_default_response_type', 'true');
+
+    const scopes = this.configService.get<string>(
+      'META_SCOPES',
+      'public_profile,email,pages_show_list,pages_read_engagement,instagram_basic,instagram_manage_insights,business_management',
+    );
+    url.searchParams.append('scope', scopes);
 
     return url.toString();
   }
@@ -126,22 +139,9 @@ export class MetaProvider implements ISocialProvider {
     const expiresInSeconds = longData.expires_in || 60 * 24 * 60 * 60; // Default 60 days
     const expiresAt = new Date(Date.now() + expiresInSeconds * 1000);
 
-    // 3. Fetch connected Facebook Pages and Instagram Business accounts
-    const accountsUrl = `${graphUrl}/me/accounts?fields=id,name,access_token,picture{url},instagram_business_account{id,username,name,profile_picture_url,followers_count}&access_token=${userAccessToken}`;
-
-    const accountsRes = await fetch(accountsUrl);
-    const accountsData = (await accountsRes.json()) as MetaAccountsResponse;
-
-    if (!accountsRes.ok || accountsData.error) {
-      this.logger.error('Failed to fetch Meta pages and Instagram accounts', accountsData.error);
-      throw new BadRequestException(
-        accountsData.error?.message || 'Failed to retrieve Meta accounts for user',
-      );
-    }
-
     const profiles: SocialAccountProfileDto[] = [];
 
-    // 1. Fetch Primary Facebook User Profile (FR-2 per Zerify_Meta_Integration_PRD)
+    // 1. Fetch Primary Facebook User Profile
     try {
       const userMeUrl = `${graphUrl}/me?fields=id,name,email,picture{url}&access_token=${userAccessToken}`;
       const userMeRes = await fetch(userMeUrl);
@@ -162,17 +162,19 @@ export class MetaProvider implements ISocialProvider {
       this.logger.warn('Could not fetch primary Meta user profile:', err);
     }
 
-    // 2. Fetch all managed Facebook Pages and linked Instagram Business/Creator accounts (FR-3 & FR-4)
+    // 2. Fetch all managed Facebook Pages, Instagram Business, and Threads assets
     try {
       const accountsUrl = `${graphUrl}/me/accounts?fields=id,name,category,access_token,picture{url},instagram_business_account{id,username,name,profile_picture_url,followers_count,follows_count,media_count,biography}&access_token=${userAccessToken}`;
       const accountsRes = await fetch(accountsUrl);
 
       if (accountsRes.ok) {
         const accountsData = (await accountsRes.json()) as MetaAccountsResponse;
+        this.logger.log(
+          `Meta accounts response: ${JSON.stringify(accountsData, null, 2)}`,
+        );
         const pages = accountsData.data || [];
 
         for (const page of pages) {
-          // Add Facebook Page asset if distinct from user profile
           if (!profiles.some((p) => p.platformUserId === page.id)) {
             profiles.push({
               platform: SocialPlatform.FACEBOOK,
@@ -185,9 +187,29 @@ export class MetaProvider implements ISocialProvider {
             });
           }
 
-          // Add linked Instagram Business / Creator Account asset
-          if (page.instagram_business_account) {
-            const ig = page.instagram_business_account;
+          let ig = page.instagram_business_account;
+
+          if (!ig && page.access_token) {
+            try {
+              const pageIgUrl = `${graphUrl}/${page.id}?fields=instagram_business_account{id,username,name,profile_picture_url,followers_count,follows_count,media_count,biography}&access_token=${page.access_token}`;
+              const pageIgRes = await fetch(pageIgUrl);
+              if (pageIgRes.ok) {
+                const pageIgData = (await pageIgRes.json()) as {
+                  instagram_business_account?: MetaPageAccount['instagram_business_account'];
+                };
+                this.logger.log(
+                  `Page ${page.name} (${page.id}) IG check result: ${JSON.stringify(pageIgData, null, 2)}`,
+                );
+                if (pageIgData.instagram_business_account) {
+                  ig = pageIgData.instagram_business_account;
+                }
+              }
+            } catch (pageIgErr) {
+              this.logger.warn(`Could not check Instagram account for page ${page.id}:`, pageIgErr);
+            }
+          }
+
+          if (ig) {
             if (!profiles.some((p) => p.platformUserId === ig.id)) {
               profiles.push({
                 platform: SocialPlatform.INSTAGRAM,
@@ -196,7 +218,7 @@ export class MetaProvider implements ISocialProvider {
                 displayName: ig.name || ig.username || 'Instagram Account',
                 avatar: ig.profile_picture_url,
                 followerCount: ig.followers_count,
-                accessToken: userAccessToken,
+                accessToken: page.access_token || userAccessToken,
                 expiresAt,
               });
             }

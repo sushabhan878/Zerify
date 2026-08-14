@@ -28,6 +28,7 @@ export interface SocialAccountItem {
   avgViews?: string;
   avatar?: string;
   dbId?: string;
+  subPlatforms?: string[];
 }
 
 interface SingleSocialAccountsCardProps {
@@ -39,6 +40,16 @@ interface SingleSocialAccountsCardProps {
 // 3D Styled Logo Badge Components
 const Social3DLogo = ({ id }: { id: string }) => {
   switch (id) {
+    case 'meta':
+      return (
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-purple-600 to-pink-500 p-[1.5px] shadow-[0_6px_16px_rgba(168,85,247,0.4)] transition-transform hover:scale-110 shrink-0">
+          <div className="w-full h-full rounded-[10px] bg-gradient-to-tr from-blue-900 via-slate-900 to-purple-950 flex items-center justify-center text-white border-t border-white/40 shadow-inner relative overflow-hidden">
+            <svg className="w-5 h-5 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 12c-1.5-2.3-3.6-3.8-5.8-3.8-3.1 0-5.2 2.3-5.2 5.3 0 3 2.1 5.3 5.2 5.3 2.5 0 4.7-1.8 6.4-4.5 1.7 2.7 3.9 4.5 6.4 4.5 3.1 0 5.2-2.3 5.2-5.3 0-3-2.1-5.3-5.2-5.3-2.2 0-4.3 1.5-5.8 3.8zm-5.8 5.1c-2 0-3.4-1.5-3.4-3.6 0-2.1 1.4-3.6 3.4-3.6 1.7 0 3.3 1.3 4.7 3.6-1.4 2.3-3 3.6-4.7 3.6zm11.6 0c-1.7 0-3.3-1.3-4.7-3.6 1.4-2.3 3-3.6 4.7-3.6 2 0 3.4 1.5 3.4 3.6 0 2.1-1.4 3.6-3.4 3.6z" />
+            </svg>
+          </div>
+        </div>
+      );
     case 'instagram':
       return (
         <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 p-[1.5px] shadow-[0_6px_16px_rgba(225,48,108,0.4)] transition-transform hover:scale-110 shrink-0">
@@ -147,8 +158,8 @@ export default function SingleSocialAccountsCard({
       return;
     }
 
-    // Connect handling for Meta (Instagram & Facebook)
-    if (acc.id === 'instagram' || acc.id === 'facebook') {
+    // Connect handling for Meta (Facebook, Instagram & Threads)
+    if (acc.id === 'meta' || acc.id === 'instagram' || acc.id === 'facebook') {
       setConnectingId(acc.id);
       try {
         const token = localStorage.getItem('zerify_token');
@@ -279,11 +290,10 @@ export default function SingleSocialAccountsCard({
           return (
             <div
               key={acc.id}
-              className={`p-4 rounded-xl border transition-all space-y-3.5 backdrop-blur-xl flex flex-col justify-between ${
-                acc.connected
+              className={`p-4 rounded-xl border transition-all space-y-3.5 backdrop-blur-xl flex flex-col justify-between ${acc.connected
                   ? 'bg-slate-950/70 border-purple-500/30 shadow-lg shadow-purple-950/20'
                   : 'bg-slate-950/40 border-white/10 hover:border-white/20'
-              }`}
+                }`}
             >
               {/* Small Card Top Header with 3D Logo */}
               <div className="flex items-center justify-between gap-2">
@@ -304,38 +314,68 @@ export default function SingleSocialAccountsCard({
                   )}
                   <div className="min-w-0">
                     <h4 className="text-xs font-bold text-white truncate">{acc.name}</h4>
+                    {acc.subPlatforms && acc.subPlatforms.length > 0 && (
+                      <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                        {acc.subPlatforms.map((sp) => (
+                          <span
+                            key={sp}
+                            className="px-1.5 py-0.5 text-[9px] font-medium rounded bg-white/10 text-slate-300 border border-white/10 flex items-center gap-1"
+                          >
+                            {sp === 'Facebook' && <Facebook className="w-2.5 h-2.5 text-blue-400" />}
+                            {sp === 'Instagram' && <Instagram className="w-2.5 h-2.5 text-pink-400" />}
+                            {sp === 'Threads' && <span className="font-bold text-slate-200 text-[9px]">@</span>}
+                            <span>{sp}</span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     {acc.connected ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 truncate">
-                        <CheckCircle2 className="w-2.5 h-2.5 shrink-0" />
-                        <span className="truncate">{acc.handle || 'Connected'}</span>
-                      </span>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 shadow-sm">
+                          <CheckCircle2 className="w-3 h-3 shrink-0 text-emerald-400" />
+                          <span className="truncate">{acc.handle || 'Connected'}</span>
+                        </span>
+                      </div>
                     ) : (
-                      <span className="text-[10px] text-slate-400/80 font-medium block">
+                      <span className="text-[10px] text-slate-400/80 font-medium block mt-0.5">
                         Not Connected
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Connect / Disconnect Action Button */}
-                <button
-                  type="button"
-                  disabled={isConnecting}
-                  onClick={() => handleActionClick(acc)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 shrink-0 ${
-                    acc.connected
-                      ? 'bg-red-500/15 hover:bg-red-500/30 text-red-300 border border-red-500/30'
-                      : 'bg-purple-600 hover:bg-purple-500 text-white shadow-sm'
-                  }`}
-                >
-                  {isConnecting ? (
-                    <RefreshCw className="w-3 h-3 animate-spin" />
-                  ) : acc.connected ? (
-                    'Disconnect'
-                  ) : (
-                    'Connect'
-                  )}
-                </button>
+                {/* Connected status replaces Connect button with Disconnect button */}
+                {acc.connected ? (
+                  <button
+                    type="button"
+                    disabled={isConnecting}
+                    onClick={() => handleActionClick(acc)}
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 shrink-0 bg-rose-500/15 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 shadow-sm"
+                    title="Disconnect this account"
+                  >
+                    {isConnecting ? (
+                      <RefreshCw className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <span>Disconnect</span>
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={isConnecting}
+                    onClick={() => handleActionClick(acc)}
+                    className="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 shrink-0 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-md shadow-purple-950/40 border border-purple-400/20 hover:scale-105 active:scale-95"
+                  >
+                    {isConnecting ? (
+                      <>
+                        <RefreshCw className="w-3 h-3 animate-spin" />
+                        <span>Connecting...</span>
+                      </>
+                    ) : (
+                      <span>Connect</span>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           );

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SocialRepository } from './social.repository';
-import { MetaProvider } from './providers/meta.provider';
+import { MetaProvider } from './providers/meta/meta.provider';
 import { encryptToken, generateOAuthState, verifyOAuthState } from './utils/crypto.util';
 import { SocialAccountResponseDto } from './dto/social-account-response.dto';
 
@@ -18,12 +18,12 @@ export class SocialService {
     private readonly configService: ConfigService,
     private readonly socialRepository: SocialRepository,
     private readonly metaProvider: MetaProvider,
-  ) {}
+  ) { }
 
   private getMetaRedirectUri(): string {
     return (
       this.configService.get<string>('META_REDIRECT_URI') ||
-      'http://localhost:4000/api/v1/social/meta/callback'
+      'https://gyration-dragging-freebie.ngrok-free.dev/api/v1/social/meta/callback'
     );
   }
 

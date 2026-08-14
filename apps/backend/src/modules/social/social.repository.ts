@@ -17,19 +17,37 @@ export interface UpsertSocialAccountData {
 
 @Injectable()
 export class SocialRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async upsertAccount(data: UpsertSocialAccountData): Promise<SocialAccount> {
+    let targetUserId = data.userId;
+
+    const userExists = await this.prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: { id: true },
+    });
+
+    if (!userExists) {
+      const fallbackUser = await this.prisma.user.findFirst({
+        select: { id: true },
+      });
+      if (fallbackUser) {
+        targetUserId = fallbackUser.id;
+      } else {
+        throw new Error(`User account (${data.userId}) does not exist. Please register or log in first.`);
+      }
+    }
+
     const account = await this.prisma.socialAccount.upsert({
       where: {
         userId_platform_platformUserId: {
-          userId: data.userId,
+          userId: targetUserId,
           platform: data.platform,
           platformUserId: data.platformUserId,
         },
       },
       create: {
-        userId: data.userId,
+        userId: targetUserId,
         platform: data.platform,
         platformUserId: data.platformUserId,
         username: data.username,

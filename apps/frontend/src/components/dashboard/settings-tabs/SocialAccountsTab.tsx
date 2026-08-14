@@ -26,16 +26,16 @@ export default function SocialAccountsTab({ onSaveSuccess }: SocialAccountsTabPr
       id: 'instagram',
       name: 'Instagram',
       icon: Instagram,
-      gradientColor: 'from-pink-500 via-purple-600 to-indigo-600',
+      gradientColor: 'from-amber-500 via-rose-500 to-purple-600',
       connected: false,
       handle: '',
       followers: '',
     },
     {
       id: 'facebook',
-      name: 'Facebook Page',
+      name: 'Facebook',
       icon: Facebook,
-      gradientColor: 'from-blue-600 to-indigo-700',
+      gradientColor: 'from-blue-700 via-indigo-600 to-blue-400',
       connected: false,
       handle: '',
       followers: '',
@@ -103,13 +103,25 @@ export default function SocialAccountsTab({ onSaveSuccess }: SocialAccountsTabPr
         if (Array.isArray(dbAccounts) && dbAccounts.length > 0) {
           setAccounts((prev) =>
             prev.map((acc) => {
-              const matched = dbAccounts.find(
-                (item: any) =>
-                  (item.platform || '').toLowerCase() === acc.id.toLowerCase() ||
-                  (item.platform || '').toLowerCase() === acc.name.toLowerCase() ||
-                  (acc.id === 'instagram' && item.platform === 'INSTAGRAM') ||
-                  (acc.id === 'facebook' && item.platform === 'FACEBOOK'),
-              );
+              let matched: any = null;
+
+              if (acc.id === 'instagram') {
+                matched = dbAccounts.find(
+                  (item: any) => (item.platform || '').toUpperCase() === 'INSTAGRAM',
+                );
+              } else if (acc.id === 'facebook') {
+                matched = dbAccounts.find(
+                  (item: any) =>
+                    ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()),
+                );
+              } else {
+                matched = dbAccounts.find(
+                  (item: any) =>
+                    (item.platform || '').toLowerCase() === acc.id.toLowerCase() ||
+                    (item.platform || '').toLowerCase() === acc.name.toLowerCase(),
+                );
+              }
+
               if (matched) {
                 const formattedHandle = matched.username
                   ? (matched.username.startsWith('@') ? matched.username : `@${matched.username}`)
@@ -117,14 +129,21 @@ export default function SocialAccountsTab({ onSaveSuccess }: SocialAccountsTabPr
 
                 return {
                   ...acc,
-                  connected: matched.status === 'CONNECTED',
+                  connected: true,
                   handle: formattedHandle,
                   avatar: matched.avatar || acc.avatar,
                   followers: matched.followerCount ? matched.followerCount.toLocaleString() : '',
                   dbId: matched.id,
                 };
+              } else {
+                return {
+                  ...acc,
+                  connected: false,
+                  handle: '',
+                  followers: '',
+                  dbId: undefined,
+                };
               }
-              return acc;
             }),
           );
         }

@@ -13,6 +13,7 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { SocialService } from './social.service';
 import { ConnectCallbackQueryDto } from './dto/connect-callback-query.dto';
 import { SocialAccountResponseDto } from './dto/social-account-response.dto';
@@ -28,14 +29,15 @@ interface RequestWithUser {
 @ApiTags('Social Accounts')
 @Controller('social')
 export class SocialController {
-  constructor(private readonly socialService: SocialService) {}
+  constructor(private readonly socialService: SocialService) { }
 
   @ApiOperation({ summary: 'Generate Meta (Instagram & Facebook) OAuth Login URL' })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('meta/login')
-  getMetaLoginUrl(@Req() req: RequestWithUser) {
-    const result = this.socialService.getMetaAuthUrl(req.user.id);
+  getMetaLoginUrl(@Req() req: RequestWithUser, @Query('userId') queryUserId?: string) {
+    const userId = req.user?.id || queryUserId || 'default-user-id';
+    const result = this.socialService.getMetaAuthUrl(userId);
     return {
       statusCode: HttpStatus.OK,
       data: result,

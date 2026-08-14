@@ -4,7 +4,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { SocialPlatform, SocialAccountStatus } from '@prisma/client';
 import { SocialService } from './social.service';
 import { SocialRepository } from './social.repository';
-import { MetaProvider } from './providers/meta.provider';
+import { MetaProvider } from './providers/meta/meta.provider';
 import { encryptToken, decryptToken, generateOAuthState, verifyOAuthState } from './utils/crypto.util';
 
 describe('SocialCryptoUtils', () => {
@@ -60,8 +60,10 @@ describe('SocialService', () => {
 
     configService = {
       get: jest.fn().mockImplementation((key: string) => {
-        if (key === 'META_REDIRECT_URI') return 'http://localhost:4000/api/v1/social/meta/callback';
+        if (key === 'META_REDIRECT_URI') return 'https://test.ngrok-free.app/api/v1/social/meta/callback';
         if (key === 'FRONTEND_URL') return 'http://localhost:3000';
+        if (key === 'META_CONFIG_ID') return '1191067560767082';
+        if (key === 'META_APP_ID') return '1080562267988646';
         return null;
       }),
     };
@@ -195,5 +197,54 @@ describe('SocialService', () => {
     await expect(service.disconnectAccount(mockUserId, 'non-existent')).rejects.toThrow(
       NotFoundException,
     );
+  });
+});
+
+describe('MetaProvider Unit Tests', () => {
+  let metaProvider: MetaProvider;
+  let mockConfigService: any;
+
+  beforeEach(() => {
+    mockConfigService = {
+      get: jest.fn((key: string) => {
+        if (key === 'META_APP_ID') return 'test-app-id-123';
+        if (key === 'META_CONFIG_ID') return 'test-config-id-456';
+        if (key === 'META_OAUTH_DIALOG_URL') return 'https://www.facebook.com/v23.0/dialog/oauth';
+        return null;
+      }),
+    };
+
+    metaProvider = new MetaProvider(mockConfigService as ConfigService);
+  });
+
+  it('should generate Facebook Login for Business auth URL with config_id and override_default_response_type', () => {
+    const redirectUri = 'https://test.ngrok-free.app/api/v1/social/meta/callback';
+    const state = 'test_signed_state';
+    const authUrlString = metaProvider.getAuthUrl(redirectUri, state);
+
+    const url = new URL(authUrlString);
+
+    expect(url.origin + url.pathname).toBe('https://www.facebook.com/v23.0/dialog/oauth');
+    expect(url.searchParams.get('client_id')).toBe('test-app-id-123');
+    expect(url.searchParams.get('redirect_uri')).toBe(redirectUri);
+    expect(url.searchParams.get('state')).toBe(state);
+    expect(url.searchParams.get('config_id')).toBe('test-config-id-456');
+    expect(url.searchParams.get('response_type')).toBe('code');
+    expect(url.searchParams.get('override_default_response_type')).toBe('true');
+
+    // Must NOT include scope=public_profile,email
+    expect(url.searchParams.get('scope')).toBeNull();
+  });
+
+  it('should throw clear exception if META_CONFIG_ID is missing', () => {
+    (mockConfigService.get as jest.Mock).mockImplementation((key: string) => {
+      if (key === 'META_APP_ID') return 'test-app-id-123';
+      if (key === 'META_CONFIG_ID') return undefined;
+      return null;
+    });
+
+    expect(() =>
+      metaProvider.getAuthUrl('https://test.ngrok-free.app/api/v1/social/meta/callback', 'state'),
+    ).toThrow('META_CONFIG_ID environment variable is missing');
   });
 });
