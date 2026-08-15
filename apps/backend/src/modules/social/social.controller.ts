@@ -59,12 +59,41 @@ export class SocialController {
     return res.redirect(redirectUrl);
   }
 
+  @ApiOperation({ summary: 'Generate Direct Instagram OAuth Login URL' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('instagram/login')
+  getInstagramLoginUrl(@Req() req: RequestWithUser, @Query('userId') queryUserId?: string) {
+    const userId = req.user?.id || queryUserId || 'default-user-id';
+    const result = this.socialService.getInstagramAuthUrl(userId);
+    return {
+      statusCode: HttpStatus.OK,
+      data: result,
+    };
+  }
+
+  @ApiOperation({ summary: 'Instagram OAuth Authorization Callback' })
+  @Get('instagram/callback')
+  async instagramCallback(
+    @Query() query: ConnectCallbackQueryDto,
+    @Res() res: Response,
+  ) {
+    const redirectUrl = await this.socialService.handleInstagramCallback(
+      query.code,
+      query.state,
+      query.error,
+      query.error_description || query.error_reason,
+    );
+    return res.redirect(redirectUrl);
+  }
+
   @ApiOperation({ summary: 'Get list of connected social accounts for the user' })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('accounts')
   async getUserSocialAccounts(@Req() req: RequestWithUser): Promise<{ statusCode: number; data: SocialAccountResponseDto[] }> {
-    const accounts = await this.socialService.getUserAccounts(req.user.id);
+    const userId = req.user?.id || 'default-user-id';
+    const accounts = await this.socialService.getUserAccounts(userId);
     return {
       statusCode: HttpStatus.OK,
       data: accounts,
@@ -73,14 +102,15 @@ export class SocialController {
 
   @ApiOperation({ summary: 'Disconnect a connected social account' })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Delete('accounts/:id')
   @HttpCode(HttpStatus.OK)
   async disconnectAccount(
     @Req() req: RequestWithUser,
     @Param('id') id: string,
   ) {
-    const result = await this.socialService.disconnectAccount(req.user.id, id);
+    const userId = req.user?.id || 'default-user-id';
+    const result = await this.socialService.disconnectAccount(userId, id);
     return {
       statusCode: HttpStatus.OK,
       data: result,

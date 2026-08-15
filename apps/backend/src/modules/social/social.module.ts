@@ -6,6 +6,7 @@ import { SocialService } from './social.service';
 import { SocialRepository } from './social.repository';
 import {
   MetaProvider,
+  InstagramProvider,
   YoutubeProvider,
   TiktokProvider,
   LinkedinProvider,
@@ -19,6 +20,7 @@ import {
     SocialService,
     SocialRepository,
     MetaProvider,
+    InstagramProvider,
     YoutubeProvider,
     TiktokProvider,
     LinkedinProvider,

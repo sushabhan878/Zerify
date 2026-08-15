@@ -90,89 +90,100 @@ export default function SocialAccountsTab({ onSaveSuccess }: SocialAccountsTabPr
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      // Fetch both profile and raw social accounts
+      // Fetch both profile and raw social accounts concurrently
       const [profileRes, socialRes] = await Promise.allSettled([
         fetch(`${apiUrl}/influencer/profile`, { headers }),
         fetch(`${apiUrl}/social/accounts`, { headers }),
       ]);
 
+      let dbAccounts: any[] = [];
+      let profileAccounts: any[] = [];
+
       if (socialRes.status === 'fulfilled' && socialRes.value.ok) {
         const socialData = await socialRes.value.json();
-        const dbAccounts = socialData.data || [];
-
-        if (Array.isArray(dbAccounts) && dbAccounts.length > 0) {
-          setAccounts((prev) =>
-            prev.map((acc) => {
-              let matched: any = null;
-
-              if (acc.id === 'instagram') {
-                matched = dbAccounts.find(
-                  (item: any) => (item.platform || '').toUpperCase() === 'INSTAGRAM',
-                );
-              } else if (acc.id === 'facebook') {
-                matched = dbAccounts.find(
-                  (item: any) =>
-                    ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()),
-                );
-              } else {
-                matched = dbAccounts.find(
-                  (item: any) =>
-                    (item.platform || '').toLowerCase() === acc.id.toLowerCase() ||
-                    (item.platform || '').toLowerCase() === acc.name.toLowerCase(),
-                );
-              }
-
-              if (matched) {
-                const formattedHandle = matched.username
-                  ? (matched.username.startsWith('@') ? matched.username : `@${matched.username}`)
-                  : (matched.displayName || `@${acc.id}_user`);
-
-                return {
-                  ...acc,
-                  connected: true,
-                  handle: formattedHandle,
-                  avatar: matched.avatar || acc.avatar,
-                  followers: matched.followerCount ? matched.followerCount.toLocaleString() : '',
-                  dbId: matched.id,
-                };
-              } else {
-                return {
-                  ...acc,
-                  connected: false,
-                  handle: '',
-                  followers: '',
-                  dbId: undefined,
-                };
-              }
-            }),
-          );
-        }
+        dbAccounts = Array.isArray(socialData.data) ? socialData.data : [];
       }
 
       if (profileRes.status === 'fulfilled' && profileRes.value.ok) {
-        const data = await profileRes.value.json();
-        if (Array.isArray(data.connectedAccounts) && data.connectedAccounts.length > 0) {
-          setAccounts((prev) =>
-            prev.map((acc) => {
-              const match = data.connectedAccounts.find(
-                (dbAcc: any) =>
-                  (dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
-                  (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase(),
-              );
-              if (match) {
-                return {
-                  ...acc,
-                  connected: true,
-                  handle: match.handle || acc.handle,
-                  followers: match.followerCount ? match.followerCount.toLocaleString() : acc.followers,
-                  engagementRate: match.engagementRate ? `${match.engagementRate}%` : acc.engagementRate,
-                };
-              }
-              return acc;
-            }),
-          );
-        }
+        const profileData = await profileRes.value.json();
+        const userSocials = profileData.user?.socialAccounts || profileData.connectedAccounts;
+        profileAccounts = Array.isArray(userSocials) ? userSocials : [];
       }
+
+      // Perform a single atomic state update to avoid React state race conditions
+      setAccounts((prev) =>
+        prev.map((acc) => {
+          // 1. Check social_accounts DB table match
+          let matched: any = null;
+
+          if (acc.id === 'instagram') {
+            matched = dbAccounts.find(
+              (item: any) =>
+                (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+                ((item.platform || '').toUpperCase() === 'INSTAGRAM' ||
+                 (item.platform || '').toLowerCase() === 'instagram'),
+            );
+          } else if (acc.id === 'facebook') {
+            matched = dbAccounts.find(
+              (item: any) =>
+                (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+                ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()),
+            );
+          } else {
+            matched = dbAccounts.find(
+              (item: any) =>
+                (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+                ((item.platform || '').toLowerCase() === acc.id.toLowerCase() ||
+                 (item.platform || '').toLowerCase() === acc.name.toLowerCase()),
+            );
+          }
+
+          // 2. Check profile connectedAccounts fallback match (only connected accounts)
+          const profileMatch = profileAccounts.find(
+            (dbAcc: any) =>
+              (dbAcc.status ? (dbAcc.status || '').toUpperCase() === 'CONNECTED' : true) &&
+              ((dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
+               (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase()),
+          );
+
+          if (matched || profileMatch) {
+            const rawHandle = matched?.handle || matched?.username || profileMatch?.handle || profileMatch?.username;
+            const handle = rawHandle
+              ? rawHandle.startsWith('@')
+                ? rawHandle
+                : `@${rawHandle}`
+              : `@${acc.id}_user`;
+
+            const platformUserId = matched?.platformUserId || profileMatch?.platformUserId || acc.platformUserId;
+            const avatar = matched?.avatar || profileMatch?.avatar || acc.avatar;
+            const followers = matched?.followerCount
+              ? matched.followerCount.toLocaleString()
+              : profileMatch?.followerCount
+              ? profileMatch.followerCount.toLocaleString()
+              : acc.followers;
+            const dbId = matched?.id || profileMatch?.id;
+
+            return {
+              ...acc,
+              connected: true,
+              handle,
+              platformUserId,
+              avatar,
+              followers,
+              dbId,
+            };
+          }
+
+          return {
+            ...acc,
+            connected: false,
+            handle: '',
+            platformUserId: undefined,
+            followers: '',
+            dbId: undefined,
+          };
+        }),
+      );
     } catch (err) {
       console.warn('Could not load social accounts from DB:', err);
     }

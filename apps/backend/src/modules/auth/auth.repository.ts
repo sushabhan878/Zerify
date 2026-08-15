@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
-import { UserRole } from '@prisma/client';
+import { UserRole, SocialPlatform, SocialAccountStatus } from '@prisma/client';
 import { RegisterBrandDto } from './dto/register-brand.dto';
 import { RegisterInfluencerDto } from './dto/register-influencer.dto';
 
@@ -109,12 +109,24 @@ export class AuthRepository {
       });
 
       if (platform) {
-        await tx.influencerConnectedAccount.create({
+        const platformUpper = (platform || 'INSTAGRAM').toUpperCase();
+        let socialPlatform: SocialPlatform = SocialPlatform.INSTAGRAM;
+        if (Object.values(SocialPlatform).includes(platformUpper as SocialPlatform)) {
+          socialPlatform = platformUpper as SocialPlatform;
+        }
+
+        const handleStr = handle || `@${(name || 'creator').toLowerCase().replace(/\s+/g, '')}`;
+
+        await tx.socialAccount.create({
           data: {
-            influencerId: profile.id,
-            platform,
-            handle: handle || `@${(name || 'creator').toLowerCase().replace(/\s+/g, '')}`,
+            userId: user.id,
+            platform: socialPlatform,
+            platformUserId: `user_${user.id.slice(0, 8)}`,
+            username: handleStr.replace(/^@/, ''),
+            handle: handleStr,
             isVerified: true,
+            accessToken: 'initial_registration_token',
+            status: SocialAccountStatus.CONNECTED,
           },
         });
       }

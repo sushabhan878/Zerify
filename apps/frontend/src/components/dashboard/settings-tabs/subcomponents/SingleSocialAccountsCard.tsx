@@ -24,6 +24,7 @@ export interface SocialAccountItem {
   connected: boolean;
   handle: string;
   followers: string;
+  platformUserId?: string;
   engagementRate?: string;
   avgViews?: string;
   avatar?: string;
@@ -133,32 +134,53 @@ export default function SingleSocialAccountsCard({
 
     // Disconnect handling
     if (acc.connected) {
-      if (acc.dbId) {
-        setConnectingId(acc.id);
-        try {
-          const token = localStorage.getItem('zerify_token');
-          const headers: Record<string, string> = {};
-          if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-          }
-
-          await fetch(`${apiUrl}/social/accounts/${acc.dbId}`, {
-            method: 'DELETE',
-            headers,
-          });
-
-          if (onRefreshAccounts) onRefreshAccounts();
-        } catch (err) {
-          console.error('Disconnect account failed:', err);
-        } finally {
-          setConnectingId(null);
+      setConnectingId(acc.id);
+      try {
+        const token = localStorage.getItem('zerify_token');
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
         }
+
+        const deleteId = acc.dbId || acc.id;
+        const res = await fetch(`${apiUrl}/social/accounts/${deleteId}`, {
+          method: 'DELETE',
+          headers,
+        });
+
+        if (!res.ok) {
+          const json = await res.json().catch(() => ({}));
+          throw new Error(json.message || `Failed to disconnect ${acc.name}`);
+        }
+
+        // Immediately update local state to disconnected
+        setAccounts((prev) =>
+          prev.map((item) =>
+            item.id === acc.id
+              ? {
+                  ...item,
+                  connected: false,
+                  handle: '',
+                  platformUserId: undefined,
+                  followers: '',
+                  dbId: undefined,
+                }
+              : item,
+          ),
+        );
+
+        if (onRefreshAccounts) {
+          await onRefreshAccounts();
+        }
+      } catch (err) {
+        console.error('Disconnect account failed:', err);
+      } finally {
+        setConnectingId(null);
       }
-      handleToggleConnection(acc.id);
       return;
     }
 
-    // Connect handling for Meta (Facebook, Instagram & Threads)
+    // Connect handling for Meta/Facebook & Instagram
     if (acc.id === 'meta' || acc.id === 'instagram' || acc.id === 'facebook') {
       setConnectingId(acc.id);
       try {
@@ -168,11 +190,12 @@ export default function SingleSocialAccountsCard({
           headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const res = await fetch(`${apiUrl}/social/meta/login`, { headers });
+        const endpoint = acc.id === 'instagram' ? `${apiUrl}/social/instagram/login` : `${apiUrl}/social/meta/login`;
+        const res = await fetch(endpoint, { headers });
         const json = await res.json();
 
         if (!res.ok || !json.data?.url) {
-          throw new Error(json.message || json.data?.message || 'Failed to initialize Meta OAuth');
+          throw new Error(json.message || json.data?.message || `Failed to initialize ${acc.name} OAuth`);
         }
 
         const authUrl = json.data.url;
@@ -185,7 +208,7 @@ export default function SingleSocialAccountsCard({
 
         const popup = window.open(
           authUrl,
-          'ZerifyMetaOAuth',
+          `Zerify${acc.id.toUpperCase()}OAuth`,
           `width=${width},height=${height},left=${left},top=${top},status=yes,scrollbars=yes`,
         );
 
@@ -205,7 +228,7 @@ export default function SingleSocialAccountsCard({
         }, 1000);
 
       } catch (err: any) {
-        console.error('Meta OAuth popup launch error:', err);
+        console.error(`${acc.name} OAuth popup launch error:`, err);
         setErrorMsg(err.message || 'Could not launch OAuth window');
         setConnectingId(null);
       }
@@ -330,8 +353,8 @@ export default function SingleSocialAccountsCard({
                       </div>
                     )}
                     {acc.connected ? (
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 shadow-sm">
+                      <div className="flex flex-col gap-1 mt-1">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 shadow-sm w-fit">
                           <CheckCircle2 className="w-3 h-3 shrink-0 text-emerald-400" />
                           <span className="truncate">{acc.handle || 'Connected'}</span>
                         </span>

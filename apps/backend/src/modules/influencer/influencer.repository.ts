@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { SocialPlatform, SocialAccountStatus } from '@prisma/client';
 import { UpdateInfluencerProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
@@ -16,9 +17,9 @@ export class InfluencerRepository {
             email: true,
             name: true,
             role: true,
+            socialAccounts: true,
           },
         },
-        connectedAccounts: true,
         pastDeliverables: true,
         paymentDetails: true,
       },
@@ -39,9 +40,9 @@ export class InfluencerRepository {
                 email: true,
                 name: true,
                 role: true,
+                socialAccounts: true,
               },
             },
-            connectedAccounts: true,
             pastDeliverables: true,
             paymentDetails: true,
           },
@@ -61,9 +62,9 @@ export class InfluencerRepository {
             email: true,
             name: true,
             role: true,
+            socialAccounts: true,
           },
         },
-        connectedAccounts: true,
         pastDeliverables: true,
         paymentDetails: true,
       },
@@ -88,9 +89,9 @@ export class InfluencerRepository {
                 email: true,
                 name: true,
                 role: true,
+                socialAccounts: true,
               },
             },
-            connectedAccounts: true,
             pastDeliverables: true,
             paymentDetails: true,
           },
@@ -152,9 +153,9 @@ export class InfluencerRepository {
             email: true,
             name: true,
             role: true,
+            socialAccounts: true,
           },
         },
-        connectedAccounts: true,
         pastDeliverables: true,
         paymentDetails: true,
       },
@@ -162,30 +163,64 @@ export class InfluencerRepository {
   }
 
   async syncConnectedAccounts(influencerId: string, accounts: any[]) {
-    await this.prisma.influencerConnectedAccount.deleteMany({ where: { influencerId } });
+    const influencer = await this.prisma.influencerProfile.findUnique({
+      where: { id: influencerId },
+      select: { userId: true },
+    });
 
-    for (const acc of accounts) {
-      if (acc.connected || acc.handle) {
-        const followerCount = acc.followers ? parseInt(String(acc.followers).replace(/,/g, ''), 10) : 0;
-        const engagementRate = acc.engagementRate ? parseFloat(String(acc.engagementRate).replace(/%/g, '')) : 0;
+    if (influencer) {
+      const userId = influencer.userId;
 
-        await this.prisma.influencerConnectedAccount.create({
-          data: {
-            influencerId,
-            platform: acc.name || acc.platform || 'Other',
-            handle: acc.handle || null,
-            followerCount: isNaN(followerCount) ? 0 : followerCount,
-            engagementRate: isNaN(engagementRate) ? 0 : engagementRate,
-            isVerified: true,
-          },
-        });
+      for (const acc of accounts) {
+        if (acc.connected || acc.handle) {
+          const followerCount = acc.followers ? parseInt(String(acc.followers).replace(/,/g, ''), 10) : 0;
+          const engagementRate = acc.engagementRate ? parseFloat(String(acc.engagementRate).replace(/%/g, '')) : 0;
+          const platformUpper = (acc.id || acc.platform || acc.name || 'INSTAGRAM').toUpperCase();
+
+          let socialPlatform: SocialPlatform = SocialPlatform.INSTAGRAM;
+          if (Object.values(SocialPlatform).includes(platformUpper as SocialPlatform)) {
+            socialPlatform = platformUpper as SocialPlatform;
+          } else if (platformUpper.includes('FACEBOOK') || platformUpper.includes('META')) {
+            socialPlatform = SocialPlatform.FACEBOOK;
+          }
+
+          const existing = await this.prisma.socialAccount.findFirst({
+            where: {
+              userId,
+              platform: socialPlatform,
+            },
+          });
+
+          if (existing) {
+            await this.prisma.socialAccount.update({
+              where: { id: existing.id },
+              data: {
+                handle: acc.handle || existing.handle,
+                followerCount: isNaN(followerCount) ? existing.followerCount : followerCount,
+                engagementRate: isNaN(engagementRate) ? existing.engagementRate : engagementRate,
+                status: SocialAccountStatus.CONNECTED,
+              },
+            });
+          } else {
+            await this.prisma.socialAccount.create({
+              data: {
+                userId,
+                platform: socialPlatform,
+                platformUserId: `user_${acc.id || 'acc'}_${Date.now()}`,
+                username: acc.handle ? acc.handle.replace(/^@/, '') : acc.id,
+                handle: acc.handle || `@${acc.id}`,
+                followerCount: isNaN(followerCount) ? 0 : followerCount,
+                engagementRate: isNaN(engagementRate) ? 0 : engagementRate,
+                accessToken: 'manual_connected_account',
+                status: SocialAccountStatus.CONNECTED,
+              },
+            });
+          }
+        }
       }
     }
 
-    return this.prisma.influencerProfile.findUnique({
-      where: { id: influencerId },
-      include: { user: true, connectedAccounts: true, pastDeliverables: true, paymentDetails: true },
-    });
+    return this.findByUserId(influencer?.userId || '');
   }
 
   async syncPastDeliverables(influencerId: string, items: any[]) {
@@ -203,10 +238,8 @@ export class InfluencerRepository {
       });
     }
 
-    return this.prisma.influencerProfile.findUnique({
-      where: { id: influencerId },
-      include: { user: true, connectedAccounts: true, pastDeliverables: true, paymentDetails: true },
-    });
+    const influencer = await this.prisma.influencerProfile.findUnique({ where: { id: influencerId } });
+    return this.findByUserId(influencer?.userId || '');
   }
 
   async upsertPaymentDetails(influencerId: string, paymentDto: any) {
@@ -219,9 +252,7 @@ export class InfluencerRepository {
       },
     });
 
-    return this.prisma.influencerProfile.findUnique({
-      where: { id: influencerId },
-      include: { user: true, connectedAccounts: true, pastDeliverables: true, paymentDetails: true },
-    });
+    const influencer = await this.prisma.influencerProfile.findUnique({ where: { id: influencerId } });
+    return this.findByUserId(influencer?.userId || '');
   }
 }

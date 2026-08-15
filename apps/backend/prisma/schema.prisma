@@ -81,8 +81,7 @@ model InfluencerProfile {
   avatarUrl               String?
   pricingRange            String?
 
-  // Connected Accounts, Deliverables & Payment Relations
-  connectedAccounts       InfluencerConnectedAccount[]
+  // Deliverables & Payment Relations
   pastDeliverables        InfluencerPastDeliverable[]
   paymentDetails          InfluencerPaymentDetails?
 
@@ -92,33 +91,15 @@ model InfluencerProfile {
   @@map("influencer_profiles")
 }
 
-model InfluencerConnectedAccount {
-  id             String            @id @default(uuid())
-  influencerId   String
-  influencer     InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
-  platform       String            // e.g. "Instagram", "YouTube", "TikTok"
-  handle         String?
-  followerCount  Int?              @default(0)
-  engagementRate Float?
-  profileUrl     String?
-  isVerified     Boolean           @default(false)
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-
-  @@map("influencer_connected_accounts")
-}
-
 model InfluencerPastDeliverable {
   id           String            @id @default(uuid())
   influencerId String
   influencer   InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
   title        String?
   brandName    String?
-  contentUrl   String
   contentType  String?           // e.g. "Reel", "Video", "Post"
-  thumbnailUrl String?
-  viewsCount   Int?              @default(0)
-  likesCount   Int?              @default(0)
+  contentUrl   String
+  metrics      Json?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
 
@@ -129,14 +110,12 @@ model InfluencerPaymentDetails {
   id            String            @id @default(uuid())
   influencerId  String            @unique
   influencer    InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
-  payoutMethod  String?           @default("Cashfree")
-  accountHolder String?
+  bankName      String?
   accountNumber String?
   ifscCode      String?
-  upiId         String?
   paypalEmail   String?
-  gstin         String?
-  panNumber     String?
+  upiId         String?
+  panTaxId      String?
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
@@ -182,8 +161,12 @@ model SocialAccount {
   platform       SocialPlatform
   platformUserId String
   username       String?
-  displayName    String?
+  handle         String?
   avatar         String?
+  followerCount  Int?                @default(0)
+  engagementRate Float?
+  profileUrl     String?
+  isVerified     Boolean             @default(false)
   accessToken    String              // Encrypted token
   refreshToken   String?             // Encrypted token
   expiresAt      DateTime?

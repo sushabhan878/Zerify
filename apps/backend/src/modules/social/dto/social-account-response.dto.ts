@@ -6,9 +6,12 @@ export class SocialAccountResponseDto {
   platform: SocialPlatform;
   platformUserId: string;
   username?: string | null;
-  displayName?: string | null;
+  handle?: string | null;
   avatar?: string | null;
   followerCount?: number | null;
+  engagementRate?: number | null;
+  profileUrl?: string | null;
+  isVerified?: boolean;
   expiresAt?: Date | null;
   status: SocialAccountStatus;
   connectedAt: Date;

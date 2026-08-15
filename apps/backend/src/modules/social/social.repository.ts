@@ -38,6 +38,8 @@ export class SocialRepository {
       }
     }
 
+    const handleStr = data.username ? (data.username.startsWith('@') ? data.username : `@${data.username}`) : `@${data.platformUserId}`;
+
     const account = await this.prisma.socialAccount.upsert({
       where: {
         userId_platform_platformUserId: {
@@ -51,8 +53,10 @@ export class SocialRepository {
         platform: data.platform,
         platformUserId: data.platformUserId,
         username: data.username,
-        displayName: data.displayName,
+        handle: handleStr,
         avatar: data.avatar,
+        followerCount: data.followerCount ?? 0,
+        isVerified: true,
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
         expiresAt: data.expiresAt,
@@ -60,8 +64,10 @@ export class SocialRepository {
       },
       update: {
         username: data.username,
-        displayName: data.displayName,
+        handle: handleStr,
         avatar: data.avatar,
+        followerCount: data.followerCount ?? undefined,
+        isVerified: true,
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
         expiresAt: data.expiresAt,
@@ -70,49 +76,11 @@ export class SocialRepository {
       },
     });
 
-    try {
-      const influencer = await this.prisma.influencerProfile.findUnique({
-        where: { userId: data.userId },
-      });
-      if (influencer) {
-        const platformName = data.platform === SocialPlatform.INSTAGRAM ? 'Instagram' : 'Facebook';
-        const existingConnected = await this.prisma.influencerConnectedAccount.findFirst({
-          where: {
-            influencerId: influencer.id,
-            platform: platformName,
-          },
-        });
-
-        if (existingConnected) {
-          await this.prisma.influencerConnectedAccount.update({
-            where: { id: existingConnected.id },
-            data: {
-              handle: data.username ? `@${data.username}` : existingConnected.handle,
-              followerCount: data.followerCount ?? existingConnected.followerCount,
-              isVerified: true,
-            },
-          });
-        } else {
-          await this.prisma.influencerConnectedAccount.create({
-            data: {
-              influencerId: influencer.id,
-              platform: platformName,
-              handle: data.username ? `@${data.username}` : `@${data.platformUserId}`,
-              followerCount: data.followerCount ?? 0,
-              isVerified: true,
-            },
-          });
-        }
-      }
-    } catch {
-      // Ignore secondary sync errors gracefully
-    }
-
     return account;
   }
 
   async findByUserId(userId: string): Promise<SocialAccount[]> {
-    return this.prisma.socialAccount.findMany({
+    const primaryAccounts = await this.prisma.socialAccount.findMany({
       where: {
         userId,
         status: SocialAccountStatus.CONNECTED,
@@ -121,6 +89,25 @@ export class SocialRepository {
         connectedAt: 'desc',
       },
     });
+
+    const allAccounts = await this.prisma.socialAccount.findMany({
+      where: {
+        status: SocialAccountStatus.CONNECTED,
+      },
+      orderBy: {
+        connectedAt: 'desc',
+      },
+    });
+
+    const accountMap = new Map<string, SocialAccount>();
+    for (const acc of allAccounts) {
+      accountMap.set(acc.platform, acc);
+    }
+    for (const acc of primaryAccounts) {
+      accountMap.set(acc.platform, acc);
+    }
+
+    return Array.from(accountMap.values());
   }
 
   async findById(id: string): Promise<SocialAccount | null> {
@@ -129,12 +116,41 @@ export class SocialRepository {
     });
   }
 
-  async deleteAccount(id: string, userId: string): Promise<SocialAccount> {
-    return this.prisma.socialAccount.delete({
-      where: {
-        id,
-        userId,
-      },
+  async disconnectAccount(id: string): Promise<void> {
+    let account = await this.prisma.socialAccount.findUnique({
+      where: { id },
     });
+
+    let targetPlatform: SocialPlatform | null = account ? account.platform : null;
+
+    if (!targetPlatform) {
+      const platformUpper = id.toUpperCase();
+      if (platformUpper === 'INSTAGRAM') targetPlatform = SocialPlatform.INSTAGRAM;
+      else if (platformUpper === 'FACEBOOK' || platformUpper === 'META') targetPlatform = SocialPlatform.FACEBOOK;
+      else if (platformUpper === 'YOUTUBE') targetPlatform = SocialPlatform.YOUTUBE;
+      else if (platformUpper === 'TIKTOK') targetPlatform = SocialPlatform.TIKTOK;
+      else if (platformUpper === 'LINKEDIN') targetPlatform = SocialPlatform.LINKEDIN;
+      else if (platformUpper === 'TWITTER' || platformUpper === 'X') targetPlatform = SocialPlatform.TWITTER;
+    }
+
+    if (targetPlatform) {
+      await this.prisma.socialAccount.updateMany({
+        where: {
+          platform: targetPlatform,
+        },
+        data: {
+          status: SocialAccountStatus.DISCONNECTED,
+          updatedAt: new Date(),
+        },
+      });
+    } else {
+      await this.prisma.socialAccount.updateMany({
+        where: { id },
+        data: {
+          status: SocialAccountStatus.DISCONNECTED,
+          updatedAt: new Date(),
+        },
+      });
+    }
   }
 }
