@@ -70,7 +70,9 @@ export class MetaProvider implements ISocialProvider {
   }
 
   private getGraphApiUrl(): string {
-    const graphUrl = this.configService.get<string>('META_GRAPH_URL') || 'https://graph.facebook.com/v23.0';
+    const apiVersion = this.configService.get<string>('META_API_VERSION') || 'v26.0';
+    const graphUrl =
+      this.configService.get<string>('META_GRAPH_URL') || `https://graph.facebook.com/${apiVersion}`;
     return graphUrl.replace(/\/+$/, '');
   }
 
@@ -84,11 +86,13 @@ export class MetaProvider implements ISocialProvider {
       );
     }
 
+    const apiVersion = this.configService.get<string>('META_API_VERSION') || 'v26.0';
     const dialogUrl =
       this.configService.get<string>('META_OAUTH_DIALOG_URL') ||
-      'https://www.facebook.com/v23.0/dialog/oauth';
+      `https://www.facebook.com/${apiVersion}/dialog/oauth`;
 
     const url = new URL(dialogUrl);
+
 
     url.searchParams.append('client_id', appId);
     url.searchParams.append('redirect_uri', redirectUri);
@@ -99,8 +103,9 @@ export class MetaProvider implements ISocialProvider {
 
     const scopes = this.configService.get<string>(
       'META_SCOPES',
-      'public_profile,email,pages_show_list,pages_read_engagement,instagram_basic,instagram_manage_insights,business_management',
+      'public_profile,email,pages_show_list,pages_read_user_content,pages_read_engagement,pages_manage_posts,read_insights,instagram_basic,instagram_manage_insights,business_management',
     );
+
     url.searchParams.append('scope', scopes);
 
     return url.toString();

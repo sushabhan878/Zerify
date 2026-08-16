@@ -4,6 +4,7 @@ import { PrismaModule } from '../../database/prisma.module';
 import { SocialController } from './social.controller';
 import { SocialService } from './social.service';
 import { SocialRepository } from './social.repository';
+import { SocialGateway } from './social.gateway';
 import {
   MetaProvider,
   InstagramProvider,
@@ -19,6 +20,7 @@ import {
   providers: [
     SocialService,
     SocialRepository,
+    SocialGateway,
     MetaProvider,
     InstagramProvider,
     YoutubeProvider,
@@ -26,6 +28,7 @@ import {
     LinkedinProvider,
     TwitterProvider,
   ],
-  exports: [SocialService, SocialRepository],
+  exports: [SocialService, SocialRepository, SocialGateway],
 })
 export class SocialModule {}
+

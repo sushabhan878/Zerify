@@ -156,7 +156,7 @@ export default function SingleSocialAccountsCard({
         // Immediately update local state to disconnected
         setAccounts((prev) =>
           prev.map((item) =>
-            item.id === acc.id
+            item.id === acc.id || item.dbId === deleteId || (acc.platformUserId && item.platformUserId === acc.platformUserId)
               ? {
                   ...item,
                   connected: false,
@@ -172,13 +172,15 @@ export default function SingleSocialAccountsCard({
         if (onRefreshAccounts) {
           await onRefreshAccounts();
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Disconnect account failed:', err);
+        setErrorMsg(err?.message || 'Failed to disconnect account');
       } finally {
         setConnectingId(null);
       }
       return;
     }
+
 
     // Connect handling for Meta/Facebook & Instagram
     if (acc.id === 'meta' || acc.id === 'instagram' || acc.id === 'facebook') {

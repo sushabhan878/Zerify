@@ -174,7 +174,145 @@ model SocialAccount {
   connectedAt    DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
 
+  // Linked Small Modular Tables
+  metadata       SocialProfileMetadata?
+  demographics   SocialAudienceDemographic[]
+  performance    SocialAccountPerformance[]
+  contents       SocialMediaContent[]
+  syncStates     SocialSyncState[]
+
   @@unique([userId, platform, platformUserId])
   @@map("social_accounts")
 }
+
+enum DemographicType {
+  AGE_GENDER
+  COUNTRY
+  CITY
+  LOCALE
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  CAROUSEL
+  REEL
+  STORY
+}
+
+enum SyncTarget {
+  PROFILE_METADATA
+  AUDIENCE_DEMOGRAPHICS
+  ACCOUNT_PERFORMANCE
+  MEDIA_CONTENT
+}
+
+enum SyncStatus {
+  IDLE
+  SYNCING
+  SUCCESS
+  FAILED
+  RATE_LIMITED
+}
+
+// 1. Basic Metadata Table (1-to-1 with SocialAccount)
+model SocialProfileMetadata {
+  id              String        @id @default(uuid())
+  socialAccountId String        @unique
+  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  username        String?
+  displayName     String?
+  avatarUrl       String?
+  bio             String?
+  website         String?
+  profileUrl      String?
+  isVerified      Boolean       @default(false)
+  followerCount   Int           @default(0)
+  followingCount  Int           @default(0)
+  mediaCount      Int           @default(0)
+  category        String?
+  updatedAt       DateTime      @updatedAt
+
+  @@map("social_profile_metadata")
+}
+
+// 2. Audience Demographic Table (1-to-many with SocialAccount)
+model SocialAudienceDemographic {
+  id              String          @id @default(uuid())
+  socialAccountId String
+  socialAccount   SocialAccount   @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  type            DemographicType
+  key             String          // e.g., "18-24.M", "US", "New York", "en_US"
+  label           String?         // Human-readable label
+  value           Float           @default(0) // Percentage or count
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([socialAccountId, type, key])
+  @@map("social_audience_demographics")
+}
+
+// 3. Account Performance Table (Time-series / Snapshots 1-to-many with SocialAccount)
+model SocialAccountPerformance {
+  id                String        @id @default(uuid())
+  socialAccountId   String
+  socialAccount     SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  recordedAt        DateTime      // Snapshot timestamp/date
+  reach             Int           @default(0)
+  impressions       Int           @default(0)
+  profileViews      Int           @default(0)
+  websiteClicks     Int           @default(0)
+  accountsEngaged   Int           @default(0)
+  totalInteractions Int           @default(0)
+  followerCount     Int           @default(0)
+  engagementRate    Float         @default(0)
+  createdAt         DateTime      @default(now())
+
+  @@unique([socialAccountId, recordedAt])
+  @@map("social_account_performance")
+}
+
+// 4. Unified Media / Posts & Performance Table (1-to-many with SocialAccount)
+model SocialMediaContent {
+  id                 String        @id @default(uuid())
+  socialAccountId    String
+  socialAccount      SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  platformMediaId    String
+  mediaType          MediaType     @default(IMAGE)
+  caption            String?
+  permalink          String?
+  thumbnailUrl       String?
+  publishedAt        DateTime?
+  likeCount          Int           @default(0)
+  commentCount       Int           @default(0)
+  shareCount         Int           @default(0)
+  saveCount          Int           @default(0)
+  playCount          Int           @default(0)
+  reach              Int           @default(0)
+  impressions        Int           @default(0)
+  videoViewTotalTime Float?
+  avgWatchTime       Float?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@unique([socialAccountId, platformMediaId])
+  @@map("social_media_contents")
+}
+
+
+// 6. Sync State & Rate-Limit Tracking Table (1-to-many with SocialAccount)
+model SocialSyncState {
+  id              String        @id @default(uuid())
+  socialAccountId String
+  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  target          SyncTarget
+  lastSyncedAt    DateTime      @default(now())
+  nextSyncDueAt   DateTime?
+  syncStatus      SyncStatus    @default(IDLE)
+  lastError       String?
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([socialAccountId, target])
+  @@map("social_sync_states")
+}
+
 

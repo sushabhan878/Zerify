@@ -49,7 +49,8 @@ export class InstagramProvider implements ISocialProvider {
 
   getAuthUrl(redirectUri: string, state: string): string {
     const appId = this.getAppId();
-    const scopes = 'instagram_business_basic,instagram_business_content_publish';
+    const scopes =
+      'instagram_business_basic,instagram_business_manage_insights,instagram_business_manage_comments,instagram_business_manage_messages,instagram_business_content_publish';
 
     const url = new URL('https://www.instagram.com/oauth/authorize');
     url.searchParams.append('client_id', appId);
@@ -59,6 +60,14 @@ export class InstagramProvider implements ISocialProvider {
     url.searchParams.append('state', state);
 
     return url.toString();
+  }
+
+
+  private getGraphApiUrl(): string {
+    const apiVersion = this.configService.get<string>('META_API_VERSION') || 'v26.0';
+    const graphUrl =
+      this.configService.get<string>('INSTAGRAM_GRAPH_URL') || `https://graph.instagram.com/${apiVersion}`;
+    return graphUrl.replace(/\/+$/, '');
   }
 
   async exchangeCodeAndGetAccounts(
@@ -104,7 +113,7 @@ export class InstagramProvider implements ISocialProvider {
 
     // Attempt to exchange for long-lived access token via graph.instagram.com
     try {
-      const longTokenUrl = `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${appSecret}&access_token=${shortToken}`;
+      const longTokenUrl = `${this.getGraphApiUrl()}/access_token?grant_type=ig_exchange_token&client_secret=${appSecret}&access_token=${shortToken}`;
       const longTokenRes = await fetch(longTokenUrl);
       if (longTokenRes.ok) {
         const longTokenData = (await longTokenRes.json()) as { access_token?: string; expires_in?: number };
@@ -119,9 +128,10 @@ export class InstagramProvider implements ISocialProvider {
       this.logger.warn('Could not exchange for long-lived Instagram token, falling back to short token:', longTokenErr);
     }
 
-    // Step 7 — Immediately test/fetch the Instagram Graph API profile info
-    const profileUrl = `https://graph.instagram.com/v23.0/me?fields=id,username,name,profile_picture_url,followers_count&access_token=${accessToken}`;
+    // Step 7 — Immediately test/fetch the Instagram Graph API profile info (v26.0)
+    const profileUrl = `${this.getGraphApiUrl()}/me?fields=id,username,name,profile_picture_url,followers_count&access_token=${accessToken}`;
     this.logger.log(`Testing Instagram Graph API endpoint: ${profileUrl.replace(accessToken, 'REDACTED')}`);
+
 
     const profileRes = await fetch(profileUrl);
     let profileData: InstagramProfileResponse = { id: userId };

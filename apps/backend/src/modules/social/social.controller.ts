@@ -1,9 +1,11 @@
 import {
   Controller,
   Get,
+  Post,
   Delete,
   Query,
   Param,
+  Body,
   UseGuards,
   Req,
   Res,
@@ -28,6 +30,7 @@ interface RequestWithUser {
 
 @ApiTags('Social Accounts')
 @Controller('social')
+
 export class SocialController {
   constructor(private readonly socialService: SocialService) { }
 
@@ -116,4 +119,66 @@ export class SocialController {
       data: result,
     };
   }
+
+  @ApiOperation({ summary: 'Meta Webhook URL verification endpoint' })
+  @Get('webhook')
+  verifyWebhook(
+    @Query('hub.mode') mode?: string,
+    @Query('hub.verify_token') token?: string,
+    @Query('hub.challenge') challenge?: string,
+    @Res() res?: Response,
+  ) {
+    const challengeResult = this.socialService.verifyMetaWebhook(mode, token, challenge);
+    return res?.status(HttpStatus.OK).send(challengeResult);
+  }
+
+  @ApiOperation({ summary: 'Meta Webhook event delivery endpoint' })
+  @Post('webhook')
+  @HttpCode(HttpStatus.OK)
+  async handleWebhookEvent(@Body() body: any) {
+    return this.socialService.handleMetaWebhookEvent(body);
+  }
+
+  @ApiOperation({ summary: 'Get modular analytics, demographics, media performance, and sync status for an account' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('accounts/:id/analytics')
+  async getAccountAnalytics(@Param('id') id: string) {
+    const data = await this.socialService.getAccountAnalytics(id);
+    return {
+      statusCode: HttpStatus.OK,
+      data,
+    };
+  }
+
+  @ApiOperation({ summary: 'Trigger analytics sync for all connected accounts of the user' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Post('accounts/sync-all')
+  @HttpCode(HttpStatus.OK)
+  async syncAllUserAccounts(@Req() req: RequestWithUser) {
+    const userId = req.user?.id || 'default-user-id';
+    const result = await this.socialService.syncAllUserAccounts(userId);
+    return {
+      statusCode: HttpStatus.OK,
+      data: result,
+    };
+  }
+
+  @ApiOperation({ summary: 'Trigger analytics sync for a specific connected account' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Post('accounts/:id/sync')
+  @HttpCode(HttpStatus.OK)
+  async syncAccount(@Param('id') id: string) {
+    await this.socialService.syncAccountDetails(id);
+    const analytics = await this.socialService.getAccountAnalytics(id);
+    return {
+      statusCode: HttpStatus.OK,
+      data: analytics,
+    };
+  }
 }
+
+
+
