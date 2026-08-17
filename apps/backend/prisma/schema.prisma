@@ -75,7 +75,8 @@ model BrandProfile {
   // Section 5: Payments & Escrow Setup
   escrowSetup           Json?          // { billingEmail, taxId, paymentMethod, escrowEnabled, autoDeposit, walletBalance }
 
-  // Onboarding status
+  // Onboarding status & progress
+  completionPercentage  Int            @default(0)
   isOnboardingCompleted Boolean        @default(false)
 
   createdAt             DateTime       @default(now())

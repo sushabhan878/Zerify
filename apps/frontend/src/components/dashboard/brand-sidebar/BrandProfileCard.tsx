@@ -20,7 +20,6 @@ export default function BrandProfileCard({
   onCompleteProfile,
 }: BrandProfileCardProps) {
   const logoChar = companyName.charAt(0).toUpperCase();
-  const showCompletion = completionPercentage < 90;
 
   if (isCollapsed) {
     return (
@@ -28,7 +27,7 @@ export default function BrandProfileCard({
         <div
           className="relative group shrink-0 cursor-pointer"
           onClick={onCompleteProfile}
-          title={`${companyName} • ${industry} ${showCompletion ? `(Profile ${completionPercentage}% Complete)` : ''}`}
+          title={`${companyName} • ${industry} (Profile ${completionPercentage}% Complete)`}
         >
           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 p-[2px] shadow-md shadow-purple-950/50">
             {logoUrl ? (
@@ -45,13 +44,9 @@ export default function BrandProfileCard({
               </div>
             )}
           </div>
-          {showCompletion ? (
-            <span className="absolute -bottom-1 -right-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full border border-slate-950 shadow-md">
-              {completionPercentage}%
-            </span>
-          ) : (
-            <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-purple-500 border-2 border-slate-950 shadow-sm" />
-          )}
+          <span className="absolute -bottom-1 -right-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full border border-slate-950 shadow-md">
+            {completionPercentage}%
+          </span>
         </div>
       </div>
     );
@@ -79,16 +74,12 @@ export default function BrandProfileCard({
             </div>
           )}
         </div>
-        {showCompletion ? (
-          <span
-            className="absolute -bottom-1 -right-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[8.5px] font-black px-1.5 py-0.5 rounded-full border border-slate-950 shadow-md"
-            title={`Profile ${completionPercentage}% Complete`}
-          >
-            {completionPercentage}%
-          </span>
-        ) : (
-          <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-purple-500 border-2 border-slate-950 shadow-sm" title="Verified Partner" />
-        )}
+        <span
+          className="absolute -bottom-1 -right-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[8.5px] font-black px-1.5 py-0.5 rounded-full border border-slate-950 shadow-md"
+          title={`Profile ${completionPercentage}% Complete`}
+        >
+          {completionPercentage}%
+        </span>
       </div>
 
       {/* Field & Name */}

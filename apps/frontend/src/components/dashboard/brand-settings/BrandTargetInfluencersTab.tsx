@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { Users, CheckCircle, Check, Loader2, Sparkles, ShieldCheck, DollarSign, Calendar, Sliders } from 'lucide-react';
 
+import CustomSelect, { SelectOption } from '../settings-tabs/subcomponents/CustomSelect';
+
 interface BrandTargetInfluencersTabProps {
   initialData?: any;
   onSaveSuccess?: () => void;
@@ -20,6 +22,16 @@ const CREATOR_LOCATIONS = ['India', 'USA', 'Canada', 'UK', 'Australia', 'Germany
 const GENDER_PREFERENCES = ['Any', 'Female', 'Male', 'Non-Binary'];
 const BUDGET_RANGES = ['<$1,000', '$1,000 – $5,000', '$5,000 – $20,000', '$20,000 – $50,000', '$50,000+'];
 const FREQUENCY_OPTIONS = ['One-time Campaign', 'Monthly Recurring', 'Quarterly Campaigns', 'Ongoing Partnership'];
+
+const BUDGET_SELECT_OPTIONS: SelectOption[] = BUDGET_RANGES.map((b) => ({
+  value: b,
+  label: b,
+}));
+
+const FREQUENCY_SELECT_OPTIONS: SelectOption[] = FREQUENCY_OPTIONS.map((f) => ({
+  value: f,
+  label: f,
+}));
 
 export default function BrandTargetInfluencersTab({ initialData, onSaveSuccess }: BrandTargetInfluencersTabProps) {
   const [selectedTiers, setSelectedTiers] = useState<string[]>(initialData?.creatorTiers || ['Micro', 'Mid']);
@@ -76,11 +88,11 @@ export default function BrandTargetInfluencersTab({ initialData, onSaveSuccess }
         }),
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        const msg = Array.isArray(errData.message) ? errData.message.join(', ') : errData.message;
-        throw new Error(msg || 'Failed to update creator requirements.');
-      }
+      const updatedProfile = await res.json();
+      try {
+        localStorage.setItem('zerify_brand_profile_cache', JSON.stringify(updatedProfile));
+        window.dispatchEvent(new Event('zerify_brand_profile_update'));
+      } catch (e) {}
 
       setStatusMsg({ type: 'success', text: 'Targeted influencer preferences saved!' });
       onSaveSuccess?.();
@@ -218,39 +230,27 @@ export default function BrandTargetInfluencersTab({ initialData, onSaveSuccess }
       {/* 4. Budget & Frequency */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
-            <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5">
             Estimated Campaign Budget Range
           </label>
-          <select
+          <CustomSelect
+            options={BUDGET_SELECT_OPTIONS}
             value={budget}
-            onChange={(e) => setBudget(e.target.value)}
-            className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500"
-          >
-            {BUDGET_RANGES.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setBudget(val)}
+            dropdownHeight="max-h-52"
+          />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5">
             Campaign Frequency
           </label>
-          <select
+          <CustomSelect
+            options={FREQUENCY_SELECT_OPTIONS}
             value={frequency}
-            onChange={(e) => setFrequency(e.target.value)}
-            className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500"
-          >
-            {FREQUENCY_OPTIONS.map((f) => (
-              <option key={f} value={f}>
-                {f}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setFrequency(val)}
+            dropdownHeight="max-h-52"
+          />
         </div>
       </div>
 

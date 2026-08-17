@@ -30,7 +30,7 @@ export default function BrandSettingsSection({
   const [loading, setLoading] = useState(true);
   const [completion, setCompletion] = useState(65);
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (silent = false) => {
     try {
       const token = localStorage.getItem('zerify_token');
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
@@ -47,6 +47,10 @@ export default function BrandSettingsSection({
         if (data.completionPercentage !== undefined) {
           setCompletion(data.completionPercentage);
         }
+        try {
+          localStorage.setItem('zerify_brand_profile_cache', JSON.stringify(data));
+          window.dispatchEvent(new Event('zerify_brand_profile_update'));
+        } catch (err) {}
       }
     } catch (e) {
       // Ignore
@@ -56,7 +60,20 @@ export default function BrandSettingsSection({
   };
 
   useEffect(() => {
-    fetchProfile();
+    const cached = typeof window !== 'undefined' ? localStorage.getItem('zerify_brand_profile_cache') : null;
+    let hasCache = false;
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        setProfileData(parsed);
+        if (parsed.completionPercentage !== undefined) {
+          setCompletion(parsed.completionPercentage);
+        }
+        setLoading(false);
+        hasCache = true;
+      } catch (e) {}
+    }
+    fetchProfile(hasCache);
   }, []);
 
   const tabs = [

@@ -56,11 +56,11 @@ export default function BrandPaymentsEscrowTab({ initialData, onSaveSuccess }: B
         }),
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        const msg = Array.isArray(errData.message) ? errData.message.join(', ') : errData.message;
-        throw new Error(msg || 'Failed to update escrow configuration.');
-      }
+      const updatedProfile = await res.json();
+      try {
+        localStorage.setItem('zerify_brand_profile_cache', JSON.stringify(updatedProfile));
+        window.dispatchEvent(new Event('zerify_brand_profile_update'));
+      } catch (e) {}
 
       setStatusMsg({ type: 'success', text: 'Payments & Escrow preferences configured successfully!' });
       onSaveSuccess?.();

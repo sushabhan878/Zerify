@@ -16,7 +16,7 @@ export default function BrandOnboardingWizard() {
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (silent = false) => {
     try {
       const token = localStorage.getItem('zerify_token');
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
@@ -30,6 +30,9 @@ export default function BrandOnboardingWizard() {
       if (res.ok) {
         const data = await res.json();
         setProfileData(data);
+        try {
+          localStorage.setItem('zerify_brand_profile_cache', JSON.stringify(data));
+        } catch (e) {}
       }
     } catch (e) {
       // Ignore
@@ -39,7 +42,17 @@ export default function BrandOnboardingWizard() {
   };
 
   useEffect(() => {
-    fetchProfile();
+    const cached = typeof window !== 'undefined' ? localStorage.getItem('zerify_brand_profile_cache') : null;
+    let hasCache = false;
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        setProfileData(parsed);
+        setLoading(false);
+        hasCache = true;
+      } catch (e) {}
+    }
+    fetchProfile(hasCache);
   }, []);
 
   const steps = [

@@ -2,13 +2,86 @@
 
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, Globe, MapPin, Calendar, FileText, Check, Loader2, Sparkles, Instagram, Linkedin, Twitter, Youtube, Camera, Pencil, Upload, Trash2 } from 'lucide-react';
+import { Building2, Globe, MapPin, Calendar, FileText, Check, Loader2, Sparkles, Instagram, Linkedin, Twitter, Youtube, Camera, Pencil, Upload, Trash2, Plus, Link as LinkIcon } from 'lucide-react';
 import Image from 'next/image';
+
+import CustomSelect, { SelectOption } from '../settings-tabs/subcomponents/CustomSelect';
+import LocationAutocomplete from '../settings-tabs/subcomponents/LocationAutocomplete';
+// @ts-ignore
+import { Industry } from 'naics';
+
+interface CustomSocialLink {
+  id: string;
+  platform: string;
+  url: string;
+}
 
 interface BrandCompanyInfoTabProps {
   initialData?: any;
   onSaveSuccess?: () => void;
 }
+
+export const EXTENSIVE_INDUSTRY_OPTIONS: SelectOption[] = [
+  // Technology & Digital
+  { value: 'Software & SaaS', label: 'Software & SaaS', keywords: 'tech software cloud saas app IT' },
+  { value: 'AI & Machine Learning', label: 'AI & Machine Learning', keywords: 'ai artificial intelligence ml data algorithms' },
+  { value: 'Cybersecurity & IT Infrastructure', label: 'Cybersecurity & IT Infrastructure', keywords: 'security IT networks cloud data' },
+  { value: 'Mobile Apps & Gaming', label: 'Mobile Apps & Mobile Gaming', keywords: 'apps mobile games ios android' },
+  { value: 'Consumer Electronics & Hardware', label: 'Consumer Electronics & Hardware', keywords: 'hardware gadgets electronics tech devices' },
+  { value: 'Fintech & Digital Payments', label: 'Fintech & Digital Payments', keywords: 'finance fintech payments banking money crypto' },
+  { value: 'Web3, Crypto & Blockchain', label: 'Web3, Crypto & Blockchain', keywords: 'crypto bitcoin web3 nft blockchain' },
+
+  // E-Commerce, Retail & Fashion
+  { value: 'E-commerce & Retail', label: 'E-commerce & Direct-to-Consumer (D2C)', keywords: 'ecommerce shop retail online d2c' },
+  { value: 'Fashion & Apparel', label: 'Fashion & Apparel', keywords: 'clothing fashion apparel style wear garments' },
+  { value: 'Luxury & Designer Goods', label: 'Luxury Goods & Designer Fashion', keywords: 'luxury premium designer watches haute couture' },
+  { value: 'Jewelry & Accessories', label: 'Jewelry, Watches & Accessories', keywords: 'jewelry watches accessories rings gold' },
+  { value: 'Footwear & Athleisure', label: 'Footwear & Athleisure', keywords: 'shoes sneakers sports fashion footwear activewear' },
+  { value: 'Retail Outlets & Department Stores', label: 'Retail Outlets & Department Stores', keywords: 'retail store shopping mall boutique' },
+
+  // Beauty, Health & Personal Care
+  { value: 'Beauty & Personal Care', label: 'Beauty, Cosmetics & Skincare', keywords: 'makeup beauty skincare cosmetics makeup' },
+  { value: 'Personal Care & Hygiene', label: 'Personal Care & Hygiene', keywords: 'shampoo soap grooming hygiene body care' },
+  { value: 'Haircare & Styling', label: 'Haircare & Styling Products', keywords: 'hair salon haircare styling shampoo' },
+  { value: 'Fitness & Wellness', label: 'Fitness, Wellness & Dietary Supplements', keywords: 'gym fitness nutrition protein wellness health' },
+  { value: 'Healthcare & Pharmaceuticals', label: 'Healthcare & Pharmaceuticals', keywords: 'health medical pharma doctor care medicine' },
+  { value: 'Medical Devices & Biotech', label: 'Medical Devices & Biotechnology', keywords: 'biotech lab medical research devices' },
+
+  // Food, Beverage & Hospitality
+  { value: 'Food & Beverage', label: 'Food, Gourmet & Packaged Goods', keywords: 'food snacks dining organic packaged groceries' },
+  { value: 'Beverages & Coffee', label: 'Beverages, Specialty Drinks & Coffee', keywords: 'drinks coffee tea juice soda alcohol wine' },
+  { value: 'Restaurants & Cafes', label: 'Restaurants, Cafes & Fast Food', keywords: 'restaurant cafe dining fastfood bistro' },
+  { value: 'Hospitality & Travel', label: 'Hospitality, Hotels & Resorts', keywords: 'hotels resorts stay travel booking hospitality' },
+  { value: 'Food Delivery & Cloud Kitchens', label: 'Food Delivery & Cloud Kitchens', keywords: 'delivery food ordering kitchen take-out' },
+
+  // Lifestyle, Travel & Real Estate
+  { value: 'Travel & Lifestyle', label: 'Travel, Tourism & Aviation', keywords: 'travel flight tourism airline adventure' },
+  { value: 'Home & Interior Design', label: 'Home Decor, Furniture & Interior Design', keywords: 'furniture home decor interior design architecture' },
+  { value: 'Kitchenware & Appliances', label: 'Kitchenware & Home Appliances', keywords: 'kitchen cookware appliances home' },
+  { value: 'Real Estate & Property Development', label: 'Real Estate & Property Development', keywords: 'real estate housing property construction architecture' },
+  { value: 'Automotive & EV', label: 'Automotive, Electric Vehicles & Mobility', keywords: 'auto cars ev electric vehicles EV transport' },
+  { value: 'Sports & Outdoor Equipment', label: 'Outdoor, Camping & Sports Gear', keywords: 'sports outdoor hiking camping gear' },
+
+  // Media, Entertainment & Games
+  { value: 'Media & Publishing', label: 'Media, Publishing & Journalism', keywords: 'news media magazine blog publishing press' },
+  { value: 'Film & Video Streaming', label: 'Film, Television & Video Streaming', keywords: 'movies tv OTT streaming video film' },
+  { value: 'Music & Audio Production', label: 'Music, Audio & Podcast Production', keywords: 'music podcast audio record studio' },
+  { value: 'Esports & Gaming Organizations', label: 'Esports & Gaming Organizations', keywords: 'gaming esports stream twitch youtube' },
+  { value: 'Events & PR Agencies', label: 'Events, PR & Talent Management', keywords: 'events pr talent management agency' },
+
+  // Finance, Legal & Professional Services
+  { value: 'Financial Services', label: 'Banking & Financial Services', keywords: 'bank loans finance wealth wealth management' },
+  { value: 'Venture Capital & Investment', label: 'Venture Capital & Investment Banking', keywords: 'invest VC capital banking finance fund' },
+  { value: 'EdTech & Education', label: 'EdTech & Online Learning', keywords: 'education edtech course learning school training' },
+  { value: 'Higher Education & Universities', label: 'Universities & Higher Education', keywords: 'college university degree academy' },
+  { value: 'Non-Profit & Sustainability', label: 'Non-Profit, NGO & Sustainability', keywords: 'ngo charity non-profit green clean energy' },
+  { value: 'Logistics & Supply Chain', label: 'Logistics, Freight & Supply Chain', keywords: 'shipping logistics cargo transport delivery' },
+  { value: 'Professional Services & Consulting', label: 'Business Consulting & Corporate Services', keywords: 'consulting legal hr recruitment accounting' },
+  { value: 'Agriculture & Forestry', label: 'Agriculture, Forestry & AgTech', keywords: 'agriculture farming forestry agtech' },
+  { value: 'Construction & Engineering', label: 'Construction & Heavy Engineering', keywords: 'construction engineering building infrastructure' },
+  { value: 'Manufacturing & Industrial', label: 'Manufacturing & Industrial Production', keywords: 'factory manufacturing industrial production' },
+  { value: 'Utilities & Energy', label: 'Utilities, Renewable Energy & Solar', keywords: 'energy solar wind power utilities' },
+];
 
 const BRAND_VALUES_OPTIONS = [
   'Sustainability',
@@ -34,6 +107,9 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
   const [linkedin, setLinkedin] = useState(initialData?.socialLinks?.linkedin || '');
   const [twitter, setTwitter] = useState(initialData?.socialLinks?.twitter || '');
   const [youtube, setYoutube] = useState(initialData?.socialLinks?.youtube || '');
+  const [customLinks, setCustomLinks] = useState<CustomSocialLink[]>(
+    initialData?.socialLinks?.customLinks || []
+  );
 
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isEditingNameInline, setIsEditingNameInline] = useState(false);
@@ -59,9 +135,29 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
         if (initialData.socialLinks.linkedin !== undefined) setLinkedin(initialData.socialLinks.linkedin || '');
         if (initialData.socialLinks.twitter !== undefined) setTwitter(initialData.socialLinks.twitter || '');
         if (initialData.socialLinks.youtube !== undefined) setYoutube(initialData.socialLinks.youtube || '');
+        if (Array.isArray(initialData.socialLinks.customLinks)) {
+          setCustomLinks(initialData.socialLinks.customLinks);
+        }
       }
     }
   }, [initialData]);
+
+  const handleAddCustomLink = () => {
+    setCustomLinks((prev) => [
+      ...prev,
+      { id: Date.now().toString(), platform: 'Facebook', url: '' },
+    ]);
+  };
+
+  const handleUpdateCustomLink = (id: string, field: 'platform' | 'url', value: string) => {
+    setCustomLinks((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+    );
+  };
+
+  const handleRemoveCustomLink = (id: string) => {
+    setCustomLinks((prev) => prev.filter((item) => item.id !== id));
+  };
 
   const toggleValue = (val: string) => {
     setSelectedValues((prev) =>
@@ -143,18 +239,23 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
           foundedYear,
           description,
           brandValues: selectedValues,
-          socialLinks: { instagram, linkedin, twitter, youtube },
+          socialLinks: {
+            instagram,
+            linkedin,
+            twitter,
+            youtube,
+            customLinks: customLinks.filter((l) => l.url.trim() !== ''),
+          },
         }),
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        const msg = Array.isArray(errData.message) ? errData.message.join(', ') : errData.message;
-        throw new Error(msg || 'Failed to update company info. Please check authentication.');
-      }
+      const updatedProfile = await res.json();
 
-      // Sync local storage for top bar
+      // Sync local storage & trigger real-time UI updates
       try {
+        localStorage.setItem('zerify_brand_profile_cache', JSON.stringify(updatedProfile));
+        window.dispatchEvent(new Event('zerify_brand_profile_update'));
+
         const stored = localStorage.getItem('zerify_user');
         const userObj = stored ? JSON.parse(stored) : {};
         const updatedUser = {
@@ -278,36 +379,25 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1.5">Industry</label>
-          <select
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5">Industry Sector</label>
+          <CustomSelect
+            options={EXTENSIVE_INDUSTRY_OPTIONS}
             value={industry}
-            onChange={(e) => setIndustry(e.target.value)}
-            className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500"
-          >
-            <option value="E-commerce & Retail">E-commerce & Retail</option>
-            <option value="Fashion & Apparel">Fashion & Apparel</option>
-            <option value="Beauty & Personal Care">Beauty & Personal Care</option>
-            <option value="Fitness & Wellness">Fitness & Wellness</option>
-            <option value="Technology & SaaS">Technology & SaaS</option>
-            <option value="Food & Beverage">Food & Beverage</option>
-            <option value="Travel & Lifestyle">Travel & Lifestyle</option>
-            <option value="Financial Services">Financial Services</option>
-            <option value="EdTech & Education">EdTech & Education</option>
-          </select>
+            onChange={(val) => setIndustry(val)}
+            searchable
+            searchPlaceholder="Search 40+ industry sectors..."
+            iconLeft={<Building2 className="w-3.5 h-3.5 text-purple-400" />}
+            dropdownHeight="max-h-64"
+          />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-slate-300 mb-1.5">HQ Location</label>
-          <div className="relative">
-            <MapPin className="w-3.5 h-3.5 absolute left-3 top-3 text-slate-400" />
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="e.g. San Francisco, CA / Mumbai, India"
-              className="w-full bg-slate-950/80 border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
-            />
-          </div>
+          <LocationAutocomplete
+            value={location}
+            onChange={(val) => setLocation(val)}
+            placeholder="e.g. San Francisco, CA / Mumbai, India"
+          />
         </div>
 
         <div>
@@ -363,8 +453,9 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
       </div>
 
       {/* Social Media Links */}
-      <div className="space-y-3 pt-2 border-t border-white/10">
+      <div className="space-y-3 pt-1">
         <label className="block text-xs font-semibold text-slate-300">Brand Social Media Handles</label>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="flex items-center gap-2 bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2">
             <Instagram className="w-4 h-4 text-pink-400 shrink-0" />
@@ -406,6 +497,57 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
               className="w-full bg-transparent text-xs text-white focus:outline-none placeholder-slate-600"
             />
           </div>
+
+          {/* Additional Dynamic Social / Portfolio Links */}
+          {customLinks.map((link) => (
+            <div key={link.id} className="flex items-center gap-2 bg-slate-950/90 border border-purple-500/30 rounded-xl px-2.5 py-1.5 shadow-sm">
+              <div className="flex items-center gap-1 shrink-0">
+                <LinkIcon className="w-3.5 h-3.5 text-purple-400" />
+                <select
+                  value={link.platform}
+                  onChange={(e) => handleUpdateCustomLink(link.id, 'platform', e.target.value)}
+                  className="bg-slate-900 border border-white/10 text-[11px] font-bold text-purple-300 rounded-lg px-2 py-1 focus:outline-none focus:border-purple-500 cursor-pointer"
+                >
+                  <option value="Facebook">Facebook</option>
+                  <option value="TikTok">TikTok</option>
+                  <option value="Discord">Discord</option>
+                  <option value="GitHub">GitHub</option>
+                  <option value="Twitch">Twitch</option>
+                  <option value="Pinterest">Pinterest</option>
+                  <option value="Threads">Threads</option>
+                  <option value="Custom">Custom Link</option>
+                </select>
+              </div>
+              <input
+                type="text"
+                value={link.url}
+                onChange={(e) => handleUpdateCustomLink(link.id, 'url', e.target.value)}
+                placeholder={`Enter ${link.platform} URL / handle`}
+                className="w-full bg-transparent text-xs text-white focus:outline-none placeholder-slate-600"
+              />
+              <button
+                type="button"
+                onClick={() => handleRemoveCustomLink(link.id)}
+                className="p-1 text-slate-500 hover:text-rose-400 transition-colors cursor-pointer shrink-0"
+                title="Remove link"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Add Link Button placed AFTER all 4 link fields */}
+        <div className="pt-1">
+          <button
+            type="button"
+            onClick={handleAddCustomLink}
+            className="flex items-center gap-1.5 text-xs font-bold text-purple-300 hover:text-white bg-purple-600/20 hover:bg-purple-600/30 px-3.5 py-2 rounded-xl border border-purple-500/40 transition-all cursor-pointer shadow-sm hover:scale-[1.02]"
+            title="Add custom social media link or website handle"
+          >
+            <Plus className="w-4 h-4 text-purple-400" />
+            <span>Add Link</span>
+          </button>
         </div>
       </div>
 

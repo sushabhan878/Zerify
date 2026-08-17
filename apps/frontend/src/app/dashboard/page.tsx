@@ -86,6 +86,49 @@ export default function DashboardPage() {
     router.push('/login');
   };
 
+  // Brand Profile State & Hydration
+  const [brandProfile, setBrandProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      const cached = typeof window !== 'undefined' ? localStorage.getItem('zerify_brand_profile_cache') : null;
+      if (cached) {
+        try {
+          setBrandProfile(JSON.parse(cached));
+        } catch (e) {}
+      }
+    };
+
+    handleProfileUpdate();
+
+    const fetchBrandProfile = async () => {
+      try {
+        const token = localStorage.getItem('zerify_token');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
+        const res = await fetch(`${apiUrl}/brand/profile`, {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : '',
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setBrandProfile(data);
+          try {
+            localStorage.setItem('zerify_brand_profile_cache', JSON.stringify(data));
+          } catch (err) {}
+        }
+      } catch (e) {}
+    };
+
+    fetchBrandProfile();
+    window.addEventListener('zerify_brand_profile_update', handleProfileUpdate);
+    return () => window.removeEventListener('zerify_brand_profile_update', handleProfileUpdate);
+  }, []);
+
+  const completionPercentage = brandProfile?.completionPercentage !== undefined ? brandProfile.completionPercentage : 65;
+
   if (loading) {
     return (
       <div className="h-screen w-screen bg-[#07090E] dark:bg-[#07090E] light:bg-slate-50 flex flex-col items-center justify-center text-white">
@@ -141,6 +184,7 @@ export default function DashboardPage() {
             setIsMobileMenuOpen(false);
           }}
           style={{ width: `${sidebarWidth}px` }}
+          completionPercentage={completionPercentage}
         />
 
         {/* Resizable Divider Handle (Desktop) */}
@@ -174,6 +218,7 @@ export default function DashboardPage() {
                   setIsMobileMenuOpen(false);
                 }}
                 isMobileDrawer
+                completionPercentage={completionPercentage}
               />
             </div>
           </div>
@@ -198,6 +243,7 @@ export default function DashboardPage() {
                 avatarUrl={user.avatarUrl}
                 activeRoute={activeRoute}
                 onSelectRoute={(route) => setActiveRoute(route)}
+                completionPercentage={completionPercentage}
               />
             ) : (
               <InfluencerDashboardView

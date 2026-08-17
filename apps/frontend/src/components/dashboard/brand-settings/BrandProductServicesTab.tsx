@@ -3,6 +3,9 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Plus, Trash2, ExternalLink, Image as ImageIcon, Check, Loader2, Sparkles, Tag, ArrowRight, X, Camera, Upload } from 'lucide-react';
 
+import CustomSelect from '../settings-tabs/subcomponents/CustomSelect';
+import { EXTENSIVE_INDUSTRY_OPTIONS } from './BrandCompanyInfoTab';
+
 interface BrandProductServicesTabProps {
   initialProducts?: any[];
   onSaveSuccess?: () => void;
@@ -78,6 +81,16 @@ export default function BrandProductServicesTab({ initialProducts = [], onSaveSu
       setShowAddForm(false);
       
       setStatusMsg({ type: 'success', text: 'Product added successfully to your catalog!' });
+
+      // Trigger profile refetch for percentage calculation update
+      const refetchRes = await fetch(`${apiUrl}/brand/profile`, {
+        headers: { Authorization: token ? `Bearer ${token}` : '' },
+      });
+      if (refetchRes.ok) {
+        const freshData = await refetchRes.json();
+        localStorage.setItem('zerify_brand_profile_cache', JSON.stringify(freshData));
+        window.dispatchEvent(new Event('zerify_brand_profile_update'));
+      }
     } catch (err: any) {
       setStatusMsg({ type: 'error', text: err.message || 'Error adding product.' });
     } finally {
@@ -100,6 +113,15 @@ export default function BrandProductServicesTab({ initialProducts = [], onSaveSu
 
       if (res.ok) {
         setProducts(products.filter((p) => p.id !== id));
+        
+        const refetchRes = await fetch(`${apiUrl}/brand/profile`, {
+          headers: { Authorization: token ? `Bearer ${token}` : '' },
+        });
+        if (refetchRes.ok) {
+          const freshData = await refetchRes.json();
+          localStorage.setItem('zerify_brand_profile_cache', JSON.stringify(freshData));
+          window.dispatchEvent(new Event('zerify_brand_profile_update'));
+        }
         onSaveSuccess?.();
       }
     } catch (err) {
@@ -240,20 +262,16 @@ export default function BrandProductServicesTab({ initialProducts = [], onSaveSu
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Category</label>
-                  <select
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Product Category</label>
+                  <CustomSelect
+                    options={EXTENSIVE_INDUSTRY_OPTIONS}
                     value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500"
-                  >
-                    <option value="Apparel & Accessories">Apparel & Accessories</option>
-                    <option value="Beauty & Cosmetics">Beauty & Cosmetics</option>
-                    <option value="Electronics & Tech">Electronics & Tech</option>
-                    <option value="Software & SaaS">Software & SaaS</option>
-                    <option value="Food & Beverages">Food & Beverages</option>
-                    <option value="Fitness & Supplements">Fitness & Supplements</option>
-                    <option value="Digital Services">Digital Services</option>
-                  </select>
+                    onChange={(val) => setCategory(val)}
+                    searchable
+                    searchPlaceholder="Search 50+ product categories..."
+                    iconLeft={<Tag className="w-3.5 h-3.5 text-purple-400" />}
+                    dropdownHeight="max-h-52"
+                  />
                 </div>
 
                 {/* Price / Value Interactive Range Slider (Without preset tag pills) */}

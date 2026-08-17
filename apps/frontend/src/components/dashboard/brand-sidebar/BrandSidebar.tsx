@@ -18,6 +18,7 @@ interface BrandSidebarProps {
   onSelectRoute?: (routeId: string) => void;
   isMobileDrawer?: boolean;
   style?: React.CSSProperties;
+  completionPercentage?: number;
 }
 
 export default function BrandSidebar({
@@ -31,6 +32,7 @@ export default function BrandSidebar({
   onSelectRoute: externalOnSelectRoute,
   isMobileDrawer = false,
   style,
+  completionPercentage = 65,
 }: BrandSidebarProps) {
   const [internalActiveRoute, setInternalActiveRoute] = useState('search-creators');
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -104,7 +106,7 @@ export default function BrandSidebar({
           industry={industry}
           logoUrl={logoUrl}
           isCollapsed={isCollapsed}
-          completionPercentage={65}
+          completionPercentage={completionPercentage}
           onCompleteProfile={() => handleSelectRoute('brand-settings')}
         />
       </div>
