@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { FileUploadModule } from './modules/file-upload/file-upload.module';
 import { InfluencerModule } from './modules/influencer/influencer.module';
 import { SocialModule } from './modules/social/social.module';
+import { BrandModule } from './modules/brand/brand.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SocialModule } from './modules/social/social.module';
     FileUploadModule,
     InfluencerModule,
     SocialModule,
+    BrandModule,
   ],
   controllers: [AppController],
   providers: [],

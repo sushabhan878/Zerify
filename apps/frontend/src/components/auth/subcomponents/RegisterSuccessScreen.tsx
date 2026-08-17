@@ -47,16 +47,35 @@ export default function RegisterSuccessScreen({ role }: RegisterSuccessScreenPro
         </p>
       </div>
 
-      {/* Modern Glowing CTA Button to Dashboard */}
-      <div className="pt-3">
-        <Link
-          href="/dashboard"
-          className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white font-bold text-xs shadow-xl shadow-purple-600/30 hover:shadow-purple-600/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden"
-        >
-          <span className="relative z-10">Go to Dashboard</span>
-          <ArrowRight className="relative z-10 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        </Link>
+      {/* Modern Glowing CTA Button */}
+      <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
+        {role === 'BRAND' ? (
+          <>
+            <Link
+              href="/onboarding/brand"
+              className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white font-bold text-xs shadow-xl shadow-purple-600/30 hover:shadow-purple-600/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden"
+            >
+              <span className="relative z-10">Start Brand Onboarding</span>
+              <ArrowRight className="relative z-10 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            </Link>
+            <Link
+              href="/dashboard"
+              className="text-xs font-semibold text-slate-400 hover:text-white transition-colors py-2"
+            >
+              Go to Dashboard directly
+            </Link>
+          </>
+        ) : (
+          <Link
+            href="/dashboard"
+            className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white font-bold text-xs shadow-xl shadow-purple-600/30 hover:shadow-purple-600/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden"
+          >
+            <span className="relative z-10">Go to Dashboard</span>
+            <ArrowRight className="relative z-10 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </Link>
+        )}
       </div>
     </motion.div>
   );

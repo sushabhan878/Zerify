@@ -40,17 +40,66 @@ model Organization {
 }
 
 model BrandProfile {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyName String?
-  website     String?
-  logoUrl     String?  // Cloudinary image URL
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                    String         @id @default(uuid())
+  userId                String         @unique
+  user                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Section 1: Company / Brand Info
+  companyName           String?
+  logoUrl               String?        // Cloudinary image URL
+  website               String?
+  industry              String?
+  location              String?
+  description           String?
+  foundedYear           String?
+  socialLinks           Json?          // { instagram, linkedin, twitter, youtube, facebook, tiktok }
+  brandValues           String[]       @default([]) // Sustainability, Inclusivity, Innovation, Quality, Affordability, Community, Transparency
+
+  // Section 2: Campaign Goals
+  primaryGoals          String[]       @default([]) // Brand Awareness, Sales & Conversions, Content Creation, etc.
+  targetPlatforms       String[]       @default([]) // Instagram, YouTube, TikTok, LinkedIn, Twitter, Facebook
+  targetAudience        Json?          // { ageRanges: [], gender: "All", locations: [], interests: [] }
+
+  // Section 3: Product / Services Relation
+  products              BrandProduct[]
+
+  // Section 4: Targeted Influencers Preferences
+  creatorTiers          String[]       @default([]) // Nano, Micro, Mid, Macro, Mega
+  creatorLocations      String[]       @default([]) // India, USA, Canada, UK, etc.
+  preferredCreatorGender String?       @default("Any") // Any, Female, Male, Non-binary
+  verifiedOnly          Boolean        @default(false)
+  minEngagementRate     Float?         @default(0.0)
+  campaignBudget        String?        // Budget range
+  campaignFrequency     String?        // One-time, Monthly, Quarterly, Ongoing
+
+  // Section 5: Payments & Escrow Setup
+  escrowSetup           Json?          // { billingEmail, taxId, paymentMethod, escrowEnabled, autoDeposit, walletBalance }
+
+  // Onboarding status
+  isOnboardingCompleted Boolean        @default(false)
+
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
 
   @@map("brand_profiles")
 }
+
+model BrandProduct {
+  id             String       @id @default(uuid())
+  brandProfileId String
+  brandProfile   BrandProfile @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+  name           String
+  imageUrl       String?
+  productUrl     String?
+  category       String?
+  price          String?
+  description    String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("brand_products")
+}
+
 
 model InfluencerProfile {
   id                      String                        @id @default(uuid())
