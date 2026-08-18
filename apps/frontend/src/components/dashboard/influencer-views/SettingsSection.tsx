@@ -14,6 +14,7 @@ interface SettingsSectionProps {
   userEmail?: string;
   userHandle?: string;
   avatarUrl?: string;
+  completionPercentage?: number;
 }
 
 type TabType = 'basic' | 'creator' | 'social' | 'portfolio' | 'payment';
@@ -25,10 +26,34 @@ export default function SettingsSection({
   userEmail,
   userHandle,
   avatarUrl,
+  completionPercentage,
 }: SettingsSectionProps = {}) {
   const [activeTab, setActiveTab] = useState<TabType>('basic');
   const [direction, setDirection] = useState<number>(1);
-  const [completion, setCompletion] = useState(65);
+  const [completion, setCompletion] = useState<number>(completionPercentage ?? 75);
+
+  React.useEffect(() => {
+    const syncCompletion = () => {
+      const cached = typeof window !== 'undefined' ? localStorage.getItem('zerify_influencer_profile_cache') : null;
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed?.completionPercentage !== undefined) {
+            setCompletion(parsed.completionPercentage);
+          }
+        } catch (e) {}
+      }
+    };
+
+    if (completionPercentage !== undefined) {
+      setCompletion(completionPercentage);
+    } else {
+      syncCompletion();
+    }
+
+    window.addEventListener('zerify_influencer_profile_update', syncCompletion);
+    return () => window.removeEventListener('zerify_influencer_profile_update', syncCompletion);
+  }, [completionPercentage]);
 
   const tabs = [
     { id: 'basic', label: 'Basic Info', icon: User },
@@ -47,7 +72,6 @@ export default function SettingsSection({
   };
 
   const handleTabSave = (nextTabId?: TabType) => {
-    setCompletion((prev) => Math.min(prev + 10, 100));
     if (nextTabId) {
       changeTab(nextTabId);
     }

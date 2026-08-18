@@ -7,6 +7,7 @@ import Image from 'next/image';
 
 import CustomSelect, { SelectOption } from '../settings-tabs/subcomponents/CustomSelect';
 import LocationAutocomplete from '../settings-tabs/subcomponents/LocationAutocomplete';
+import { useToast } from '@/components/ui/Toast';
 // @ts-ignore
 import { Industry } from 'naics';
 
@@ -94,6 +95,8 @@ const BRAND_VALUES_OPTIONS = [
 ];
 
 export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: BrandCompanyInfoTabProps) {
+  const { toastSuccess, toastError } = useToast();
+
   const [companyName, setCompanyName] = useState(initialData?.companyName || '');
   const [logoUrl, setLogoUrl] = useState(initialData?.logoUrl || '');
   const [website, setWebsite] = useState(initialData?.website || '');
@@ -114,7 +117,6 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isEditingNameInline, setIsEditingNameInline] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
@@ -173,7 +175,6 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
     const tempPreview = URL.createObjectURL(file);
     setLogoUrl(tempPreview);
     setIsUploadingLogo(true);
-    setStatusMsg(null);
 
     try {
       const formData = new FormData();
@@ -198,11 +199,11 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
       const data = await res.json();
       if (data.url) {
         setLogoUrl(data.url);
-        setStatusMsg({ type: 'success', text: 'Brand logo uploaded successfully!' });
+        toastSuccess('Brand logo uploaded successfully!');
       }
     } catch (err: any) {
       console.error('Logo upload error:', err);
-      setStatusMsg({ type: 'error', text: err.message || 'Image upload failed.' });
+      toastError(err.message || 'Image upload failed.');
     } finally {
       setIsUploadingLogo(false);
     }
@@ -218,7 +219,6 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setStatusMsg(null);
 
     try {
       const token = localStorage.getItem('zerify_token');
@@ -270,10 +270,10 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
         // Ignore localStorage error
       }
 
-      setStatusMsg({ type: 'success', text: 'Company details saved successfully!' });
+      toastSuccess('Company details saved successfully!');
       onSaveSuccess?.();
     } catch (err: any) {
-      setStatusMsg({ type: 'error', text: err.message || 'Error saving changes.' });
+      toastError(err.message || 'Error saving changes.');
     } finally {
       setSaving(false);
     }
@@ -281,11 +281,6 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
 
   return (
     <form onSubmit={handleSave} className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-5 shadow-xl">
-      {statusMsg && (
-        <div className={`p-3 rounded-xl text-xs font-medium ${statusMsg.type === 'success' ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300' : 'bg-rose-500/10 border border-rose-500/30 text-rose-300'}`}>
-          {statusMsg.text}
-        </div>
-      )}
 
       {/* Minimal Brand Identity Header with Default Building Logo */}
       <div className="flex items-center gap-4 pb-2">
@@ -356,7 +351,7 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
             <span>•</span>
             <span className="flex items-center gap-1">
               <MapPin className="w-3 h-3 text-slate-500" />
-              {location || 'Location not set'}
+              {location ? location.split(',')[0].trim() : 'Location not set'}
             </span>
           </p>
         </div>

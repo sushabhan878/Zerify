@@ -64,6 +64,7 @@ export default function DashboardSidebar({
       onSelectRoute={onSelectRoute}
       isMobileDrawer={isMobileDrawer}
       style={style}
+      completionPercentage={completionPercentage}
     />
   );
 }

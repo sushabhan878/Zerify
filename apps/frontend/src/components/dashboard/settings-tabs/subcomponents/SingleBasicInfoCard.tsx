@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import Image from 'next/image';
 import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
 import * as Flags from 'country-flag-icons/react/3x2';
-import { Camera, User, Mail, Calendar, Users, Phone } from 'lucide-react';
+import { Camera, User, Mail, Calendar, Users, Phone, MapPin, Pencil } from 'lucide-react';
 import LocationAutocomplete from './LocationAutocomplete';
 import CustomSelect from './CustomSelect';
 
@@ -53,6 +53,22 @@ export default function SingleBasicInfoCard({
   onAvatarChange,
   onRemoveAvatar,
 }: SingleBasicInfoCardProps) {
+  const [isEditingNameInline, setIsEditingNameInline] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handlePencilClick = () => {
+    setIsEditingNameInline(true);
+    setTimeout(() => {
+      nameInputRef.current?.focus();
+    }, 100);
+  };
+
+  const formatFirstLocation = (locStr: string): string => {
+    if (!locStr) return '';
+    return locStr.split(',')[0].trim();
+  };
+
   const phoneCodeOptions = useMemo(() => {
     const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
     const popularCodes = ['IN', 'US', 'GB', 'CA', 'AU'];
@@ -93,58 +109,97 @@ export default function SingleBasicInfoCard({
   ];
 
   return (
-    <div className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-4 shadow-xl">
-      {/* 1. Profile Picture & Avatar Header */}
-      <div className="flex flex-col sm:flex-row items-center gap-5 pb-4 border-b border-white/10">
-        <div className="relative group shrink-0">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 p-[2px] shadow-lg shadow-purple-950/40">
+    <div className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-5 shadow-xl">
+      {/* 1. Identity & Profile Photo Header */}
+      <div className="flex items-center gap-4 pb-3 border-b border-white/10">
+        {/* Avatar Box */}
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          className="relative group shrink-0 cursor-pointer"
+        >
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-purple-950/30 border-2 border-purple-500/40 overflow-hidden flex items-center justify-center shadow-md group-hover:border-purple-400 transition-colors">
             {avatarUrl ? (
-              <Image src={avatarUrl} alt={name} width={64} height={64} className="w-full h-full object-cover rounded-full" />
+              <img
+                src={avatarUrl}
+                alt={name || 'Creator Avatar'}
+                className="w-full h-full object-cover rounded-full bg-slate-900"
+              />
             ) : (
-              <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-white font-black text-lg">
-                {name.charAt(0).toUpperCase()}
-              </div>
+              <User className="w-7 h-7 text-purple-400 group-hover:scale-105 transition-transform" />
             )}
           </div>
-          <label className="absolute bottom-0 right-0 p-1.5 rounded-full bg-purple-600 hover:bg-purple-500 text-white cursor-pointer transition-transform group-hover:scale-110 shadow-md border-2 border-slate-950">
+
+          {/* Camera Badge */}
+          <div
+            className="absolute bottom-0 right-0 p-1.5 rounded-full bg-purple-600 hover:bg-purple-500 text-white shadow-md border-2 border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110"
+            title="Upload Photo from Device"
+          >
             <Camera className="w-3 h-3" />
-            <input type="file" accept="image/*" onChange={onAvatarChange} className="hidden" />
-          </label>
-        </div>
-
-        <div className="space-y-0.5 text-center sm:text-left">
-          <h3 className="text-xs font-bold text-white flex items-center gap-1.5 justify-center sm:justify-start">
-            <User className="w-3.5 h-3.5 text-purple-400" />
-            <span>Profile Photo & General Info</span>
-          </h3>
-          <p className="text-[11px] text-slate-400/80">JPG, PNG or GIF. Recommended 400x400px.</p>
-          {avatarUrl && (
-            <button
-              type="button"
-              onClick={onRemoveAvatar}
-              className="text-[11px] font-semibold text-pink-400 hover:text-pink-300 pt-1 block"
-            >
-              Remove Photo
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* 2. Name & Handle */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
-            Full Name
-          </label>
+          </div>
           <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Sarah Jenkins"
-            className="w-full px-3.5 py-2.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs text-white placeholder:text-slate-600/70 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all font-medium shadow-inner"
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={onAvatarChange}
+            className="hidden"
           />
         </div>
 
+        {/* Creator Info on Right of Avatar */}
+        <div className="flex-1 space-y-0.5">
+          <div className="flex items-center gap-2">
+            {isEditingNameInline ? (
+              <input
+                ref={nameInputRef}
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onBlur={() => setIsEditingNameInline(false)}
+                onKeyDown={(e) => e.key === 'Enter' && setIsEditingNameInline(false)}
+                placeholder="Enter Full Name"
+                className="bg-slate-900 border border-purple-500 rounded-lg px-2.5 py-1 text-sm font-bold text-white focus:outline-none"
+              />
+            ) : (
+              <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                <span>{name || 'Full Name'}</span>
+                <button
+                  type="button"
+                  onClick={handlePencilClick}
+                  className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-purple-300 transition-colors cursor-pointer"
+                  title="Edit Name"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+              </h2>
+            )}
+          </div>
+
+          <p className="text-xs text-slate-400 flex items-center gap-2 font-medium">
+            <span className="text-purple-300 font-semibold">{handle ? `@${handle.replace(/^@/, '')}` : '@handle'}</span>
+            <span>•</span>
+            <span className="flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-slate-500" />
+              {location ? formatFirstLocation(location) : 'Location not set'}
+            </span>
+          </p>
+
+          <div className="flex items-center gap-3 pt-0.5">
+            <span className="text-[11px] text-slate-500">JPG, PNG or GIF. Rec. 400x400px.</span>
+            {avatarUrl && (
+              <button
+                type="button"
+                onClick={onRemoveAvatar}
+                className="text-[11px] font-semibold text-pink-400 hover:text-pink-300 transition-colors"
+              >
+                Remove Photo
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Username / Handle & Contact Number (Side by side at top) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
             Username / Handle
@@ -160,9 +215,37 @@ export default function SingleBasicInfoCard({
             />
           </div>
         </div>
+
+        <div>
+          <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
+            Contact Number
+          </label>
+          <div className="flex gap-2">
+            <CustomSelect
+              options={phoneCodeOptions}
+              value={phoneCode}
+              onChange={setPhoneCode}
+              searchable
+              searchPlaceholder="Search country or code..."
+              dropdownHeight="max-h-64"
+              className="w-32 sm:w-36 shrink-0"
+              showCheckmark={false}
+            />
+            <div className="relative flex-1 min-w-0">
+              <Phone className="w-4 h-4 text-slate-500/70 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="415-555-0192"
+                className="w-full pl-10 pr-3.5 py-2.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs text-white placeholder:text-slate-600/70 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all font-medium shadow-inner"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* 3. Bio & Pitch */}
+      {/* 3. Bio & Creative Pitch */}
       <div>
         <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
           Bio & Creative Pitch
@@ -172,7 +255,7 @@ export default function SingleBasicInfoCard({
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           placeholder="e.g. Content creator focused on tech gadgets, productivity workflows, and modern lifestyle aesthetics..."
-          className="w-full px-3.5 py-2.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs text-white placeholder:text-slate-600/70 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all leading-relaxed shadow-inner"
+          className="w-full px-3.5 py-2.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs text-white placeholder:text-slate-600/70 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all leading-relaxed shadow-inner resize-none"
         />
         <span className="text-[10px] text-slate-500/80 font-medium block text-right mt-1">
           {bio.length} / 300 characters
@@ -208,38 +291,8 @@ export default function SingleBasicInfoCard({
         </div>
       </div>
 
-      {/* 5. Contact Number */}
-      <div>
-        <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
-          Contact Number
-        </label>
-        <div className="flex gap-2">
-          <CustomSelect
-            options={phoneCodeOptions}
-            value={phoneCode}
-            onChange={setPhoneCode}
-            searchable
-            searchPlaceholder="Search country or code..."
-            dropdownHeight="max-h-64"
-            className="w-40 shrink-0"
-            showCheckmark={false}
-          />
-          <div className="relative flex-1">
-            <Phone className="w-4 h-4 text-slate-500/70 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="415-555-0192"
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs text-white placeholder:text-slate-600/70 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all font-medium shadow-inner"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 6. DOB & Gender Dropdown (Gender on the RIGHT side of DOB) */}
+      {/* 6. DOB & Gender Selection */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Left Column: Date of Birth (DOB Calendar Picker) */}
         <div>
           <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
             Date of Birth (DOB)
@@ -255,7 +308,6 @@ export default function SingleBasicInfoCard({
           </div>
         </div>
 
-        {/* Right Column: Gender Selection Dropdown (Only 3 Options) */}
         <div>
           <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
             Gender Identity

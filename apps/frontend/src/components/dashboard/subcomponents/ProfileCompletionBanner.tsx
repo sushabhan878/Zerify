@@ -14,8 +14,8 @@ export default function ProfileCompletionBanner({
 }: ProfileCompletionBannerProps) {
   const [dismissed, setDismissed] = useState(false);
 
-  // Automatically hide when profile completion is 70% or higher
-  if (completionPercentage >= 70 || dismissed) {
+  // Automatically hide when profile completion is 80% or higher
+  if (completionPercentage >= 80 || dismissed) {
     return null;
   }
 

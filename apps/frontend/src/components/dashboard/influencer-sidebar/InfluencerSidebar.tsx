@@ -19,6 +19,7 @@ interface InfluencerSidebarProps {
   onSelectRoute?: (routeId: string) => void;
   isMobileDrawer?: boolean;
   style?: React.CSSProperties;
+  completionPercentage?: number;
 }
 
 export default function InfluencerSidebar({
@@ -32,6 +33,7 @@ export default function InfluencerSidebar({
   onSelectRoute: externalOnSelectRoute,
   isMobileDrawer = false,
   style,
+  completionPercentage = 75,
 }: InfluencerSidebarProps) {
   const [internalActiveRoute, setInternalActiveRoute] = useState('profile-overview');
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -107,7 +109,7 @@ export default function InfluencerSidebar({
           userHandle={userHandle}
           avatarUrl={avatarUrl}
           isCollapsed={isCollapsed}
-          completionPercentage={65}
+          completionPercentage={completionPercentage}
           onCompleteProfile={() => handleSelectRoute('settings')}
         />
       </div>

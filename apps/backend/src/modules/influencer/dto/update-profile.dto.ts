@@ -51,4 +51,10 @@ export class UpdateInfluencerProfileDto {
 
   @IsOptional()
   responseTime?: string;
+
+  @IsOptional()
+  completionPercentage?: number;
+
+  @IsOptional()
+  isOnboardingCompleted?: boolean;
 }

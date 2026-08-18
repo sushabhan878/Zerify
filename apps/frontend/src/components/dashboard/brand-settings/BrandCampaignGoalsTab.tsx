@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Target, Share2, Users, Check, Loader2, Sparkles, Instagram, Youtube, Linkedin, Twitter, Facebook, Plus } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast';
 
 interface BrandCampaignGoalsTabProps {
   initialData?: any;
@@ -74,6 +75,7 @@ export const INTEREST_TAGS = [
 ];
 
 export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: BrandCampaignGoalsTabProps) {
+  const { toastSuccess, toastError } = useToast();
   const [goals, setGoals] = useState<string[]>(initialData?.primaryGoals || ['Brand Awareness', 'Sales & Conversions']);
   const [platforms, setPlatforms] = useState<string[]>(initialData?.targetPlatforms || ['Instagram', 'YouTube']);
   
@@ -140,7 +142,6 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
   }, [initialData]);
 
   const [saving, setSaving] = useState(false);
-  const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const toggleArrayItem = (list: string[], item: string, setter: (val: string[]) => void) => {
     setter(list.includes(item) ? list.filter((i) => i !== item) : [...list, item]);
@@ -149,7 +150,6 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setStatusMsg(null);
 
     try {
       const token = localStorage.getItem('zerify_token');
@@ -179,10 +179,10 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
         window.dispatchEvent(new Event('zerify_brand_profile_update'));
       } catch (e) {}
 
-      setStatusMsg({ type: 'success', text: 'Campaign goals and targeted audience saved successfully!' });
+      toastSuccess('Campaign goals and targeted audience saved successfully!');
       onSaveSuccess?.();
     } catch (err: any) {
-      setStatusMsg({ type: 'error', text: err.message || 'Error saving campaign goals.' });
+      toastError(err.message || 'Error saving campaign goals.');
     } finally {
       setSaving(false);
     }
@@ -190,13 +190,6 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
 
   return (
     <form onSubmit={handleSave} className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-5 shadow-xl">
-
-
-      {statusMsg && (
-        <div className={`p-3 rounded-xl text-xs font-medium ${statusMsg.type === 'success' ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300' : 'bg-rose-500/10 border border-rose-500/30 text-rose-300'}`}>
-          {statusMsg.text}
-        </div>
-      )}
 
       {/* 1. Primary Goals */}
       <div>

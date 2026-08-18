@@ -86,48 +86,81 @@ export default function DashboardPage() {
     router.push('/login');
   };
 
-  // Brand Profile State & Hydration
+  // Brand & Influencer Profile State & Hydration
   const [brandProfile, setBrandProfile] = useState<any>(null);
+  const [influencerProfile, setInfluencerProfile] = useState<any>(null);
 
   useEffect(() => {
     const handleProfileUpdate = () => {
-      const cached = typeof window !== 'undefined' ? localStorage.getItem('zerify_brand_profile_cache') : null;
-      if (cached) {
+      const cachedBrand = typeof window !== 'undefined' ? localStorage.getItem('zerify_brand_profile_cache') : null;
+      if (cachedBrand) {
         try {
-          setBrandProfile(JSON.parse(cached));
+          setBrandProfile(JSON.parse(cachedBrand));
+        } catch (e) {}
+      }
+
+      const cachedInfluencer = typeof window !== 'undefined' ? localStorage.getItem('zerify_influencer_profile_cache') : null;
+      if (cachedInfluencer) {
+        try {
+          setInfluencerProfile(JSON.parse(cachedInfluencer));
         } catch (e) {}
       }
     };
 
     handleProfileUpdate();
 
-    const fetchBrandProfile = async () => {
+    const fetchProfiles = async () => {
       try {
         const token = localStorage.getItem('zerify_token');
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
-        const res = await fetch(`${apiUrl}/brand/profile`, {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : '',
-          },
-        });
+        const headers = { Authorization: token ? `Bearer ${token}` : '' };
 
-        if (res.ok) {
-          const data = await res.json();
-          setBrandProfile(data);
-          try {
-            localStorage.setItem('zerify_brand_profile_cache', JSON.stringify(data));
-          } catch (err) {}
-        }
+        // Fetch Brand Profile
+        fetch(`${apiUrl}/brand/profile`, { headers })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (data) {
+              setBrandProfile(data);
+              try {
+                localStorage.setItem('zerify_brand_profile_cache', JSON.stringify(data));
+              } catch (err) {}
+            }
+          })
+          .catch(() => {});
+
+        // Fetch Influencer Profile
+        fetch(`${apiUrl}/influencer/profile`, { headers })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (data) {
+              setInfluencerProfile(data);
+              try {
+                localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(data));
+              } catch (err) {}
+            }
+          })
+          .catch(() => {});
       } catch (e) {}
     };
 
-    fetchBrandProfile();
+    fetchProfiles();
     window.addEventListener('zerify_brand_profile_update', handleProfileUpdate);
-    return () => window.removeEventListener('zerify_brand_profile_update', handleProfileUpdate);
+    window.addEventListener('zerify_influencer_profile_update', handleProfileUpdate);
+    return () => {
+      window.removeEventListener('zerify_brand_profile_update', handleProfileUpdate);
+      window.removeEventListener('zerify_influencer_profile_update', handleProfileUpdate);
+    };
   }, []);
 
-  const completionPercentage = brandProfile?.completionPercentage !== undefined ? brandProfile.completionPercentage : 65;
+  const completionPercentage =
+    user?.role === 'BRAND'
+      ? brandProfile?.completionPercentage !== undefined
+        ? brandProfile.completionPercentage
+        : 65
+      : influencerProfile?.completionPercentage !== undefined
+      ? influencerProfile.completionPercentage
+      : 75;
 
   if (loading) {
     return (
@@ -253,6 +286,7 @@ export default function DashboardPage() {
                 avatarUrl={user.avatarUrl}
                 activeRoute={activeRoute}
                 onSelectRoute={(route) => setActiveRoute(route)}
+                completionPercentage={completionPercentage}
               />
             )}
           </main>

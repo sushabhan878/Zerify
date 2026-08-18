@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Check, Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2 } from 'lucide-react';
 import SingleCreatorDetailsCard from './subcomponents/SingleCreatorDetailsCard';
+import { useToast } from '@/components/ui/Toast';
 
 interface CreatorDetailsTabProps {
   onSaveSuccess?: () => void;
@@ -10,6 +11,7 @@ interface CreatorDetailsTabProps {
 
 export default function CreatorDetailsTab({ onSaveSuccess }: CreatorDetailsTabProps) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+  const { toastSuccess, toastError } = useToast();
 
   const [categories, setCategories] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
@@ -20,7 +22,6 @@ export default function CreatorDetailsTab({ onSaveSuccess }: CreatorDetailsTabPr
   const [travelReady, setTravelReady] = useState(true);
   const [responseTime, setResponseTime] = useState('Within 24 hours');
   const [isSaving, setIsSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
 
   // Fetch saved creator details from DB on mount
   useEffect(() => {
@@ -77,20 +78,27 @@ export default function CreatorDetailsTab({ onSaveSuccess }: CreatorDetailsTabPr
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      await fetch(`${apiUrl}/influencer/creator-details`, {
+      const res = await fetch(`${apiUrl}/influencer/creator-details`, {
         method: 'PUT',
         headers,
         body: JSON.stringify(payload),
       });
-    } catch (err) {
+
+      if (res.ok) {
+        const updatedData = await res.json();
+        try {
+          localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(updatedData));
+          window.dispatchEvent(new Event('zerify_influencer_profile_update'));
+        } catch (e) {}
+      }
+
+      toastSuccess('Creator details saved successfully!');
+      if (onSaveSuccess) onSaveSuccess();
+    } catch (err: any) {
       console.warn('API save failed, using client state:', err);
+      toastError('Failed to save creator details.');
     } finally {
       setIsSaving(false);
-      setSaved(true);
-      setTimeout(() => {
-        setSaved(false);
-        if (onSaveSuccess) onSaveSuccess();
-      }, 700);
     }
   };
 
@@ -117,12 +125,6 @@ export default function CreatorDetailsTab({ onSaveSuccess }: CreatorDetailsTabPr
 
       {/* Save Button */}
       <div className="flex items-center justify-end gap-3 pt-2">
-        {saved && (
-          <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
-            <Check className="w-4 h-4" /> Creator Details Saved! Redirecting...
-          </span>
-        )}
-
         <button
           type="submit"
           disabled={isSaving}

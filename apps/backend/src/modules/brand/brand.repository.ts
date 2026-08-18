@@ -74,4 +74,23 @@ export class BrandRepository {
       },
     });
   }
+
+  async findAllForDiscovery() {
+    return this.prisma.brandProfile.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+          },
+        },
+        products: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+  }
 }

@@ -231,4 +231,20 @@ export class BrandService {
 
     return Math.min(score, 100);
   }
+
+  async getDiscoveryBrands() {
+    const cacheKey = 'brand:discovery:all';
+    try {
+      const cached = await this.cacheManager.get<any>(cacheKey);
+      if (cached) return cached;
+    } catch (e) {}
+
+    const brands = await this.brandRepository.findAllForDiscovery();
+    
+    try {
+      await this.cacheManager.set(cacheKey, brands, 60 * 1000);
+    } catch (e) {}
+
+    return brands;
+  }
 }

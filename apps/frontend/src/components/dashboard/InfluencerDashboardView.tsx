@@ -66,6 +66,7 @@ export default function InfluencerDashboardView({
             userEmail={userEmail}
             userHandle={userHandle}
             avatarUrl={avatarUrl}
+            completionPercentage={completionPercentage}
           />
         );
       case 'profile-overview':

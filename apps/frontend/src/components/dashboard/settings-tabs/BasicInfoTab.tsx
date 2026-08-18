@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Check, Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2 } from 'lucide-react';
 import SingleBasicInfoCard from './subcomponents/SingleBasicInfoCard';
+import { useToast } from '@/components/ui/Toast';
 
 interface BasicInfoTabProps {
   userName?: string;
@@ -20,6 +21,7 @@ export default function BasicInfoTab({
   onSaveSuccess,
 }: BasicInfoTabProps) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+  const { toastSuccess, toastError } = useToast();
 
   const [name, setName] = useState(userName);
   const [handle, setHandle] = useState(userHandle.replace(/^@/, ''));
@@ -32,8 +34,6 @@ export default function BasicInfoTab({
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatar);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Fetch saved profile from DB on mount
   useEffect(() => {
@@ -73,7 +73,6 @@ export default function BasicInfoTab({
     const tempPreview = URL.createObjectURL(file);
     setAvatarUrl(tempPreview);
     setIsUploadingAvatar(true);
-    setErrorMsg(null);
 
     try {
       const formData = new FormData();
@@ -100,10 +99,11 @@ export default function BasicInfoTab({
       const data = await res.json();
       if (data.url) {
         setAvatarUrl(data.url);
+        toastSuccess('Profile picture updated successfully!');
       }
     } catch (err: any) {
       console.error('Image upload error:', err);
-      setErrorMsg(err.message || 'Image upload failed.');
+      toastError(err.message || 'Image upload failed.');
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -112,7 +112,6 @@ export default function BasicInfoTab({
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    setErrorMsg(null);
 
     const payload = {
       name,
@@ -160,7 +159,7 @@ export default function BasicInfoTab({
         if (updatedData.avatarUrl) setAvatarUrl(updatedData.avatarUrl);
       }
 
-      // Sync local storage for top bar
+      // Sync local storage for top bar & sidebar real-time progress
       const stored = localStorage.getItem('zerify_user');
       const userObj = stored ? JSON.parse(stored) : {};
       const updatedUser = {
@@ -171,16 +170,15 @@ export default function BasicInfoTab({
         avatarUrl: updatedData.avatarUrl || avatarUrl,
       };
       localStorage.setItem('zerify_user', JSON.stringify(updatedUser));
+      localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(updatedData));
+      window.dispatchEvent(new Event('zerify_influencer_profile_update'));
       window.dispatchEvent(new Event('zerify_auth_change'));
 
-      setSaved(true);
-      setTimeout(() => {
-        setSaved(false);
-        if (onSaveSuccess) onSaveSuccess();
-      }, 700);
+      toastSuccess('Basic info saved successfully!');
+      if (onSaveSuccess) onSaveSuccess();
     } catch (err: any) {
       console.error('Error saving profile:', err);
-      setErrorMsg(err.message || 'Failed to save settings to database.');
+      toastError(err.message || 'Failed to save settings to database.');
     } finally {
       setIsSaving(false);
     }
@@ -188,12 +186,6 @@ export default function BasicInfoTab({
 
   return (
     <form onSubmit={handleSave} className="space-y-5">
-      {errorMsg && (
-        <div className="p-3 rounded-lg bg-pink-500/10 border border-pink-500/30 text-xs text-pink-300 font-medium">
-          {errorMsg}
-        </div>
-      )}
-
       {/* Single Unified Card containing image upload, name, username, bio, location suggestions, contact & gender */}
       <SingleBasicInfoCard
         name={name}
@@ -222,13 +214,7 @@ export default function BasicInfoTab({
       <div className="flex items-center justify-end gap-3 pt-2">
         {isUploadingAvatar && (
           <span className="text-xs font-semibold text-purple-300 flex items-center gap-1.5 bg-purple-500/10 px-3 py-1.5 rounded-lg border border-purple-500/20">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading to Cloudinary...
-          </span>
-        )}
-
-        {saved && (
-          <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
-            <Check className="w-4 h-4" /> Basic Information Saved! Redirecting...
+            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading image...
           </span>
         )}
 

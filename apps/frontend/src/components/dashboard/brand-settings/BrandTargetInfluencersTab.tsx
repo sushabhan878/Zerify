@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Users, CheckCircle, Check, Loader2, Sparkles, ShieldCheck, DollarSign, Calendar, Sliders } from 'lucide-react';
 
 import CustomSelect, { SelectOption } from '../settings-tabs/subcomponents/CustomSelect';
+import { useToast } from '@/components/ui/Toast';
 
 interface BrandTargetInfluencersTabProps {
   initialData?: any;
@@ -34,6 +35,8 @@ const FREQUENCY_SELECT_OPTIONS: SelectOption[] = FREQUENCY_OPTIONS.map((f) => ({
 }));
 
 export default function BrandTargetInfluencersTab({ initialData, onSaveSuccess }: BrandTargetInfluencersTabProps) {
+  const { toastSuccess, toastError } = useToast();
+
   const [selectedTiers, setSelectedTiers] = useState<string[]>(initialData?.creatorTiers || ['Micro', 'Mid']);
   const [locations, setLocations] = useState<string[]>(initialData?.creatorLocations || ['India', 'USA']);
   const [preferredGender, setPreferredGender] = useState<string>(initialData?.preferredCreatorGender || 'Any');
@@ -56,7 +59,6 @@ export default function BrandTargetInfluencersTab({ initialData, onSaveSuccess }
   }, [initialData]);
 
   const [saving, setSaving] = useState(false);
-  const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const toggleArrayItem = (list: string[], item: string, setter: (val: string[]) => void) => {
     setter(list.includes(item) ? list.filter((i) => i !== item) : [...list, item]);
@@ -65,7 +67,6 @@ export default function BrandTargetInfluencersTab({ initialData, onSaveSuccess }
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setStatusMsg(null);
 
     try {
       const token = localStorage.getItem('zerify_token');
@@ -94,10 +95,10 @@ export default function BrandTargetInfluencersTab({ initialData, onSaveSuccess }
         window.dispatchEvent(new Event('zerify_brand_profile_update'));
       } catch (e) {}
 
-      setStatusMsg({ type: 'success', text: 'Targeted influencer preferences saved!' });
+      toastSuccess('Targeted influencer preferences saved successfully!');
       onSaveSuccess?.();
     } catch (err: any) {
-      setStatusMsg({ type: 'error', text: err.message || 'Error saving requirements.' });
+      toastError(err.message || 'Error saving requirements.');
     } finally {
       setSaving(false);
     }
@@ -105,13 +106,6 @@ export default function BrandTargetInfluencersTab({ initialData, onSaveSuccess }
 
   return (
     <form onSubmit={handleSave} className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-5 shadow-xl">
-
-
-      {statusMsg && (
-        <div className={`p-3 rounded-xl text-xs font-medium ${statusMsg.type === 'success' ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300' : 'bg-rose-500/10 border border-rose-500/30 text-rose-300'}`}>
-          {statusMsg.text}
-        </div>
-      )}
 
       {/* 1. Creator Tiers */}
       <div>

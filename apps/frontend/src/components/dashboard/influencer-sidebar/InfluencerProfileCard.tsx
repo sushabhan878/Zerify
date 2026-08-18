@@ -22,7 +22,7 @@ export default function InfluencerProfileCard({
   onCompleteProfile,
 }: InfluencerProfileCardProps) {
   const avatarChar = userName.charAt(0).toUpperCase();
-  const showCompletion = completionPercentage < 90;
+  const showCompletion = completionPercentage < 100;
 
   if (isCollapsed) {
     return (

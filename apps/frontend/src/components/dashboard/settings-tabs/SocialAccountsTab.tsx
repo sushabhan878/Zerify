@@ -13,12 +13,14 @@ import {
   Loader2,
 } from 'lucide-react';
 import SingleSocialAccountsCard, { SocialAccountItem } from './subcomponents/SingleSocialAccountsCard';
+import { useToast } from '@/components/ui/Toast';
 
 interface SocialAccountsTabProps {
   onSaveSuccess?: () => void;
 }
 
 export default function SocialAccountsTab({ onSaveSuccess }: SocialAccountsTabProps) {
+  const { toastSuccess, toastError } = useToast();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
   const [accounts, setAccounts] = useState<SocialAccountItem[]>([
@@ -206,13 +208,24 @@ export default function SocialAccountsTab({ onSaveSuccess }: SocialAccountsTabPr
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      await fetch(`${apiUrl}/influencer/social-accounts`, {
+      const res = await fetch(`${apiUrl}/influencer/social-accounts`, {
         method: 'PUT',
         headers,
         body: JSON.stringify(accounts),
       });
-    } catch (err) {
+
+      if (res.ok) {
+        const updatedData = await res.json();
+        try {
+          localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(updatedData));
+          window.dispatchEvent(new Event('zerify_influencer_profile_update'));
+        } catch (e) {}
+      }
+
+      toastSuccess('Social accounts updated successfully!');
+    } catch (err: any) {
       console.warn('API save failed, using client state:', err);
+      toastError('Failed to update social accounts.');
     } finally {
       setIsSaving(false);
       setSaved(true);

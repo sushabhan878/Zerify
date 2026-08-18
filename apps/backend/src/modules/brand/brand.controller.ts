@@ -97,4 +97,10 @@ export class BrandController {
     const userId = this.extractUserId(req);
     return this.brandService.completeOnboarding(userId);
   }
+
+  @Get('discovery')
+  @ApiOperation({ summary: 'Get all companies/brands for discovery directory' })
+  async getDiscovery() {
+    return this.brandService.getDiscoveryBrands();
+  }
 }
