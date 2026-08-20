@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import CampaignDiscoveryHeader from './campaign-discovery/CampaignDiscoveryHeader';
 import CampaignSearchBar from './campaign-discovery/CampaignSearchBar';
 import CampaignQuickFilters, {
   CampaignQuickFilterState,
@@ -439,13 +438,7 @@ export default function CampaignDiscoverySection() {
 
   return (
     <div className="space-y-5">
-      {/* 1. Header with Live Metrics */}
-      <CampaignDiscoveryHeader
-        totalCampaigns={SAMPLE_CAMPAIGNS.length}
-        filteredCount={filteredCampaigns.length}
-      />
-
-      {/* 2. Search Bar & Quick Filters */}
+      {/* 1. Search Bar & Quick Filters */}
       <div className="p-4 sm:p-5 rounded-2xl bg-slate-950/60 border border-white/10 backdrop-blur-xl space-y-3.5 shadow-xl">
         <CampaignSearchBar
           searchQuery={searchQuery}
