@@ -15,6 +15,7 @@ interface BrandSettingsSectionProps {
   userHandle?: string;
   companyName?: string;
   avatarUrl?: string;
+  initialData?: any;
 }
 
 type BrandTabType = 'info' | 'goals' | 'products' | 'creators' | 'escrow';
@@ -23,12 +24,28 @@ const BRAND_TAB_ORDER: BrandTabType[] = ['info', 'goals', 'products', 'creators'
 
 export default function BrandSettingsSection({
   companyName,
+  initialData,
 }: BrandSettingsSectionProps = {}) {
   const [activeTab, setActiveTab] = useState<BrandTabType>('info');
   const [direction, setDirection] = useState<number>(1);
-  const [profileData, setProfileData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [completion, setCompletion] = useState(65);
+  const [profileData, setProfileData] = useState<any>(() => {
+    if (initialData) return initialData;
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('zerify_brand_profile_cache');
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(() => {
+    if (initialData) return false;
+    if (typeof window !== 'undefined') {
+      return !localStorage.getItem('zerify_brand_profile_cache');
+    }
+    return false;
+  });
+  const [completion, setCompletion] = useState(() => profileData?.completionPercentage ?? 65);
 
   const fetchProfile = async (silent = false) => {
     try {
@@ -58,6 +75,16 @@ export default function BrandSettingsSection({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (initialData) {
+      setProfileData(initialData);
+      if (initialData.completionPercentage !== undefined) {
+        setCompletion(initialData.completionPercentage);
+      }
+      setLoading(false);
+    }
+  }, [initialData]);
 
   useEffect(() => {
     const cached = typeof window !== 'undefined' ? localStorage.getItem('zerify_brand_profile_cache') : null;

@@ -15,6 +15,7 @@ interface SettingsSectionProps {
   userHandle?: string;
   avatarUrl?: string;
   completionPercentage?: number;
+  initialData?: any;
 }
 
 type TabType = 'basic' | 'creator' | 'social' | 'portfolio' | 'payment';
@@ -27,10 +28,27 @@ export default function SettingsSection({
   userHandle,
   avatarUrl,
   completionPercentage,
+  initialData,
 }: SettingsSectionProps = {}) {
   const [activeTab, setActiveTab] = useState<TabType>('basic');
   const [direction, setDirection] = useState<number>(1);
   const [completion, setCompletion] = useState<number>(completionPercentage ?? 75);
+  const [profileData, setProfileData] = useState<any>(() => {
+    if (initialData) return initialData;
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('zerify_influencer_profile_cache');
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+    }
+    return null;
+  });
+
+  React.useEffect(() => {
+    if (initialData) {
+      setProfileData(initialData);
+    }
+  }, [initialData]);
 
   React.useEffect(() => {
     const syncCompletion = () => {
@@ -38,6 +56,7 @@ export default function SettingsSection({
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
+          setProfileData(parsed);
           if (parsed?.completionPercentage !== undefined) {
             setCompletion(parsed.completionPercentage);
           }
@@ -142,11 +161,22 @@ export default function SettingsSection({
                 userEmail={userEmail}
                 userHandle={userHandle}
                 avatarUrl={avatarUrl}
+                initialData={profileData}
                 onSaveSuccess={() => handleTabSave('creator')}
               />
             )}
-            {activeTab === 'creator' && <CreatorDetailsTab onSaveSuccess={() => handleTabSave('social')} />}
-            {activeTab === 'social' && <SocialAccountsTab onSaveSuccess={() => handleTabSave('portfolio')} />}
+            {activeTab === 'creator' && (
+              <CreatorDetailsTab
+                initialData={profileData}
+                onSaveSuccess={() => handleTabSave('social')}
+              />
+            )}
+            {activeTab === 'social' && (
+              <SocialAccountsTab
+                initialData={profileData}
+                onSaveSuccess={() => handleTabSave('portfolio')}
+              />
+            )}
             {activeTab === 'portfolio' && <PortfolioTab onSaveSuccess={() => handleTabSave('payment')} />}
             {activeTab === 'payment' && <PaymentSettingsTab onSaveSuccess={() => handleTabSave()} />}
           </motion.div>

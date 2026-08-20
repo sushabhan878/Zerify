@@ -24,6 +24,7 @@ interface InfluencerDashboardViewProps {
   activeRoute?: string;
   onSelectRoute?: (routeId: string) => void;
   completionPercentage?: number;
+  influencerProfile?: any;
 }
 
 export default function InfluencerDashboardView({
@@ -34,6 +35,7 @@ export default function InfluencerDashboardView({
   activeRoute = 'profile-overview',
   onSelectRoute,
   completionPercentage = 65,
+  influencerProfile,
 }: InfluencerDashboardViewProps) {
   const renderSection = () => {
     switch (activeRoute) {
@@ -67,6 +69,7 @@ export default function InfluencerDashboardView({
             userHandle={userHandle}
             avatarUrl={avatarUrl}
             completionPercentage={completionPercentage}
+            initialData={influencerProfile}
           />
         );
       case 'profile-overview':

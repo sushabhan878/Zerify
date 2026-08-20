@@ -129,7 +129,7 @@ export default function DashboardPage() {
           })
           .catch(() => {});
 
-        // Fetch Influencer Profile
+        // Fetch Influencer Profile and Social Accounts
         fetch(`${apiUrl}/influencer/profile`, { headers })
           .then((res) => (res.ok ? res.json() : null))
           .then((data) => {
@@ -137,6 +137,19 @@ export default function DashboardPage() {
               setInfluencerProfile(data);
               try {
                 localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(data));
+                window.dispatchEvent(new Event('zerify_influencer_profile_update'));
+              } catch (err) {}
+            }
+          })
+          .catch(() => {});
+
+        // Prefetch Social Accounts
+        fetch(`${apiUrl}/social/accounts`, { headers })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (data && Array.isArray(data.data)) {
+              try {
+                localStorage.setItem('zerify_social_accounts_cache', JSON.stringify(data.data));
               } catch (err) {}
             }
           })
@@ -277,6 +290,7 @@ export default function DashboardPage() {
                 activeRoute={activeRoute}
                 onSelectRoute={(route) => setActiveRoute(route)}
                 completionPercentage={completionPercentage}
+                brandProfile={brandProfile}
               />
             ) : (
               <InfluencerDashboardView
@@ -287,6 +301,7 @@ export default function DashboardPage() {
                 activeRoute={activeRoute}
                 onSelectRoute={(route) => setActiveRoute(route)}
                 completionPercentage={completionPercentage}
+                influencerProfile={influencerProfile}
               />
             )}
           </main>

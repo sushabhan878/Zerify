@@ -6,24 +6,52 @@ import SingleCreatorDetailsCard from './subcomponents/SingleCreatorDetailsCard';
 import { useToast } from '@/components/ui/Toast';
 
 interface CreatorDetailsTabProps {
+  initialData?: any;
   onSaveSuccess?: () => void;
 }
 
-export default function CreatorDetailsTab({ onSaveSuccess }: CreatorDetailsTabProps) {
+export default function CreatorDetailsTab({ initialData, onSaveSuccess }: CreatorDetailsTabProps) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
   const { toastSuccess, toastError } = useToast();
 
-  const [categories, setCategories] = useState<string[]>([]);
-  const [languages, setLanguages] = useState<string[]>([]);
-  const [minAmount, setMinAmount] = useState('');
-  const [currency, setCurrency] = useState('INR');
-  const [collabTypes, setCollabTypes] = useState<string[]>([]);
-  const [barterAvailable, setBarterAvailable] = useState(false);
-  const [travelReady, setTravelReady] = useState(true);
-  const [responseTime, setResponseTime] = useState('Within 24 hours');
+  const getCachedData = () => {
+    if (initialData) return initialData;
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('zerify_influencer_profile_cache');
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+    }
+    return null;
+  };
+
+  const cached = getCachedData();
+
+  const [categories, setCategories] = useState<string[]>(() => (Array.isArray(cached?.niches) ? cached.niches : []));
+  const [languages, setLanguages] = useState<string[]>(() => (Array.isArray(cached?.contentLanguages) ? cached.contentLanguages : []));
+  const [minAmount, setMinAmount] = useState<string>(() => (cached?.minPricePerReel != null ? String(cached.minPricePerReel) : ''));
+  const [currency, setCurrency] = useState<string>(() => cached?.currency || 'INR');
+  const [collabTypes, setCollabTypes] = useState<string[]>(() => (Array.isArray(cached?.collaborationTypes) ? cached.collaborationTypes : []));
+  const [barterAvailable, setBarterAvailable] = useState<boolean>(() => cached?.availableForBarter ?? false);
+  const [travelReady, setTravelReady] = useState<boolean>(() => cached?.availableForRelocation ?? false);
+  const [responseTime, setResponseTime] = useState<string>(() => cached?.responseTime || 'Within 24 hours');
   const [isSaving, setIsSaving] = useState(false);
 
-  // Fetch saved creator details from DB on mount
+  // Sync state whenever initialData changes
+  useEffect(() => {
+    if (initialData) {
+      if (Array.isArray(initialData.niches)) setCategories(initialData.niches);
+      if (Array.isArray(initialData.contentLanguages)) setLanguages(initialData.contentLanguages);
+      if (initialData.minPricePerReel != null) setMinAmount(String(initialData.minPricePerReel));
+      if (initialData.currency) setCurrency(initialData.currency);
+      if (Array.isArray(initialData.collaborationTypes)) setCollabTypes(initialData.collaborationTypes);
+      if (initialData.availableForBarter !== undefined) setBarterAvailable(initialData.availableForBarter);
+      if (initialData.availableForRelocation !== undefined) setTravelReady(initialData.availableForRelocation);
+      if (initialData.responseTime) setResponseTime(initialData.responseTime);
+    }
+  }, [initialData]);
+
+  // Fetch in background to ensure fresh cache
   useEffect(() => {
     async function loadCreatorDetails() {
       try {
@@ -46,9 +74,13 @@ export default function CreatorDetailsTab({ onSaveSuccess }: CreatorDetailsTabPr
           if (data.availableForBarter !== undefined) setBarterAvailable(data.availableForBarter);
           if (data.availableForRelocation !== undefined) setTravelReady(data.availableForRelocation);
           if (data.responseTime) setResponseTime(data.responseTime);
+
+          try {
+            localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(data));
+          } catch (e) {}
         }
       } catch (err) {
-        console.warn('Could not load creator details from DB:', err);
+        // Silently use cached data
       }
     }
     loadCreatorDetails();

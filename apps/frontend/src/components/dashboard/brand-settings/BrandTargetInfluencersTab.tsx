@@ -37,19 +37,32 @@ const FREQUENCY_SELECT_OPTIONS: SelectOption[] = FREQUENCY_OPTIONS.map((f) => ({
 export default function BrandTargetInfluencersTab({ initialData, onSaveSuccess }: BrandTargetInfluencersTabProps) {
   const { toastSuccess, toastError } = useToast();
 
-  const [selectedTiers, setSelectedTiers] = useState<string[]>(initialData?.creatorTiers || ['Micro', 'Mid']);
-  const [locations, setLocations] = useState<string[]>(initialData?.creatorLocations || ['India', 'USA']);
-  const [preferredGender, setPreferredGender] = useState<string>(initialData?.preferredCreatorGender || 'Any');
-  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(initialData?.verifiedOnly ?? false);
-  const [minEngagement, setMinEngagement] = useState<number>(initialData?.minEngagementRate ?? 2.0);
-  const [budget, setBudget] = useState<string>(initialData?.campaignBudget || '$1,000 – $5,000');
-  const [frequency, setFrequency] = useState<string>(initialData?.campaignFrequency || 'Monthly Recurring');
+  const getCachedData = () => {
+    if (initialData) return initialData;
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('zerify_brand_profile_cache');
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+    }
+    return null;
+  };
+
+  const cached = getCachedData();
+
+  const [selectedTiers, setSelectedTiers] = useState<string[]>(() => cached?.creatorTiers || []);
+  const [locations, setLocations] = useState<string[]>(() => cached?.creatorLocations || []);
+  const [preferredGender, setPreferredGender] = useState<string>(() => cached?.preferredCreatorGender || 'Any');
+  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(() => cached?.verifiedOnly ?? false);
+  const [minEngagement, setMinEngagement] = useState<number>(() => cached?.minEngagementRate ?? 2.0);
+  const [budget, setBudget] = useState<string>(() => cached?.campaignBudget || '$5,000 – $20,000');
+  const [frequency, setFrequency] = useState<string>(() => cached?.campaignFrequency || 'Monthly Recurring');
 
   // Sync state whenever initialData changes from backend API
   React.useEffect(() => {
     if (initialData) {
-      if (initialData.creatorTiers && initialData.creatorTiers.length > 0) setSelectedTiers(initialData.creatorTiers);
-      if (initialData.creatorLocations && initialData.creatorLocations.length > 0) setLocations(initialData.creatorLocations);
+      if (initialData.creatorTiers !== undefined) setSelectedTiers(initialData.creatorTiers || []);
+      if (initialData.creatorLocations !== undefined) setLocations(initialData.creatorLocations || []);
       if (initialData.preferredCreatorGender) setPreferredGender(initialData.preferredCreatorGender);
       if (initialData.verifiedOnly !== undefined) setVerifiedOnly(initialData.verifiedOnly);
       if (initialData.minEngagementRate !== undefined && initialData.minEngagementRate !== null) setMinEngagement(initialData.minEngagementRate);

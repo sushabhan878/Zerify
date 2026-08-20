@@ -12,7 +12,21 @@ interface BrandProductServicesTabProps {
 }
 
 export default function BrandProductServicesTab({ initialProducts = [], onSaveSuccess }: BrandProductServicesTabProps) {
-  const [products, setProducts] = useState<any[]>(initialProducts);
+  const getCachedProducts = () => {
+    if (initialProducts && initialProducts.length > 0) return initialProducts;
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('zerify_brand_profile_cache');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed.products)) return parsed.products;
+        }
+      } catch (e) {}
+    }
+    return [];
+  };
+
+  const [products, setProducts] = useState<any[]>(() => getCachedProducts());
   const [showAddForm, setShowAddForm] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -24,8 +38,8 @@ export default function BrandProductServicesTab({ initialProducts = [], onSaveSu
   const [name, setName] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [productUrl, setProductUrl] = useState('');
-  const [category, setCategory] = useState('Apparel & Accessories');
-  const [price, setPrice] = useState('$99');
+  const [category, setCategory] = useState('Software & SaaS');
+  const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
 
   // Sync products list whenever initialProducts prop updates from backend

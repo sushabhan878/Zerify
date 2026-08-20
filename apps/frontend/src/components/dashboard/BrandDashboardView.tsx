@@ -24,6 +24,7 @@ interface BrandDashboardViewProps {
   activeRoute?: string;
   onSelectRoute?: (routeId: string) => void;
   completionPercentage?: number;
+  brandProfile?: any;
 }
 
 export default function BrandDashboardView({
@@ -35,6 +36,7 @@ export default function BrandDashboardView({
   activeRoute = 'search-creators',
   onSelectRoute,
   completionPercentage = 65,
+  brandProfile,
 }: BrandDashboardViewProps) {
   const renderSection = () => {
     switch (activeRoute) {
@@ -66,6 +68,7 @@ export default function BrandDashboardView({
             userHandle={userHandle}
             companyName={companyName}
             avatarUrl={avatarUrl}
+            initialData={brandProfile}
           />
         );
       case 'search-creators':

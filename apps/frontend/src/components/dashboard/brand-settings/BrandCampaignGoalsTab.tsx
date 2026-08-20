@@ -76,14 +76,27 @@ export const INTEREST_TAGS = [
 
 export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: BrandCampaignGoalsTabProps) {
   const { toastSuccess, toastError } = useToast();
-  const [goals, setGoals] = useState<string[]>(initialData?.primaryGoals || ['Brand Awareness', 'Sales & Conversions']);
-  const [platforms, setPlatforms] = useState<string[]>(initialData?.targetPlatforms || ['Instagram', 'YouTube']);
-  
-  const audience = initialData?.targetAudience || {};
-  const [ageRanges, setAgeRanges] = useState<string[]>(audience.ageRanges || ['18-24', '25-34']);
-  const [targetGender, setTargetGender] = useState<string>(audience.gender || 'All');
-  const [locations, setLocations] = useState<string[]>(audience.locations || ['India', 'USA']);
-  const [interests, setInterests] = useState<string[]>(audience.interests || ['Fashion & Apparel', 'Tech & Gadgets']);
+
+  const getCachedData = () => {
+    if (initialData) return initialData;
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('zerify_brand_profile_cache');
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+    }
+    return null;
+  };
+
+  const cached = getCachedData();
+  const audience = cached?.targetAudience || {};
+
+  const [goals, setGoals] = useState<string[]>(() => cached?.primaryGoals || []);
+  const [platforms, setPlatforms] = useState<string[]>(() => cached?.targetPlatforms || []);
+  const [ageRanges, setAgeRanges] = useState<string[]>(() => audience.ageRanges || []);
+  const [targetGender, setTargetGender] = useState<string>(() => audience.gender || 'All');
+  const [locations, setLocations] = useState<string[]>(() => audience.locations || []);
+  const [interests, setInterests] = useState<string[]>(() => audience.interests || []);
   const [customNicheInput, setCustomNicheInput] = useState('');
   const [extraTags, setExtraTags] = useState<string[]>([]);
 

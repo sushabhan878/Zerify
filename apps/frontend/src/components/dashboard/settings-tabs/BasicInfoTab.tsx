@@ -10,6 +10,7 @@ interface BasicInfoTabProps {
   userEmail?: string;
   userHandle?: string;
   avatarUrl?: string | null;
+  initialData?: any;
   onSaveSuccess?: () => void;
 }
 
@@ -18,24 +19,53 @@ export default function BasicInfoTab({
   userEmail = 'user@zerify.io',
   userHandle = '@user',
   avatarUrl: initialAvatar = null,
+  initialData,
   onSaveSuccess,
 }: BasicInfoTabProps) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
   const { toastSuccess, toastError } = useToast();
 
-  const [name, setName] = useState(userName);
-  const [handle, setHandle] = useState(userHandle.replace(/^@/, ''));
-  const [bio, setBio] = useState('');
-  const [location, setLocation] = useState('San Francisco, CA, United States');
-  const [phoneCode, setPhoneCode] = useState('+1');
-  const [phoneNumber, setPhoneNumber] = useState('415-555-0192');
-  const [dob, setDob] = useState('1996-08-14');
-  const [gender, setGender] = useState('Female');
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatar);
+  const getCachedData = () => {
+    if (initialData) return initialData;
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('zerify_influencer_profile_cache');
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+    }
+    return null;
+  };
+
+  const cached = getCachedData();
+
+  const [name, setName] = useState(() => cached?.user?.name || cached?.name || userName || '');
+  const [handle, setHandle] = useState(() => (cached?.handle || userHandle || '').replace(/^@/, ''));
+  const [bio, setBio] = useState(() => cached?.bio || '');
+  const [location, setLocation] = useState(() => cached?.location || '');
+  const [phoneCode, setPhoneCode] = useState(() => cached?.phoneCode || '+1');
+  const [phoneNumber, setPhoneNumber] = useState(() => cached?.phoneNumber || '');
+  const [dob, setDob] = useState(() => (cached?.dob ? new Date(cached.dob).toISOString().split('T')[0] : ''));
+  const [gender, setGender] = useState(() => cached?.gender || 'Prefer not to say');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(() => cached?.avatarUrl || cached?.user?.avatarUrl || initialAvatar || null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Fetch saved profile from DB on mount
+  // Sync state whenever initialData changes
+  useEffect(() => {
+    if (initialData) {
+      if (initialData.user?.name) setName(initialData.user.name);
+      if (initialData.handle) setHandle(initialData.handle.replace(/^@/, ''));
+      if (initialData.bio !== undefined && initialData.bio !== null) setBio(initialData.bio);
+      if (initialData.location !== undefined) setLocation(initialData.location || '');
+      if (initialData.phoneCode !== undefined) setPhoneCode(initialData.phoneCode || '+1');
+      if (initialData.phoneNumber !== undefined) setPhoneNumber(initialData.phoneNumber || '');
+      if (initialData.dob) setDob(new Date(initialData.dob).toISOString().split('T')[0]);
+      if (initialData.gender) setGender(initialData.gender);
+      if (initialData.avatarUrl !== undefined) setAvatarUrl(initialData.avatarUrl || null);
+    }
+  }, [initialData]);
+
+  // Fetch saved profile in background to update cache
   useEffect(() => {
     async function loadProfile() {
       try {
@@ -51,15 +81,19 @@ export default function BasicInfoTab({
           if (data.user?.name) setName(data.user.name);
           if (data.handle) setHandle(data.handle.replace(/^@/, ''));
           if (data.bio !== undefined && data.bio !== null) setBio(data.bio);
-          if (data.location) setLocation(data.location);
+          if (data.location !== undefined) setLocation(data.location || '');
           if (data.phoneCode) setPhoneCode(data.phoneCode);
-          if (data.phoneNumber) setPhoneNumber(data.phoneNumber);
+          if (data.phoneNumber !== undefined) setPhoneNumber(data.phoneNumber || '');
           if (data.dob) setDob(new Date(data.dob).toISOString().split('T')[0]);
           if (data.gender) setGender(data.gender);
           if (data.avatarUrl) setAvatarUrl(data.avatarUrl);
+
+          try {
+            localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(data));
+          } catch (e) {}
         }
       } catch (err) {
-        console.warn('Could not connect to backend API, using initial props');
+        // Silently use cached data
       }
     }
     loadProfile();

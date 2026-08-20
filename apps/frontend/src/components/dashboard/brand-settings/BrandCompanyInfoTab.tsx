@@ -97,21 +97,34 @@ const BRAND_VALUES_OPTIONS = [
 export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: BrandCompanyInfoTabProps) {
   const { toastSuccess, toastError } = useToast();
 
-  const [companyName, setCompanyName] = useState(initialData?.companyName || '');
-  const [logoUrl, setLogoUrl] = useState(initialData?.logoUrl || '');
-  const [website, setWebsite] = useState(initialData?.website || '');
-  const [industry, setIndustry] = useState(initialData?.industry || 'E-commerce & Retail');
-  const [location, setLocation] = useState(initialData?.location || '');
-  const [foundedYear, setFoundedYear] = useState(initialData?.foundedYear || '');
-  const [description, setDescription] = useState(initialData?.description || '');
-  const [selectedValues, setSelectedValues] = useState<string[]>(initialData?.brandValues || ['Quality', 'Innovation']);
+  const getCachedData = () => {
+    if (initialData) return initialData;
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('zerify_brand_profile_cache');
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+    }
+    return null;
+  };
+
+  const cached = getCachedData();
+
+  const [companyName, setCompanyName] = useState(() => cached?.companyName || '');
+  const [logoUrl, setLogoUrl] = useState(() => cached?.logoUrl || '');
+  const [website, setWebsite] = useState(() => cached?.website || '');
+  const [industry, setIndustry] = useState(() => cached?.industry || 'Software & SaaS');
+  const [location, setLocation] = useState(() => cached?.location || '');
+  const [foundedYear, setFoundedYear] = useState(() => cached?.foundedYear || '');
+  const [description, setDescription] = useState(() => cached?.description || '');
+  const [selectedValues, setSelectedValues] = useState<string[]>(() => cached?.brandValues || []);
   
-  const [instagram, setInstagram] = useState(initialData?.socialLinks?.instagram || '');
-  const [linkedin, setLinkedin] = useState(initialData?.socialLinks?.linkedin || '');
-  const [twitter, setTwitter] = useState(initialData?.socialLinks?.twitter || '');
-  const [youtube, setYoutube] = useState(initialData?.socialLinks?.youtube || '');
-  const [customLinks, setCustomLinks] = useState<CustomSocialLink[]>(
-    initialData?.socialLinks?.customLinks || []
+  const [instagram, setInstagram] = useState(() => cached?.socialLinks?.instagram || '');
+  const [linkedin, setLinkedin] = useState(() => cached?.socialLinks?.linkedin || '');
+  const [twitter, setTwitter] = useState(() => cached?.socialLinks?.twitter || '');
+  const [youtube, setYoutube] = useState(() => cached?.socialLinks?.youtube || '');
+  const [customLinks, setCustomLinks] = useState<CustomSocialLink[]>(() =>
+    Array.isArray(cached?.socialLinks?.customLinks) ? cached.socialLinks.customLinks : []
   );
 
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -127,11 +140,11 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
       if (initialData.companyName !== undefined) setCompanyName(initialData.companyName || '');
       if (initialData.logoUrl !== undefined) setLogoUrl(initialData.logoUrl || '');
       if (initialData.website !== undefined) setWebsite(initialData.website || '');
-      if (initialData.industry !== undefined) setIndustry(initialData.industry || 'E-commerce & Retail');
+      if (initialData.industry !== undefined) setIndustry(initialData.industry || 'Software & SaaS');
       if (initialData.location !== undefined) setLocation(initialData.location || '');
       if (initialData.foundedYear !== undefined) setFoundedYear(initialData.foundedYear || '');
       if (initialData.description !== undefined) setDescription(initialData.description || '');
-      if (initialData.brandValues && initialData.brandValues.length > 0) setSelectedValues(initialData.brandValues);
+      if (initialData.brandValues !== undefined) setSelectedValues(initialData.brandValues || []);
       if (initialData.socialLinks) {
         if (initialData.socialLinks.instagram !== undefined) setInstagram(initialData.socialLinks.instagram || '');
         if (initialData.socialLinks.linkedin !== undefined) setLinkedin(initialData.socialLinks.linkedin || '');
