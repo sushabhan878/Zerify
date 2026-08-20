@@ -1,67 +1,114 @@
 'use client';
 
-import React from 'react';
-import { SlidersHorizontal, ArrowUpDown, Filter } from 'lucide-react';
-
-export type CampaignSortOption =
-  | 'matchScore'
-  | 'highestBudget'
-  | 'lowestBudget'
-  | 'newest'
-  | 'endingSoon';
+import React, { useState } from 'react';
+import { ArrowUpDown, LayoutGrid, List, ChevronDown, Check } from 'lucide-react';
 
 interface CampaignSortAndControlsProps {
-  sortBy: CampaignSortOption;
-  onSortChange: (val: CampaignSortOption) => void;
-  onOpenAdvancedFilters: () => void;
-  activeFilterCount: number;
-  totalResults: number;
+  count: number;
+  sortBy: string;
+  onSortChange: (val: string) => void;
+  viewMode: 'grid' | 'list';
+  onViewModeChange: (mode: 'grid' | 'list') => void;
 }
 
+const SORT_OPTIONS = [
+  { label: 'Best Match (Match Score)', value: 'matchScore' },
+  { label: 'Highest Budget', value: 'highestBudget' },
+  { label: 'Lowest Budget', value: 'lowestBudget' },
+  { label: 'Newest Posted', value: 'newest' },
+  { label: 'Ending Soonest', value: 'endingSoon' },
+];
+
 export default function CampaignSortAndControls({
+  count,
   sortBy,
   onSortChange,
-  onOpenAdvancedFilters,
-  activeFilterCount,
-  totalResults,
+  viewMode,
+  onViewModeChange,
 }: CampaignSortAndControlsProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const currentOption = SORT_OPTIONS.find((opt) => opt.value === sortBy) || SORT_OPTIONS[0];
+
   return (
-    <div className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
-      <div className="text-xs text-slate-400 font-medium">
-        Showing <span className="font-bold text-white">{totalResults}</span> active campaign opportunities
+    <div className="flex items-center justify-between gap-4 py-2 text-xs border-b border-white/5 relative z-20">
+      <div className="text-slate-400 font-medium">
+        Showing <span className="text-white font-extrabold">{count}</span> campaign opportunities
       </div>
 
-      <div className="flex items-center gap-2">
-        {/* Sort Select */}
-        <div className="relative flex items-center">
-          <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" />
-          <select
-            value={sortBy}
-            onChange={(e) => onSortChange(e.target.value as CampaignSortOption)}
-            className="pl-8 pr-7 py-2 rounded-xl bg-slate-900/80 border border-white/10 text-xs font-semibold text-white focus:outline-none focus:border-purple-500/80 appearance-none cursor-pointer hover:bg-slate-800/90 transition-colors"
+      <div className="flex items-center gap-3">
+        {/* Custom Sort Dropdown */}
+        <div className="relative">
+          {isOpen && (
+            <div
+              className="fixed inset-0 z-30 bg-transparent"
+              onClick={() => setIsOpen(false)}
+            />
+          )}
+
+          <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            className="flex items-center gap-1.5 bg-slate-900 border border-white/10 hover:border-white/20 px-3 py-1.5 rounded-xl text-slate-300 font-bold transition-all relative z-40"
           >
-            <option value="matchScore">Best Match %</option>
-            <option value="highestBudget">Highest Budget</option>
-            <option value="lowestBudget">Lowest Budget</option>
-            <option value="newest">Newest First</option>
-            <option value="endingSoon">Ending Soonest</option>
-          </select>
+            <ArrowUpDown className="w-3.5 h-3.5 text-purple-400" />
+            <span className="text-slate-400 font-medium hidden sm:inline">Sort:</span>
+            <span className="text-white">{currentOption.label}</span>
+            <ChevronDown className="w-3.5 h-3.5 opacity-70 ml-0.5" />
+          </button>
+
+          {isOpen && (
+            <div className="absolute top-full right-0 mt-1.5 w-56 max-h-64 overflow-y-auto bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+              {SORT_OPTIONS.map((opt) => {
+                const isSelected = opt.value === sortBy;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      onSortChange(opt.value);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
+                      isSelected
+                        ? 'bg-purple-500/20 text-purple-200 font-semibold border border-purple-500/30'
+                        : 'text-slate-300 hover:bg-slate-800/80'
+                    }`}
+                  >
+                    <span>{opt.label}</span>
+                    {isSelected && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Advanced Filters Button */}
-        <button
-          onClick={onOpenAdvancedFilters}
-          type="button"
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900/80 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/40 text-xs font-bold text-slate-200 hover:text-white transition-all shadow-sm group"
-        >
-          <SlidersHorizontal className="w-3.5 h-3.5 text-purple-400 group-hover:scale-110 transition-transform" />
-          <span>Filters</span>
-          {activeFilterCount > 0 && (
-            <span className="px-1.5 py-0.2 rounded-full bg-purple-600 text-white text-[10px] font-black">
-              {activeFilterCount}
-            </span>
-          )}
-        </button>
+        {/* View Mode Grid/List Toggle */}
+        <div className="flex items-center bg-slate-900 border border-white/10 p-1 rounded-xl gap-1">
+          <button
+            onClick={() => onViewModeChange('grid')}
+            className={`p-1.5 rounded-lg transition-colors ${
+              viewMode === 'grid'
+                ? 'bg-purple-500/20 text-purple-200 border border-purple-500/30'
+                : 'text-slate-400 hover:text-white'
+            }`}
+            title="Grid View"
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => onViewModeChange('list')}
+            className={`p-1.5 rounded-lg transition-colors ${
+              viewMode === 'list'
+                ? 'bg-purple-500/20 text-purple-200 border border-purple-500/30'
+                : 'text-slate-400 hover:text-white'
+            }`}
+            title="List View"
+          >
+            <List className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   );

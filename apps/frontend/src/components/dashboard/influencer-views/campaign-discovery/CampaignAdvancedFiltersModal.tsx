@@ -4,7 +4,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, SlidersHorizontal, RotateCcw, Check, Sparkles, ShieldCheck } from 'lucide-react';
-import { CAMPAIGN_CATEGORIES, DELIVERABLE_TYPES, PAYOUT_MODELS } from './CampaignQuickFilters';
+import { CAMPAIGN_CATEGORIES, CAMPAIGN_TYPES } from './CampaignQuickFilters';
 
 export interface CampaignAdvancedFilterState {
   category: string;

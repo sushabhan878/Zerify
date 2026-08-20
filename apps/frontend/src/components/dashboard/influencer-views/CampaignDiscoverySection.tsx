@@ -6,9 +6,7 @@ import CampaignQuickFilters, {
   CampaignQuickFilterState,
 } from './campaign-discovery/CampaignQuickFilters';
 import CampaignActiveFilterChips from './campaign-discovery/CampaignActiveFilterChips';
-import CampaignSortAndControls, {
-  CampaignSortOption,
-} from './campaign-discovery/CampaignSortAndControls';
+import CampaignSortAndControls from './campaign-discovery/CampaignSortAndControls';
 import CampaignCard, { CampaignItem } from './campaign-discovery/CampaignCard';
 import CampaignDetailModal from './campaign-discovery/CampaignDetailModal';
 import CampaignPitchModal from './campaign-discovery/CampaignPitchModal';
@@ -20,8 +18,8 @@ import CampaignLoadingSkeleton from './campaign-discovery/CampaignLoadingSkeleto
 import { AlertCircle } from 'lucide-react';
 
 const INITIAL_FILTERS: CampaignAdvancedFilterState = {
-  category: 'All Campaigns',
-  deliverableType: 'All Deliverables',
+  category: 'All',
+  deliverableType: 'All Types',
   payoutModel: 'All Payouts',
   budgetRange: 'Any Budget',
   platform: 'All Platforms',
@@ -274,12 +272,15 @@ function parseBudgetNumeric(str: string): number {
 export default function CampaignDiscoverySection() {
   const [searchQuery, setSearchQuery] = useState('');
   const [quickFilters, setQuickFilters] = useState<CampaignQuickFilterState>({
-    category: 'All Campaigns',
-    deliverableType: 'All Deliverables',
-    payoutModel: 'All Payouts',
+    category: 'All',
+    budgetRange: 'Any Budget',
+    minMatchScore: 0,
+    platform: 'All Platforms',
+    campaignType: 'All Types',
   });
   const [advancedFilters, setAdvancedFilters] = useState<CampaignAdvancedFilterState>(INITIAL_FILTERS);
-  const [sortBy, setSortBy] = useState<CampaignSortOption>('matchScore');
+  const [sortBy, setSortBy] = useState<string>('matchScore');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
 
@@ -296,7 +297,7 @@ export default function CampaignDiscoverySection() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleQuickFilterChange = (key: keyof CampaignQuickFilterState, val: string) => {
+  const handleQuickFilterChange = (key: keyof CampaignQuickFilterState, val: any) => {
     setQuickFilters((prev) => ({ ...prev, [key]: val }));
     setAdvancedFilters((prev) => ({ ...prev, [key]: val }));
     setCurrentPage(1);
@@ -306,8 +307,10 @@ export default function CampaignDiscoverySection() {
     setAdvancedFilters(newFilters);
     setQuickFilters({
       category: newFilters.category,
-      deliverableType: newFilters.deliverableType,
-      payoutModel: newFilters.payoutModel,
+      budgetRange: newFilters.budgetRange,
+      minMatchScore: newFilters.minMatchScore,
+      platform: newFilters.platform,
+      campaignType: newFilters.deliverableType,
     });
     setCurrentPage(1);
   };
@@ -315,9 +318,11 @@ export default function CampaignDiscoverySection() {
   const handleResetFilters = () => {
     setSearchQuery('');
     setQuickFilters({
-      category: 'All Campaigns',
-      deliverableType: 'All Deliverables',
-      payoutModel: 'All Payouts',
+      category: 'All',
+      budgetRange: 'Any Budget',
+      minMatchScore: 0,
+      platform: 'All Platforms',
+      campaignType: 'All Types',
     });
     setAdvancedFilters(INITIAL_FILTERS);
     setCurrentPage(1);
@@ -337,26 +342,26 @@ export default function CampaignDiscoverySection() {
       }
 
       // 2. Category
-      if (quickFilters.category !== 'All Campaigns' && quickFilters.category !== 'All') {
+      if (quickFilters.category !== 'All') {
         if (c.category !== quickFilters.category) return false;
       }
 
-      // 3. Deliverable Type
-      if (quickFilters.deliverableType !== 'All Deliverables' && quickFilters.deliverableType !== 'All') {
+      // 3. Deliverable / Campaign Type
+      if (quickFilters.campaignType !== 'All Types' && quickFilters.campaignType !== 'All') {
         const hasDel = c.deliverables.some((d) =>
-          d.toLowerCase().includes(quickFilters.deliverableType.toLowerCase())
+          d.toLowerCase().includes(quickFilters.campaignType.toLowerCase())
         );
         if (!hasDel) return false;
       }
 
-      // 4. Payout Model
-      if (quickFilters.payoutModel !== 'All Payouts' && quickFilters.payoutModel !== 'All') {
-        if (c.payoutModel !== quickFilters.payoutModel) return false;
+      // 4. Platform Filter
+      if (quickFilters.platform !== 'All Platforms' && quickFilters.platform !== 'All') {
+        if (!c.targetPlatforms.includes(quickFilters.platform as any)) return false;
       }
 
-      // 5. Platform Filter
-      if (advancedFilters.platform !== 'All Platforms' && advancedFilters.platform !== 'All') {
-        if (!c.targetPlatforms.includes(advancedFilters.platform as any)) return false;
+      // 5. Minimum Match Score
+      if (quickFilters.minMatchScore > 0 && c.matchScore < quickFilters.minMatchScore) {
+        return false;
       }
 
       // 6. Verified Brand
@@ -364,11 +369,6 @@ export default function CampaignDiscoverySection() {
 
       // 7. Escrow Only
       if (advancedFilters.isEscrowOnly && !c.isEscrowGuaranteed) return false;
-
-      // 8. Minimum Match Score
-      if (advancedFilters.minMatchScore > 0 && c.matchScore < advancedFilters.minMatchScore) {
-        return false;
-      }
 
       return true;
     });
@@ -402,20 +402,20 @@ export default function CampaignDiscoverySection() {
   // Active Filter Chips
   const activeChips = useMemo(() => {
     const chips: { key: string; label: string }[] = [];
-    if (quickFilters.category !== 'All Campaigns') {
-      chips.push({ key: 'category', label: `Niche: ${quickFilters.category}` });
+    if (quickFilters.category !== 'All') {
+      chips.push({ key: 'category', label: `Category: ${quickFilters.category}` });
     }
-    if (quickFilters.deliverableType !== 'All Deliverables') {
-      chips.push({ key: 'deliverableType', label: `Deliverable: ${quickFilters.deliverableType}` });
+    if (quickFilters.budgetRange !== 'Any Budget') {
+      chips.push({ key: 'budgetRange', label: `Budget: ${quickFilters.budgetRange}` });
     }
-    if (advancedFilters.budgetRange !== 'Any Budget') {
-      chips.push({ key: 'budgetRange', label: `Budget: ${advancedFilters.budgetRange}` });
+    if (quickFilters.minMatchScore > 0) {
+      chips.push({ key: 'minMatchScore', label: `Min ${quickFilters.minMatchScore}% Match` });
     }
-    if (advancedFilters.platform !== 'All Platforms') {
-      chips.push({ key: 'platform', label: `Platform: ${advancedFilters.platform}` });
+    if (quickFilters.platform !== 'All Platforms') {
+      chips.push({ key: 'platform', label: `Platform: ${quickFilters.platform}` });
     }
-    if (advancedFilters.minMatchScore > 0) {
-      chips.push({ key: 'minMatchScore', label: `Min ${advancedFilters.minMatchScore}% Match` });
+    if (quickFilters.campaignType !== 'All Types') {
+      chips.push({ key: 'campaignType', label: `Type: ${quickFilters.campaignType}` });
     }
     if (advancedFilters.isVerifiedOnly) {
       chips.push({ key: 'isVerifiedOnly', label: 'Verified Brands Only' });
@@ -427,50 +427,51 @@ export default function CampaignDiscoverySection() {
   }, [quickFilters, advancedFilters]);
 
   const handleRemoveChip = (key: string) => {
-    if (key === 'category') handleQuickFilterChange('category', 'All Campaigns');
-    if (key === 'deliverableType') handleQuickFilterChange('deliverableType', 'All Deliverables');
-    if (key === 'budgetRange') setAdvancedFilters((prev) => ({ ...prev, budgetRange: 'Any Budget' }));
-    if (key === 'platform') setAdvancedFilters((prev) => ({ ...prev, platform: 'All Platforms' }));
-    if (key === 'minMatchScore') setAdvancedFilters((prev) => ({ ...prev, minMatchScore: 0 }));
+    if (key === 'category') handleQuickFilterChange('category', 'All');
+    if (key === 'budgetRange') handleQuickFilterChange('budgetRange', 'Any Budget');
+    if (key === 'minMatchScore') handleQuickFilterChange('minMatchScore', 0);
+    if (key === 'platform') handleQuickFilterChange('platform', 'All Platforms');
+    if (key === 'campaignType') handleQuickFilterChange('campaignType', 'All Types');
     if (key === 'isVerifiedOnly') setAdvancedFilters((prev) => ({ ...prev, isVerifiedOnly: false }));
     if (key === 'isEscrowOnly') setAdvancedFilters((prev) => ({ ...prev, isEscrowOnly: false }));
   };
 
   return (
-    <div className="space-y-5">
-      {/* 1. Search Bar & Quick Filters */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-slate-950/60 border border-white/10 backdrop-blur-xl space-y-3.5 shadow-xl">
-        <CampaignSearchBar
-          searchQuery={searchQuery}
-          onSearchChange={(q) => {
-            setSearchQuery(q);
-            setCurrentPage(1);
-          }}
-          onClear={() => setSearchQuery('')}
-        />
-
-        <CampaignQuickFilters
-          filters={quickFilters}
-          onChange={handleQuickFilterChange}
-        />
-
-        <CampaignActiveFilterChips
-          chips={activeChips}
-          onRemoveChip={handleRemoveChip}
-          onResetAll={handleResetFilters}
-        />
-      </div>
-
-      {/* 3. Controls Bar: Sort Dropdown & Advanced Filter Modal Trigger */}
-      <CampaignSortAndControls
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        onOpenAdvancedFilters={() => setIsFiltersModalOpen(true)}
-        activeFilterCount={activeChips.length}
-        totalResults={filteredCampaigns.length}
+    <div className="space-y-4">
+      {/* 1. Full-Width Search Input */}
+      <CampaignSearchBar
+        value={searchQuery}
+        onChange={(val) => {
+          setSearchQuery(val);
+          setCurrentPage(1);
+        }}
       />
 
-      {/* 4. Grid of Campaign Cards */}
+      {/* 2. Dropdown Filter Pills & All Filters Button */}
+      <CampaignQuickFilters
+        filters={quickFilters}
+        onFilterChange={handleQuickFilterChange}
+        onOpenAdvancedModal={() => setIsFiltersModalOpen(true)}
+        activeCount={activeChips.length}
+      />
+
+      {/* 3. Active Filter Chips (if any) */}
+      <CampaignActiveFilterChips
+        chips={activeChips}
+        onRemoveChip={handleRemoveChip}
+        onResetAll={handleResetFilters}
+      />
+
+      {/* 4. Controls Bar: Showing count, Sort Dropdown & Grid/List Toggle */}
+      <CampaignSortAndControls
+        count={filteredCampaigns.length}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+      />
+
+      {/* 5. Grid of Campaign Cards */}
       {isLoading ? (
         <CampaignLoadingSkeleton />
       ) : paginatedCampaigns.length === 0 ? (
@@ -491,7 +492,13 @@ export default function CampaignDiscoverySection() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <div
+          className={
+            viewMode === 'grid'
+              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5'
+              : 'space-y-4'
+          }
+        >
           {paginatedCampaigns.map((camp) => (
             <CampaignCard
               key={camp.id}
@@ -503,7 +510,7 @@ export default function CampaignDiscoverySection() {
         </div>
       )}
 
-      {/* 5. Pagination */}
+      {/* 6. Pagination */}
       {!isLoading && (
         <CampaignPagination
           currentPage={currentPage}
@@ -517,7 +524,7 @@ export default function CampaignDiscoverySection() {
         />
       )}
 
-      {/* 6. Modals */}
+      {/* 7. Modals */}
       <CampaignAdvancedFiltersModal
         isOpen={isFiltersModalOpen}
         onClose={() => setIsFiltersModalOpen(false)}
