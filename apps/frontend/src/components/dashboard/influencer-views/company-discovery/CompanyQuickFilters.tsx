@@ -9,7 +9,7 @@ export interface QuickFilterState {
   minMatchScore: number;
   platform: string;
   campaignType: string;
-  paidOnly: boolean;
+  paidOnly?: boolean;
   location: string;
 }
 
@@ -97,7 +97,7 @@ export default function CompanyQuickFilters({
           type="button"
           className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
             filters.industry !== 'All'
-              ? 'bg-purple-600 text-white border-purple-500 shadow-md shadow-purple-950/40'
+              ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm'
               : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
           }`}
         >
@@ -115,11 +115,13 @@ export default function CompanyQuickFilters({
                   setOpenDropdown(null);
                 }}
                 className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
-                  filters.industry === ind ? 'bg-purple-600 text-white' : 'text-slate-300 hover:bg-slate-800/80'
+                  filters.industry === ind
+                    ? 'bg-purple-500/20 text-purple-200 font-semibold border border-purple-500/30'
+                    : 'text-slate-300 hover:bg-slate-800/80'
                 }`}
               >
                 <span className="truncate">{ind}</span>
-                {filters.industry === ind && <Check className="w-3.5 h-3.5 shrink-0" />}
+                {filters.industry === ind && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
               </button>
             ))}
           </div>
@@ -133,7 +135,7 @@ export default function CompanyQuickFilters({
           type="button"
           className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
             filters.budgetRange !== 'Any Budget'
-              ? 'bg-emerald-600 text-white border-emerald-500 shadow-md shadow-emerald-950/40'
+              ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm'
               : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
           }`}
         >
@@ -141,7 +143,7 @@ export default function CompanyQuickFilters({
           <ChevronDown className="w-3.5 h-3.5 opacity-70" />
         </button>
         {openDropdown === 'budget' && (
-          <div className="absolute top-full left-0 mt-1.5 w-52 max-h-64 overflow-y-auto bg-slate-950 border border-emerald-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+          <div className="absolute top-full left-0 mt-1.5 w-52 max-h-64 overflow-y-auto bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
             {BUDGET_RANGES.map((b) => (
               <button
                 key={b}
@@ -151,11 +153,13 @@ export default function CompanyQuickFilters({
                   setOpenDropdown(null);
                 }}
                 className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
-                  filters.budgetRange === b ? 'bg-emerald-600 text-white' : 'text-slate-300 hover:bg-slate-800/80'
+                  filters.budgetRange === b
+                    ? 'bg-purple-500/20 text-purple-200 font-semibold border border-purple-500/30'
+                    : 'text-slate-300 hover:bg-slate-800/80'
                 }`}
               >
                 <span>{b}</span>
-                {filters.budgetRange === b && <Check className="w-3.5 h-3.5" />}
+                {filters.budgetRange === b && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
               </button>
             ))}
           </div>
@@ -169,7 +173,7 @@ export default function CompanyQuickFilters({
           type="button"
           className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
             filters.minMatchScore > 0
-              ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-950/40'
+              ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm'
               : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
           }`}
         >
@@ -177,7 +181,7 @@ export default function CompanyQuickFilters({
           <ChevronDown className="w-3.5 h-3.5 opacity-70" />
         </button>
         {openDropdown === 'match' && (
-          <div className="absolute top-full left-0 mt-1.5 w-44 bg-slate-950 border border-indigo-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+          <div className="absolute top-full left-0 mt-1.5 w-44 bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
             {MATCH_SCORES.map((m) => (
               <button
                 key={m.label}
@@ -187,11 +191,13 @@ export default function CompanyQuickFilters({
                   setOpenDropdown(null);
                 }}
                 className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
-                  filters.minMatchScore === m.value ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800/80'
+                  filters.minMatchScore === m.value
+                    ? 'bg-purple-500/20 text-purple-200 font-semibold border border-purple-500/30'
+                    : 'text-slate-300 hover:bg-slate-800/80'
                 }`}
               >
                 <span>{m.label}</span>
-                {filters.minMatchScore === m.value && <Check className="w-3.5 h-3.5" />}
+                {filters.minMatchScore === m.value && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
               </button>
             ))}
           </div>
@@ -205,7 +211,7 @@ export default function CompanyQuickFilters({
           type="button"
           className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
             filters.platform !== 'All Platforms'
-              ? 'bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-950/40'
+              ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm'
               : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
           }`}
         >
@@ -213,7 +219,7 @@ export default function CompanyQuickFilters({
           <ChevronDown className="w-3.5 h-3.5 opacity-70" />
         </button>
         {openDropdown === 'platform' && (
-          <div className="absolute top-full left-0 mt-1.5 w-48 bg-slate-950 border border-blue-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+          <div className="absolute top-full left-0 mt-1.5 w-48 bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
             {PLATFORMS.map((p) => (
               <button
                 key={p}
@@ -223,11 +229,13 @@ export default function CompanyQuickFilters({
                   setOpenDropdown(null);
                 }}
                 className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
-                  filters.platform === p ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800/80'
+                  filters.platform === p
+                    ? 'bg-purple-500/20 text-purple-200 font-semibold border border-purple-500/30'
+                    : 'text-slate-300 hover:bg-slate-800/80'
                 }`}
               >
                 <span>{p}</span>
-                {filters.platform === p && <Check className="w-3.5 h-3.5" />}
+                {filters.platform === p && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
               </button>
             ))}
           </div>
@@ -241,7 +249,7 @@ export default function CompanyQuickFilters({
           type="button"
           className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
             filters.campaignType !== 'All Types'
-              ? 'bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-950/40'
+              ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm'
               : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
           }`}
         >
@@ -249,7 +257,7 @@ export default function CompanyQuickFilters({
           <ChevronDown className="w-3.5 h-3.5 opacity-70" />
         </button>
         {openDropdown === 'campaignType' && (
-          <div className="absolute top-full left-0 mt-1.5 w-52 bg-slate-950 border border-violet-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+          <div className="absolute top-full left-0 mt-1.5 w-52 bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
             {CAMPAIGN_TYPES.map((t) => (
               <button
                 key={t}
@@ -259,29 +267,18 @@ export default function CompanyQuickFilters({
                   setOpenDropdown(null);
                 }}
                 className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
-                  filters.campaignType === t ? 'bg-violet-600 text-white' : 'text-slate-300 hover:bg-slate-800/80'
+                  filters.campaignType === t
+                    ? 'bg-purple-500/20 text-purple-200 font-semibold border border-purple-500/30'
+                    : 'text-slate-300 hover:bg-slate-800/80'
                 }`}
               >
                 <span>{t}</span>
-                {filters.campaignType === t && <Check className="w-3.5 h-3.5" />}
+                {filters.campaignType === t && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
               </button>
             ))}
           </div>
         )}
       </div>
-
-      {/* Paid Only Toggle */}
-      <button
-        onClick={() => onFilterChange('paidOnly', !filters.paidOnly)}
-        type="button"
-        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 border ${
-          filters.paidOnly
-            ? 'bg-teal-600 text-white border-teal-500 shadow-md shadow-teal-950/40'
-            : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
-        }`}
-      >
-        Paid Only {filters.paidOnly ? '✓' : ''}
-      </button>
 
       {/* Advanced All Filters Button */}
       <button

@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, SlidersHorizontal, Building2, Target, Users, Sparkles, RotateCcw, Check, ShieldCheck, DollarSign, Globe, Award } from 'lucide-react';
+import { ChevronDown, Check, RotateCcw } from 'lucide-react';
 import { QuickFilterState } from './CompanyQuickFilters';
 
 export interface AdvancedFilterState extends QuickFilterState {
@@ -65,9 +66,64 @@ const CAMPAIGN_TYPES = [
   'Product Review',
 ];
 
-const CREATOR_TIERS = ['All', 'Nano (1K - 10K)', 'Micro (10K - 50K)', 'Mid (50K - 250K)', 'Macro (250K - 1M)', 'Mega (1M+)'];
 const GENDER_OPTIONS = ['All', 'Female', 'Male', 'Non-Binary'];
 const AGE_OPTIONS = ['All', '18-24', '25-34', '35-44', '45+'];
+
+interface FilterDropdownProps {
+  label: string;
+  value: string;
+  options: string[];
+  onChange: (val: string) => void;
+}
+
+function FilterDropdown({ label, value, options, onChange }: FilterDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="space-y-1.5 relative">
+      <label className="text-xs font-bold text-slate-300 block">{label}</label>
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-transparent"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 hover:border-purple-500/40 text-xs font-semibold text-white transition-all relative z-40"
+      >
+        <span className="truncate">{value}</span>
+        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isOpen ? 'rotate-180 text-purple-400' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+          {options.map((opt) => {
+            const isSelected = value === opt;
+            return (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => {
+                  onChange(opt);
+                  setIsOpen(false);
+                }}
+                className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${isSelected
+                    ? 'bg-purple-500/20 text-purple-200 font-semibold border border-purple-500/30'
+                    : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                  }`}
+              >
+                <span className="truncate">{opt}</span>
+                {isSelected && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function CompanyAdvancedFiltersModal({
   isOpen,
@@ -77,12 +133,17 @@ export default function CompanyAdvancedFiltersModal({
   onResetFilters,
 }: CompanyAdvancedFiltersModalProps) {
   const [localState, setLocalState] = useState<AdvancedFilterState>(filters);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setLocalState(filters);
   }, [filters, isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const handleFieldChange = (key: keyof AdvancedFilterState, val: any) => {
     setLocalState((prev) => ({ ...prev, [key]: val }));
@@ -93,17 +154,17 @@ export default function CompanyAdvancedFiltersModal({
     onClose();
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          {/* Dark Blurred Backdrop Overlay */}
+        <div className="fixed inset-0 z-[100] flex justify-end">
+          {/* Dark Blurred Backdrop Overlay covering 100% of viewport and sidebar */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm"
+            className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
           />
 
           {/* Right Slide-Over Drawer Container */}
@@ -112,141 +173,67 @@ export default function CompanyAdvancedFiltersModal({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-            className="relative z-50 w-full max-w-md h-full bg-slate-950 border-l border-white/10 shadow-2xl flex flex-col justify-between overflow-hidden selection:bg-purple-500 selection:text-white"
+            className="relative z-50 w-full max-w-md h-screen bg-slate-950 border-l border-white/10 shadow-2xl flex flex-col overflow-hidden selection:bg-purple-500 selection:text-white"
           >
-            {/* Drawer Top Header */}
-            <div className="p-5 border-b border-white/10 flex items-center justify-between bg-slate-900/60 backdrop-blur-xl shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center border border-purple-500/30 shadow-md">
-                  <SlidersHorizontal className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="text-base font-black text-white tracking-tight">Directory Filters</h2>
-                  <p className="text-[11px] text-slate-400">Refine brands by specs, budget & match scores</p>
-                </div>
-              </div>
-
-              <button
-                onClick={onClose}
-                type="button"
-                className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition-colors border border-white/10"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
             {/* Scrollable Filter Form Body */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-6 no-scrollbar text-xs">
-              {/* 1. Category / Industry */}
-              <div className="space-y-2">
-                <label className="font-bold text-slate-300 flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Primary Industry Category</span>
-                </label>
-                <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto p-1.5 rounded-xl bg-slate-900 border border-white/10">
-                  {INDUSTRIES.map((ind) => {
-                    const isSelected = localState.industry === ind;
-                    return (
-                      <button
-                        key={ind}
-                        type="button"
-                        onClick={() => handleFieldChange('industry', ind)}
-                        className={`px-2.5 py-1.5 rounded-lg text-left text-[11px] font-semibold transition-all truncate flex items-center justify-between ${
-                          isSelected
-                            ? 'bg-purple-600 text-white shadow-md'
-                            : 'text-slate-400 hover:text-white hover:bg-white/5'
-                        }`}
-                      >
-                        <span className="truncate">{ind}</span>
-                        {isSelected && <Check className="w-3 h-3 shrink-0" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+            <div className="flex-1 overflow-y-auto p-5 space-y-6 text-xs">
+              {/* 1. Category / Industry Dropdown */}
+              <FilterDropdown
+                label="Primary Industry Category"
+                value={localState.industry}
+                options={INDUSTRIES}
+                onChange={(val) => handleFieldChange('industry', val)}
+              />
 
-              {/* 2. Budget Range & Compensation */}
-              <div className="space-y-3 pt-2 border-t border-white/5">
-                <label className="font-bold text-slate-300 flex items-center gap-1.5">
-                  <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Campaign Budget Range</span>
-                </label>
-                <select
+              {/* 2. Budget Range Dropdown */}
+              <div className="pt-3 border-t border-white/5">
+                <FilterDropdown
+                  label="Campaign Budget Range"
                   value={localState.budgetRange}
-                  onChange={(e) => handleFieldChange('budgetRange', e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white font-medium focus:outline-none focus:border-purple-500"
-                >
-                  {BUDGET_RANGES.map((b) => (
-                    <option key={b} value={b}>
-                      {b}
-                    </option>
-                  ))}
-                </select>
-
-                <label className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-900/60 border border-white/5 cursor-pointer text-slate-300">
-                  <input
-                    type="checkbox"
-                    checked={localState.paidOnly}
-                    onChange={(e) => handleFieldChange('paidOnly', e.target.checked)}
-                    className="w-4 h-4 rounded border-white/20 text-purple-600 focus:ring-purple-500 bg-slate-950"
-                  />
-                  <div>
-                    <span className="font-bold text-white block">Paid Campaigns Only</span>
-                    <span className="text-[10px] text-slate-400 block">Filter out barter/product exchange deals</span>
-                  </div>
-                </label>
+                  options={BUDGET_RANGES}
+                  onChange={(val) => handleFieldChange('budgetRange', val)}
+                />
               </div>
 
               {/* 3. Platform & Campaign Type */}
-              <div className="space-y-3 pt-2 border-t border-white/5">
-                <label className="font-bold text-slate-300 flex items-center gap-1.5">
-                  <Globe className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Target Social Platform</span>
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {PLATFORMS.map((p) => {
-                    const isSelected = localState.platform === p;
-                    return (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => handleFieldChange('platform', p)}
-                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-all ${
-                          isSelected
-                            ? 'bg-blue-600 text-white border-blue-500 shadow-md'
-                            : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    );
-                  })}
+              <div className="space-y-3 pt-3 border-t border-white/5">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-300 block">Target Social Platform</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {PLATFORMS.map((p) => {
+                      const isSelected = localState.platform === p;
+                      return (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => handleFieldChange('platform', p)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${isSelected
+                              ? 'bg-purple-500/20 text-purple-200 border-purple-500/40 shadow-sm'
+                              : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white hover:border-white/20'
+                            }`}
+                        >
+                          {p}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                <div className="space-y-1.5 pt-1">
-                  <label className="font-bold text-slate-300">Deliverable Format / Campaign Type</label>
-                  <select
-                    value={localState.campaignType}
-                    onChange={(e) => handleFieldChange('campaignType', e.target.value)}
-                    className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white font-medium focus:outline-none focus:border-purple-500"
-                  >
-                    {CAMPAIGN_TYPES.map((ct) => (
-                      <option key={ct} value={ct}>
-                        {ct}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <FilterDropdown
+                  label="Deliverable Format / Campaign Type"
+                  value={localState.campaignType}
+                  options={CAMPAIGN_TYPES}
+                  onChange={(val) => handleFieldChange('campaignType', val)}
+                />
               </div>
 
               {/* 4. Match Score Threshold Slider */}
-              <div className="space-y-3 pt-2 border-t border-white/5">
-                <div className="flex items-center justify-between font-bold">
-                  <span className="text-slate-300 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Min Zerify Match Score</span>
+              <div className="space-y-2.5 pt-3 border-t border-white/5">
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <span className="text-slate-300">Minimum Zerify Match Score</span>
+                  <span className="px-2 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-black">
+                    {localState.minMatchScore > 0 ? `${localState.minMatchScore}%+` : 'Any Match'}
                   </span>
-                  <span className="text-purple-400 font-black text-sm">{localState.minMatchScore}%+</span>
                 </div>
                 <input
                   type="range"
@@ -255,128 +242,80 @@ export default function CompanyAdvancedFiltersModal({
                   step={10}
                   value={localState.minMatchScore}
                   onChange={(e) => handleFieldChange('minMatchScore', parseInt(e.target.value))}
-                  className="w-full accent-purple-500 cursor-pointer h-2 bg-slate-900 rounded-lg"
+                  className="w-full accent-purple-500 cursor-pointer h-1.5 bg-slate-900 rounded-lg"
                 />
               </div>
 
-              {/* 5. Creator Tier Requirement */}
-              <div className="space-y-3 pt-2 border-t border-white/5">
-                <label className="font-bold text-slate-300 flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5 text-pink-400" />
-                  <span>Creator Tier Eligibility</span>
-                </label>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {CREATOR_TIERS.map((tier) => {
-                    const isSelected = localState.creatorTier === tier;
-                    return (
-                      <button
-                        key={tier}
-                        type="button"
-                        onClick={() => handleFieldChange('creatorTier', tier)}
-                        className={`px-3 py-2 rounded-xl text-[11px] font-bold text-left border transition-all ${
-                          isSelected
-                            ? 'bg-pink-600 text-white border-pink-500 shadow-md'
-                            : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        {tier}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 6. Target Audience Demographic */}
-              <div className="space-y-3 pt-2 border-t border-white/5">
-                <label className="font-bold text-slate-300 flex items-center gap-1.5">
-                  <Target className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Target Audience Demographic</span>
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <span className="text-[10px] text-slate-400 font-bold block mb-1">Gender</span>
-                    <select
-                      value={localState.targetGender}
-                      onChange={(e) => handleFieldChange('targetGender', e.target.value)}
-                      className="w-full p-2 rounded-xl bg-slate-900 border border-white/10 text-white text-[11px]"
-                    >
-                      {GENDER_OPTIONS.map((g) => (
-                        <option key={g} value={g}>
-                          {g}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400 font-bold block mb-1">Age Range</span>
-                    <select
-                      value={localState.targetAge}
-                      onChange={(e) => handleFieldChange('targetAge', e.target.value)}
-                      className="w-full p-2 rounded-xl bg-slate-900 border border-white/10 text-white text-[11px]"
-                    >
-                      {AGE_OPTIONS.map((a) => (
-                        <option key={a} value={a}>
-                          {a}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              {/* 5. Target Audience Demographic */}
+              <div className="space-y-2.5 pt-3 border-t border-white/5">
+                <label className="text-xs font-bold text-slate-300 block">Target Audience Demographic</label>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <FilterDropdown
+                    label="Gender"
+                    value={localState.targetGender}
+                    options={GENDER_OPTIONS}
+                    onChange={(val) => handleFieldChange('targetGender', val)}
+                  />
+                  <FilterDropdown
+                    label="Age Range"
+                    value={localState.targetAge}
+                    options={AGE_OPTIONS}
+                    onChange={(val) => handleFieldChange('targetAge', val)}
+                  />
                 </div>
               </div>
 
               {/* 7. Trust & Verification Signals */}
-              <div className="space-y-2 pt-2 border-t border-white/5">
-                <label className="font-bold text-slate-300 flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Trust & Security Signals</span>
-                </label>
-                <label className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-900/60 border border-white/5 cursor-pointer text-slate-300">
+              <div className="space-y-2 pt-3 border-t border-white/5">
+                <label className="text-xs font-bold text-slate-300 block">Trust & Verification</label>
+                <label className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/60 border border-white/5 hover:border-purple-500/30 cursor-pointer text-slate-300 transition-all">
                   <input
                     type="checkbox"
                     checked={localState.isVerifiedOnly}
                     onChange={(e) => handleFieldChange('isVerifiedOnly', e.target.checked)}
-                    className="w-4 h-4 rounded border-white/20 text-purple-600 focus:ring-purple-500 bg-slate-950"
+                    className="w-4 h-4 rounded border-white/20 accent-purple-500 bg-slate-950 cursor-pointer"
                   />
-                  <span>Verified Brands Only</span>
+                  <span className="font-semibold text-white text-xs">Verified Brands Only</span>
                 </label>
-                <label className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-900/60 border border-white/5 cursor-pointer text-slate-300">
+                <label className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/60 border border-white/5 hover:border-purple-500/30 cursor-pointer text-slate-300 transition-all">
                   <input
                     type="checkbox"
                     checked={localState.escrowOnly}
                     onChange={(e) => handleFieldChange('escrowOnly', e.target.checked)}
-                    className="w-4 h-4 rounded border-white/20 text-purple-600 focus:ring-purple-500 bg-slate-950"
+                    className="w-4 h-4 rounded border-white/20 accent-purple-500 bg-slate-950 cursor-pointer"
                   />
-                  <span>Escrow Protection Available</span>
+                  <span className="font-semibold text-white text-xs">Escrow Protection Available</span>
                 </label>
               </div>
-            </div>
 
-            {/* Fixed Drawer Footer Controls */}
-            <div className="p-4 border-t border-white/10 bg-slate-900/90 backdrop-blur-xl shrink-0 flex items-center justify-between gap-3">
-              <button
-                onClick={() => {
-                  onResetFilters();
-                  onClose();
-                }}
-                type="button"
-                className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-colors"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset All</span>
-              </button>
+              {/* Action Buttons (Inline at bottom of scrollable content) */}
+              <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+                <button
+                  onClick={() => {
+                    onResetFilters();
+                    onClose();
+                  }}
+                  type="button"
+                  className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset All</span>
+                </button>
 
-              <button
-                onClick={handleApply}
-                type="button"
-                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-black shadow-lg shadow-purple-950/50 transition-all flex items-center justify-center gap-1.5 border border-purple-400/20"
-              >
-                <Check className="w-4 h-4" />
-                <span>Apply Filters</span>
-              </button>
+                <button
+                  onClick={handleApply}
+                  type="button"
+                  className="flex-1 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-extrabold shadow-lg shadow-purple-950/50 transition-all flex items-center justify-center gap-1.5 border border-purple-400/20"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Apply Filters</span>
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

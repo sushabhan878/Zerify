@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Sparkles, DollarSign, CheckCircle2, Loader2 } from 'lucide-react';
 import { CompanyItem } from './CompanyCard';
@@ -17,8 +18,13 @@ export default function CompanyPitchModal({ company, onClose, onSubmitPitch }: C
   const [selectedDeliverable, setSelectedDeliverable] = useState('Instagram Reel');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  if (!company) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!company || !mounted) return null;
 
   const handleApplyTemplate = () => {
     setPitchMessage(
@@ -46,9 +52,9 @@ export default function CompanyPitchModal({ company, onClose, onSubmitPitch }: C
     }, 1000);
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -178,6 +184,7 @@ export default function CompanyPitchModal({ company, onClose, onSubmitPitch }: C
           )}
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

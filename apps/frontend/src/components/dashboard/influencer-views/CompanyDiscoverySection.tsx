@@ -9,7 +9,9 @@ import CompanyCard, { CompanyItem } from './company-discovery/CompanyCard';
 import CompanyDetailModal from './company-discovery/CompanyDetailModal';
 import CompanyPitchModal from './company-discovery/CompanyPitchModal';
 import CompanyAdvancedFiltersModal, { AdvancedFilterState } from './company-discovery/CompanyAdvancedFiltersModal';
-import { Loader2, AlertCircle } from 'lucide-react';
+import CompanyPagination from './company-discovery/CompanyPagination';
+import CompanyLoadingSkeleton from './company-discovery/CompanyLoadingSkeleton';
+import { AlertCircle } from 'lucide-react';
 
 const INITIAL_FILTERS: AdvancedFilterState = {
   industry: 'All',
@@ -44,7 +46,7 @@ const FALLBACK_COMPANIES: CompanyItem[] = [
     targetPlatforms: ['LinkedIn', 'Twitter', 'YouTube'],
     targetAudience: { gender: 'All', ageRanges: ['25-34', '35-44'], locations: ['United States', 'UK', 'India'] },
     creatorTiers: ['Mid', 'Macro'],
-    campaignBudget: '$20,000 – $50,000',
+    campaignBudget: '$25,000 – $50,000',
     campaignFrequency: 'Monthly Recurring',
     matchScore: 96,
     audienceMatchScore: 98,
@@ -72,7 +74,7 @@ const FALLBACK_COMPANIES: CompanyItem[] = [
     targetPlatforms: ['Instagram', 'TikTok', 'YouTube'],
     targetAudience: { gender: 'Female', ageRanges: ['18-24', '25-34'], locations: ['United States', 'Canada'] },
     creatorTiers: ['Micro', 'Mid'],
-    campaignBudget: '$5,000 – $20,000',
+    campaignBudget: '$5,000 – $10,000',
     campaignFrequency: 'Monthly Recurring',
     matchScore: 94,
     audienceMatchScore: 96,
@@ -99,7 +101,7 @@ const FALLBACK_COMPANIES: CompanyItem[] = [
     targetPlatforms: ['Instagram', 'YouTube'],
     targetAudience: { gender: 'All', ageRanges: ['18-24', '25-34', '35-44'], locations: ['UK', 'Germany'] },
     creatorTiers: ['Micro', 'Mid', 'Macro'],
-    campaignBudget: '$5,000 – $20,000',
+    campaignBudget: '$3,000 – $5,000',
     campaignFrequency: 'Quarterly Campaigns',
     matchScore: 91,
     audienceMatchScore: 93,
@@ -123,7 +125,7 @@ const FALLBACK_COMPANIES: CompanyItem[] = [
     targetPlatforms: ['Instagram', 'TikTok'],
     targetAudience: { gender: 'All', ageRanges: ['18-24', '25-34'], locations: ['United States'] },
     creatorTiers: ['Nano', 'Micro'],
-    campaignBudget: '$1,000 – $5,000',
+    campaignBudget: '$1,000 – $3,000',
     campaignFrequency: 'Monthly Recurring',
     matchScore: 88,
     audienceMatchScore: 90,
@@ -147,7 +149,7 @@ const FALLBACK_COMPANIES: CompanyItem[] = [
     targetPlatforms: ['YouTube', 'Instagram'],
     targetAudience: { gender: 'All', ageRanges: ['25-34', '35-44'], locations: ['United Kingdom', 'United States'] },
     creatorTiers: ['Mid', 'Macro'],
-    campaignBudget: '$20,000 – $50,000',
+    campaignBudget: '$10,000 – $25,000',
     campaignFrequency: 'Ongoing Partnership',
     matchScore: 95,
     audienceMatchScore: 97,
@@ -171,7 +173,7 @@ const FALLBACK_COMPANIES: CompanyItem[] = [
     targetPlatforms: ['YouTube', 'TikTok', 'Twitter'],
     targetAudience: { gender: 'Male', ageRanges: ['18-24', '25-34'], locations: ['Japan', 'United States'] },
     creatorTiers: ['Micro', 'Mid'],
-    campaignBudget: '$5,000 – $20,000',
+    campaignBudget: '$5,000 – $10,000',
     campaignFrequency: 'One-time Campaign',
     matchScore: 92,
     audienceMatchScore: 94,
@@ -195,7 +197,7 @@ const FALLBACK_COMPANIES: CompanyItem[] = [
     targetPlatforms: ['Instagram', 'Pinterest'],
     targetAudience: { gender: 'All', ageRanges: ['25-34', '35-44'], locations: ['Germany', 'France'] },
     creatorTiers: ['Micro'],
-    campaignBudget: '$1,000 – $5,000',
+    campaignBudget: '$1,000 – $3,000',
     campaignFrequency: 'Monthly Recurring',
     matchScore: 86,
     audienceMatchScore: 88,
@@ -219,7 +221,7 @@ const FALLBACK_COMPANIES: CompanyItem[] = [
     targetPlatforms: ['Instagram', 'TikTok', 'YouTube'],
     targetAudience: { gender: 'All', ageRanges: ['18-24', '25-34'], locations: ['United States', 'Canada'] },
     creatorTiers: ['Micro', 'Mid'],
-    campaignBudget: '$5,000 – $20,000',
+    campaignBudget: '$3,000 – $5,000',
     campaignFrequency: 'Monthly Recurring',
     matchScore: 93,
     audienceMatchScore: 95,
@@ -228,6 +230,206 @@ const FALLBACK_COMPANIES: CompanyItem[] = [
     brandFitScore: 91,
     budgetFitScore: 94,
     matchReasons: ['Fashion-forward aesthetic content compatibility'],
+    isVerified: true,
+  },
+  {
+    id: 'b9',
+    companyName: 'VaultPay Financial',
+    logoUrl: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=400&q=80',
+    website: 'https://vaultpay.app',
+    industry: 'Fintech & Digital Payments',
+    location: 'New York, NY, United States',
+    description: 'Next-gen cross-border smart card with zero foreign exchange fees and high-yield cash back rewards.',
+    brandValues: ['Innovation', 'Transparency', 'Security'],
+    primaryGoals: ['User Acquisition', 'Brand Awareness'],
+    targetPlatforms: ['YouTube', 'Twitter', 'TikTok'],
+    targetAudience: { gender: 'All', ageRanges: ['18-24', '25-34', '35-44'], locations: ['United States', 'UK'] },
+    creatorTiers: ['Micro', 'Mid'],
+    campaignBudget: '$10,000 – $25,000',
+    campaignFrequency: 'Ongoing Partnership',
+    escrowSetup: true,
+    matchScore: 94,
+    audienceMatchScore: 96,
+    nicheMatchScore: 94,
+    contentMatchScore: 93,
+    brandFitScore: 92,
+    budgetFitScore: 95,
+    matchReasons: ['Strong tech and personal finance creator affinity'],
+    isVerified: true,
+  },
+  {
+    id: 'b10',
+    companyName: 'Lumina Health Therapeutics',
+    logoUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    website: 'https://luminahealth.com',
+    industry: 'Healthcare & Pharmaceuticals',
+    location: 'Boston, MA, United States',
+    description: 'Physician-formulated clean botanical longevity supplements and cellular NAD+ boosters.',
+    brandValues: ['Quality', 'Health', 'Sustainability'],
+    primaryGoals: ['Sales & Conversions', 'Lead Generation'],
+    targetPlatforms: ['Instagram', 'YouTube', 'TikTok'],
+    targetAudience: { gender: 'All', ageRanges: ['25-34', '35-44', '45+'], locations: ['United States', 'Canada'] },
+    creatorTiers: ['Micro', 'Mid'],
+    campaignBudget: '$5,000 – $10,000',
+    campaignFrequency: 'Monthly Recurring',
+    escrowSetup: true,
+    matchScore: 92,
+    audienceMatchScore: 93,
+    nicheMatchScore: 92,
+    contentMatchScore: 90,
+    brandFitScore: 94,
+    budgetFitScore: 91,
+    matchReasons: ['Wellness lifestyle audience alignment'],
+    isVerified: true,
+  },
+  {
+    id: 'b11',
+    companyName: 'Aura Luxury Chronographs',
+    logoUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
+    website: 'https://aurachronos.ch',
+    industry: 'Luxury & Designer Goods',
+    location: 'Geneva, Switzerland',
+    description: 'Swiss-automatic limited edition luxury chronographs crafted with Damascus titanium.',
+    brandValues: ['Quality', 'Exclusivity', 'Innovation'],
+    primaryGoals: ['Brand Awareness', 'Community Building'],
+    targetPlatforms: ['Instagram', 'YouTube'],
+    targetAudience: { gender: 'Male', ageRanges: ['25-34', '35-44', '45+'], locations: ['United States', 'UK', 'EU'] },
+    creatorTiers: ['Mid', 'Macro'],
+    campaignBudget: '$25,000+',
+    campaignFrequency: 'Quarterly Campaigns',
+    escrowSetup: true,
+    matchScore: 95,
+    audienceMatchScore: 96,
+    nicheMatchScore: 95,
+    contentMatchScore: 94,
+    brandFitScore: 93,
+    budgetFitScore: 97,
+    matchReasons: ['Luxury lifestyle and aesthetic horology match'],
+    isVerified: true,
+  },
+  {
+    id: 'b12',
+    companyName: 'Verdant Micro-Roasters',
+    logoUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=400&q=80',
+    website: 'https://verdantcoffee.co',
+    industry: 'Food & Beverage',
+    location: 'Portland, OR, United States',
+    description: 'Fair-trade single-origin micro-lot specialty coffee beans sourced directly from Ethiopian smallholder farms.',
+    brandValues: ['Sustainability', 'Quality', 'Community'],
+    primaryGoals: ['Sales & Conversions', 'Brand Awareness'],
+    targetPlatforms: ['Instagram', 'TikTok', 'YouTube'],
+    targetAudience: { gender: 'All', ageRanges: ['18-24', '25-34', '35-44'], locations: ['United States'] },
+    creatorTiers: ['Nano', 'Micro'],
+    campaignBudget: '$500 – $1,000',
+    campaignFrequency: 'Monthly Recurring',
+    escrowSetup: true,
+    matchScore: 89,
+    audienceMatchScore: 91,
+    nicheMatchScore: 88,
+    contentMatchScore: 89,
+    brandFitScore: 88,
+    budgetFitScore: 90,
+    matchReasons: ['High affinity with morning routine and culinary lifestyle creators'],
+    isVerified: true,
+  },
+  {
+    id: 'b13',
+    companyName: 'EcoSpark Home Labs',
+    logoUrl: 'https://images.unsplash.com/photo-1585670210693-e7fdd16b142e?auto=format&fit=crop&w=400&q=80',
+    website: 'https://ecosparkhome.com',
+    industry: 'Home & Interior Design',
+    location: 'Seattle, WA, United States',
+    description: 'Zero-waste refillable organic probiotic cleaning concentrates in glass flacons.',
+    brandValues: ['Sustainability', 'Affordability'],
+    primaryGoals: ['Sales & Conversions', 'UGC Creation'],
+    targetPlatforms: ['TikTok', 'Instagram'],
+    targetAudience: { gender: 'All', ageRanges: ['18-24', '25-34'], locations: ['United States'] },
+    creatorTiers: ['Nano'],
+    campaignBudget: 'Under $500',
+    campaignFrequency: 'One-time Campaign',
+    escrowSetup: true,
+    matchScore: 87,
+    audienceMatchScore: 89,
+    nicheMatchScore: 86,
+    contentMatchScore: 87,
+    brandFitScore: 85,
+    budgetFitScore: 92,
+    matchReasons: ['Eco-friendly home care and cleaning lifestyle affinity'],
+    isVerified: true,
+  },
+  {
+    id: 'b14',
+    companyName: 'Zenith BioPulse',
+    logoUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=400&q=80',
+    website: 'https://zenithbiopulse.com',
+    industry: 'Fitness & Wellness',
+    location: 'Denver, CO, United States',
+    description: 'Smart hydration sensors and electrolyte hydration monitors for endurance athletes.',
+    brandValues: ['Innovation', 'Health'],
+    primaryGoals: ['Product Review', 'Brand Awareness'],
+    targetPlatforms: ['Instagram', 'YouTube'],
+    targetAudience: { gender: 'All', ageRanges: ['18-24', '25-34', '35-44'], locations: ['United States', 'UK'] },
+    creatorTiers: ['Nano', 'Micro'],
+    campaignBudget: '$500 – $1,000',
+    campaignFrequency: 'Monthly Recurring',
+    escrowSetup: true,
+    matchScore: 90,
+    audienceMatchScore: 92,
+    nicheMatchScore: 89,
+    contentMatchScore: 90,
+    brandFitScore: 89,
+    budgetFitScore: 91,
+    matchReasons: ['Targeting athletic and fitness tracking creators'],
+    isVerified: true,
+  },
+  {
+    id: 'b15',
+    companyName: 'ByteCraft Interactive',
+    logoUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=400&q=80',
+    website: 'https://bytecraft.games',
+    industry: 'Consumer Electronics & Hardware',
+    location: 'Montreal, Canada',
+    description: 'Retro pixel-art indie roguelike adventure game with cross-platform co-op multiplayer.',
+    brandValues: ['Innovation', 'Community'],
+    primaryGoals: ['Sponsored Post', 'User Acquisition'],
+    targetPlatforms: ['Twitch', 'YouTube', 'TikTok'],
+    targetAudience: { gender: 'All', ageRanges: ['18-24', '25-34'], locations: ['United States', 'Canada', 'EU'] },
+    creatorTiers: ['Nano'],
+    campaignBudget: 'Under $500',
+    campaignFrequency: 'One-time Campaign',
+    escrowSetup: true,
+    matchScore: 91,
+    audienceMatchScore: 93,
+    nicheMatchScore: 90,
+    contentMatchScore: 92,
+    brandFitScore: 89,
+    budgetFitScore: 93,
+    matchReasons: ['Gaming creators and live-stream play-through fit'],
+    isVerified: true,
+  },
+  {
+    id: 'b16',
+    companyName: 'Quantum Dynamics Inc.',
+    logoUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=400&q=80',
+    website: 'https://quantumdynamics.ai',
+    industry: 'Software & SaaS',
+    location: 'Austin, TX, United States',
+    description: 'Enterprise generative AI infrastructure and automated business intelligence copilots.',
+    brandValues: ['Innovation', 'Quality', 'Exclusivity'],
+    primaryGoals: ['Brand Ambassador', 'Lead Generation'],
+    targetPlatforms: ['LinkedIn', 'YouTube', 'Twitter'],
+    targetAudience: { gender: 'All', ageRanges: ['25-34', '35-44', '45+'], locations: ['United States', 'Global'] },
+    creatorTiers: ['Mid', 'Macro'],
+    campaignBudget: '$25,000+',
+    campaignFrequency: 'Annual Enterprise Retainer',
+    escrowSetup: true,
+    matchScore: 97,
+    audienceMatchScore: 98,
+    nicheMatchScore: 97,
+    contentMatchScore: 95,
+    brandFitScore: 96,
+    budgetFitScore: 98,
+    matchReasons: ['Top 1% technology audience resonance and enterprise B2B reach'],
     isVerified: true,
   },
 ];
@@ -241,6 +443,10 @@ export default function CompanyDiscoverySection() {
   const [companies, setCompanies] = useState<CompanyItem[]>(FALLBACK_COMPANIES);
   const [loading, setLoading] = useState(true);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
 
   // Modal States
   const [detailCompany, setDetailCompany] = useState<CompanyItem | null>(null);
@@ -257,6 +463,15 @@ export default function CompanyDiscoverySection() {
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
+            const sampleBudgets = [
+              '$25,000+',
+              '$10,000 – $25,000',
+              '$5,000 – $10,000',
+              '$3,000 – $5,000',
+              '$1,000 – $3,000',
+              '$500 – $1,000',
+              'Under $500',
+            ];
             const formatted: CompanyItem[] = data.map((b: any, idx: number) => {
               const baseMatch = Math.min(99, Math.max(65, 98 - (idx % 15) * 2));
               return {
@@ -274,7 +489,7 @@ export default function CompanyDiscoverySection() {
                 targetAudience: b.targetAudience || { gender: 'All', ageRanges: ['18-24', '25-34'] },
                 creatorTiers: b.creatorTiers || ['Micro', 'Mid'],
                 creatorLocations: b.creatorLocations || ['United States', 'Canada', 'India'],
-                campaignBudget: b.campaignBudget || '$5,000 – $20,000',
+                campaignBudget: b.campaignBudget || sampleBudgets[idx % sampleBudgets.length],
                 campaignFrequency: b.campaignFrequency || 'Monthly Recurring',
                 escrowSetup: b.escrowSetup,
                 products: b.products || [],
@@ -329,7 +544,8 @@ export default function CompanyDiscoverySection() {
     if (filters.minMatchScore > 0) list.push({ key: 'minMatchScore', label: `Match: ${filters.minMatchScore}%+` });
     if (filters.platform !== 'All Platforms') list.push({ key: 'platform', label: `Platform: ${filters.platform}` });
     if (filters.campaignType !== 'All Types') list.push({ key: 'campaignType', label: `Type: ${filters.campaignType}` });
-    if (filters.paidOnly) list.push({ key: 'paidOnly', label: 'Paid Only' });
+    if (filters.targetGender !== 'All') list.push({ key: 'targetGender', label: `Gender: ${filters.targetGender}` });
+    if (filters.targetAge !== 'All') list.push({ key: 'targetAge', label: `Age: ${filters.targetAge}` });
     if (filters.isVerifiedOnly) list.push({ key: 'isVerifiedOnly', label: 'Verified Brands Only' });
     if (filters.escrowOnly) list.push({ key: 'escrowOnly', label: 'Escrow Protected Only' });
     return list;
@@ -344,24 +560,172 @@ export default function CompanyDiscoverySection() {
     setFilters(INITIAL_FILTERS);
   };
 
+  // Helper functions for robust multi-attribute filtering
+  const getFilterRangeBounds = (filterStr: string): [number, number] => {
+    if (!filterStr || filterStr === 'Any Budget') return [0, Infinity];
+
+    const parseVal = (valStr: string): number => {
+      const clean = valStr.replace(/[$,+]/g, '').trim().toLowerCase();
+      if (clean.endsWith('k')) {
+        return parseFloat(clean.replace('k', '')) * 1000;
+      }
+      if (clean.endsWith('m')) {
+        return parseFloat(clean.replace('m', '')) * 1000000;
+      }
+      return parseFloat(clean) || 0;
+    };
+
+    const lower = filterStr.toLowerCase().trim();
+
+    if (lower.startsWith('under') || lower.startsWith('<')) {
+      const rawVal = lower.replace(/under|<|\$/g, '').trim();
+      return [0, parseVal(rawVal)];
+    }
+
+    if (filterStr.includes('+')) {
+      const rawVal = filterStr.replace('+', '').trim();
+      return [parseVal(rawVal), Infinity];
+    }
+
+    if (filterStr.includes('-') || filterStr.includes('–')) {
+      const delimiter = filterStr.includes('–') ? '–' : '-';
+      const [low, high] = filterStr.split(delimiter).map((s) => s.trim());
+      return [parseVal(low), parseVal(high)];
+    }
+
+    return [0, Infinity];
+  };
+
+  const parseCompanyBudgetBounds = (budgetStr?: string): [number, number] => {
+    if (!budgetStr) return [0, Infinity];
+    const cleaned = budgetStr.replace(/,/g, '').trim();
+
+    if (cleaned.includes('+')) {
+      const match = cleaned.match(/\d+/);
+      const val = match ? Number(match[0]) : 0;
+      return [val, Infinity];
+    }
+
+    const nums = cleaned.match(/\d+/g)?.map(Number) || [];
+    if (nums.length === 0) return [0, Infinity];
+    if (nums.length === 1) {
+      if (cleaned.toLowerCase().includes('under') || cleaned.toLowerCase().includes('<')) {
+        return [0, nums[0]];
+      }
+      return [nums[0], nums[0]];
+    }
+
+    return [Math.min(nums[0], nums[1]), Math.max(nums[0], nums[1])];
+  };
+
+  const matchesBudget = (budgetStr: string | undefined, filterRange: string): boolean => {
+    if (!filterRange || filterRange === 'Any Budget') return true;
+    if (!budgetStr) return true;
+
+    const [brandMin, brandMax] = parseCompanyBudgetBounds(budgetStr);
+    const brandMid = (brandMin + (brandMax === Infinity ? brandMin : brandMax)) / 2;
+
+    switch (filterRange) {
+      case 'Under $500':
+        return brandMin < 500 || brandMax <= 500 || brandMid <= 500;
+      case '$500 - $1K':
+        return (brandMin >= 400 && brandMax <= 1200) || (brandMid >= 500 && brandMid <= 1000);
+      case '$1K - $3K':
+        return (brandMin >= 900 && brandMax <= 3500) || (brandMid >= 1000 && brandMid <= 3000);
+      case '$3K - $5K':
+        return (brandMin >= 2500 && brandMax <= 5500) || (brandMid >= 3000 && brandMid <= 5000);
+      case '$5K - $10K':
+        return (brandMin >= 4500 && brandMax <= 11000) || (brandMid >= 5000 && brandMid <= 10000);
+      case '$10K - $25K':
+        return (brandMin >= 9000 && brandMax <= 26000) || (brandMid >= 10000 && brandMid <= 25000);
+      case '$25K+':
+        return brandMax >= 25000 || brandMin >= 25000;
+      default: {
+        const [filterMin, filterMax] = getFilterRangeBounds(filterRange);
+        return brandMax >= filterMin && brandMin <= filterMax;
+      }
+    }
+  };
+
+  const matchesCampaignType = (c: CompanyItem, campaignType: string): boolean => {
+    if (!campaignType || campaignType === 'All Types') return true;
+    const typeLower = campaignType.toLowerCase();
+
+    // Direct goal / deliverable match
+    if (c.primaryGoals?.some((g) => g.toLowerCase().includes(typeLower) || typeLower.includes(g.toLowerCase()))) {
+      return true;
+    }
+
+    // Social platform deliverable match
+    if (typeLower.includes('instagram') && c.targetPlatforms?.some((p) => p.toLowerCase().includes('instagram'))) {
+      return true;
+    }
+    if (typeLower.includes('tiktok') && c.targetPlatforms?.some((p) => p.toLowerCase().includes('tiktok'))) {
+      return true;
+    }
+    if (typeLower.includes('youtube') && c.targetPlatforms?.some((p) => p.toLowerCase().includes('youtube'))) {
+      return true;
+    }
+
+    // General formats (Sponsored Post, UGC Creation, Brand Ambassador, Product Review)
+    if (
+      typeLower.includes('sponsored') ||
+      typeLower.includes('ugc') ||
+      typeLower.includes('ambassador') ||
+      typeLower.includes('review') ||
+      typeLower.includes('post')
+    ) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const matchesDemographics = (c: CompanyItem, gender?: string, age?: string): boolean => {
+    if (gender && gender !== 'All') {
+      const brandGender = c.targetAudience?.gender || 'All';
+      if (brandGender !== 'All' && brandGender.toLowerCase() !== gender.toLowerCase()) {
+        return false;
+      }
+    }
+
+    if (age && age !== 'All') {
+      const brandAges = c.targetAudience?.ageRanges || ['All'];
+      if (!brandAges.includes('All') && !brandAges.includes(age)) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   // Filter & Search Logic
   const filteredCompanies = useMemo(() => {
     return companies
       .filter((c) => {
+        // 1. Search Query (name, description, industry, location, products, goals)
         if (search) {
-          const query = search.toLowerCase();
+          const query = search.toLowerCase().trim();
           const matchName = c.companyName.toLowerCase().includes(query);
           const matchDesc = c.description?.toLowerCase().includes(query);
           const matchInd = c.industry.toLowerCase().includes(query);
-          const matchProd = c.products?.some((p) => p.name?.toLowerCase().includes(query));
-          if (!matchName && !matchDesc && !matchInd && !matchProd) return false;
+          const matchLoc = c.location?.toLowerCase().includes(query);
+          const matchProd = c.products?.some((p) => p.name?.toLowerCase().includes(query) || p.description?.toLowerCase().includes(query));
+          const matchGoals = c.primaryGoals?.some((g) => g.toLowerCase().includes(query));
+          if (!matchName && !matchDesc && !matchInd && !matchLoc && !matchProd && !matchGoals) return false;
         }
 
-        if (filters.industry !== 'All' && c.industry !== filters.industry) return false;
-        if (filters.minMatchScore > 0 && c.matchScore < filters.minMatchScore) return false;
-        if (filters.minAudienceScore > 0 && c.audienceMatchScore < filters.minAudienceScore) return false;
-        if (filters.isVerifiedOnly && c.isVerified === false) return false;
+        // 2. Industry / Category
+        if (filters.industry !== 'All') {
+          const cInd = c.industry.toLowerCase();
+          const fInd = filters.industry.toLowerCase();
+          if (!cInd.includes(fInd) && !fInd.includes(cInd)) return false;
+        }
 
+        // 3. Budget Range
+        if (!matchesBudget(c.campaignBudget, filters.budgetRange)) return false;
+
+        // 4. Platform
         if (filters.platform !== 'All Platforms') {
           const hasPlat = c.targetPlatforms?.some(
             (p) => p.toLowerCase() === filters.platform.toLowerCase()
@@ -369,14 +733,53 @@ export default function CompanyDiscoverySection() {
           if (!hasPlat) return false;
         }
 
+        // 5. Campaign / Deliverable Type
+        if (!matchesCampaignType(c, filters.campaignType)) return false;
+
+        // 6. Match Scores
+        if (filters.minMatchScore > 0 && c.matchScore < filters.minMatchScore) return false;
+        if (filters.minAudienceScore > 0 && c.audienceMatchScore < filters.minAudienceScore) return false;
+        if (filters.minNicheScore > 0 && c.nicheMatchScore < filters.minNicheScore) return false;
+
+        // 7. Demographics (Gender & Age)
+        if (!matchesDemographics(c, filters.targetGender, filters.targetAge)) return false;
+
+        // 8. Trust & Escrow
+        if (filters.isVerifiedOnly && c.isVerified === false) return false;
+        if (filters.escrowOnly && c.escrowSetup === false) return false;
+
         return true;
       })
       .sort((a, b) => {
-        if (sortBy === 'matchScore') return b.matchScore - a.matchScore;
         if (sortBy === 'name') return a.companyName.localeCompare(b.companyName);
+        if (sortBy === 'highestBudget') {
+          const [_, maxA] = parseCompanyBudgetBounds(a.campaignBudget);
+          const [__, maxB] = parseCompanyBudgetBounds(b.campaignBudget);
+          return maxB - maxA;
+        }
+        if (sortBy === 'lowestBudget') {
+          const [minA] = parseCompanyBudgetBounds(a.campaignBudget);
+          const [minB] = parseCompanyBudgetBounds(b.campaignBudget);
+          return minA - minB;
+        }
+        if (sortBy === 'newest') {
+          return Number(b.foundedYear || 2024) - Number(a.foundedYear || 2024);
+        }
         return b.matchScore - a.matchScore;
       });
   }, [companies, search, filters, sortBy]);
+
+  // Reset to page 1 on filter/search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filters, sortBy]);
+
+  // Pagination Computations
+  const totalPages = Math.max(1, Math.ceil(filteredCompanies.length / pageSize));
+  const paginatedCompanies = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredCompanies.slice(start, start + pageSize);
+  }, [filteredCompanies, currentPage, pageSize]);
 
   return (
     <div className="space-y-5">
@@ -409,10 +812,7 @@ export default function CompanyDiscoverySection() {
 
       {/* Results Grid / Loading State */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center space-y-3 text-slate-400">
-          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
-          <span className="text-xs font-bold">Matching company opportunities...</span>
-        </div>
+        <CompanyLoadingSkeleton />
       ) : filteredCompanies.length === 0 ? (
         <div className="py-16 p-8 text-center bg-slate-950/40 rounded-3xl border border-white/10 space-y-3">
           <AlertCircle className="w-10 h-10 text-slate-500 mx-auto" />
@@ -428,25 +828,36 @@ export default function CompanyDiscoverySection() {
           </button>
         </div>
       ) : (
-        <div
-          className={
-            viewMode === 'grid'
-              ? 'grid grid-cols-1 md:grid-cols-2 gap-4'
-              : 'flex flex-col space-y-3'
-          }
-        >
-          {filteredCompanies.map((company) => (
-            <CompanyCard
-              key={company.id}
-              company={company}
-              isSaved={savedIds.has(company.id)}
-              onToggleSave={handleToggleSave}
-              onViewDetails={setDetailCompany}
-              onPitchBrand={setPitchCompany}
-              viewMode={viewMode}
-            />
-          ))}
-        </div>
+        <>
+          <div
+            className={
+              viewMode === 'grid'
+                ? 'grid grid-cols-1 md:grid-cols-2 gap-4'
+                : 'flex flex-col space-y-3'
+            }
+          >
+            {paginatedCompanies.map((company) => (
+              <CompanyCard
+                key={company.id}
+                company={company}
+                isSaved={savedIds.has(company.id)}
+                onToggleSave={handleToggleSave}
+                onViewDetails={setDetailCompany}
+                onPitchBrand={setPitchCompany}
+                viewMode={viewMode}
+              />
+            ))}
+          </div>
+
+          {/* Pagination Bar */}
+          <CompanyPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredCompanies.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+          />
+        </>
       )}
 
       {/* Modals */}

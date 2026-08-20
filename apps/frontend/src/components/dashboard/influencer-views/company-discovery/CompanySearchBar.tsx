@@ -17,7 +17,7 @@ export default function CompanySearchBar({ value, onChange }: CompanySearchBarPr
         placeholder="Search brands, industries, products, campaigns or keywords..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full pl-11 pr-10 py-3.5 rounded-2xl bg-slate-900/80 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all shadow-inner"
+        className="w-full pl-11 pr-10 py-3.5 rounded-2xl bg-slate-900/80 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-white/20 focus:ring-0 transition-all shadow-inner"
       />
       {value && (
         <button

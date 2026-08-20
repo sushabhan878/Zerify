@@ -1,23 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import {
   Sparkles,
   ShieldCheck,
   Send,
   Heart,
-  Globe,
-  DollarSign,
-  ChevronDown,
-  ChevronUp,
-  CheckCircle2,
-  AlertTriangle,
   Eye,
-  Instagram,
-  Youtube,
-  Twitter,
-  Linkedin,
 } from 'lucide-react';
 
 export interface CompanyItem {
@@ -68,8 +58,6 @@ export default function CompanyCard({
   onPitchBrand,
   viewMode = 'grid',
 }: CompanyCardProps) {
-  const [showMatchDetails, setShowMatchDetails] = useState(false);
-
   const getMatchColor = (score: number) => {
     if (score >= 85) return 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400';
     if (score >= 70) return 'bg-purple-500/15 border-purple-500/40 text-purple-300';
@@ -78,19 +66,29 @@ export default function CompanyCard({
 
   const logoLetter = company.companyName ? company.companyName.charAt(0).toUpperCase() : 'B';
 
-  const audienceText = company.targetAudience?.gender
-    ? `${company.targetAudience.gender} | ${company.targetAudience.ageRanges?.join(', ') || 'All Ages'}`
-    : 'All Demographics';
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`p-5 rounded-2xl bg-slate-950/60 border border-white/10 backdrop-blur-xl shadow-xl hover:border-purple-500/40 transition-all flex flex-col justify-between group ${
+      whileHover={{ y: -4, scale: 1.008 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+      className={`relative p-5 rounded-2xl bg-slate-950/60 border border-white/10 backdrop-blur-xl shadow-xl hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-950/40 hover:bg-slate-950/85 transition-all flex flex-col justify-between group ${
         viewMode === 'list' ? 'md:flex-row md:items-center gap-4' : 'space-y-4'
       }`}
     >
-      <div className="space-y-3 flex-1">
+      {/* Top-Right Match Score Badge */}
+      <div className="absolute top-4 right-4 sm:top-5 sm:right-5 z-10">
+        <div
+          className={`px-3 py-1 rounded-full border text-xs font-black flex items-center gap-1.5 ${getMatchColor(
+            company.matchScore
+          )}`}
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>{company.matchScore}% Match</span>
+        </div>
+      </div>
+
+      <div className="space-y-3 flex-1 pr-24 md:pr-0">
         {/* Top Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -123,20 +121,6 @@ export default function CompanyCard({
               </div>
             </div>
           </div>
-
-          {/* Match Score Badge */}
-          <div className="flex flex-col items-end gap-1">
-            <button
-              onClick={() => setShowMatchDetails(!showMatchDetails)}
-              className={`px-3 py-1 rounded-full border text-xs font-black flex items-center gap-1.5 transition-all hover:scale-105 ${getMatchColor(
-                company.matchScore
-              )}`}
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{company.matchScore}% Match</span>
-              {showMatchDetails ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-            </button>
-          </div>
         </div>
 
         {/* Short Campaign Goal / Description */}
@@ -147,91 +131,18 @@ export default function CompanyCard({
             }.`}
         </p>
 
-        {/* Match Breakdown Expandable Section */}
-        {showMatchDetails && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            className="p-3 rounded-xl bg-slate-900/90 border border-purple-500/20 text-xs space-y-2"
-          >
-            <div className="font-extrabold text-white text-[11px] flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-              <span>Match Component Scores:</span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] text-slate-300 font-medium">
-              <div className="p-1.5 rounded-lg bg-slate-950/60 border border-white/5">
-                <span className="text-slate-400 block">Audience</span>
-                <span className="font-extrabold text-emerald-400">{company.audienceMatchScore}%</span>
-              </div>
-              <div className="p-1.5 rounded-lg bg-slate-950/60 border border-white/5">
-                <span className="text-slate-400 block">Niche Fit</span>
-                <span className="font-extrabold text-purple-300">{company.nicheMatchScore}%</span>
-              </div>
-              <div className="p-1.5 rounded-lg bg-slate-950/60 border border-white/5">
-                <span className="text-slate-400 block">Brand Fit</span>
-                <span className="font-extrabold text-blue-300">{company.brandFitScore}%</span>
-              </div>
-              <div className="p-1.5 rounded-lg bg-slate-950/60 border border-white/5">
-                <span className="text-slate-400 block">Budget Fit</span>
-                <span className="font-extrabold text-teal-300">{company.budgetFitScore}%</span>
-              </div>
-            </div>
-
-            <div className="space-y-1 pt-1">
-              {company.matchReasons.map((reason, idx) => (
-                <div key={idx} className="flex items-center gap-1.5 text-[11px] text-emerald-300">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
-                  <span>{reason}</span>
-                </div>
-              ))}
-              {company.matchWarnings?.map((warning, idx) => (
-                <div key={idx} className="flex items-center gap-1.5 text-[11px] text-amber-300">
-                  <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" />
-                  <span>{warning}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Key Target Signals */}
-        <div className="flex flex-wrap items-center gap-2 text-[11px]">
-          <div className="px-2.5 py-1 rounded-lg bg-slate-900 border border-white/10 text-slate-300 flex items-center gap-1 font-medium">
-            <DollarSign className="w-3 h-3 text-emerald-400" />
-            <span className="text-emerald-400 font-extrabold">
-              {company.campaignBudget || '$5,000 – $20,000'}
-            </span>
-          </div>
-
-          <div className="px-2.5 py-1 rounded-lg bg-slate-900 border border-white/10 text-slate-300 font-medium truncate max-w-[200px]">
-            Target: <strong className="text-white">{audienceText}</strong>
-          </div>
-
-          {company.targetPlatforms && company.targetPlatforms.length > 0 && (
-            <div className="px-2.5 py-1 rounded-lg bg-slate-900 border border-white/10 text-slate-300 font-medium flex items-center gap-1">
-              <span>Platforms:</span>
-              <strong className="text-purple-300">{company.targetPlatforms.join(', ')}</strong>
-            </div>
-          )}
-        </div>
-
-        {/* Badges */}
-        <div className="flex items-center gap-1.5 pt-1">
-          <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-400">
-            Paid Campaign
-          </span>
-          <span className="px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-[10px] font-bold text-purple-300">
-            Escrow Available
-          </span>
-          <span className="px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold text-blue-300">
-            Verified Brand
+        {/* Budget Highlight */}
+        <div className="pt-1">
+          <span className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight">
+            {company.campaignBudget || '$5,000 – $20,000'}
           </span>
         </div>
       </div>
 
       {/* Footer Actions */}
-      <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2 shrink-0">
+      <div className={`pt-3 border-t border-white/5 flex items-center justify-between gap-2 shrink-0 ${
+        viewMode === 'list' ? 'md:border-t-0 md:pt-0 md:self-end md:mt-2' : ''
+      }`}>
         <div className="flex items-center gap-2">
           <button
             onClick={() => onToggleSave(company.id)}
