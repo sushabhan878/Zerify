@@ -3,6 +3,7 @@
 import React from 'react';
 import ProfileOverviewSection from './influencer-views/ProfileOverviewSection';
 import CompanyDiscoverySection from './influencer-views/CompanyDiscoverySection';
+import CampaignDiscoverySection from './influencer-views/CampaignDiscoverySection';
 import AiProfileMatchSection from './influencer-views/AiProfileMatchSection';
 import CampaignInvitationsSection from './influencer-views/CampaignInvitationsSection';
 import ActiveCampaignsSection from './influencer-views/ActiveCampaignsSection';
@@ -47,6 +48,8 @@ export default function InfluencerDashboardView({
         return <StatisticView />;
       case 'company-discovery':
         return <CompanyDiscoverySection />;
+      case 'campaign-discovery':
+        return <CampaignDiscoverySection />;
       case 'ai-profile-match':
         return <AiProfileMatchSection />;
       case 'campaign-invitations':

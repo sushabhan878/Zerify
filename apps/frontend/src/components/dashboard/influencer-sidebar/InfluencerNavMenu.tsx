@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import {
   User,
   Building2,
+  Compass,
   Sparkles,
   MailCheck,
   Megaphone,
@@ -58,6 +59,7 @@ export default function InfluencerNavMenu({
       ],
     },
     { id: 'company-discovery', label: 'Company Discovery', icon: Building2, section: 'MAIN' },
+    { id: 'campaign-discovery', label: 'Campaign Discovery', icon: Compass, section: 'MAIN' },
     {
       id: 'ai-profile-match',
       label: 'AI Profile Match',
