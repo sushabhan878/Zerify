@@ -1,13 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Megaphone, Search } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Megaphone, Search, ChevronRight } from 'lucide-react';
 import ActiveCampaignKpiBar from './subcomponents/ActiveCampaignKpiBar';
 import ActiveCampaignCardItem, { ActiveCampaignItem } from './subcomponents/ActiveCampaignCardItem';
+import CollaborationWorkspace from './collaborations/CollaborationWorkspace';
+import { DeliverableService } from '@/services/deliverable.service';
 
 export default function ActiveCampaignsSection() {
   const [activeTab, setActiveTab] = useState<'ALL' | 'IN_PRODUCTION' | 'CONTENT_REVIEW' | 'READY_TO_PUBLISH'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeParticipantId, setActiveParticipantId] = useState<string | null>(null);
 
   const [campaigns, setCampaigns] = useState<ActiveCampaignItem[]>([
     {
@@ -16,7 +19,7 @@ export default function ActiveCampaignsSection() {
       brand: 'FlexiSpot Official',
       industry: 'Office & Home Productivity',
       stage: 'CONTENT_REVIEW',
-      deadline: 'Aug 04, 2026 (2 Days Left)',
+      deadline: 'Aug 28, 2026 (4 Days Left)',
       payout: '$2,800.00',
       progress: 75,
       deliverables: [
@@ -32,7 +35,7 @@ export default function ActiveCampaignsSection() {
       brand: 'Soundcore Audio',
       industry: 'Consumer Audio & Accessories',
       stage: 'READY_TO_PUBLISH',
-      deadline: 'Aug 08, 2026',
+      deadline: 'Sep 02, 2026',
       payout: '$1,500.00',
       progress: 90,
       deliverables: [
@@ -42,27 +45,60 @@ export default function ActiveCampaignsSection() {
       verifiedBrand: true,
       contractBrief: 'Demonstrate active noise cancellation in noisy coffee shop environment. Include link-in-bio trackable discount code in story swipe up.',
     },
-    {
-      id: 3,
-      title: 'Smart Fitness Ring 24/7 Sleep & Health Tracking',
-      brand: 'Ultrahuman Ring',
-      industry: 'Health Tech & Wearables',
-      stage: 'IN_PRODUCTION',
-      deadline: 'Aug 14, 2026',
-      payout: '$4,000.00',
-      progress: 40,
-      deliverables: [
-        { title: '1x YouTube 60s Integrated Sponsor Segment', completed: false },
-        { title: '1x TikTok Daily Vlog Feature', completed: false },
-      ],
-      verifiedBrand: true,
-      contractBrief: 'Show night time recovery score dashboard on smartphone app and sleek titanium finish during gym workouts.',
-    },
   ]);
 
-  const handleUploadSubmit = (id: number) => {
-    alert(`Draft upload modal opened for campaign #${id}. File upload pipeline ready!`);
+  const loadData = async () => {
+    try {
+      const data = await DeliverableService.getMyCollaborations();
+      if (data && Array.isArray(data) && data.length > 0) {
+        const formatted: ActiveCampaignItem[] = data.map((p: any) => {
+          const deliverables = p.deliverables || [];
+          const completedCount = deliverables.filter((d: any) => d.status === 'VERIFIED').length;
+          const progress = deliverables.length > 0 ? Math.round((completedCount / deliverables.length) * 100) : 50;
+
+          return {
+            id: p.id,
+            title: p.campaign?.title || 'Creator Collaboration',
+            brand: p.campaign?.brandProfile?.companyName || 'Verified Brand',
+            industry: p.campaign?.industry || 'Tech & Creator',
+            stage: progress >= 100 ? 'READY_TO_PUBLISH' : progress > 0 ? 'CONTENT_REVIEW' : 'IN_PRODUCTION',
+            deadline: p.campaign?.endDate ? new Date(p.campaign.endDate).toLocaleDateString() : 'Rolling',
+            payout: `$${p.agreedAmount.toLocaleString()} ${p.agreedCurrency}`,
+            progress,
+            deliverables: deliverables.map((d: any) => ({
+              title: `${d.quantity || 1}x ${d.type}`,
+              completed: d.status === 'VERIFIED' || d.status === 'APPROVED',
+            })),
+            verifiedBrand: true,
+            contractBrief: p.campaign?.description || 'Deliverable guidelines and brand objectives.',
+          };
+        });
+        setCampaigns(formatted);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleUploadSubmit = (id: any) => {
+    setActiveParticipantId(String(id));
+  };
+
+  if (activeParticipantId) {
+    return (
+      <CollaborationWorkspace
+        participantId={activeParticipantId}
+        onBack={() => {
+          setActiveParticipantId(null);
+          loadData();
+        }}
+      />
+    );
+  }
 
   const filteredCampaigns = campaigns.filter((c) => {
     const matchesTab = activeTab === 'ALL' || c.stage === activeTab;
@@ -82,7 +118,9 @@ export default function ActiveCampaignsSection() {
             <Megaphone className="w-5 h-5 text-purple-400" />
             <span>Active Collaborations</span>
           </h2>
-          <p className="text-xs text-slate-400">Track active deliverables, milestone deadlines, and content draft submissions</p>
+          <p className="text-xs text-slate-400">
+            Track active deliverables, milestone deadlines, and content draft submissions
+          </p>
         </div>
 
         <div className="flex items-center gap-2">

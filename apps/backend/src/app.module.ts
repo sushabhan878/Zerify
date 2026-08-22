@@ -9,6 +9,7 @@ import { FileUploadModule } from './modules/file-upload/file-upload.module';
 import { InfluencerModule } from './modules/influencer/influencer.module';
 import { SocialModule } from './modules/social/social.module';
 import { BrandModule } from './modules/brand/brand.module';
+import { CampaignModule } from './modules/campaign/campaign.module';
 
 @Module({
   imports: [
@@ -26,8 +27,10 @@ import { BrandModule } from './modules/brand/brand.module';
     InfluencerModule,
     SocialModule,
     BrandModule,
+    CampaignModule,
   ],
   controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
+

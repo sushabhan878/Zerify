@@ -288,14 +288,61 @@ export default function CampaignDiscoverySection() {
   const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
   const [selectedCampaignForDetail, setSelectedCampaignForDetail] = useState<CampaignItem | null>(null);
   const [selectedCampaignForPitch, setSelectedCampaignForPitch] = useState<CampaignItem | null>(null);
+  const [liveCampaigns, setLiveCampaigns] = useState<CampaignItem[]>([]);
 
-  // Artificial initial loading to ensure smooth feel
+  // Fetch live campaigns from backend API
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 400);
-    return () => clearTimeout(timer);
-  }, []);
+    async function fetchLive() {
+      try {
+        const { CampaignService } = await import('@/services/campaign.service');
+        const res = await CampaignService.discoverCampaigns({
+          search: searchQuery || undefined,
+          category: quickFilters.category !== 'All' ? quickFilters.category : undefined,
+          platform: quickFilters.platform !== 'All Platforms' ? quickFilters.platform : undefined,
+        });
+
+        if (res?.campaigns && Array.isArray(res.campaigns) && res.campaigns.length > 0) {
+          // Format backend campaigns into CampaignItem shape
+          const formatted: CampaignItem[] = res.campaigns.map((c: any) => ({
+            id: c.id,
+            title: c.title,
+            brandName: c.brandProfile?.companyName || 'Verified Brand',
+            brandLogo: c.brandProfile?.logoUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80',
+            category: c.categories?.[0] || c.industry || 'Tech & AI',
+            industry: c.industry || 'SaaS & Enterprise',
+            coverImage: c.coverImageUrl || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
+            description: c.description || 'Campaign brief',
+            payoutAmount: `$${c.budgetMinPerInfluencer || c.budgetTotalAmount || 1500} – $${c.budgetMaxPerInfluencer || c.budgetTotalAmount || 3000}`,
+            payoutModel: (c.budgetPaymentModel === 'FIXED' ? 'Fixed Fee' : 'Paid + Commission') as any,
+            hasFreeProduct: Boolean(c.productName),
+            freeProductValue: c.productName ? `${c.productName} Sample` : undefined,
+            deliverables: (c.deliverables || []).map((d: any) => `${d.quantity || 1}x ${d.type}`),
+            targetPlatforms: c.platforms || ['Instagram'],
+            creatorTiers: ['Micro', 'Mid', 'Macro'],
+            slotsTotal: c.targetParticipants || 5,
+            slotsFilled: c._count?.participants || 0,
+            deadline: c.applicationDeadline ? new Date(c.applicationDeadline).toLocaleDateString() : 'Rolling',
+            daysRemaining: 14,
+            matchScore: c.matchScore || 95,
+            audienceMatchScore: 96,
+            nicheMatchScore: 94,
+            isVerifiedBrand: true,
+            isEscrowGuaranteed: true,
+            requirements: ['Active creator', 'Verified profile'],
+            dos: ['Submit authentic content demo', 'Tag brand in publication'],
+            donts: ['No low-quality audio or video', 'No undisclosed sponsorships'],
+          }));
+          setLiveCampaigns(formatted);
+        }
+      } catch (err) {
+        console.error('Failed to fetch discovery campaigns', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchLive();
+  }, [searchQuery, quickFilters]);
 
   const handleQuickFilterChange = (key: keyof CampaignQuickFilterState, val: any) => {
     setQuickFilters((prev) => ({ ...prev, [key]: val }));
@@ -328,18 +375,24 @@ export default function CampaignDiscoverySection() {
     setCurrentPage(1);
   };
 
+  const allCampaignsPool: CampaignItem[] = useMemo(() => {
+    return [...liveCampaigns, ...SAMPLE_CAMPAIGNS];
+  }, [liveCampaigns]);
+
   // Filter Pipeline
   const filteredCampaigns = useMemo(() => {
-    return SAMPLE_CAMPAIGNS.filter((c) => {
+    return allCampaignsPool.filter((c: CampaignItem) => {
       // 1. Search Query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const matchesTitle = c.title.toLowerCase().includes(q);
         const matchesBrand = c.brandName.toLowerCase().includes(q);
         const matchesCat = c.category.toLowerCase().includes(q);
-        const matchesDel = c.deliverables.some((d) => d.toLowerCase().includes(q));
+        const matchesDel = c.deliverables.some((d: string) => d.toLowerCase().includes(q));
         if (!matchesTitle && !matchesBrand && !matchesCat && !matchesDel) return false;
       }
+
+
 
       // 2. Category
       if (quickFilters.category !== 'All') {
@@ -348,11 +401,12 @@ export default function CampaignDiscoverySection() {
 
       // 3. Deliverable / Campaign Type
       if (quickFilters.campaignType !== 'All Types' && quickFilters.campaignType !== 'All') {
-        const hasDel = c.deliverables.some((d) =>
+        const hasDel = c.deliverables.some((d: string) =>
           d.toLowerCase().includes(quickFilters.campaignType.toLowerCase())
         );
         if (!hasDel) return false;
       }
+
 
       // 4. Platform Filter
       if (quickFilters.platform !== 'All Platforms' && quickFilters.platform !== 'All') {

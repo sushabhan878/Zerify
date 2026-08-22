@@ -79,6 +79,9 @@ model BrandProfile {
   completionPercentage  Int            @default(0)
   isOnboardingCompleted Boolean        @default(false)
 
+  // Campaign Relation
+  campaigns             Campaign[]
+
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @updatedAt
 
@@ -134,6 +137,10 @@ model InfluencerProfile {
   // Deliverables & Payment Relations
   pastDeliverables        InfluencerPastDeliverable[]
   paymentDetails          InfluencerPaymentDetails?
+
+  // Campaign Relations
+  applications            CampaignApplication[]
+  participants            CampaignParticipant[]
 
   // Onboarding status & progress
   completionPercentage    Int                           @default(0)
@@ -234,6 +241,9 @@ model SocialAccount {
   performance    SocialAccountPerformance[]
   contents       SocialMediaContent[]
   syncStates     SocialSyncState[]
+
+  // Campaign Relations
+  applications   CampaignApplication[]
 
   @@unique([userId, platform, platformUserId])
   @@map("social_accounts")
@@ -369,4 +379,421 @@ model SocialSyncState {
   @@map("social_sync_states")
 }
 
+
+// ============================================================================
+// CAMPAIGN DISCOVERY & COLLABORATION MODELS
+// ============================================================================
+
+enum CampaignStatus {
+  DRAFT
+  OPEN
+  FILLING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  PAUSED
+}
+
+enum CampaignObjective {
+  BRAND_AWARENESS
+  PRODUCT_LAUNCH
+  WEBSITE_TRAFFIC
+  APP_INSTALLS
+  LEAD_GENERATION
+  SALES_CONVERSIONS
+  UGC_CREATION
+  SOCIAL_GROWTH
+  EVENT_PROMOTION
+  OTHER
+}
+
+enum PaymentModel {
+  FIXED
+  NEGOTIABLE
+  RANGE
+  PERFORMANCE_BASED
+  COMMISSION
+  BARTER
+  HYBRID
+}
+
+enum ApplicationStatus {
+  APPLIED
+  UNDER_REVIEW
+  SHORTLISTED
+  REJECTED
+  WITHDRAWN
+  EXPIRED
+  OFFER_SENT
+  OFFER_ACCEPTED
+  OFFER_DECLINED
+  OFFER_EXPIRED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  OFFER_EXPIRED
+  CANCELLED
+}
+
+enum ParticipantStatus {
+  CONFIRMED
+  PARTICIPANT_ACTIVE
+  PARTICIPANT_COMPLETED
+  PARTICIPANT_CANCELLED
+}
+
+enum DeliverableStatus {
+  PENDING
+  IN_PROGRESS
+  SUBMITTED
+  REVISION_REQUESTED
+  APPROVED
+  READY_TO_PUBLISH
+  PUBLISHED
+  VERIFIED
+  DELIVERABLE_REJECTED
+}
+
+enum EligibilityResult {
+  ELIGIBLE
+  PARTIALLY_ELIGIBLE
+  NOT_ELIGIBLE
+}
+
+enum CampaignPaymentType {
+  CAMPAIGN_FUNDING
+  PARTICIPANT_ALLOCATION
+  PAYOUT
+  REFUND
+}
+
+enum CampaignPaymentStatus {
+  PAYMENT_PENDING
+  PROCESSING
+  FUNDED
+  HELD
+  RELEASED
+  PAYMENT_FAILED
+  REFUNDED
+}
+
+// Core Campaign entity — owned by a BrandProfile
+model Campaign {
+  id                    String              @id @default(uuid())
+  brandProfileId        String
+  brandProfile          BrandProfile        @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+
+  // Basic Info
+  title                 String
+  slug                  String              @unique
+  objective             CampaignObjective   @default(OTHER)
+  description           String?
+  industry              String?
+  categories            String[]            @default([])
+  coverImageUrl         String?
+
+  // Product / Brand Info
+  productName           String?
+  productDescription    String?
+  websiteUrl            String?
+  landingPageUrl        String?
+  internalReference     String?
+
+  status                CampaignStatus      @default(DRAFT)
+
+  // Target Platforms
+  platforms             String[]            @default([]) // INSTAGRAM, YOUTUBE, TIKTOK, etc.
+
+  // Influencer Requirements (stored as JSON for flexibility)
+  requirements          Json?               // { strictEligibility, social: {...}, influencer: {...}, audience: {...} }
+
+  // Budget
+  budgetTotalAmount     Float?
+  budgetCurrency        String?             @default("USD")
+  budgetPaymentModel    PaymentModel?       @default(FIXED)
+  budgetMinPerInfluencer Float?
+  budgetMaxPerInfluencer Float?
+
+  // Participant Settings
+  targetParticipants    Int                 @default(1)
+  maxParticipants       Int                 @default(1)
+  autoCloseWhenFilled   Boolean             @default(false)
+
+  // Content Guidelines (stored as JSON)
+  contentGuidelines     Json?               // { description, requiredHashtags, requiredMentions, requiredCtas, referenceUrls, assetUrls }
+
+  // Timeline
+  applicationDeadline   DateTime?
+  startDate             DateTime?
+  endDate               DateTime?
+
+  // Status Timestamps
+  publishedAt           DateTime?
+  applicationsClosedAt  DateTime?
+  completedAt           DateTime?
+  cancelledAt           DateTime?
+
+  // Relations
+  deliverables          CampaignDeliverable[]
+  applications          CampaignApplication[]
+  participants          CampaignParticipant[]
+
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([brandProfileId, status])
+  @@index([status, applicationDeadline])
+  @@index([status, createdAt])
+  @@map("campaigns")
+}
+
+// Template deliverables defined at campaign level (what company expects)
+model CampaignDeliverable {
+  id                String      @id @default(uuid())
+  campaignId        String
+  campaign          Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  platform          String?     // INSTAGRAM, YOUTUBE, etc.
+  type              String      // Reel, Feed Post, Carousel, Story, Dedicated Video, Short, UGC, etc.
+  title             String?
+  description       String?
+  quantity          Int         @default(1)
+  dueDate           DateTime?
+
+  // Content Requirements
+  requiredCta       String?
+  mandatoryHashtags String[]    @default([])
+  mandatoryMentions String[]    @default([])
+  contentGuidelines String?
+  revisionLimit     Int         @default(2)
+
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([campaignId])
+  @@map("campaign_deliverables")
+}
+
+// Influencer applies to a campaign
+model CampaignApplication {
+  id                    String              @id @default(uuid())
+  campaignId            String
+  campaign              Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  influencerProfileId   String
+  influencerProfile     InfluencerProfile   @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+  socialAccountId       String
+  socialAccount         SocialAccount       @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  status                ApplicationStatus   @default(APPLIED)
+
+  // Application Content
+  applicationMessage    String?
+  proposedAmount        Float?
+  proposedCurrency      String?             @default("USD")
+  contentIdea           String?
+  portfolioUrls         String[]            @default([])
+
+  // Match & Eligibility Snapshot (immutable after submission)
+  matchSnapshot         Json?               // { score, eligibility, reasons[], calculatedAt, algorithmVersion }
+  profileSnapshot       Json?               // { displayName, username, platform, followersCount, engagementRate, categories, location }
+
+  // Review
+  reviewedBy            String?
+  reviewedAt            DateTime?
+  reviewNotes           String?
+
+  // Status Timestamps
+  submittedAt           DateTime            @default(now())
+  withdrawnAt           DateTime?
+  rejectedAt            DateTime?
+
+  // Relations
+  offers                CampaignOffer[]
+
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@unique([campaignId, socialAccountId])
+  @@index([campaignId, status])
+  @@index([influencerProfileId, createdAt])
+  @@map("campaign_applications")
+}
+
+// Company sends offer to shortlisted applicant
+model CampaignOffer {
+  id                    String              @id @default(uuid())
+  campaignId            String
+  applicationId         String
+  application           CampaignApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  influencerProfileId   String
+
+  status                OfferStatus         @default(PENDING)
+
+  // Compensation
+  compensationAmount    Float
+  compensationCurrency  String              @default("USD")
+  compensationPaymentModel PaymentModel     @default(FIXED)
+
+  // Timeline
+  startDate             DateTime?
+  endDate               DateTime?
+  responseDeadline      DateTime?
+
+  // Terms
+  termsSnapshot         Json?               // snapshot of campaign terms at offer time
+  customNotes           String?
+
+  // Tracking
+  sentBy                String?
+  sentAt                DateTime            @default(now())
+  respondedAt           DateTime?
+
+  // Relations
+  participant           CampaignParticipant?
+
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([campaignId, status])
+  @@index([applicationId])
+  @@index([influencerProfileId, status])
+  @@index([responseDeadline])
+  @@map("campaign_offers")
+}
+
+// Confirmed influencer in a campaign (created on offer acceptance)
+model CampaignParticipant {
+  id                    String                  @id @default(uuid())
+  campaignId            String
+  campaign              Campaign                @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  influencerProfileId   String
+  influencerProfile     InfluencerProfile       @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+  socialAccountId       String
+  applicationId         String
+  offerId               String                  @unique
+  offer                 CampaignOffer           @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  status                ParticipantStatus       @default(CONFIRMED)
+
+  // Agreed Compensation
+  agreedAmount          Float
+  agreedCurrency        String                  @default("USD")
+  agreedPaymentModel    PaymentModel            @default(FIXED)
+
+  // Allocation Status
+  allocationStatus      String                  @default("PENDING") // PENDING, ALLOCATED, FUNDED, RELEASED
+
+  // Status Timestamps
+  joinedAt              DateTime                @default(now())
+  startedAt             DateTime?
+  completedAt           DateTime?
+  cancelledAt           DateTime?
+
+  // Relations
+  deliverables          ParticipantDeliverable[]
+  payments              CampaignPayment[]
+
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+
+  @@unique([campaignId, influencerProfileId])
+  @@index([campaignId, status])
+  @@index([influencerProfileId, status])
+  @@map("campaign_participants")
+}
+
+// Per-participant deliverable tracking (instantiated from campaign deliverable templates)
+model ParticipantDeliverable {
+  id                String              @id @default(uuid())
+  campaignId        String
+  participantId     String
+  participant       CampaignParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  // Deliverable Info
+  platform          String?
+  type              String
+  title             String?
+  description       String?
+  quantity          Int                 @default(1)
+  dueDate           DateTime?
+
+  status            DeliverableStatus   @default(PENDING)
+
+  // Submission
+  contentUrls       String[]            @default([])
+  submissionNotes   String?
+  submittedAt       DateTime?
+
+  // Review
+  reviewStatus      String?             // PENDING, APPROVED, REVISION_REQUESTED, REJECTED
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  reviewComments    String?
+  revisionCount     Int                 @default(0)
+
+  // Publication
+  publishedUrl      String?
+  publishedAt       DateTime?
+  proofUrls         String[]            @default([])
+  verifiedAt        DateTime?
+  verifiedBy        String?
+
+  // Relations
+  revisions         DeliverableRevision[]
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([participantId, status])
+  @@index([campaignId, status])
+  @@index([dueDate, status])
+  @@map("participant_deliverables")
+}
+
+// Audit trail for deliverable revisions
+model DeliverableRevision {
+  id              String                @id @default(uuid())
+  deliverableId   String
+  deliverable     ParticipantDeliverable @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
+  version         Int
+  submittedBy     String?
+  files           String[]              @default([])
+  notes           String?
+  status          String                @default("SUBMITTED") // SUBMITTED, APPROVED, REVISION_REQUESTED, REJECTED
+  reviewComments  String?
+  createdAt       DateTime              @default(now())
+
+  @@index([deliverableId, version])
+  @@map("deliverable_revisions")
+}
+
+// Payment allocation per participant
+model CampaignPayment {
+  id                    String              @id @default(uuid())
+  campaignId            String
+  participantId         String
+  participant           CampaignParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  companyId             String
+  influencerProfileId   String
+
+  amount                Float
+  currency              String              @default("USD")
+
+  type                  CampaignPaymentType @default(PARTICIPANT_ALLOCATION)
+  status                CampaignPaymentStatus @default(PAYMENT_PENDING)
+
+  provider              String?
+  providerTransactionId String?
+  releaseCondition      String?
+
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([participantId, status])
+  @@index([campaignId, status])
+  @@map("campaign_payments")
+}
 

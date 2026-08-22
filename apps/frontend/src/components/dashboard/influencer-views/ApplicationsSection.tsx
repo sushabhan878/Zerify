@@ -1,13 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
-import { FileText, Search } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { FileText, Search, Send, Sparkles } from 'lucide-react';
 import ApplicationKpiBar from './subcomponents/ApplicationKpiBar';
 import ApplicationCardItem, { ApplicationItem } from './subcomponents/ApplicationCardItem';
+import OfferReceivedCard from './applications/OfferReceivedCard';
+import OfferDetailModal from './applications/OfferDetailModal';
+import { ApplicationService } from '@/services/application.service';
+import { OfferService, CampaignOfferItem } from '@/services/offer.service';
 
 export default function ApplicationsSection() {
   const [activeTab, setActiveTab] = useState<'ALL' | 'CONTRACT_SENT' | 'SHORTLISTED' | 'UNDER_REVIEW' | 'DECLINED'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [offers, setOffers] = useState<CampaignOfferItem[]>([]);
+  const [selectedOffer, setSelectedOffer] = useState<CampaignOfferItem | null>(null);
+  const [isAcceptingOffer, setIsAcceptingOffer] = useState(false);
 
   const [applications, setApplications] = useState<ApplicationItem[]>([
     {
@@ -15,7 +22,7 @@ export default function ApplicationsSection() {
       brand: 'Sony Audio Systems',
       industry: 'Consumer Audio & Tech',
       role: 'WH-1000XM5 Wireless Headphones Unboxing Reel',
-      appliedDate: 'Jul 22, 2026',
+      appliedDate: 'Aug 20, 2026',
       proposedRate: '$2,800.00',
       deliveryTime: '5 Days from acceptance',
       status: 'CONTRACT_SENT',
@@ -29,7 +36,7 @@ export default function ApplicationsSection() {
       brand: 'Logitech Gaming',
       industry: 'Gaming Accessories & Hardware',
       role: 'Stream Deck + Wireless Gaming Mouse Integration',
-      appliedDate: 'Jul 18, 2026',
+      appliedDate: 'Aug 18, 2026',
       proposedRate: '$3,200.00',
       deliveryTime: '7 Days',
       status: 'SHORTLISTED',
@@ -38,25 +45,76 @@ export default function ApplicationsSection() {
       pitchSummary: 'Will feature macro automation shortcuts for stream creators and dedicated RGB lighting syncing with game triggers.',
       lastViewedByBrand: 'Brand viewed pitch yesterday',
     },
-    {
-      id: 3,
-      brand: 'Razer Inc',
-      industry: 'High Performance Laptops',
-      role: 'Blade 16 Gaming Laptop Showcase & Benchmark Test',
-      appliedDate: 'Jul 10, 2026',
-      proposedRate: '$4,500.00',
-      deliveryTime: '10 Days',
-      status: 'UNDER_REVIEW',
-      platforms: ['YouTube'],
-      verifiedBrand: true,
-      pitchSummary: 'Detailed FPS benchmark test comparing OLED screen performance in triple-A games with thermal management analytics.',
-      lastViewedByBrand: 'Pitch under active review by PR team',
-    },
   ]);
 
-  const handleWithdraw = (id: number) => {
+  const loadData = async () => {
+    try {
+      const [myApps, myOffers] = await Promise.all([
+        ApplicationService.getMyApplications().catch(() => []),
+        OfferService.getMyOffers().catch(() => []),
+      ]);
+
+      if (myOffers && myOffers.length > 0) {
+        setOffers(myOffers);
+      }
+
+      if (myApps && myApps.length > 0) {
+        const formatted: ApplicationItem[] = myApps.map((a: any) => ({
+          id: a.id,
+          brand: a.campaign?.brandProfile?.companyName || 'Verified Brand',
+          industry: a.campaign?.industry || 'Technology & Creator',
+          role: a.campaign?.title || 'Creator Campaign',
+          appliedDate: new Date(a.submittedAt).toLocaleDateString(),
+          proposedRate: a.proposedAmount ? `$${a.proposedAmount.toLocaleString()}` : '$1,500.00',
+          deliveryTime: '7 Days',
+          status: a.status === 'OFFER_SENT' ? 'CONTRACT_SENT' : a.status === 'APPLIED' ? 'UNDER_REVIEW' : a.status,
+          platforms: a.campaign?.platforms || ['Instagram'],
+          verifiedBrand: true,
+          pitchSummary: a.applicationMessage || 'Submitted pitch concept',
+          lastViewedByBrand: 'Live status synced',
+        }));
+        setApplications(formatted);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleAcceptOffer = async (offerId: string) => {
+    setIsAcceptingOffer(true);
+    try {
+      await OfferService.acceptOffer(offerId);
+      loadData();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsAcceptingOffer(false);
+    }
+  };
+
+  const handleDeclineOffer = async (offerId: string) => {
+    try {
+      await OfferService.declineOffer(offerId);
+      loadData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleWithdraw = async (id: any) => {
     if (confirm('Are you sure you want to withdraw this application pitch?')) {
-      setApplications((prev) => prev.filter((a) => a.id !== id));
+      try {
+        if (typeof id === 'string') {
+          await ApplicationService.withdrawApplication(id);
+        }
+        setApplications((prev) => prev.filter((a) => a.id !== id));
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
@@ -76,20 +134,47 @@ export default function ApplicationsSection() {
         <div>
           <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
             <FileText className="w-5 h-5 text-purple-400" />
-            <span>Applications Tracker</span>
+            <span>Applications & Offers Tracker</span>
           </h2>
-          <p className="text-xs text-slate-400">Track pitch submissions, proposed rates, and contract offers from brand campaigns</p>
+          <p className="text-xs text-slate-400">
+            Track pitch submissions, proposed rates, and received collaboration contracts
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-xs font-extrabold text-purple-300">
-            {applications.length} Pitches Submitted
+            {applications.length} Pitches Active
           </span>
         </div>
       </div>
 
+      {/* Offers Received Section */}
+      {offers.filter((o) => o.status === 'PENDING').length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-black text-white flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-purple-400" />
+            <span>Pending Collaboration Offers ({offers.filter((o) => o.status === 'PENDING').length})</span>
+          </h3>
+
+          <div className="space-y-4">
+            {offers
+              .filter((o) => o.status === 'PENDING')
+              .map((offer) => (
+                <OfferReceivedCard
+                  key={offer.id}
+                  offer={offer}
+                  onAccept={handleAcceptOffer}
+                  onDecline={handleDeclineOffer}
+                  onViewDetails={(off) => setSelectedOffer(off)}
+                  isAccepting={isAcceptingOffer}
+                />
+              ))}
+          </div>
+        </div>
+      )}
+
       {/* 1. KPI Stats Summary Bar */}
-      <ApplicationKpiBar totalCount={applications.length} totalProposedValue="$10,500.00" />
+      <ApplicationKpiBar totalCount={applications.length} totalProposedValue="$12,500.00" />
 
       {/* 2. Controls Bar: Search & Status Filter Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-lg">
@@ -138,11 +223,21 @@ export default function ApplicationsSection() {
             <FileText className="w-8 h-8 text-slate-500 mx-auto" />
             <h3 className="text-sm font-bold text-white">No Applications Found</h3>
             <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              No pitches match your selected filter criteria. Apply to open campaigns from company discovery.
+              No pitches match your selected filter criteria. Discover open campaigns from brand discovery.
             </p>
           </div>
         )}
       </div>
+
+      {/* Offer Detail Modal */}
+      {selectedOffer && (
+        <OfferDetailModal
+          offer={selectedOffer}
+          onClose={() => setSelectedOffer(null)}
+          onAccept={handleAcceptOffer}
+          onDecline={handleDeclineOffer}
+        />
+      )}
     </div>
   );
 }

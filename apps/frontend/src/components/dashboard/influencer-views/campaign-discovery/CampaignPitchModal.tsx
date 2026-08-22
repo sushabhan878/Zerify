@@ -60,17 +60,37 @@ export default function CampaignPitchModal({
     setIsSubmitting(true);
 
     try {
-      // Simulate submission
-      await new Promise((res) => setTimeout(res, 800));
+      // Find connected social account
+      let socialAccountId = '';
+      const cached = typeof window !== 'undefined' ? localStorage.getItem('zerify_social_accounts_cache') : null;
+      if (cached) {
+        try {
+          const accounts = JSON.parse(cached);
+          if (Array.isArray(accounts) && accounts.length > 0) {
+            socialAccountId = accounts[0].id;
+          }
+        } catch (_) {}
+      }
+
+      const { ApplicationService } = await import('@/services/application.service');
+      await ApplicationService.applyToCampaign(campaign.id, {
+        socialAccountId: socialAccountId || '00000000-0000-0000-0000-000000000000',
+        proposedAmount: Number(proposedRate) || undefined,
+        applicationMessage: pitchMessage,
+        portfolioUrls: sampleLink ? [sampleLink] : [],
+        contentIdea: pitchMessage,
+      });
+
       toastSuccess(`Application submitted to ${campaign.brandName}! They will review your proposal shortly.`);
       if (onSuccess) onSuccess();
       onClose();
-    } catch (err) {
-      toastError('Failed to submit application. Please try again.');
+    } catch (err: any) {
+      toastError(err?.message || 'Failed to submit application. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   const modalContent = (
     <AnimatePresence>
