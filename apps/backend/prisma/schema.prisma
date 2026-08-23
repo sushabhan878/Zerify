@@ -553,9 +553,7 @@ model CampaignProduct {
 
   productName         String
   productType         String?   // PHYSICAL, DIGITAL_SAAS, MOBILE_APP, SERVICE_EXPERIENCE
-  productDescription  String?
   landingPageUrl      String?
-  websiteUrl          String?
   coverImageUrl       String?
   hasFreeProduct      Boolean   @default(false)
   freeProductValue    Float?
@@ -578,21 +576,17 @@ model CampaignRequirement {
 
   // Social criteria
   minFollowers        Int?
-  maxFollowers        Int?
   minEngagementRate   Float?
   verifiedOnly        Boolean   @default(false)
 
   // Influencer criteria
   targetCountries     String[]  @default([])
   targetGenders       String[]  @default([])
-  targetAgeRanges     String[]  @default([])
   targetLanguages     String[]  @default([])
 
-  // Audience criteria
+  // Audience / Age criteria
+  targetAgeGroup      String[]  @default([])
   audienceCountries   String[]  @default([])
-  audienceMinAge      Int?
-  audienceMaxAge      Int?
-  audienceTopGender   String?
 
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
@@ -617,7 +611,6 @@ model CampaignDeliverable {
   requiredCta       String?
   mandatoryHashtags String[]    @default([])
   mandatoryMentions String[]    @default([])
-  contentGuidelines String?
   instructions      String?
   revisionLimit     Int         @default(2)
 

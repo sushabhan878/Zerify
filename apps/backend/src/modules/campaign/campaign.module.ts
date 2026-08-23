@@ -21,12 +21,12 @@ import { ApplicationOwnerGuard } from './guards/application-owner.guard';
 @Module({
   imports: [PrismaModule],
   controllers: [
+    DiscoveryController,
     CampaignController,
     ApplicationController,
     OfferController,
     ParticipantController,
     DeliverableController,
-    DiscoveryController,
   ],
   providers: [
     CampaignRepository,

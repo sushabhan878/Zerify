@@ -53,10 +53,6 @@ export class CampaignDeliverableDto {
 
   @IsOptional()
   @IsString()
-  contentGuidelines?: string;
-
-  @IsOptional()
-  @IsString()
   instructions?: string;
 
   @IsOptional()
@@ -68,10 +64,6 @@ export class CampaignRequirementsSocialDto {
   @IsOptional()
   @IsNumber()
   minFollowers?: number;
-
-  @IsOptional()
-  @IsNumber()
-  maxFollowers?: number;
 
   @IsOptional()
   @IsNumber()
@@ -121,11 +113,6 @@ export class CampaignRequirementsInfluencerDto {
   @IsArray()
   @IsString({ each: true })
   genders?: string[];
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  ageRanges?: string[];
 }
 
 export class CampaignRequirementsAudienceDto {
@@ -140,16 +127,9 @@ export class CampaignRequirementsAudienceDto {
   cities?: string[];
 
   @IsOptional()
-  @IsNumber()
-  minAge?: number;
-
-  @IsOptional()
-  @IsNumber()
-  maxAge?: number;
-
-  @IsOptional()
-  @IsString()
-  topGender?: string;
+  @IsArray()
+  @IsString({ each: true })
+  targetAgeGroup?: string[];
 
   @IsOptional()
   @IsArray()
@@ -248,14 +228,6 @@ export class CreateCampaignDto {
   @IsOptional()
   @IsString()
   productType?: string;
-
-  @IsOptional()
-  @IsString()
-  productDescription?: string;
-
-  @IsOptional()
-  @IsString()
-  websiteUrl?: string;
 
   @IsOptional()
   @IsString()

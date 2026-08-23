@@ -176,6 +176,8 @@ export class CampaignRepository {
               completionPercentage: true,
             },
           },
+          product: true,
+          requirement: true,
           deliverables: true,
           _count: {
             select: {

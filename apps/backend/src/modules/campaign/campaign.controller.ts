@@ -13,13 +13,20 @@ import { CampaignService } from './campaign.service';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { CampaignOwnerGuard } from './guards/campaign-owner.guard';
+import { DiscoveryService } from './discovery.service';
+import { DiscoverCampaignsQueryDto } from './dto/discover-campaigns-query.dto';
+import { Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('campaigns')
 @Controller('campaigns')
 export class CampaignController {
-  constructor(private readonly campaignService: CampaignService) {}
+  constructor(
+    private readonly campaignService: CampaignService,
+    private readonly discoveryService: DiscoveryService,
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -35,6 +42,13 @@ export class CampaignController {
   @ApiOperation({ summary: 'List all campaigns owned by the authenticated brand' })
   async listBrandCampaigns(@Req() req: any) {
     return this.campaignService.listBrandCampaigns(req.user.id);
+  }
+
+  @Get('discover')
+  @UseGuards(OptionalJwtAuthGuard)
+  @ApiOperation({ summary: 'Discover open campaigns with rich filtering, search and sorting' })
+  async discoverCampaigns(@Req() req: any, @Query() query: DiscoverCampaignsQueryDto) {
+    return this.discoveryService.discoverCampaigns(query, req?.user?.id);
   }
 
   @Get(':id')

@@ -12,6 +12,7 @@ import { OfferService } from './offer.service';
 import { ParticipantService } from './participant.service';
 import { DiscoverCampaignsQueryDto } from './dto/discover-campaigns-query.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('campaign-discovery')
@@ -25,9 +26,10 @@ export class DiscoveryController {
   ) {}
 
   @Get('campaigns/discover')
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'Discover open campaigns with rich filtering, search and sorting' })
-  async discoverCampaigns(@Query() query: DiscoverCampaignsQueryDto) {
-    return this.discoveryService.discoverCampaigns(query);
+  async discoverCampaigns(@Req() req: any, @Query() query: DiscoverCampaignsQueryDto) {
+    return this.discoveryService.discoverCampaigns(query, req?.user?.id);
   }
 
   @Get('campaigns/:campaignId/eligibility')

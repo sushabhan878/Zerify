@@ -152,9 +152,8 @@ export default function DeliverablesStep({ formData, onChange }: DeliverablesSte
                       {item.type || 'Select Asset Type...'}
                     </span>
                     <ChevronDown
-                      className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                        openDropdownIdx === idx ? 'rotate-180 text-purple-300' : ''
-                      }`}
+                      className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${openDropdownIdx === idx ? 'rotate-180 text-purple-300' : ''
+                        }`}
                     />
                   </button>
 
@@ -177,11 +176,10 @@ export default function DeliverablesStep({ formData, onChange }: DeliverablesSte
                                 updateItem(idx, 'type', dt);
                                 setOpenDropdownIdx(null);
                               }}
-                              className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between ${
-                                isSelected
+                              className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between ${isSelected
                                   ? 'bg-purple-500/20 text-purple-200 font-bold'
                                   : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                              }`}
+                                }`}
                             >
                               <span>{dt}</span>
                               {isSelected && <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />}

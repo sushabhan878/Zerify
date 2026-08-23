@@ -36,10 +36,10 @@ export default function BasicInfoStep({ formData, onChange }: BasicInfoStepProps
   const selectedTags: string[] = Array.isArray(formData.objective)
     ? formData.objective
     : formData.objective
-    ? [formData.objective]
-    : Array.isArray(formData.categories)
-    ? formData.categories
-    : [];
+      ? [formData.objective]
+      : Array.isArray(formData.categories)
+        ? formData.categories
+        : [];
 
   const toggleTag = (tag: string) => {
     let updated: string[];
@@ -101,9 +101,8 @@ export default function BasicInfoStep({ formData, onChange }: BasicInfoStepProps
               {formData.industry || 'Select Industry / Vertical...'}
             </span>
             <ChevronDown
-              className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-                isIndustryDropdownOpen ? 'rotate-180 text-purple-300' : ''
-              }`}
+              className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isIndustryDropdownOpen ? 'rotate-180 text-purple-300' : ''
+                }`}
             />
           </button>
 
@@ -163,11 +162,10 @@ export default function BasicInfoStep({ formData, onChange }: BasicInfoStepProps
                                   setIsIndustryDropdownOpen(false);
                                   setIndustrySearchQuery('');
                                 }}
-                                className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between ${
-                                  isSelected
+                                className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between ${isSelected
                                     ? 'bg-purple-500/20 text-purple-200 font-bold'
                                     : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                                }`}
+                                  }`}
                               >
                                 <span>{item}</span>
                                 {isSelected && <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />}
@@ -207,11 +205,10 @@ export default function BasicInfoStep({ formData, onChange }: BasicInfoStepProps
                 type="button"
                 key={tag}
                 onClick={() => toggleTag(tag)}
-                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-2 ${
-                  isSelected
+                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-2 ${isSelected
                     ? 'bg-purple-500/20 border border-purple-400/60 text-purple-100 shadow-[0_0_10px_rgba(192,132,252,0.25)]'
                     : 'bg-slate-900/90 border border-white/10 text-slate-400 hover:border-purple-400/30 hover:text-purple-200 hover:bg-slate-800/80'
-                }`}
+                  }`}
               >
                 {isSelected ? (
                   <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />

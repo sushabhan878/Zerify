@@ -11,7 +11,7 @@ export interface CampaignDeliverable {
   requiredCta?: string;
   mandatoryHashtags?: string[];
   mandatoryMentions?: string[];
-  contentGuidelines?: string;
+  instructions?: string;
   revisionLimit?: number;
 }
 
@@ -27,18 +27,13 @@ export interface CampaignItem {
   product?: {
     productName?: string;
     productType?: string;
-    productDescription?: string;
     landingPageUrl?: string;
-    websiteUrl?: string;
     coverImageUrl?: string;
     hasFreeProduct?: boolean;
     freeProductValue?: number;
     shippingDetails?: string;
     productInstructions?: string;
   };
-  productName?: string;
-  productDescription?: string;
-  websiteUrl?: string;
   landingPageUrl?: string;
   requirement?: any;
   status: 'DRAFT' | 'OPEN' | 'FILLING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'PAUSED';

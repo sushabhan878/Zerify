@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import CampaignSearchBar from './campaign-discovery/CampaignSearchBar';
 import CampaignQuickFilters, {
   CampaignQuickFilterState,
@@ -14,8 +14,9 @@ import CampaignAdvancedFiltersModal, {
   CampaignAdvancedFilterState,
 } from './campaign-discovery/CampaignAdvancedFiltersModal';
 import CampaignPagination from './campaign-discovery/CampaignPagination';
-import CampaignLoadingSkeleton from './campaign-discovery/CampaignLoadingSkeleton';
-import { AlertCircle } from 'lucide-react';
+import LottieLoader from '@/components/ui/LottieLoader';
+import { AlertCircle, RefreshCw } from 'lucide-react';
+import { CampaignService } from '@/services/campaign.service';
 
 const INITIAL_FILTERS: CampaignAdvancedFilterState = {
   category: 'All',
@@ -29,244 +30,137 @@ const INITIAL_FILTERS: CampaignAdvancedFilterState = {
   isEscrowOnly: false,
 };
 
-const SAMPLE_CAMPAIGNS: CampaignItem[] = [
-  {
-    id: 'camp-1',
-    title: 'Next-Gen AI Workspace Launch — Developer & Creator Review Series',
-    brandName: 'Aetheria Tech Labs',
-    brandLogo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80',
-    category: 'Tech & AI',
-    industry: 'Software & SaaS',
-    coverImage: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
-    description: 'Looking for tech, SaaS and developer creators to showcase how our AI workflow engine cuts 10+ hours per week of repetitive engineering and content creation work.',
-    payoutAmount: '$3,500 – $6,000',
-    payoutModel: 'Fixed Fee',
-    hasFreeProduct: true,
-    freeProductValue: '$1,200/yr Enterprise License',
-    deliverables: ['1x Dedicated YouTube Video (8-12 mins)', '2x YouTube Shorts / IG Reels'],
-    targetPlatforms: ['YouTube', 'LinkedIn', 'Twitter'],
-    creatorTiers: ['Mid', 'Macro'],
-    slotsTotal: 8,
-    slotsFilled: 5,
-    deadline: 'Aug 30, 2026',
-    daysRemaining: 10,
-    matchScore: 98,
-    audienceMatchScore: 99,
-    nicheMatchScore: 97,
-    isVerifiedBrand: true,
-    isEscrowGuaranteed: true,
-    requirements: ['Minimum 20k tech/dev followers', 'High engagement in US/EU/IN', 'Original testing demo footage'],
-    dos: ['Walk through real workflow before/after', 'Highlight speed comparison', 'Include special affiliate discount link in bio/description'],
-    donts: ['Do not use robotic synthetic voiceovers', 'No generic feature list reading without live UI interaction'],
-  },
-  {
-    id: 'camp-2',
-    title: '30-Day Botanical Skincare Transformation Reel & Story Takeover',
-    brandName: 'GlowBotanica Organics',
-    brandLogo: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80',
-    category: 'Beauty & Skincare',
-    industry: 'Beauty & Personal Care',
-    coverImage: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1200&q=80',
-    description: 'Document your honest 30-day glow journey using our cold-pressed alpine barrier repair serum. Highlighting 100% vegan certified clean beauty ingredients.',
-    payoutAmount: '$2,000 – $4,500',
-    payoutModel: 'Paid + Commission',
-    hasFreeProduct: true,
-    freeProductValue: '$280 Skincare Bundle',
-    deliverables: ['1x Instagram Reel (45-60s)', '3x Story Frames with Custom Promo Code'],
-    targetPlatforms: ['Instagram', 'TikTok'],
-    creatorTiers: ['Micro', 'Mid'],
-    slotsTotal: 12,
-    slotsFilled: 7,
-    deadline: 'Sep 05, 2026',
-    daysRemaining: 16,
-    matchScore: 96,
-    audienceMatchScore: 98,
-    nicheMatchScore: 95,
-    isVerifiedBrand: true,
-    isEscrowGuaranteed: true,
-    requirements: ['Authentic aesthetic lighting', 'Majority female audience (18-35)', 'Clear skin texture closeup'],
-    dos: ['Show texture application in natural sunlight', 'Emphasize cruelty-free certifications', 'Tag @glowbotanica and use #GlowBarrierRepair'],
-    donts: ['Do not use heavy smoothing beauty filters on camera', 'Avoid comparing negatively to named competitors'],
-  },
-  {
-    id: 'camp-3',
-    title: 'Zero-Latency Wireless Pro Gaming Headset Competitive Play Challenge',
-    brandName: 'Veloce Audio Labs',
-    brandLogo: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=400&q=80',
-    category: 'Gaming & Esports',
-    industry: 'Consumer Electronics & Hardware',
-    coverImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
-    description: 'Seeking competitive FPS and battle royale streamers & YouTubers to test our custom planar magnetic spatial audio drivers during live competitive ranked matches.',
-    payoutAmount: '$4,000 – $8,500',
-    payoutModel: 'Fixed Fee',
-    hasFreeProduct: true,
-    freeProductValue: '$349 Pro Headset',
-    deliverables: ['1x 90s In-Video Integration on YouTube', '1x Dedicated Twitch/YouTube Live Stream Shoutout'],
-    targetPlatforms: ['YouTube', 'TikTok', 'Twitter'],
-    creatorTiers: ['Mid', 'Macro'],
-    slotsTotal: 6,
-    slotsFilled: 3,
-    deadline: 'Aug 28, 2026',
-    daysRemaining: 8,
-    matchScore: 94,
-    audienceMatchScore: 96,
-    nicheMatchScore: 93,
-    isVerifiedBrand: true,
-    isEscrowGuaranteed: true,
-    requirements: ['Active gaming channel with 50K+ subs', 'Demonstrated competitive gameplay (Valorant, Apex, CS2)'],
-    dos: ['Highlight footsteps spatial pinpointing accuracy', 'Test microphone clarity on stream', 'Link hardware giveaway in description'],
-    donts: ['Do not obscure headset logo when on camera', 'Avoid bad audio recording setup'],
-  },
-  {
-    id: 'camp-4',
-    title: 'High-Performance Seamless Compression Athleisure Workout Drop',
-    brandName: 'Solaria Activewear',
-    brandLogo: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
-    category: 'Fitness & Wellness',
-    industry: 'Fashion & Apparel',
-    coverImage: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1200&q=80',
-    description: 'Promote our upcoming Autumn Core Sculpt collection with squat-proof recycled nylon. Perfect for gym training, pilates, running, and high-energy lifestyle content.',
-    payoutAmount: '$1,500 – $3,200',
-    payoutModel: 'Paid + Commission',
-    hasFreeProduct: true,
-    freeProductValue: '$320 Athletic Set',
-    deliverables: ['2x TikTok / IG Reels with High Energy Gym Beats', '2x Story Link Stills'],
-    targetPlatforms: ['Instagram', 'TikTok'],
-    creatorTiers: ['Micro', 'Mid'],
-    slotsTotal: 15,
-    slotsFilled: 11,
-    deadline: 'Sep 02, 2026',
-    daysRemaining: 13,
-    matchScore: 92,
-    audienceMatchScore: 94,
-    nicheMatchScore: 91,
-    isVerifiedBrand: true,
-    isEscrowGuaranteed: true,
-    requirements: ['Fitness, workout or active lifestyle niche', 'High quality gym/outdoor videography'],
-    dos: ['Show movement flexibility, squats and stretches', 'Call out breathable fabric tech', 'Pin promo code in comments'],
-    donts: ['No dimly lit home videos', 'Do not wear competing apparel logos'],
-  },
-  {
-    id: 'camp-5',
-    title: 'Automated Global Dollar Savings & High-Yield Fintech App Tour',
-    brandName: 'FinNova Global Pay',
-    brandLogo: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=400&q=80',
-    category: 'Finance & Crypto',
-    industry: 'Fintech & Digital Payments',
-    coverImage: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1200&q=80',
-    description: 'Educate your audience on earning 5.2% APY on USD balances with zero foreign exchange markup fees. Perfect for personal finance, side hustle and digital nomad creators.',
-    payoutAmount: '$5,000 – $12,000',
-    payoutModel: 'Fixed Fee',
-    hasFreeProduct: false,
-    deliverables: ['1x Dedicated YouTube Video (10 mins)', '1x LinkedIn Longform Breakdown', '1x Twitter / X Thread'],
-    targetPlatforms: ['YouTube', 'LinkedIn', 'Twitter'],
-    creatorTiers: ['Mid', 'Macro'],
-    slotsTotal: 5,
-    slotsFilled: 2,
-    deadline: 'Sep 10, 2026',
-    daysRemaining: 21,
-    matchScore: 95,
-    audienceMatchScore: 97,
-    nicheMatchScore: 94,
-    isVerifiedBrand: true,
-    isEscrowGuaranteed: true,
-    requirements: ['Verified finance, investing or tech creator', 'Disclose standard financial disclaimer at start of video'],
-    dos: ['Show live app dashboard and quick fund deposit', 'Explain FDIC pass-through insurance safety', 'Highlight zero transfer fees'],
-    donts: ['Do not guarantee fixed future investment returns', 'Do not violate compliance disclosure guidelines'],
-  },
-  {
-    id: 'camp-6',
-    title: 'Artisanal Single-Origin Cold Brew & Smart Nitrogen Infuser Launch',
-    brandName: 'Koa Artisan Coffee Roasters',
-    brandLogo: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=400&q=80',
-    category: 'Food & Beverage',
-    industry: 'Food & Beverage',
-    coverImage: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=80',
-    description: 'Calling all coffee connoisseurs, morning routine creators and foodies. Experience velvety micro-foam nitro cold brew drafted straight at your kitchen counter.',
-    payoutAmount: '$1,200 – $2,800',
-    payoutModel: 'Fixed Fee',
-    hasFreeProduct: true,
-    freeProductValue: '$199 Smart Nitro Infuser + 3 Bags Single Origin Beans',
-    deliverables: ['1x Aesthetic Morning Routine Reel (30-45s)', '2x Story Frames with Unboxing'],
-    targetPlatforms: ['Instagram', 'TikTok'],
-    creatorTiers: ['Nano', 'Micro', 'Mid'],
-    slotsTotal: 10,
-    slotsFilled: 6,
-    deadline: 'Sep 08, 2026',
-    daysRemaining: 19,
-    matchScore: 91,
-    audienceMatchScore: 93,
-    nicheMatchScore: 90,
-    isVerifiedBrand: true,
-    isEscrowGuaranteed: true,
-    requirements: ['Aesthetic morning routine / culinary creator', 'Crisp ASMR pouring sound quality'],
-    dos: ['Capture slow-motion nitro cascade effect', 'Record rich coffee grinder and pour sounds', 'Feature unboxing packaging presentation'],
-    donts: ['No rushed 5-second blurry clips', 'Do not prepare using instant powdered coffee'],
-  },
-  {
-    id: 'camp-7',
-    title: 'Smart Solar Travel Backpack & Portable Off-Grid Power Station',
-    brandName: 'NomadVault Gear',
-    brandLogo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-    category: 'Travel & Lifestyle',
-    industry: 'Consumer Electronics & Hardware',
-    coverImage: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1200&q=80',
-    description: 'Travel creators and van lifers: Test our rugged, waterproof solar fast-charging pack on your next mountain hike or road trip adventures.',
-    payoutAmount: '$2,500 – $5,500',
-    payoutModel: 'Fixed Fee',
-    hasFreeProduct: true,
-    freeProductValue: '$450 Solar Gear Kit',
-    deliverables: ['1x YouTube Integration / Travel Vlog Feature', '1x 60s Instagram Reel'],
-    targetPlatforms: ['YouTube', 'Instagram', 'TikTok'],
-    creatorTiers: ['Micro', 'Mid'],
-    slotsTotal: 8,
-    slotsFilled: 4,
-    deadline: 'Sep 12, 2026',
-    daysRemaining: 23,
-    matchScore: 93,
-    audienceMatchScore: 95,
-    nicheMatchScore: 92,
-    isVerifiedBrand: true,
-    isEscrowGuaranteed: true,
-    requirements: ['Active travel, outdoor or adventure channel', 'Stunning scenic location shoot'],
-    dos: ['Show charging drone/camera battery on trail', 'Demonstrate weather resistance in rain/snow', 'Link product pre-order discount'],
-    donts: ['Do not film solely indoors in an office', 'Do not omit disclosure tags'],
-  },
-  {
-    id: 'camp-8',
-    title: 'Minimalist Titanium Automatic Watch & Sapphire Glass Timepiece',
-    brandName: 'Aethel Watches Geneva',
-    brandLogo: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
-    category: 'Fashion & Apparel',
-    industry: 'Luxury & Designer Goods',
-    coverImage: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=1200&q=80',
-    description: 'Luxury timepiece crafted in Grade 5 Titanium with exposed skeleton movement. Seeking men’s and unisex fashion, tailoring and architecture creators.',
-    payoutAmount: '$3,000 – $7,000',
-    payoutModel: 'Fixed Fee',
-    hasFreeProduct: true,
-    freeProductValue: '$890 Automatic Watch',
-    deliverables: ['1x High-End Macro Cinema Reel (30s)', '1x Carousel Post with 5 Outfit Pairings'],
-    targetPlatforms: ['Instagram', 'YouTube'],
-    creatorTiers: ['Mid', 'Macro'],
-    slotsTotal: 5,
-    slotsFilled: 3,
-    deadline: 'Sep 15, 2026',
-    daysRemaining: 26,
-    matchScore: 90,
-    audienceMatchScore: 92,
-    nicheMatchScore: 89,
-    isVerifiedBrand: true,
-    isEscrowGuaranteed: true,
-    requirements: ['High production quality lighting & macro lens capability', 'Fashion or design focus'],
-    dos: ['Showcase precision movement under macro lens', 'Pair with elegant tailored or minimal casual outfits', 'Tag brand and designer notes'],
-    donts: ['No low-light pixelated handheld mobile videos', 'Avoid fast jarring transitions that hide watch face'],
-  },
-];
-
 function parseBudgetNumeric(str: string): number {
+  if (!str) return 0;
   const clean = str.replace(/,/g, '');
-  const match = clean.match(/\$([0-9]+)/);
-  return match ? parseInt(match[1], 10) : 0;
+  const match = clean.match(/[0-9]+/);
+  return match ? parseInt(match[0], 10) : 0;
+}
+
+function normalizePlatform(p: string): 'Instagram' | 'YouTube' | 'TikTok' | 'LinkedIn' | 'Twitter' {
+  const upper = (p || '').toUpperCase();
+  if (upper.includes('INSTA')) return 'Instagram';
+  if (upper.includes('YOU')) return 'YouTube';
+  if (upper.includes('TIK')) return 'TikTok';
+  if (upper.includes('LINK')) return 'LinkedIn';
+  if (upper.includes('TWIT') || upper === 'X') return 'Twitter';
+  return 'Instagram';
+}
+
+function mapDbCampaignToItem(c: any): CampaignItem {
+  const currencyCode = c.budgetCurrency || 'USD';
+  const sym = currencyCode === 'INR' ? '₹' : currencyCode === 'EUR' ? '€' : currencyCode === 'GBP' ? '£' : '$';
+
+  let payoutAmount = 'Flexible / Negotiable';
+  if (c.budgetPaymentModel === 'BARTER') {
+    payoutAmount = 'Product Barter ($0 Escrow)';
+  } else if (c.budgetTotalAmount) {
+    payoutAmount = `${sym}${Number(c.budgetTotalAmount).toLocaleString()}`;
+  } else if (c.budgetMinPerInfluencer && c.budgetMaxPerInfluencer) {
+    if (Number(c.budgetMinPerInfluencer) === Number(c.budgetMaxPerInfluencer)) {
+      payoutAmount = `${sym}${Number(c.budgetMinPerInfluencer).toLocaleString()}`;
+    } else {
+      payoutAmount = `${sym}${Number(c.budgetMinPerInfluencer).toLocaleString()} – ${sym}${Number(c.budgetMaxPerInfluencer).toLocaleString()}`;
+    }
+  } else if (c.budgetMinPerInfluencer || c.budgetMaxPerInfluencer) {
+    payoutAmount = `${sym}${Number(c.budgetMinPerInfluencer || c.budgetMaxPerInfluencer).toLocaleString()}`;
+  }
+
+  let payoutModel: 'Fixed Fee' | 'Paid + Commission' | 'Product Barter' = 'Fixed Fee';
+  if (c.budgetPaymentModel === 'BARTER') {
+    payoutModel = 'Product Barter';
+  } else if (c.budgetPaymentModel === 'PERFORMANCE_BASED' || c.budgetPaymentModel === 'COMMISSION' || c.budgetPaymentModel === 'HYBRID') {
+    payoutModel = 'Paid + Commission';
+  }
+
+  const rawPlatforms = Array.isArray(c.platforms) && c.platforms.length > 0
+    ? c.platforms
+    : ['INSTAGRAM'];
+  const targetPlatforms = rawPlatforms.map(normalizePlatform);
+
+  const product = c.product || {};
+  const req = c.requirement || c.requirements || {};
+  const guidelines = typeof c.contentGuidelines === 'object' && c.contentGuidelines !== null
+    ? c.contentGuidelines
+    : {};
+
+  // Formulate requirements list
+  const requirementsList: string[] = [];
+  if (req.minFollowers) {
+    requirementsList.push(`Min ${Number(req.minFollowers).toLocaleString()}+ active followers`);
+  }
+  if (req.minEngagementRate) {
+    requirementsList.push(`Min ${req.minEngagementRate}% engagement rate`);
+  }
+  if (req.verifiedOnly) {
+    requirementsList.push('Verified creators with authentic badges only');
+  }
+  if (Array.isArray(req.targetCountries) && req.targetCountries.length > 0) {
+    requirementsList.push(`Target regions: ${req.targetCountries.join(', ')}`);
+  }
+  if (Array.isArray(req.targetAgeGroup) && req.targetAgeGroup.length > 0) {
+    requirementsList.push(`Audience age: ${req.targetAgeGroup.join(', ')}`);
+  }
+  if (requirementsList.length === 0) {
+    requirementsList.push('Open to all qualified content creators', 'High-quality audio/video production');
+  }
+
+  // Calculate deadline and remaining days
+  let deadlineStr = 'Rolling Deadline';
+  let daysRemaining = 30;
+  if (c.applicationDeadline) {
+    const deadlineDate = new Date(c.applicationDeadline);
+    deadlineStr = deadlineDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    daysRemaining = Math.max(0, Math.ceil((deadlineDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+  }
+
+  // Objective category tag
+  const primaryCategory = Array.isArray(c.objective) && c.objective.length > 0
+    ? c.objective[0]
+    : c.industry || 'Brand Awareness';
+
+  return {
+    id: c.id,
+    title: c.title,
+    brandName: c.brandProfile?.companyName || 'Verified Brand',
+    brandLogo: c.brandProfile?.logoUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80',
+    category: primaryCategory,
+    industry: c.industry || c.brandProfile?.industry || 'Technology & Creator Economy',
+    coverImage: c.coverImageUrl || product.coverImageUrl || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
+    description: c.description || 'Exclusive brand sponsorship and creator collaboration brief.',
+    payoutAmount,
+    payoutModel,
+    hasFreeProduct: Boolean(product.hasFreeProduct || c.hasFreeProduct),
+    freeProductValue: product.freeProductValue
+      ? `${sym}${Number(product.freeProductValue).toLocaleString()} Product Sample`
+      : product.productName
+      ? `${product.productName} Sample`
+      : undefined,
+    deliverables: Array.isArray(c.deliverables) && c.deliverables.length > 0
+      ? c.deliverables.map((d: any) => `${d.quantity || 1}x ${d.type || 'Deliverable'}`)
+      : ['1x Sponsored Video / Post'],
+    targetPlatforms,
+    creatorTiers: ['Micro', 'Mid', 'Macro'],
+    slotsTotal: c.targetParticipants || c.maxParticipants || 3,
+    slotsFilled: c._count?.participants || 0,
+    deadline: deadlineStr,
+    daysRemaining,
+    matchScore: c.matchScore || 95,
+    audienceMatchScore: Math.min(99, (c.matchScore || 95) + 2),
+    nicheMatchScore: Math.max(85, (c.matchScore || 95) - 1),
+    isVerifiedBrand: true,
+    isEscrowGuaranteed: true,
+    requirements: requirementsList,
+    dos: Array.isArray(guidelines.dos) && guidelines.dos.length > 0
+      ? guidelines.dos
+      : guidelines.requiredCtas?.length
+      ? [`Include required CTA: ${guidelines.requiredCtas.join(', ')}`, 'Deliver original creative content']
+      : ['Deliver original creative content', 'Demonstrate authentic product experience'],
+    donts: Array.isArray(guidelines.donts) && guidelines.donts.length > 0
+      ? guidelines.donts
+      : ['No low-quality audio or video', 'No undisclosed sponsorships or artificial engagement'],
+    moodboardImages: guidelines.moodboardUrl ? [guidelines.moodboardUrl] : [],
+  };
 }
 
 export default function CampaignDiscoverySection() {
@@ -285,64 +179,45 @@ export default function CampaignDiscoverySection() {
   const pageSize = 6;
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
   const [selectedCampaignForDetail, setSelectedCampaignForDetail] = useState<CampaignItem | null>(null);
   const [selectedCampaignForPitch, setSelectedCampaignForPitch] = useState<CampaignItem | null>(null);
-  const [liveCampaigns, setLiveCampaigns] = useState<CampaignItem[]>([]);
+  const [campaignsList, setCampaignsList] = useState<CampaignItem[]>([]);
 
   // Fetch live campaigns from backend API
-  useEffect(() => {
-    async function fetchLive() {
-      try {
-        const { CampaignService } = await import('@/services/campaign.service');
-        const res = await CampaignService.discoverCampaigns({
-          search: searchQuery || undefined,
-          category: quickFilters.category !== 'All' ? quickFilters.category : undefined,
-          platform: quickFilters.platform !== 'All Platforms' ? quickFilters.platform : undefined,
-        });
-
-        if (res?.campaigns && Array.isArray(res.campaigns) && res.campaigns.length > 0) {
-          // Format backend campaigns into CampaignItem shape
-          const formatted: CampaignItem[] = res.campaigns.map((c: any) => ({
-            id: c.id,
-            title: c.title,
-            brandName: c.brandProfile?.companyName || 'Verified Brand',
-            brandLogo: c.brandProfile?.logoUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80',
-            category: c.categories?.[0] || c.industry || 'Tech & AI',
-            industry: c.industry || 'SaaS & Enterprise',
-            coverImage: c.coverImageUrl || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
-            description: c.description || 'Campaign brief',
-            payoutAmount: `$${c.budgetMinPerInfluencer || c.budgetTotalAmount || 1500} – $${c.budgetMaxPerInfluencer || c.budgetTotalAmount || 3000}`,
-            payoutModel: (c.budgetPaymentModel === 'FIXED' ? 'Fixed Fee' : 'Paid + Commission') as any,
-            hasFreeProduct: Boolean(c.productName),
-            freeProductValue: c.productName ? `${c.productName} Sample` : undefined,
-            deliverables: (c.deliverables || []).map((d: any) => `${d.quantity || 1}x ${d.type}`),
-            targetPlatforms: c.platforms || ['Instagram'],
-            creatorTiers: ['Micro', 'Mid', 'Macro'],
-            slotsTotal: c.targetParticipants || 5,
-            slotsFilled: c._count?.participants || 0,
-            deadline: c.applicationDeadline ? new Date(c.applicationDeadline).toLocaleDateString() : 'Rolling',
-            daysRemaining: 14,
-            matchScore: c.matchScore || 95,
-            audienceMatchScore: 96,
-            nicheMatchScore: 94,
-            isVerifiedBrand: true,
-            isEscrowGuaranteed: true,
-            requirements: ['Active creator', 'Verified profile'],
-            dos: ['Submit authentic content demo', 'Tag brand in publication'],
-            donts: ['No low-quality audio or video', 'No undisclosed sponsorships'],
-          }));
-          setLiveCampaigns(formatted);
-        }
-      } catch (err) {
-        console.error('Failed to fetch discovery campaigns', err);
-      } finally {
-        setIsLoading(false);
-      }
+  const fetchCampaigns = useCallback(async (showRefreshingSpinner = false) => {
+    if (showRefreshingSpinner) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
     }
 
-    fetchLive();
+    try {
+      const res = await CampaignService.discoverCampaigns({
+        search: searchQuery.trim() || undefined,
+        category: quickFilters.category !== 'All' ? quickFilters.category : undefined,
+        platform: quickFilters.platform !== 'All Platforms' ? quickFilters.platform : undefined,
+      });
+
+      if (res?.campaigns && Array.isArray(res.campaigns)) {
+        const formatted: CampaignItem[] = res.campaigns.map(mapDbCampaignToItem);
+        setCampaignsList(formatted);
+      } else {
+        setCampaignsList([]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch discovery campaigns from DB:', err);
+      setCampaignsList([]);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
   }, [searchQuery, quickFilters]);
+
+  useEffect(() => {
+    fetchCampaigns();
+  }, [fetchCampaigns]);
 
   const handleQuickFilterChange = (key: keyof CampaignQuickFilterState, val: any) => {
     setQuickFilters((prev) => ({ ...prev, [key]: val }));
@@ -375,28 +250,25 @@ export default function CampaignDiscoverySection() {
     setCurrentPage(1);
   };
 
-  const allCampaignsPool: CampaignItem[] = useMemo(() => {
-    return [...liveCampaigns, ...SAMPLE_CAMPAIGNS];
-  }, [liveCampaigns]);
-
-  // Filter Pipeline
+  // Filter Pipeline for live DB campaigns
   const filteredCampaigns = useMemo(() => {
-    return allCampaignsPool.filter((c: CampaignItem) => {
-      // 1. Search Query
+    return campaignsList.filter((c: CampaignItem) => {
+      // 1. Search Query Client Filtering
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const matchesTitle = c.title.toLowerCase().includes(q);
         const matchesBrand = c.brandName.toLowerCase().includes(q);
         const matchesCat = c.category.toLowerCase().includes(q);
+        const matchesIndustry = c.industry.toLowerCase().includes(q);
         const matchesDel = c.deliverables.some((d: string) => d.toLowerCase().includes(q));
-        if (!matchesTitle && !matchesBrand && !matchesCat && !matchesDel) return false;
+        if (!matchesTitle && !matchesBrand && !matchesCat && !matchesIndustry && !matchesDel) return false;
       }
 
-
-
-      // 2. Category
+      // 2. Category / Objective
       if (quickFilters.category !== 'All') {
-        if (c.category !== quickFilters.category) return false;
+        const catUpper = quickFilters.category.toLowerCase();
+        const matchesCat = c.category.toLowerCase().includes(catUpper) || c.industry.toLowerCase().includes(catUpper);
+        if (!matchesCat) return false;
       }
 
       // 3. Deliverable / Campaign Type
@@ -406,7 +278,6 @@ export default function CampaignDiscoverySection() {
         );
         if (!hasDel) return false;
       }
-
 
       // 4. Platform Filter
       if (quickFilters.platform !== 'All Platforms' && quickFilters.platform !== 'All') {
@@ -426,7 +297,7 @@ export default function CampaignDiscoverySection() {
 
       return true;
     });
-  }, [searchQuery, quickFilters, advancedFilters]);
+  }, [campaignsList, searchQuery, quickFilters, advancedFilters]);
 
   // Sort Pipeline
   const sortedCampaigns = useMemo(() => {
@@ -516,40 +387,69 @@ export default function CampaignDiscoverySection() {
         onResetAll={handleResetFilters}
       />
 
-      {/* 4. Controls Bar: Showing count, Sort Dropdown & Grid/List Toggle */}
-      <CampaignSortAndControls
-        count={filteredCampaigns.length}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-      />
+      {/* 4. Controls Bar: Showing count, Refresh Action, Sort Dropdown & Grid/List Toggle */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+        <div className="flex items-center gap-3">
+          <CampaignSortAndControls
+            count={filteredCampaigns.length}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+          />
+        </div>
 
-      {/* 5. Grid of Campaign Cards */}
+        <button
+          type="button"
+          onClick={() => fetchCampaigns(true)}
+          disabled={isLoading || isRefreshing}
+          className="self-end sm:self-auto px-3.5 py-1.5 rounded-xl bg-purple-950/40 border border-purple-500/25 text-purple-200 hover:text-white hover:bg-purple-900/50 hover:border-purple-400/40 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-purple-300' : ''}`} />
+          <span>Refresh Live</span>
+        </button>
+      </div>
+
+      {/* 5. Grid of Live Campaign Cards */}
       {isLoading ? (
-        <CampaignLoadingSkeleton />
+        <div className="p-16 flex flex-col items-center justify-center min-h-[380px]">
+          <LottieLoader size={200} message="Discovering live campaigns from verified brands..." />
+        </div>
       ) : paginatedCampaigns.length === 0 ? (
-        <div className="p-12 rounded-2xl bg-slate-950/40 border border-white/10 text-center space-y-3 flex flex-col items-center justify-center min-h-[300px]">
-          <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-            <AlertCircle className="w-6 h-6" />
+        <div className="p-12 rounded-3xl bg-slate-950/60 border border-purple-500/20 text-center space-y-4 flex flex-col items-center justify-center min-h-[340px] backdrop-blur-2xl shadow-xl shadow-purple-950/20">
+          <div className="w-14 h-14 rounded-2xl bg-purple-600/15 border border-purple-500/30 flex items-center justify-center text-purple-300 shadow-inner">
+            <AlertCircle className="w-7 h-7" />
           </div>
-          <h3 className="text-base font-bold text-white">No campaigns found</h3>
-          <p className="text-xs text-slate-400 max-w-sm">
-            No active brand sponsorship briefs matched your current search and filter criteria.
-          </p>
-          <button
-            onClick={handleResetFilters}
-            type="button"
-            className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md mt-2"
-          >
-            Reset all filters
-          </button>
+          <div className="space-y-1 max-w-md">
+            <h3 className="text-base font-bold text-white">No campaigns found</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              {campaignsList.length === 0
+                ? 'No open campaign briefs are currently published by brands in the database. When brands publish campaigns, they will appear here instantly in real-time!'
+                : 'No active sponsorship briefs matched your current search filters.'}
+            </p>
+          </div>
+          <div className="flex items-center gap-2.5 pt-1">
+            <button
+              onClick={handleResetFilters}
+              type="button"
+              className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md"
+            >
+              Reset all filters
+            </button>
+            <button
+              onClick={() => fetchCampaigns(true)}
+              type="button"
+              className="px-4 py-2 rounded-xl bg-slate-900 border border-purple-500/20 text-slate-300 hover:text-white hover:border-purple-400/40 text-xs font-semibold transition-all"
+            >
+              Check database again
+            </button>
+          </div>
         </div>
       ) : (
         <div
           className={
             viewMode === 'grid'
-              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5'
+              ? 'grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6'
               : 'space-y-4'
           }
         >
@@ -565,7 +465,7 @@ export default function CampaignDiscoverySection() {
       )}
 
       {/* 6. Pagination */}
-      {!isLoading && (
+      {!isLoading && paginatedCampaigns.length > 0 && (
         <CampaignPagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -592,6 +492,7 @@ export default function CampaignDiscoverySection() {
         onClose={() => setSelectedCampaignForDetail(null)}
         campaign={selectedCampaignForDetail}
         onApply={(camp) => {
+          setSelectedCampaignForDetail(null);
           setSelectedCampaignForPitch(camp);
         }}
       />
@@ -600,6 +501,9 @@ export default function CampaignDiscoverySection() {
         isOpen={Boolean(selectedCampaignForPitch)}
         onClose={() => setSelectedCampaignForPitch(null)}
         campaign={selectedCampaignForPitch}
+        onSuccess={() => {
+          fetchCampaigns(true);
+        }}
       />
     </div>
   );

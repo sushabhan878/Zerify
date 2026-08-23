@@ -158,11 +158,10 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
                 type="button"
                 key={plat.id}
                 onClick={() => togglePlatform(plat.id)}
-                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-2 ${
-                  isSelected
+                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-2 ${isSelected
                     ? 'bg-purple-500/20 border border-purple-400/60 text-purple-100 shadow-[0_0_10px_rgba(192,132,252,0.25)]'
                     : 'bg-slate-900/90 border border-white/10 text-slate-400 hover:border-purple-400/30 hover:text-purple-200 hover:bg-slate-800/80'
-                }`}
+                  }`}
               >
                 {isSelected ? (
                   <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />
@@ -192,9 +191,8 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
               {selectedFollowerTier ? selectedFollowerTier.label : 'Select Minimum Followers...'}
             </span>
             <ChevronDown
-              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                isFollowersOpen ? 'rotate-180 text-purple-300' : ''
-              }`}
+              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isFollowersOpen ? 'rotate-180 text-purple-300' : ''
+                }`}
             />
           </button>
 
@@ -213,11 +211,10 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
                     handleSocialChange('minFollowers', undefined);
                     setIsFollowersOpen(false);
                   }}
-                  className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between ${
-                    !socialReq.minFollowers
+                  className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between ${!socialReq.minFollowers
                       ? 'bg-purple-500/20 text-purple-200 font-bold'
                       : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <span>Any / No Minimum Requirement</span>
                   {!socialReq.minFollowers && <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />}
@@ -232,11 +229,10 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
                         handleSocialChange('minFollowers', tier.value);
                         setIsFollowersOpen(false);
                       }}
-                      className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between ${
-                        isSelected
+                      className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between ${isSelected
                           ? 'bg-purple-500/20 text-purple-200 font-bold'
                           : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                      }`}
+                        }`}
                     >
                       <span>{tier.label}</span>
                       {isSelected && <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />}
@@ -304,11 +300,10 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
                 type="button"
                 key={country}
                 onClick={() => toggleCountry(country)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
-                  isSelected
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${isSelected
                     ? 'bg-purple-500/20 border border-purple-400/60 text-purple-100 shadow-[0_0_10px_rgba(192,132,252,0.25)]'
                     : 'bg-slate-900/90 border border-white/10 text-slate-400 hover:border-purple-400/30 hover:text-purple-200 hover:bg-slate-800/80'
-                }`}
+                  }`}
               >
                 {isSelected ? (
                   <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />
@@ -347,11 +342,10 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-white block">Strict Eligibility Filter</span>
               <span
-                className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                  req.strictEligibility
+                className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${req.strictEligibility
                     ? 'bg-purple-500/20 text-purple-200 border-purple-400/30'
                     : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-                }`}
+                  }`}
               >
                 {req.strictEligibility ? 'Strict Filter Active' : 'Flexible Match (Recommended)'}
               </span>

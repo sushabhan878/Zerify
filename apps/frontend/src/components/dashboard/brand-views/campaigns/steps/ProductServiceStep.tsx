@@ -47,11 +47,10 @@ export default function ProductServiceStep({ formData, onChange }: ProductServic
                 type="button"
                 key={pt.value}
                 onClick={() => handleTypeSelect(pt.value)}
-                className={`relative p-4 rounded-2xl text-left border transition-all duration-200 group flex flex-col justify-between overflow-hidden cursor-pointer ${
-                  isSelected
+                className={`relative p-4 rounded-2xl text-left border transition-all duration-200 group flex flex-col justify-between overflow-hidden cursor-pointer ${isSelected
                     ? 'bg-gradient-to-b from-purple-950/40 to-slate-900/90 border-purple-400/50 shadow-[0_0_20px_rgba(168,85,247,0.15)] ring-1 ring-purple-400/30'
                     : 'bg-slate-900/60 border-white/10 hover:border-purple-400/30 hover:bg-slate-900/90 hover:-translate-y-0.5'
-                }`}
+                  }`}
               >
                 {/* Subtle Top Accent Highlight for active card */}
                 {isSelected && (
@@ -61,21 +60,19 @@ export default function ProductServiceStep({ formData, onChange }: ProductServic
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <div
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
-                        isSelected
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${isSelected
                           ? 'bg-purple-500/25 text-purple-200 border border-purple-400/40 shadow-[0_0_10px_rgba(192,132,252,0.25)]'
                           : 'bg-slate-800/80 text-slate-400 border border-white/5 group-hover:text-purple-300 group-hover:border-purple-400/20'
-                      }`}
+                        }`}
                     >
                       <Icon className="w-4 h-4" />
                     </div>
 
                     <div
-                      className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
-                        isSelected
+                      className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${isSelected
                           ? 'bg-purple-500 text-white shadow-sm'
                           : 'border border-white/15 group-hover:border-purple-400/30'
-                      }`}
+                        }`}
                     >
                       {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                     </div>

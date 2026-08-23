@@ -17,21 +17,26 @@ export class DiscoveryService {
     const skip = (page - 1) * limit;
 
     const where: Prisma.CampaignWhereInput = {
-      status: { in: [CampaignStatus.OPEN, CampaignStatus.FILLING] },
+      status: { in: [CampaignStatus.OPEN, CampaignStatus.FILLING, CampaignStatus.ACTIVE] },
       OR: query.search
         ? [
             { title: { contains: query.search, mode: 'insensitive' } },
             { description: { contains: query.search, mode: 'insensitive' } },
             { brandProfile: { companyName: { contains: query.search, mode: 'insensitive' } } },
             { industry: { contains: query.search, mode: 'insensitive' } },
+            { product: { productName: { contains: query.search, mode: 'insensitive' } } },
           ]
         : undefined,
-      objective:
-        query.category && query.category !== 'All'
-          ? { has: query.category }
-          : query.objective
-          ? { has: query.objective }
-          : undefined,
+      ...(query.category && query.category !== 'All'
+        ? {
+            OR: [
+              { objective: { has: query.category } },
+              { industry: { contains: query.category, mode: 'insensitive' } },
+            ],
+          }
+        : query.objective
+        ? { objective: { has: query.objective } }
+        : {}),
       platforms: query.platform && query.platform !== 'All Platforms' ? { has: query.platform } : undefined,
       budgetPaymentModel: query.paymentModel,
       budgetTotalAmount: {
@@ -123,28 +128,29 @@ export class DiscoveryService {
       };
     }
 
-    const requirements = (campaign.requirements as any) || {};
-    const socialReq = requirements.social || {};
+    const req = (campaign.requirement as any) || (campaign.requirements as any) || {};
+    const socialReq = req.social || req;
+    const minFollowers = req.minFollowers || socialReq.minFollowers;
     const reasons: any[] = [];
     let matchedCount = 0;
     let totalCriteria = 0;
 
     // Follower check
-    if (socialReq.minFollowers) {
+    if (minFollowers) {
       totalCriteria++;
       const maxFollowers = Math.max(...socialAccounts.map((a) => a.followerCount || 0), 0);
-      if (maxFollowers >= socialReq.minFollowers) {
+      if (maxFollowers >= minFollowers) {
         matchedCount++;
         reasons.push({
           criterion: 'Followers',
           result: 'MATCHED',
-          details: `Top account has ${maxFollowers.toLocaleString()} followers (min ${socialReq.minFollowers.toLocaleString()})`,
+          details: `Top account has ${maxFollowers.toLocaleString()} followers (min ${minFollowers.toLocaleString()})`,
         });
       } else {
         reasons.push({
           criterion: 'Followers',
           result: 'NOT_MATCHED',
-          details: `Top account has ${maxFollowers.toLocaleString()} followers (min required: ${socialReq.minFollowers.toLocaleString()})`,
+          details: `Top account has ${maxFollowers.toLocaleString()} followers (min required: ${minFollowers.toLocaleString()})`,
         });
       }
     }

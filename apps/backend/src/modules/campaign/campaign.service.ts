@@ -71,34 +71,39 @@ export class CampaignService {
     const hasProductData = Boolean(
       campaignData.productName ||
       campaignData.productType ||
-      campaignData.productDescription ||
       campaignData.landingPageUrl ||
-      campaignData.websiteUrl ||
       campaignData.hasFreeProduct !== undefined ||
       campaignData.freeProductValue !== undefined ||
       campaignData.shippingDetails ||
       campaignData.productInstructions
     );
 
-    const req = campaignData.requirements;
+    const req = campaignData.requirements as any;
     const social = req?.social;
     const inf = req?.influencer;
     const aud = req?.audience;
+    const targetAgeGroup: string[] = Array.isArray(aud?.targetAgeGroup)
+      ? aud.targetAgeGroup
+      : Array.isArray(req?.targetAgeGroup)
+      ? req.targetAgeGroup
+      : Array.isArray(req?.targetAgeGroups)
+      ? req.targetAgeGroups
+      : Array.isArray(inf?.ageRanges)
+      ? inf.ageRanges
+      : typeof aud?.targetAgeGroup === 'string'
+      ? [aud.targetAgeGroup]
+      : [];
 
     const hasRequirementData = Boolean(
       req?.strictEligibility !== undefined ||
       social?.minFollowers !== undefined ||
-      social?.maxFollowers !== undefined ||
       social?.minEngagementRate !== undefined ||
       social?.verifiedOnly !== undefined ||
       (inf?.countries && inf.countries.length > 0) ||
       (inf?.genders && inf.genders.length > 0) ||
-      (inf?.ageRanges && inf.ageRanges.length > 0) ||
       (inf?.languages && inf.languages.length > 0) ||
       (aud?.countries && aud.countries.length > 0) ||
-      aud?.minAge !== undefined ||
-      aud?.maxAge !== undefined ||
-      aud?.topGender !== undefined
+      targetAgeGroup.length > 0
     );
 
     const campaign = await this.repository.createCampaign({
@@ -133,9 +138,7 @@ export class CampaignService {
               create: {
                 productName: campaignData.productName || campaignData.title,
                 productType: campaignData.productType,
-                productDescription: campaignData.productDescription,
                 landingPageUrl: campaignData.landingPageUrl,
-                websiteUrl: campaignData.websiteUrl,
                 coverImageUrl: campaignData.coverImageUrl,
                 hasFreeProduct: campaignData.hasFreeProduct ?? false,
                 freeProductValue: campaignData.freeProductValue,
@@ -151,17 +154,13 @@ export class CampaignService {
               create: {
                 strictEligibility: req?.strictEligibility ?? false,
                 minFollowers: social?.minFollowers,
-                maxFollowers: social?.maxFollowers,
                 minEngagementRate: social?.minEngagementRate,
                 verifiedOnly: social?.verifiedOnly ?? false,
                 targetCountries: inf?.countries || [],
                 targetGenders: inf?.genders || [],
-                targetAgeRanges: inf?.ageRanges || [],
                 targetLanguages: inf?.languages || [],
+                targetAgeGroup,
                 audienceCountries: aud?.countries || [],
-                audienceMinAge: aud?.minAge,
-                audienceMaxAge: aud?.maxAge,
-                audienceTopGender: aud?.topGender,
               },
             },
           }
@@ -179,8 +178,7 @@ export class CampaignService {
                 requiredCta: d.requiredCta,
                 mandatoryHashtags: d.mandatoryHashtags || [],
                 mandatoryMentions: d.mandatoryMentions || [],
-                contentGuidelines: d.contentGuidelines,
-                instructions: d.instructions || d.contentGuidelines,
+                instructions: d.instructions,
                 revisionLimit: d.revisionLimit || 2,
               })),
             },
@@ -195,11 +193,9 @@ export class CampaignService {
     const brandProfile = await this.prisma.brandProfile.findUnique({
       where: { userId },
     });
-
     if (!brandProfile) {
-      throw new ForbiddenException('Brand profile not found');
+      throw new ForbiddenException('Brand profile not found for user');
     }
-
     return this.repository.listCampaignsByBrand(brandProfile.id);
   }
 
@@ -237,8 +233,7 @@ export class CampaignService {
           requiredCta: d.requiredCta,
           mandatoryHashtags: d.mandatoryHashtags || [],
           mandatoryMentions: d.mandatoryMentions || [],
-          contentGuidelines: d.contentGuidelines,
-          instructions: (d as any).instructions || d.contentGuidelines,
+          instructions: (d as any).instructions,
           revisionLimit: d.revisionLimit || 2,
         })),
       );

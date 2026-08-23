@@ -131,8 +131,8 @@ export default function ReviewPublishStep({
               {formData.budgetPaymentModel === 'BARTER'
                 ? 'Product Barter ($0 Escrow)'
                 : formData.budgetTotalAmount
-                ? `${currencySymbol} ${Number(formData.budgetTotalAmount).toLocaleString()} ${currencyCode}`
-                : 'Not Set / Flexible'}
+                  ? `${currencySymbol} ${Number(formData.budgetTotalAmount).toLocaleString()} ${currencyCode}`
+                  : 'Not Set / Flexible'}
             </span>
           </div>
 

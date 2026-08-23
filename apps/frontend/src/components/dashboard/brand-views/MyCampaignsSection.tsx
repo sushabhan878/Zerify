@@ -6,6 +6,7 @@ import { CampaignItem, CampaignService } from '@/services/campaign.service';
 import CreateCampaignWizard from './campaigns/CreateCampaignWizard';
 import CampaignOverviewDashboard from './campaigns/CampaignOverviewDashboard';
 import BrandCampaignCard from './campaigns/BrandCampaignCard';
+import LottieLoader from '@/components/ui/LottieLoader';
 
 export default function MyCampaignsSection() {
   const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
@@ -103,8 +104,8 @@ export default function MyCampaignsSection() {
 
       {/* Campaign List */}
       {isLoading ? (
-        <div className="p-16 text-center text-xs text-slate-400 font-medium">
-          Loading campaigns...
+        <div className="min-h-[350px] flex items-center justify-center p-12">
+          <LottieLoader size={180} message="Loading your campaigns..." />
         </div>
       ) : filteredCampaigns.length === 0 ? (
         <div className="p-12 rounded-3xl bg-slate-900/60 border border-dashed border-white/10 text-center space-y-4">

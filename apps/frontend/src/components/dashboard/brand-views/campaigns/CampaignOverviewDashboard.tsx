@@ -26,6 +26,7 @@ import SendOfferModal from './SendOfferModal';
 import ApplicantComparisonView from './ApplicantComparisonView';
 import ParticipantManagementView from './ParticipantManagementView';
 import OfferManagementView from './OfferManagementView';
+import LottieLoader from '@/components/ui/LottieLoader';
 
 interface CampaignOverviewDashboardProps {
   campaignId: string;
@@ -109,8 +110,8 @@ export default function CampaignOverviewDashboard({
 
   if (isLoading || !campaign) {
     return (
-      <div className="p-12 text-center text-xs text-slate-400">
-        Loading campaign control center...
+      <div className="min-h-[450px] flex items-center justify-center p-12">
+        <LottieLoader size={200} message="Loading campaign details..." />
       </div>
     );
   }
@@ -153,47 +154,60 @@ export default function CampaignOverviewDashboard({
       </div>
 
       {/* Campaign Header Banner */}
-      <div className="p-6 rounded-3xl bg-slate-900/90 border border-white/10 backdrop-blur-xl space-y-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase bg-purple-500/10 text-purple-400 border-purple-500/30">
+      <div className="p-6 rounded-3xl bg-slate-950/45 border border-purple-500/20 backdrop-blur-2xl shadow-xl shadow-purple-950/20 space-y-5">
+        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border bg-emerald-500/15 text-emerald-300 border-emerald-500/30">
                 {campaign.status}
               </span>
-              <span className="text-xs text-slate-400 font-bold">{campaign.industry}</span>
+              {campaign.industry && (
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-950/40 border border-purple-500/20 text-purple-200 flex items-center gap-1.5">
+                  <Layers className="w-3 h-3 text-purple-400" />
+                  <span>{campaign.industry}</span>
+                </span>
+              )}
             </div>
-            <h2 className="text-xl font-black text-white mt-1">{campaign.title}</h2>
+            <h2 className="text-2xl font-black text-white">{campaign.title}</h2>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="bg-slate-950/60 p-3 rounded-2xl border border-white/5 text-right">
-              <span className="text-[10px] text-slate-500 font-bold block uppercase">Budget Pool</span>
-              <span className="text-base font-black text-emerald-400">
-                ${campaign.budgetTotalAmount?.toLocaleString() || '0'} {campaign.budgetCurrency}
+          <div className="lg:text-right flex lg:flex-col items-baseline lg:items-end justify-between gap-0.5 flex-shrink-0">
+            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">
+              Total Budget Pool
+            </span>
+            <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">
+              ${campaign.budgetTotalAmount?.toLocaleString() || '0'}
+              <span className="text-xs font-bold text-emerald-300/70 ml-1.5 uppercase">
+                {campaign.budgetCurrency || 'USD'}
               </span>
-            </div>
+            </span>
           </div>
         </div>
 
-        {/* Quick Stat Chips */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-3 rounded-2xl bg-slate-950/60 border border-white/5 text-center">
-            <span className="text-[10px] text-slate-500 uppercase font-bold block">Applications</span>
-            <span className="text-base font-black text-white">{applications.length} Pitches</span>
+        {/* Quick Stat Direct Grid without dark card boxes */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-3 border-t border-white/10">
+          <div className="space-y-1">
+            <span className="text-[10px] text-slate-400 uppercase font-extrabold tracking-widest block">Applications</span>
+            <span className="text-2xl sm:text-3xl font-black text-white block">{applications.length}</span>
+            <span className="text-[10px] text-cyan-400/80 font-semibold block">Pitches received</span>
           </div>
-          <div className="p-3 rounded-2xl bg-slate-950/60 border border-white/5 text-center">
-            <span className="text-[10px] text-slate-500 uppercase font-bold block">Offers Sent</span>
-            <span className="text-base font-black text-purple-400">{offers.length} Pending</span>
+          <div className="space-y-1 sm:border-l sm:border-white/10 sm:pl-6">
+            <span className="text-[10px] text-slate-400 uppercase font-extrabold tracking-widest block">Offers Sent</span>
+            <span className="text-2xl sm:text-3xl font-black text-purple-400 block">{offers.length}</span>
+            <span className="text-[10px] text-purple-300/80 font-semibold block">Pending responses</span>
           </div>
-          <div className="p-3 rounded-2xl bg-slate-950/60 border border-white/5 text-center">
-            <span className="text-[10px] text-slate-500 uppercase font-bold block">Creators Hired</span>
-            <span className="text-base font-black text-emerald-400">
-              {confirmedCount} / {campaign.targetParticipants}
-            </span>
+          <div className="space-y-1 sm:border-l sm:border-white/10 sm:pl-6">
+            <span className="text-[10px] text-slate-400 uppercase font-extrabold tracking-widest block">Creators Hired</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl sm:text-3xl font-black text-emerald-400">{confirmedCount}</span>
+              <span className="text-xs font-bold text-slate-500">/ {campaign.targetParticipants} slots</span>
+            </div>
+            <span className="text-[10px] text-emerald-300/80 font-semibold block">Roster progress</span>
           </div>
-          <div className="p-3 rounded-2xl bg-slate-950/60 border border-white/5 text-center">
-            <span className="text-[10px] text-slate-500 uppercase font-bold block">Escrow Protected</span>
-            <span className="text-base font-black text-indigo-400">100% Guaranteed</span>
+          <div className="space-y-1 sm:border-l sm:border-white/10 sm:pl-6">
+            <span className="text-[10px] text-slate-400 uppercase font-extrabold tracking-widest block">Escrow Status</span>
+            <span className="text-2xl sm:text-3xl font-black text-indigo-400 block">100%</span>
+            <span className="text-[10px] text-indigo-300/80 font-semibold block">Auto protection</span>
           </div>
         </div>
       </div>
