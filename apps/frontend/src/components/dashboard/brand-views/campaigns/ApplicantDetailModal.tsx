@@ -22,6 +22,7 @@ export default function ApplicantDetailModal({
   onReject,
 }: ApplicantDetailModalProps) {
   const [mounted, setMounted] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -29,34 +30,84 @@ export default function ApplicantDetailModal({
 
   if (!application || !mounted) return null;
 
-  const profile: any = application.profileSnapshot || {};
-  const match: any = application.matchSnapshot || { score: 85, eligibility: 'ELIGIBLE', reasons: [] };
+  const profile: any = application.profileSnapshot || (application as any).influencerProfile || {};
+  const socialAccount: any = (application as any).socialAccount || {};
+  const influencerProfile: any = (application as any).influencerProfile || {};
+  const user: any = influencerProfile.user || {};
+  const match: any = application.matchSnapshot || { score: 95, eligibility: 'ELIGIBLE', reasons: [] };
+
+  const displayName =
+    profile.displayName ||
+    user.name ||
+    influencerProfile.handle ||
+    socialAccount.username ||
+    'Creator';
+
+  const avatarUrl =
+    profile.avatarUrl ||
+    influencerProfile.avatarUrl ||
+    profile.avatar ||
+    socialAccount.avatar ||
+    user.image ||
+    null;
+
+  const platform = (
+    profile.platform ||
+    socialAccount.platform ||
+    'INSTAGRAM'
+  ).toUpperCase();
+
+  const rawFollowers =
+    profile.followersCount ??
+    profile.followerCount ??
+    socialAccount.followerCount ??
+    socialAccount.followersCount ??
+    null;
+
+  const formatCount = (count: number | null | undefined) => {
+    if (count === null || count === undefined || isNaN(Number(count))) return 'N/A';
+    const n = Number(count);
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+    if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+    return n.toLocaleString();
+  };
 
   const modalContent = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-2xl bg-slate-900 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="w-full max-w-2xl bg-slate-950/95 border border-purple-500/30 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] backdrop-blur-2xl"
       >
         {/* Header */}
-        <div className="p-6 border-b border-white/10 flex items-center justify-between bg-slate-950/40">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-md">
-              {profile.displayName ? profile.displayName.charAt(0).toUpperCase() : 'C'}
+        <div className="p-5 sm:p-6 border-b border-purple-500/20 flex items-center justify-between bg-slate-900/50">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl overflow-hidden border border-purple-500/30 bg-slate-900 flex items-center justify-center text-white font-black text-sm shadow-md shrink-0">
+              {avatarUrl && !imageError ? (
+                <img
+                  src={avatarUrl}
+                  alt={displayName}
+                  onError={() => setImageError(true)}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 flex items-center justify-center text-white font-black text-base shadow-inner select-none">
+                  {displayName ? displayName.charAt(0).toUpperCase() : 'C'}
+                </div>
+              )}
             </div>
             <div>
-              <h3 className="text-base font-black text-white">{profile.displayName || 'Creator'}</h3>
+              <h3 className="text-base font-bold text-white">{displayName}</h3>
               <p className="text-xs text-slate-400">
-                @{profile.username} • {profile.platform || 'INSTAGRAM'}
+                <span className="text-purple-300 font-semibold">{formatCount(rawFollowers)} Followers</span> • {platform}
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 border border-transparent hover:border-purple-500/20 transition-all"
           >
             <X className="w-5 h-5" />
           </button>

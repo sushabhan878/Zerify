@@ -13,6 +13,8 @@ export interface QuickFilterState {
   location: string;
 }
 
+import { PRIMARY_CATEGORY_NAMES } from '@/constants/categories';
+
 interface CompanyQuickFiltersProps {
   filters: QuickFilterState;
   onFilterChange: (key: keyof QuickFilterState, val: any) => void;
@@ -20,21 +22,7 @@ interface CompanyQuickFiltersProps {
   activeCount: number;
 }
 
-const INDUSTRIES = [
-  'All',
-  'Software & SaaS',
-  'Beauty & Personal Care',
-  'Fashion & Apparel',
-  'Food & Beverage',
-  'Fitness & Wellness',
-  'Consumer Electronics & Hardware',
-  'Fintech & Digital Payments',
-  'Luxury & Designer Goods',
-  'Healthcare & Pharmaceuticals',
-  'Web3, Crypto & Blockchain',
-  'Real Estate & Property Development',
-  'Automotive & EV',
-];
+const INDUSTRIES = ['All', ...PRIMARY_CATEGORY_NAMES];
 
 const BUDGET_RANGES = [
   'Any Budget',

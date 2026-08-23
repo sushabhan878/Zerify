@@ -8,7 +8,7 @@ import CampaignQuickFilters, {
 import CampaignActiveFilterChips from './campaign-discovery/CampaignActiveFilterChips';
 import CampaignSortAndControls from './campaign-discovery/CampaignSortAndControls';
 import CampaignCard, { CampaignItem } from './campaign-discovery/CampaignCard';
-import CampaignDetailModal from './campaign-discovery/CampaignDetailModal';
+import CampaignDetailView from './campaign-discovery/CampaignDetailView';
 import CampaignPitchModal from './campaign-discovery/CampaignPitchModal';
 import CampaignAdvancedFiltersModal, {
   CampaignAdvancedFilterState,
@@ -17,6 +17,8 @@ import CampaignPagination from './campaign-discovery/CampaignPagination';
 import LottieLoader from '@/components/ui/LottieLoader';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { CampaignService } from '@/services/campaign.service';
+import { ApplicationService } from '@/services/application.service';
+import { ALL_INDUSTRIES_GROUPED } from '@/constants/categories';
 
 const INITIAL_FILTERS: CampaignAdvancedFilterState = {
   category: 'All',
@@ -114,17 +116,19 @@ function mapDbCampaignToItem(c: any): CampaignItem {
     daysRemaining = Math.max(0, Math.ceil((deadlineDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
   }
 
-  // Objective category tag
-  const primaryCategory = Array.isArray(c.objective) && c.objective.length > 0
-    ? c.objective[0]
-    : c.industry || 'Brand Awareness';
+  // Industry / Category tag (prioritize actual industry/category over objective)
+  const categoryName =
+    c.industry ||
+    c.brandProfile?.industry ||
+    (Array.isArray(c.categories) && c.categories.length > 0 ? c.categories[0] : null) ||
+    'Tech & SaaS';
 
   return {
     id: c.id,
     title: c.title,
     brandName: c.brandProfile?.companyName || 'Verified Brand',
     brandLogo: c.brandProfile?.logoUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80',
-    category: primaryCategory,
+    category: categoryName,
     industry: c.industry || c.brandProfile?.industry || 'Technology & Creator Economy',
     coverImage: c.coverImageUrl || product.coverImageUrl || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
     description: c.description || 'Exclusive brand sponsorship and creator collaboration brief.',
@@ -139,6 +143,11 @@ function mapDbCampaignToItem(c: any): CampaignItem {
     deliverables: Array.isArray(c.deliverables) && c.deliverables.length > 0
       ? c.deliverables.map((d: any) => `${d.quantity || 1}x ${d.type || 'Deliverable'}`)
       : ['1x Sponsored Video / Post'],
+    rawDeliverables: c.deliverables || [],
+    productDetails: product,
+    requirementDetails: req,
+    applicationsCount: c._count?.applications || 0,
+    brandLocation: c.brandProfile?.location || '',
     targetPlatforms,
     creatorTiers: ['Micro', 'Mid', 'Macro'],
     slotsTotal: c.targetParticipants || c.maxParticipants || 3,
@@ -176,7 +185,7 @@ export default function CampaignDiscoverySection() {
   const [sortBy, setSortBy] = useState<string>('matchScore');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 6;
+  const pageSize = 8;
 
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -184,8 +193,9 @@ export default function CampaignDiscoverySection() {
   const [selectedCampaignForDetail, setSelectedCampaignForDetail] = useState<CampaignItem | null>(null);
   const [selectedCampaignForPitch, setSelectedCampaignForPitch] = useState<CampaignItem | null>(null);
   const [campaignsList, setCampaignsList] = useState<CampaignItem[]>([]);
+  const [appliedCampaignsMap, setAppliedCampaignsMap] = useState<Record<string, string>>({});
 
-  // Fetch live campaigns from backend API
+  // Fetch live campaigns and creator's active applications from backend API
   const fetchCampaigns = useCallback(async (showRefreshingSpinner = false) => {
     if (showRefreshingSpinner) {
       setIsRefreshing(true);
@@ -194,14 +204,36 @@ export default function CampaignDiscoverySection() {
     }
 
     try {
-      const res = await CampaignService.discoverCampaigns({
-        search: searchQuery.trim() || undefined,
-        category: quickFilters.category !== 'All' ? quickFilters.category : undefined,
-        platform: quickFilters.platform !== 'All Platforms' ? quickFilters.platform : undefined,
-      });
+      const [resResult, myAppsResult] = await Promise.allSettled([
+        CampaignService.discoverCampaigns({
+          limit: 100,
+          search: searchQuery.trim() || undefined,
+          category: quickFilters.category !== 'All' ? quickFilters.category : undefined,
+          platform: quickFilters.platform !== 'All Platforms' ? quickFilters.platform : undefined,
+        }),
+        ApplicationService.getMyApplications(),
+      ]);
 
-      if (res?.campaigns && Array.isArray(res.campaigns)) {
-        const formatted: CampaignItem[] = res.campaigns.map(mapDbCampaignToItem);
+      const myAppsMap: Record<string, string> = {};
+      if (myAppsResult.status === 'fulfilled' && Array.isArray(myAppsResult.value)) {
+        myAppsResult.value.forEach((app: any) => {
+          if (app.campaignId) {
+            myAppsMap[app.campaignId] = app.status || 'APPLIED';
+          }
+        });
+      }
+
+      setAppliedCampaignsMap((prev) => ({ ...prev, ...myAppsMap }));
+
+      if (resResult.status === 'fulfilled' && resResult.value?.campaigns && Array.isArray(resResult.value.campaigns)) {
+        const formatted: CampaignItem[] = resResult.value.campaigns.map((c: any) => {
+          const item = mapDbCampaignToItem(c);
+          if (myAppsMap[c.id]) {
+            item.isApplied = true;
+            item.applicationStatus = myAppsMap[c.id];
+          }
+          return item;
+        });
         setCampaignsList(formatted);
       } else {
         setCampaignsList([]);
@@ -218,6 +250,24 @@ export default function CampaignDiscoverySection() {
   useEffect(() => {
     fetchCampaigns();
   }, [fetchCampaigns]);
+
+  const handlePitchSuccess = (campaignId?: string) => {
+    const id = campaignId || selectedCampaignForPitch?.id;
+    if (id) {
+      setAppliedCampaignsMap((prev) => ({ ...prev, [id]: 'APPLIED' }));
+      setCampaignsList((prev) =>
+        prev.map((c) =>
+          c.id === id ? { ...c, isApplied: true, applicationStatus: 'APPLIED' } : c
+        )
+      );
+      if (selectedCampaignForDetail && selectedCampaignForDetail.id === id) {
+        setSelectedCampaignForDetail((prev) =>
+          prev ? { ...prev, isApplied: true, applicationStatus: 'APPLIED' } : null
+        );
+      }
+    }
+    fetchCampaigns(true);
+  };
 
   const handleQuickFilterChange = (key: keyof CampaignQuickFilterState, val: any) => {
     setQuickFilters((prev) => ({ ...prev, [key]: val }));
@@ -266,9 +316,30 @@ export default function CampaignDiscoverySection() {
 
       // 2. Category / Objective
       if (quickFilters.category !== 'All') {
-        const catUpper = quickFilters.category.toLowerCase();
-        const matchesCat = c.category.toLowerCase().includes(catUpper) || c.industry.toLowerCase().includes(catUpper);
-        if (!matchesCat) return false;
+        const catLower = quickFilters.category.toLowerCase().trim();
+        const group = ALL_INDUSTRIES_GROUPED.find(
+          (g) => g.category.toLowerCase().trim() === catLower || g.slug === catLower
+        );
+        const subItems = group ? group.items.map((i) => i.toLowerCase().trim()) : [];
+
+        const campCatLower = (c.category || '').toLowerCase().trim();
+        const campIndLower = (c.industry || '').toLowerCase().trim();
+
+        const matchesDirect =
+          campCatLower.includes(catLower) ||
+          catLower.includes(campCatLower) ||
+          campIndLower.includes(catLower) ||
+          catLower.includes(campIndLower);
+
+        const matchesGroup = subItems.some(
+          (sub) =>
+            campCatLower.includes(sub) ||
+            sub.includes(campCatLower) ||
+            campIndLower.includes(sub) ||
+            sub.includes(campIndLower)
+        );
+
+        if (!matchesDirect && !matchesGroup) return false;
       }
 
       // 3. Deliverable / Campaign Type
@@ -281,7 +352,19 @@ export default function CampaignDiscoverySection() {
 
       // 4. Platform Filter
       if (quickFilters.platform !== 'All Platforms' && quickFilters.platform !== 'All') {
-        if (!c.targetPlatforms.includes(quickFilters.platform as any)) return false;
+        const targetP = quickFilters.platform.toLowerCase().trim();
+        const hasPlatform = c.targetPlatforms.some((p: string) => {
+          const pLower = p.toLowerCase().trim();
+          return (
+            pLower === targetP ||
+            (targetP.includes('insta') && pLower.includes('insta')) ||
+            (targetP.includes('you') && pLower.includes('you')) ||
+            (targetP.includes('tik') && pLower.includes('tik')) ||
+            (targetP.includes('link') && pLower.includes('link')) ||
+            ((targetP.includes('twit') || targetP === 'x') && (pLower.includes('twit') || pLower === 'x'))
+          );
+        });
+        if (!hasPlatform) return false;
       }
 
       // 5. Minimum Match Score
@@ -360,6 +443,33 @@ export default function CampaignDiscoverySection() {
     if (key === 'isVerifiedOnly') setAdvancedFilters((prev) => ({ ...prev, isVerifiedOnly: false }));
     if (key === 'isEscrowOnly') setAdvancedFilters((prev) => ({ ...prev, isEscrowOnly: false }));
   };
+
+  // If viewing a detailed campaign brief screen
+  if (selectedCampaignForDetail) {
+    return (
+      <div className="space-y-4">
+        <CampaignDetailView
+          campaign={selectedCampaignForDetail}
+          onBack={() => {
+            setSelectedCampaignForDetail(null);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onApply={(camp) => {
+            setSelectedCampaignForPitch(camp);
+          }}
+        />
+
+        <CampaignPitchModal
+          isOpen={Boolean(selectedCampaignForPitch)}
+          onClose={() => setSelectedCampaignForPitch(null)}
+          campaign={selectedCampaignForPitch}
+          onSuccess={() => {
+            fetchCampaigns(true);
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -457,7 +567,10 @@ export default function CampaignDiscoverySection() {
             <CampaignCard
               key={camp.id}
               campaign={camp}
-              onViewBrief={(item) => setSelectedCampaignForDetail(item)}
+              onViewBrief={(item) => {
+                setSelectedCampaignForDetail(item);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
               onApply={(item) => setSelectedCampaignForPitch(item)}
             />
           ))}
@@ -487,22 +600,12 @@ export default function CampaignDiscoverySection() {
         onResetFilters={handleResetFilters}
       />
 
-      <CampaignDetailModal
-        isOpen={Boolean(selectedCampaignForDetail)}
-        onClose={() => setSelectedCampaignForDetail(null)}
-        campaign={selectedCampaignForDetail}
-        onApply={(camp) => {
-          setSelectedCampaignForDetail(null);
-          setSelectedCampaignForPitch(camp);
-        }}
-      />
-
       <CampaignPitchModal
         isOpen={Boolean(selectedCampaignForPitch)}
         onClose={() => setSelectedCampaignForPitch(null)}
         campaign={selectedCampaignForPitch}
         onSuccess={() => {
-          fetchCampaigns(true);
+          handlePitchSuccess(selectedCampaignForPitch?.id);
         }}
       />
     </div>

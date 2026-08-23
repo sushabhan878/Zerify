@@ -37,8 +37,17 @@ export class DiscoveryService {
         : query.objective
         ? { objective: { has: query.objective } }
         : {}),
-      platforms: query.platform && query.platform !== 'All Platforms' ? { has: query.platform } : undefined,
-      budgetPaymentModel: query.paymentModel,
+      platforms:
+        query.platform && query.platform !== 'All Platforms' && query.platform !== 'All'
+          ? {
+              hasSome: [
+                query.platform.toUpperCase(),
+                query.platform,
+                query.platform.toLowerCase(),
+                query.platform.toLowerCase() === 'twitter' ? 'X' : '',
+              ].filter(Boolean),
+            }
+          : undefined,
       budgetTotalAmount: {
         gte: query.minBudget ? Number(query.minBudget) : undefined,
         lte: query.maxBudget ? Number(query.maxBudget) : undefined,

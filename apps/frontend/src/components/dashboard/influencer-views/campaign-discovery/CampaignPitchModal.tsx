@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -8,11 +8,12 @@ import {
   Sparkles,
   Send,
   Loader2,
-  DollarSign,
   Link as LinkIcon,
   Clock,
   Gift,
-  CheckCircle,
+  Check,
+  ChevronDown,
+  CheckCircle2,
 } from 'lucide-react';
 import { CampaignItem } from './CampaignCard';
 import { useToast } from '@/components/ui/Toast';
@@ -23,6 +24,13 @@ interface CampaignPitchModalProps {
   campaign: CampaignItem | null;
   onSuccess?: () => void;
 }
+
+const TIMELINE_OPTIONS = [
+  { value: '3', label: 'Within 3 days of product receipt / brief' },
+  { value: '5', label: 'Within 5 days of product receipt / brief' },
+  { value: '7', label: 'Within 7 days of product receipt / brief' },
+  { value: '14', label: 'Within 14 days of product receipt / brief' },
+];
 
 export default function CampaignPitchModal({
   isOpen,
@@ -37,23 +45,43 @@ export default function CampaignPitchModal({
   const [pitchMessage, setPitchMessage] = useState('');
   const [sampleLink, setSampleLink] = useState('');
   const [turnaroundDays, setTurnaroundDays] = useState('5');
+  const [isTimelineDropdownOpen, setIsTimelineDropdownOpen] = useState(false);
   const [needsShipping, setNeedsShipping] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setMounted(true);
   }, []);
 
-  React.useEffect(() => {
-    if (campaign) {
-      setProposedRate(campaign.payoutAmount.split('–')[0].replace(/[^0-9]/g, '') || '500');
-      setPitchMessage(
-        `Hi ${campaign.brandName} team! I love your brand and would create an engaging, high-conversion ${campaign.deliverables[0] || 'deliverable'} demonstrating real results to my audience.`
-      );
+  // Reset form with clean placeholders whenever modal opens for a campaign
+  useEffect(() => {
+    if (isOpen) {
+      setProposedRate('');
+      setPitchMessage('');
+      setSampleLink('');
+      setTurnaroundDays('5');
+      setIsTimelineDropdownOpen(false);
+      setNeedsShipping(true);
     }
-  }, [campaign]);
+  }, [isOpen, campaign]);
 
   if (!isOpen || !campaign || !mounted) return null;
+
+  const isRupee = campaign.payoutAmount.includes('₹');
+  const currencySymbol = isRupee ? '₹' : '$';
+  const currencyLabel = isRupee ? '₹ INR' : '$ USD';
+
+  const handleGenerateAiPitch = () => {
+    setIsGeneratingAi(true);
+    setTimeout(() => {
+      const delName = campaign.deliverables[0] || 'deliverables';
+      setPitchMessage(
+        `Hi ${campaign.brandName} team! I'm thrilled about the opportunity to partner on this campaign. I plan to create a high-retention, authentic ${delName} that highlights your product's key strengths, hooks the audience in the first 3 seconds, and drives strong engagement with a clear call-to-action.`
+      );
+      setIsGeneratingAi(false);
+    }, 400);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,150 +119,177 @@ export default function CampaignPitchModal({
     }
   };
 
+  const selectedTimelineObj = TIMELINE_OPTIONS.find((o) => o.value === turnaroundDays) || TIMELINE_OPTIONS[1];
 
   const modalContent = (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
+          className="fixed inset-0 bg-slate-950/85 backdrop-blur-md"
         />
 
         {/* Modal Window */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-lg max-h-[90vh] bg-slate-900 border border-white/15 rounded-2xl shadow-2xl overflow-hidden flex flex-col z-10"
+          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          className="relative w-full max-w-lg max-h-[90vh] bg-slate-950/95 border border-purple-500/30 rounded-3xl shadow-2xl shadow-purple-950/50 overflow-hidden flex flex-col z-10 backdrop-blur-2xl"
         >
-          {/* Header */}
-          <div className="flex items-center justify-between p-5 border-b border-white/10 shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-900 border border-white/10 overflow-hidden shrink-0">
-                <img
-                  src={campaign.brandLogo}
-                  alt={campaign.brandName}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-white">Apply to Campaign</h3>
-                <p className="text-[11px] text-slate-400 truncate max-w-xs">{campaign.title}</p>
-              </div>
-            </div>
-
-            <button
-              onClick={onClose}
-              type="button"
-              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+          {/* Floating Close Button */}
+          <button
+            onClick={onClose}
+            type="button"
+            className="absolute top-5 right-5 z-20 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 border border-transparent hover:border-purple-500/20 transition-all"
+          >
+            <X className="w-4 h-4" />
+          </button>
 
           {/* Form Content */}
-          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4 text-xs no-scrollbar">
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 sm:p-7 space-y-5 text-xs no-scrollbar">
             {/* Proposed Rate */}
-            <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
-                Your Proposed Fee ($ USD)
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+                Your Proposed Fee ({currencyLabel})
               </label>
               <div className="relative">
-                <DollarSign className="w-4 h-4 text-purple-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <span className="w-5 h-5 flex items-center justify-center text-purple-400 font-black text-sm absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                  {currencySymbol}
+                </span>
                 <input
                   type="number"
                   required
                   value={proposedRate}
                   onChange={(e) => setProposedRate(e.target.value)}
-                  placeholder="500"
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500 font-bold"
+                  placeholder={isRupee ? 'e.g. 50,000' : 'e.g. 1,500'}
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-900/80 border border-purple-500/20 hover:border-purple-500/40 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-400 font-bold transition-colors"
                 />
               </div>
-              <span className="text-[10.5px] text-slate-500 mt-1 block">
-                Brand budget guide: {campaign.payoutAmount}
+              <span className="text-[11px] text-slate-400 block pt-0.5">
+                Brand budget guide: <strong className="text-purple-300 font-bold">{campaign.payoutAmount}</strong>
               </span>
             </div>
 
             {/* Custom Pitch Note */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
                 <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                   Creative Pitch & Concept
                 </label>
-                <span className="text-[10.5px] text-purple-400 font-semibold flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> AI Enhanced
-                </span>
+                <button
+                  type="button"
+                  onClick={handleGenerateAiPitch}
+                  disabled={isGeneratingAi}
+                  className="text-[11px] text-purple-300 hover:text-purple-200 font-bold flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-950/60 border border-purple-500/30 hover:border-purple-400/50 transition-all shadow-sm"
+                >
+                  <Sparkles className={`w-3 h-3 text-purple-300 ${isGeneratingAi ? 'animate-spin' : ''}`} />
+                  <span>{isGeneratingAi ? 'Drafting...' : 'AI Enhance Pitch'}</span>
+                </button>
               </div>
               <textarea
                 rows={4}
                 required
                 value={pitchMessage}
                 onChange={(e) => setPitchMessage(e.target.value)}
-                placeholder="Share your creative angle, script idea, or why you're a great fit for this campaign..."
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-white/10 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-purple-500 resize-none leading-relaxed"
+                placeholder="Describe your creative concept, hooks, storytelling angle, and why you are the ideal creator for this campaign..."
+                className="w-full px-4 py-3 rounded-2xl bg-slate-900/80 border border-purple-500/20 hover:border-purple-500/40 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-400 resize-none leading-relaxed transition-colors"
               />
             </div>
 
             {/* Sample Link */}
-            <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
-                Past Relevant Content / Reel Link (Optional)
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+                Past Relevant Content / Reel Link <span className="text-slate-500 font-normal lowercase">(optional)</span>
               </label>
               <div className="relative">
-                <LinkIcon className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <LinkIcon className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="url"
                   value={sampleLink}
                   onChange={(e) => setSampleLink(e.target.value)}
-                  placeholder="https://instagram.com/reel/xyz or youtube.com/watch?v=xyz"
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500"
+                  placeholder="https://instagram.com/reel/... or https://youtube.com/watch?v=..."
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-900/80 border border-purple-500/20 hover:border-purple-500/40 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-400 transition-colors"
                 />
               </div>
             </div>
 
-            {/* Turnaround Time */}
-            <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
+            {/* Custom Delivery Timeline Dropdown */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
                 Delivery Timeline
               </label>
               <div className="relative">
-                <Clock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <select
-                  value={turnaroundDays}
-                  onChange={(e) => setTurnaroundDays(e.target.value)}
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500 cursor-pointer"
+                <button
+                  type="button"
+                  onClick={() => setIsTimelineDropdownOpen(!isTimelineDropdownOpen)}
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-900/80 border border-purple-500/20 hover:border-purple-500/40 text-xs text-white focus:outline-none focus:border-purple-400 transition-colors flex items-center justify-between text-left"
                 >
-                  <option value="3">Within 3 days of product receipt</option>
-                  <option value="5">Within 5 days of product receipt</option>
-                  <option value="7">Within 7 days of product receipt</option>
-                  <option value="14">Within 14 days of product receipt</option>
-                </select>
+                  <Clock className="w-4 h-4 text-purple-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <span className="font-semibold text-slate-200">{selectedTimelineObj.label}</span>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isTimelineDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Dropdown Menu */}
+                {isTimelineDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-slate-950 border border-purple-500/30 rounded-2xl shadow-2xl p-1.5 z-30 space-y-1 backdrop-blur-2xl">
+                    {TIMELINE_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          setTurnaroundDays(opt.value);
+                          setIsTimelineDropdownOpen(false);
+                        }}
+                        className={`w-full px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between transition-colors ${
+                          turnaroundDays === opt.value
+                            ? 'bg-purple-500/20 text-purple-200 font-bold border border-purple-500/30'
+                            : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {turnaroundDays === opt.value && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Shipping Checkbox */}
+            {/* Custom Interactive Free Product Checkbox */}
             {campaign.hasFreeProduct && (
-              <label className="flex items-center gap-2.5 p-3 rounded-xl bg-purple-950/20 border border-purple-500/20 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={needsShipping}
-                  onChange={(e) => setNeedsShipping(e.target.checked)}
-                  className="rounded border-white/20 text-purple-600 focus:ring-purple-500 w-4 h-4"
-                />
-                <div>
+              <div
+                onClick={() => setNeedsShipping(!needsShipping)}
+                className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start gap-3.5 select-none ${
+                  needsShipping
+                    ? 'bg-purple-950/30 border-purple-500/40 shadow-sm'
+                    : 'bg-slate-900/40 border-purple-500/15 hover:border-purple-500/30'
+                }`}
+              >
+                {/* Custom Checkbox Indicator */}
+                <div
+                  className={`w-5 h-5 rounded-lg border shrink-0 mt-0.5 flex items-center justify-center transition-colors ${
+                    needsShipping
+                      ? 'bg-gradient-to-tr from-purple-600 to-indigo-600 border-purple-400 text-white shadow-sm'
+                      : 'border-slate-600 bg-slate-900'
+                  }`}
+                >
+                  {needsShipping && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                </div>
+
+                <div className="space-y-0.5">
                   <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <Gift className="w-3.5 h-3.5 text-purple-400" />
+                    <Gift className="w-3.5 h-3.5 text-purple-300" />
                     <span>Confirm Free Product Delivery</span>
                   </span>
-                  <span className="text-[10.5px] text-slate-400 block">
-                    Product will be shipped to your verified account address upon brand acceptance.
+                  <span className="text-[11px] text-slate-400 block leading-relaxed">
+                    Product sample will be dispatched to your verified creator shipping address upon brand acceptance.
                   </span>
                 </div>
-              </label>
+              </div>
             )}
 
             {/* Submit Button */}
@@ -242,7 +297,7 @@ export default function CampaignPitchModal({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-purple-950/50 flex items-center justify-center gap-2 transition-all disabled:opacity-50 hover:scale-[1.01] active:scale-[0.99]"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs sm:text-sm font-bold shadow-xl shadow-purple-950/50 flex items-center justify-center gap-2 transition-all disabled:opacity-50 hover:scale-[1.01] active:scale-[0.99]"
               >
                 {isSubmitting ? (
                   <>

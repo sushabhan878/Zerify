@@ -176,7 +176,7 @@ export default function CampaignOverviewDashboard({
               Total Budget Pool
             </span>
             <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">
-              ${campaign.budgetTotalAmount?.toLocaleString() || '0'}
+              {campaign.budgetCurrency === 'INR' ? '₹' : '$'}{campaign.budgetTotalAmount?.toLocaleString() || '0'}
               <span className="text-xs font-bold text-emerald-300/70 ml-1.5 uppercase">
                 {campaign.budgetCurrency || 'USD'}
               </span>
@@ -184,8 +184,8 @@ export default function CampaignOverviewDashboard({
           </div>
         </div>
 
-        {/* Quick Stat Direct Grid without dark card boxes */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-3 border-t border-white/10">
+        {/* Quick Stat Direct Grid without border divider */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-2">
           <div className="space-y-1">
             <span className="text-[10px] text-slate-400 uppercase font-extrabold tracking-widest block">Applications</span>
             <span className="text-2xl sm:text-3xl font-black text-white block">{applications.length}</span>
@@ -213,7 +213,7 @@ export default function CampaignOverviewDashboard({
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+      <div className="flex items-center gap-2 pb-1">
         <button
           onClick={() => setActiveTab('applicants')}
           className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${

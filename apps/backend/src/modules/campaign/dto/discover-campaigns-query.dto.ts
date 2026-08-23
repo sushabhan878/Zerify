@@ -82,5 +82,5 @@ export class DiscoverCampaignsQueryDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  limit?: number = 10;
+  limit?: number = 50;
 }

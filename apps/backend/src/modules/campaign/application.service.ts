@@ -77,6 +77,7 @@ export class ApplicationService {
       displayName: influencerProfile.user?.name || influencerProfile.handle,
       username: socialAccount.username || socialAccount.handle,
       platform: socialAccount.platform,
+      avatarUrl: influencerProfile.avatarUrl || socialAccount.avatar,
       followersCount: socialAccount.followerCount || 0,
       engagementRate: socialAccount.engagementRate || 0,
       categories: influencerProfile.niches || [],
