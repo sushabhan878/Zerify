@@ -489,26 +489,15 @@ model Campaign {
   // Basic Info
   title                 String
   slug                  String              @unique
-  objective             CampaignObjective   @default(OTHER)
+  objective             String[]            @default([])
   description           String?
   industry              String?
-  categories            String[]            @default([])
   coverImageUrl         String?
-
-  // Product / Brand Info
-  productName           String?
-  productDescription    String?
-  websiteUrl            String?
-  landingPageUrl        String?
-  internalReference     String?
 
   status                CampaignStatus      @default(DRAFT)
 
   // Target Platforms
   platforms             String[]            @default([]) // INSTAGRAM, YOUTUBE, TIKTOK, etc.
-
-  // Influencer Requirements (stored as JSON for flexibility)
-  requirements          Json?               // { strictEligibility, social: {...}, influencer: {...}, audience: {...} }
 
   // Budget
   budgetTotalAmount     Float?
@@ -516,6 +505,10 @@ model Campaign {
   budgetPaymentModel    PaymentModel?       @default(FIXED)
   budgetMinPerInfluencer Float?
   budgetMaxPerInfluencer Float?
+  performanceMetric     String?
+  performanceRate       Float?
+  barterItems           String?
+  shippingCovered       Boolean?
 
   // Participant Settings
   targetParticipants    Int                 @default(1)
@@ -537,6 +530,8 @@ model Campaign {
   cancelledAt           DateTime?
 
   // Relations
+  product               CampaignProduct?
+  requirement           CampaignRequirement?
   deliverables          CampaignDeliverable[]
   applications          CampaignApplication[]
   participants          CampaignParticipant[]
@@ -548,6 +543,61 @@ model Campaign {
   @@index([status, applicationDeadline])
   @@index([status, createdAt])
   @@map("campaigns")
+}
+
+// Dedicated Product / Service Table for Campaigns
+model CampaignProduct {
+  id                  String    @id @default(uuid())
+  campaignId          String    @unique
+  campaign            Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  productName         String
+  productType         String?   // PHYSICAL, DIGITAL_SAAS, MOBILE_APP, SERVICE_EXPERIENCE
+  productDescription  String?
+  landingPageUrl      String?
+  websiteUrl          String?
+  coverImageUrl       String?
+  hasFreeProduct      Boolean   @default(false)
+  freeProductValue    Float?
+  shippingDetails     String?
+  productInstructions String?
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@map("campaign_products")
+}
+
+// Dedicated Campaign Requirements Table
+model CampaignRequirement {
+  id                  String    @id @default(uuid())
+  campaignId          String    @unique
+  campaign            Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  strictEligibility   Boolean   @default(false)
+
+  // Social criteria
+  minFollowers        Int?
+  maxFollowers        Int?
+  minEngagementRate   Float?
+  verifiedOnly        Boolean   @default(false)
+
+  // Influencer criteria
+  targetCountries     String[]  @default([])
+  targetGenders       String[]  @default([])
+  targetAgeRanges     String[]  @default([])
+  targetLanguages     String[]  @default([])
+
+  // Audience criteria
+  audienceCountries   String[]  @default([])
+  audienceMinAge      Int?
+  audienceMaxAge      Int?
+  audienceTopGender   String?
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@map("campaign_requirements")
 }
 
 // Template deliverables defined at campaign level (what company expects)
@@ -568,6 +618,7 @@ model CampaignDeliverable {
   mandatoryHashtags String[]    @default([])
   mandatoryMentions String[]    @default([])
   contentGuidelines String?
+  instructions      String?
   revisionLimit     Int         @default(2)
 
   createdAt         DateTime    @default(now())

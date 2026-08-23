@@ -26,9 +26,13 @@ export class DiscoveryService {
             { industry: { contains: query.search, mode: 'insensitive' } },
           ]
         : undefined,
-      categories: query.category && query.category !== 'All' ? { has: query.category } : undefined,
+      objective:
+        query.category && query.category !== 'All'
+          ? { has: query.category }
+          : query.objective
+          ? { has: query.objective }
+          : undefined,
       platforms: query.platform && query.platform !== 'All Platforms' ? { has: query.platform } : undefined,
-      objective: query.objective,
       budgetPaymentModel: query.paymentModel,
       budgetTotalAmount: {
         gte: query.minBudget ? Number(query.minBudget) : undefined,

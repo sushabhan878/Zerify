@@ -60,27 +60,65 @@ export class CampaignService {
 
     const { deliverables, ...campaignData } = dto;
 
+    const objectives: string[] = Array.isArray(campaignData.objective)
+      ? campaignData.objective
+      : campaignData.objective
+      ? [campaignData.objective as string]
+      : Array.isArray((campaignData as any).categories)
+      ? (campaignData as any).categories
+      : [];
+
+    const hasProductData = Boolean(
+      campaignData.productName ||
+      campaignData.productType ||
+      campaignData.productDescription ||
+      campaignData.landingPageUrl ||
+      campaignData.websiteUrl ||
+      campaignData.hasFreeProduct !== undefined ||
+      campaignData.freeProductValue !== undefined ||
+      campaignData.shippingDetails ||
+      campaignData.productInstructions
+    );
+
+    const req = campaignData.requirements;
+    const social = req?.social;
+    const inf = req?.influencer;
+    const aud = req?.audience;
+
+    const hasRequirementData = Boolean(
+      req?.strictEligibility !== undefined ||
+      social?.minFollowers !== undefined ||
+      social?.maxFollowers !== undefined ||
+      social?.minEngagementRate !== undefined ||
+      social?.verifiedOnly !== undefined ||
+      (inf?.countries && inf.countries.length > 0) ||
+      (inf?.genders && inf.genders.length > 0) ||
+      (inf?.ageRanges && inf.ageRanges.length > 0) ||
+      (inf?.languages && inf.languages.length > 0) ||
+      (aud?.countries && aud.countries.length > 0) ||
+      aud?.minAge !== undefined ||
+      aud?.maxAge !== undefined ||
+      aud?.topGender !== undefined
+    );
+
     const campaign = await this.repository.createCampaign({
       brandProfile: { connect: { id: brandProfile.id } },
       title: campaignData.title,
       slug,
-      objective: campaignData.objective,
+      objective: objectives,
       description: campaignData.description,
       industry: campaignData.industry,
-      categories: campaignData.categories || [],
       coverImageUrl: campaignData.coverImageUrl,
-      productName: campaignData.productName,
-      productDescription: campaignData.productDescription,
-      websiteUrl: campaignData.websiteUrl,
-      landingPageUrl: campaignData.landingPageUrl,
-      internalReference: campaignData.internalReference,
       platforms: campaignData.platforms || [],
-      requirements: campaignData.requirements ? (campaignData.requirements as any) : undefined,
       budgetTotalAmount: campaignData.budgetTotalAmount,
       budgetCurrency: campaignData.budgetCurrency || 'USD',
       budgetPaymentModel: campaignData.budgetPaymentModel,
       budgetMinPerInfluencer: campaignData.budgetMinPerInfluencer,
       budgetMaxPerInfluencer: campaignData.budgetMaxPerInfluencer,
+      performanceMetric: campaignData.performanceMetric,
+      performanceRate: campaignData.performanceRate,
+      barterItems: campaignData.barterItems,
+      shippingCovered: campaignData.shippingCovered,
       targetParticipants: campaignData.targetParticipants || 1,
       maxParticipants: campaignData.maxParticipants || 1,
       autoCloseWhenFilled: campaignData.autoCloseWhenFilled ?? false,
@@ -89,6 +127,45 @@ export class CampaignService {
       startDate: campaignData.startDate ? new Date(campaignData.startDate) : undefined,
       endDate: campaignData.endDate ? new Date(campaignData.endDate) : undefined,
       status: CampaignStatus.DRAFT,
+      ...(hasProductData
+        ? {
+            product: {
+              create: {
+                productName: campaignData.productName || campaignData.title,
+                productType: campaignData.productType,
+                productDescription: campaignData.productDescription,
+                landingPageUrl: campaignData.landingPageUrl,
+                websiteUrl: campaignData.websiteUrl,
+                coverImageUrl: campaignData.coverImageUrl,
+                hasFreeProduct: campaignData.hasFreeProduct ?? false,
+                freeProductValue: campaignData.freeProductValue,
+                shippingDetails: campaignData.shippingDetails,
+                productInstructions: campaignData.productInstructions,
+              },
+            },
+          }
+        : {}),
+      ...(hasRequirementData
+        ? {
+            requirement: {
+              create: {
+                strictEligibility: req?.strictEligibility ?? false,
+                minFollowers: social?.minFollowers,
+                maxFollowers: social?.maxFollowers,
+                minEngagementRate: social?.minEngagementRate,
+                verifiedOnly: social?.verifiedOnly ?? false,
+                targetCountries: inf?.countries || [],
+                targetGenders: inf?.genders || [],
+                targetAgeRanges: inf?.ageRanges || [],
+                targetLanguages: inf?.languages || [],
+                audienceCountries: aud?.countries || [],
+                audienceMinAge: aud?.minAge,
+                audienceMaxAge: aud?.maxAge,
+                audienceTopGender: aud?.topGender,
+              },
+            },
+          }
+        : {}),
       ...(deliverables && deliverables.length > 0
         ? {
             deliverables: {
@@ -103,6 +180,7 @@ export class CampaignService {
                 mandatoryHashtags: d.mandatoryHashtags || [],
                 mandatoryMentions: d.mandatoryMentions || [],
                 contentGuidelines: d.contentGuidelines,
+                instructions: d.instructions || d.contentGuidelines,
                 revisionLimit: d.revisionLimit || 2,
               })),
             },
@@ -143,7 +221,7 @@ export class CampaignService {
       throw new BadRequestException(`Cannot update a campaign in ${existing.status} status`);
     }
 
-    const { deliverables, ...campaignData } = dto;
+    const { deliverables, requirements, categories, ...campaignData } = dto;
 
     // Replace deliverables if specified
     if (deliverables) {
@@ -160,14 +238,23 @@ export class CampaignService {
           mandatoryHashtags: d.mandatoryHashtags || [],
           mandatoryMentions: d.mandatoryMentions || [],
           contentGuidelines: d.contentGuidelines,
+          instructions: (d as any).instructions || d.contentGuidelines,
           revisionLimit: d.revisionLimit || 2,
         })),
       );
     }
 
+    const objectives = Array.isArray(campaignData.objective)
+      ? campaignData.objective
+      : campaignData.objective
+      ? [campaignData.objective as string]
+      : Array.isArray((categories as any))
+      ? (categories as any)
+      : undefined;
+
     return this.repository.updateCampaign(campaignId, {
       ...campaignData,
-      requirements: campaignData.requirements ? (campaignData.requirements as any) : undefined,
+      ...(objectives !== undefined ? { objective: objectives } : {}),
       contentGuidelines: campaignData.contentGuidelines ? (campaignData.contentGuidelines as any) : undefined,
       applicationDeadline: campaignData.applicationDeadline ? new Date(campaignData.applicationDeadline) : undefined,
       startDate: campaignData.startDate ? new Date(campaignData.startDate) : undefined,

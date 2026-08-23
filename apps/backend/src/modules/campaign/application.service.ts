@@ -89,7 +89,7 @@ export class ApplicationService {
     const matchData = this.calculateMatch(campaign, influencerProfile, socialAccount);
 
     // If strict eligibility is required and influencer is NOT eligible
-    const requirements = campaign.requirements as any;
+    const requirements = (campaign as any).requirement || (campaign as any).requirements || {};
     if (requirements?.strictEligibility && matchData.eligibility === 'NOT_ELIGIBLE') {
       throw new BadRequestException(
         `You do not satisfy the strict eligibility requirements: ${matchData.reasons.find((r) => r.result === 'NOT_MATCHED')?.details || 'Criteria not met'}`,
@@ -113,31 +113,31 @@ export class ApplicationService {
   }
 
   private calculateMatch(campaign: any, influencer: any, socialAccount: any) {
-    const requirements = campaign.requirements || {};
-    const socialReq = requirements.social || {};
-    const infReq = requirements.influencer || {};
+    const req = campaign.requirement || campaign.requirements || {};
+    const minFollowers = req.minFollowers || req.social?.minFollowers;
+    const targetCountries = req.targetCountries || req.influencer?.countries || [];
     const reasons: any[] = [];
     let matchedCount = 0;
     let totalCriteria = 0;
 
     // 1. Follower count check
-    if (socialReq.minFollowers) {
+    if (minFollowers) {
       totalCriteria++;
       const followers = socialAccount.followerCount || 0;
-      if (followers >= socialReq.minFollowers) {
+      if (followers >= minFollowers) {
         matchedCount++;
         reasons.push({
           criterion: 'Minimum Followers',
           result: 'MATCHED',
           weight: 25,
-          details: `Has ${followers.toLocaleString()} followers (minimum: ${socialReq.minFollowers.toLocaleString()})`,
+          details: `Has ${followers.toLocaleString()} followers (minimum: ${minFollowers.toLocaleString()})`,
         });
       } else {
         reasons.push({
           criterion: 'Minimum Followers',
           result: 'NOT_MATCHED',
           weight: 25,
-          details: `Has ${followers.toLocaleString()} followers, which is below the requirement of ${socialReq.minFollowers.toLocaleString()}`,
+          details: `Has ${followers.toLocaleString()} followers, which is below the requirement of ${minFollowers.toLocaleString()}`,
         });
       }
     }
@@ -164,24 +164,25 @@ export class ApplicationService {
       }
     }
 
-    // 3. Category / Niche overlap
-    if (campaign.categories && campaign.categories.length > 0) {
+    // 3. Category / Objective overlap
+    const campaignObjectives = campaign.objective || campaign.categories || [];
+    if (Array.isArray(campaignObjectives) && campaignObjectives.length > 0) {
       totalCriteria++;
       const influencerNiches = influencer.niches || [];
-      const hasOverlap = campaign.categories.some((cat: string) =>
+      const hasOverlap = campaignObjectives.some((cat: string) =>
         influencerNiches.some((n: string) => n.toLowerCase().includes(cat.toLowerCase()) || cat.toLowerCase().includes(n.toLowerCase())),
       );
       if (hasOverlap) {
         matchedCount++;
         reasons.push({
-          criterion: 'Content Category / Niche',
+          criterion: 'Content Category / Objective',
           result: 'MATCHED',
           weight: 25,
-          details: `Matches category focus`,
+          details: `Matches category/objective focus`,
         });
       } else {
         reasons.push({
-          criterion: 'Content Category / Niche',
+          criterion: 'Content Category / Objective',
           result: 'PARTIAL',
           weight: 25,
           details: `No direct niche overlap found, but open to application`,
@@ -190,10 +191,10 @@ export class ApplicationService {
     }
 
     // 4. Location check
-    if (infReq.countries && infReq.countries.length > 0) {
+    if (Array.isArray(targetCountries) && targetCountries.length > 0) {
       totalCriteria++;
       const loc = influencer.location || '';
-      const countryMatch = infReq.countries.some((c: string) => loc.toLowerCase().includes(c.toLowerCase()));
+      const countryMatch = targetCountries.some((c: string) => loc.toLowerCase().includes(c.toLowerCase()));
       if (countryMatch) {
         matchedCount++;
         reasons.push({

@@ -32,25 +32,23 @@ export default function BasicInfoStep({ formData, onChange }: BasicInfoStepProps
     };
   }, []);
 
-  // Objectives array stored in categories or objectives
-  const selectedTags: string[] = Array.isArray(formData.categories) && formData.categories.length > 0
-    ? formData.categories
+  // Objectives array stored in objective column
+  const selectedTags: string[] = Array.isArray(formData.objective)
+    ? formData.objective
     : formData.objective
-    ? [formData.objective.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (l: string) => l.toUpperCase())]
-    : ['Brand Awareness'];
+    ? [formData.objective]
+    : Array.isArray(formData.categories)
+    ? formData.categories
+    : [];
 
   const toggleTag = (tag: string) => {
     let updated: string[];
     if (selectedTags.includes(tag)) {
       updated = selectedTags.filter((t) => t !== tag);
-      if (updated.length === 0) updated = ['Brand Awareness']; // keep at least one
     } else {
       updated = [...selectedTags, tag];
     }
-    onChange('categories', updated);
-    // Keep primary objective enum mapped
-    const primaryEnum = updated[0]?.toUpperCase().replace(/\s+/g, '_') || 'BRAND_AWARENESS';
-    onChange('objective', primaryEnum);
+    onChange('objective', updated);
   };
 
   const handleAddCustomTag = (e: React.KeyboardEvent<HTMLInputElement>) => {

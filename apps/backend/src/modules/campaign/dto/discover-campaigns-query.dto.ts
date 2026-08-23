@@ -1,6 +1,6 @@
 import { IsOptional, IsString, IsNumber, IsBoolean, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CampaignObjective, PaymentModel } from '@prisma/client';
+import { PaymentModel } from '@prisma/client';
 
 export enum CampaignSortOption {
   BEST_MATCH = 'BEST_MATCH',
@@ -24,8 +24,8 @@ export class DiscoverCampaignsQueryDto {
   platform?: string;
 
   @IsOptional()
-  @IsEnum(CampaignObjective)
-  objective?: CampaignObjective;
+  @IsString()
+  objective?: string;
 
   @IsOptional()
   @IsEnum(PaymentModel)

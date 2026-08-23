@@ -10,7 +10,7 @@ import {
   Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CampaignObjective, PaymentModel } from '@prisma/client';
+import { PaymentModel } from '@prisma/client';
 
 export class CampaignDeliverableDto {
   @IsOptional()
@@ -54,6 +54,10 @@ export class CampaignDeliverableDto {
   @IsOptional()
   @IsString()
   contentGuidelines?: string;
+
+  @IsOptional()
+  @IsString()
+  instructions?: string;
 
   @IsOptional()
   @IsNumber()
@@ -112,6 +116,16 @@ export class CampaignRequirementsInfluencerDto {
   @IsArray()
   @IsString({ each: true })
   niches?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  genders?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  ageRanges?: string[];
 }
 
 export class CampaignRequirementsAudienceDto {
@@ -132,6 +146,10 @@ export class CampaignRequirementsAudienceDto {
   @IsOptional()
   @IsNumber()
   maxAge?: number;
+
+  @IsOptional()
+  @IsString()
+  topGender?: string;
 
   @IsOptional()
   @IsArray()
@@ -201,8 +219,9 @@ export class CreateCampaignDto {
   title: string;
 
   @IsOptional()
-  @IsEnum(CampaignObjective)
-  objective?: CampaignObjective;
+  @IsArray()
+  @IsString({ each: true })
+  objective?: string[];
 
   @IsOptional()
   @IsString()
@@ -228,6 +247,10 @@ export class CreateCampaignDto {
 
   @IsOptional()
   @IsString()
+  productType?: string;
+
+  @IsOptional()
+  @IsString()
   productDescription?: string;
 
   @IsOptional()
@@ -241,6 +264,22 @@ export class CreateCampaignDto {
   @IsOptional()
   @IsString()
   internalReference?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  hasFreeProduct?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  freeProductValue?: number;
+
+  @IsOptional()
+  @IsString()
+  shippingDetails?: string;
+
+  @IsOptional()
+  @IsString()
+  productInstructions?: string;
 
   // Platforms
   @IsOptional()
@@ -274,6 +313,22 @@ export class CreateCampaignDto {
   @IsOptional()
   @IsNumber()
   budgetMaxPerInfluencer?: number;
+
+  @IsOptional()
+  @IsString()
+  performanceMetric?: string;
+
+  @IsOptional()
+  @IsNumber()
+  performanceRate?: number;
+
+  @IsOptional()
+  @IsString()
+  barterItems?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  shippingCovered?: boolean;
 
   // Participant Settings
   @IsOptional()

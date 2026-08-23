@@ -26,6 +26,8 @@ export class CampaignRepository {
     return this.prisma.campaign.create({
       data,
       include: {
+        product: true,
+        requirement: true,
         deliverables: true,
         brandProfile: true,
       },
@@ -36,6 +38,8 @@ export class CampaignRepository {
     return this.prisma.campaign.findUnique({
       where: { id },
       include: {
+        product: true,
+        requirement: true,
         brandProfile: {
           include: {
             user: {
@@ -73,6 +77,8 @@ export class CampaignRepository {
     return this.prisma.campaign.findUnique({
       where: { slug },
       include: {
+        product: true,
+        requirement: true,
         brandProfile: true,
         deliverables: true,
       },
@@ -83,6 +89,8 @@ export class CampaignRepository {
     return this.prisma.campaign.findMany({
       where: { brandProfileId },
       include: {
+        product: true,
+        requirement: true,
         deliverables: true,
         _count: {
           select: {
@@ -100,6 +108,8 @@ export class CampaignRepository {
       where: { id },
       data,
       include: {
+        product: true,
+        requirement: true,
         deliverables: true,
         brandProfile: true,
       },
