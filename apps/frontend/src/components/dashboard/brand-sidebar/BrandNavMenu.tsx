@@ -3,11 +3,14 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
+  LayoutDashboard,
+  Search,
   Users,
   Sparkles,
   Bookmark,
   ListChecks,
   Megaphone,
+  BarChart3,
   FileText,
   MessageSquare,
   DollarSign,
@@ -15,7 +18,6 @@ import {
   ChevronDown,
   ChevronRight,
   Activity,
-  BarChart3,
   TrendingUp,
 } from 'lucide-react';
 
@@ -47,15 +49,28 @@ export default function BrandNavMenu({
 
   const mainRoutes: BrandNavItem[] = [
     {
-      id: 'search-creators',
-      label: 'Dashboard',
-      icon: Users,
+      id: 'overview',
+      label: 'Overview',
+      icon: LayoutDashboard,
       section: 'MAIN',
-      subItems: [
-        { id: 'activity', label: 'Activity', icon: Activity },
-        { id: 'traffic', label: 'Traffic', icon: TrendingUp },
-        { id: 'statistic', label: 'Statistic', icon: BarChart3 },
-      ],
+    },
+    {
+      id: 'search-creators',
+      label: 'Find Influencers',
+      icon: Search,
+      section: 'MAIN',
+    },
+    {
+      id: 'my-campaigns',
+      label: 'Campaigns',
+      icon: Megaphone,
+      section: 'MAIN',
+    },
+    {
+      id: 'brand-analytics',
+      label: 'Analytics',
+      icon: BarChart3,
+      section: 'MAIN',
     },
     {
       id: 'ai-recommendations',
@@ -66,7 +81,6 @@ export default function BrandNavMenu({
       badgeColor: 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white',
       section: 'MAIN',
     },
-    { id: 'my-campaigns', label: 'My Campaigns', icon: Megaphone, section: 'MAIN' },
   ];
 
   const workspaceRoutes: BrandNavItem[] = [

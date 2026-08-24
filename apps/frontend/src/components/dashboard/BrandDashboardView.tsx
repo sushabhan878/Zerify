@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import BrandOverviewSection from './brand-views/BrandOverviewSection';
+import BrandAnalyticsSection from './brand-views/BrandAnalyticsSection';
 import SearchCreatorsSection from './brand-views/SearchCreatorsSection';
 import BrandAiRecommendationsSection from './brand-views/BrandAiRecommendationsSection';
 import SavedCreatorsSection from './brand-views/SavedCreatorsSection';
@@ -33,19 +35,29 @@ export default function BrandDashboardView({
   userHandle,
   companyName,
   avatarUrl,
-  activeRoute = 'search-creators',
+  activeRoute = 'overview',
   onSelectRoute,
   completionPercentage = 65,
   brandProfile,
 }: BrandDashboardViewProps) {
   const renderSection = () => {
     switch (activeRoute) {
+      case 'overview':
+        return (
+          <BrandOverviewSection
+            userName={userName}
+            companyName={companyName}
+            onNavigate={(routeId) => onSelectRoute?.(routeId)}
+          />
+        );
+      case 'brand-analytics':
+      case 'statistic':
+      case 'traffic':
+        return <BrandAnalyticsSection />;
       case 'activity':
         return <ActivityView />;
-      case 'traffic':
-        return <TrafficView />;
-      case 'statistic':
-        return <StatisticView />;
+      case 'search-creators':
+        return <SearchCreatorsSection />;
       case 'ai-recommendations':
         return <BrandAiRecommendationsSection />;
       case 'saved-creators':
@@ -71,9 +83,14 @@ export default function BrandDashboardView({
             initialData={brandProfile}
           />
         );
-      case 'search-creators':
       default:
-        return <SearchCreatorsSection />;
+        return (
+          <BrandOverviewSection
+            userName={userName}
+            companyName={companyName}
+            onNavigate={(routeId) => onSelectRoute?.(routeId)}
+          />
+        );
     }
   };
 

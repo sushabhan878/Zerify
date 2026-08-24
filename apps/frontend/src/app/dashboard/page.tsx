@@ -64,7 +64,7 @@ export default function DashboardPage() {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
         setActiveRoute((currentRoute) =>
-          currentRoute || (parsedUser.role === 'BRAND' ? 'search-creators' : 'profile-overview')
+          currentRoute || (parsedUser.role === 'BRAND' ? 'overview' : 'profile-overview')
         );
       } catch {
         router.push('/login');
