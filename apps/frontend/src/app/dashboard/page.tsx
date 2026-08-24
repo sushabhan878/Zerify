@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import DashboardSidebar from '@/components/dashboard/subcomponents/DashboardSidebar';
 import BrandDashboardView from '@/components/dashboard/BrandDashboardView';
 import InfluencerDashboardView from '@/components/dashboard/InfluencerDashboardView';
@@ -11,11 +11,16 @@ import { Menu, X } from 'lucide-react';
 
 import { ThemeProvider } from '@/context/ThemeContext';
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeRoute, setActiveRoute] = useState<string>('');
+  const [activeRoute, setActiveRoute] = useState<string>(() => {
+    return searchParams.get('tab') || searchParams.get('view') || searchParams.get('screen') || '';
+  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Dynamic Sidebar Resizing State
@@ -50,6 +55,28 @@ export default function DashboardPage() {
     };
   }, [isResizing]);
 
+  // Sync state when URL search params change (e.g. browser back/forward buttons)
+  useEffect(() => {
+    const urlTab = searchParams.get('tab') || searchParams.get('view') || searchParams.get('screen');
+    if (urlTab && urlTab !== activeRoute) {
+      setActiveRoute(urlTab);
+    }
+  }, [searchParams, activeRoute]);
+
+  const handleSelectRoute = useCallback((route: string) => {
+    setActiveRoute(route);
+    setIsMobileMenuOpen(false);
+
+    const currentTab = searchParams.get('tab') || searchParams.get('view') || searchParams.get('screen');
+    if (currentTab !== route) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('tab', route);
+      params.delete('view');
+      params.delete('screen');
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+  }, [pathname, router, searchParams]);
+
   useEffect(() => {
     const loadUser = () => {
       try {
@@ -63,9 +90,19 @@ export default function DashboardPage() {
 
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
-        setActiveRoute((currentRoute) =>
-          currentRoute || (parsedUser.role === 'BRAND' ? 'overview' : 'profile-overview')
-        );
+
+        const currentTab = searchParams.get('tab') || searchParams.get('view') || searchParams.get('screen');
+        const defaultRoute = parsedUser.role === 'BRAND' ? 'overview' : 'profile-overview';
+        const targetRoute = currentTab || defaultRoute;
+
+        setActiveRoute(targetRoute);
+
+        // If no tab in URL, seamlessly set the default tab in URL
+        if (!currentTab) {
+          const params = new URLSearchParams(searchParams.toString());
+          params.set('tab', defaultRoute);
+          router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+        }
       } catch {
         router.push('/login');
       } finally {
@@ -76,7 +113,7 @@ export default function DashboardPage() {
     loadUser();
     window.addEventListener('zerify_auth_change', loadUser);
     return () => window.removeEventListener('zerify_auth_change', loadUser);
-  }, [router]);
+  }, [pathname, router, searchParams]);
 
   const handleLogout = () => {
     localStorage.removeItem('zerify_token');
@@ -236,10 +273,7 @@ export default function DashboardPage() {
           avatarUrl={effectiveAvatarUrl}
           onLogout={handleLogout}
           activeRoute={activeRoute}
-          onSelectRoute={(route) => {
-            setActiveRoute(route);
-            setIsMobileMenuOpen(false);
-          }}
+          onSelectRoute={handleSelectRoute}
           style={{ width: `${sidebarWidth}px` }}
           completionPercentage={completionPercentage}
         />
@@ -271,10 +305,7 @@ export default function DashboardPage() {
                 avatarUrl={effectiveAvatarUrl}
                 onLogout={handleLogout}
                 activeRoute={activeRoute}
-                onSelectRoute={(route) => {
-                  setActiveRoute(route);
-                  setIsMobileMenuOpen(false);
-                }}
+                onSelectRoute={handleSelectRoute}
                 isMobileDrawer
                 completionPercentage={completionPercentage}
               />
@@ -300,7 +331,7 @@ export default function DashboardPage() {
                 companyName={companyName}
                 avatarUrl={user.avatarUrl}
                 activeRoute={activeRoute}
-                onSelectRoute={(route) => setActiveRoute(route)}
+                onSelectRoute={handleSelectRoute}
                 completionPercentage={completionPercentage}
                 brandProfile={brandProfile}
               />
@@ -311,7 +342,7 @@ export default function DashboardPage() {
                 userHandle={userHandle}
                 avatarUrl={user.avatarUrl}
                 activeRoute={activeRoute}
-                onSelectRoute={(route) => setActiveRoute(route)}
+                onSelectRoute={handleSelectRoute}
                 completionPercentage={completionPercentage}
                 influencerProfile={influencerProfile}
               />
@@ -320,6 +351,20 @@ export default function DashboardPage() {
         </div>
       </div>
     </ThemeProvider>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="h-screen w-screen bg-[#07090E] flex flex-col items-center justify-center text-white">
+          <LottieLoader size={220} message="Loading Zerify Dashboard..." />
+        </div>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
   );
 }
 

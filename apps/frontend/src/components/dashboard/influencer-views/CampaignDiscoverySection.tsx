@@ -138,8 +138,8 @@ function mapDbCampaignToItem(c: any): CampaignItem {
     freeProductValue: product.freeProductValue
       ? `${sym}${Number(product.freeProductValue).toLocaleString()} Product Sample`
       : product.productName
-      ? `${product.productName} Sample`
-      : undefined,
+        ? `${product.productName} Sample`
+        : undefined,
     deliverables: Array.isArray(c.deliverables) && c.deliverables.length > 0
       ? c.deliverables.map((d: any) => `${d.quantity || 1}x ${d.type || 'Deliverable'}`)
       : ['1x Sponsored Video / Post'],
@@ -163,8 +163,8 @@ function mapDbCampaignToItem(c: any): CampaignItem {
     dos: Array.isArray(guidelines.dos) && guidelines.dos.length > 0
       ? guidelines.dos
       : guidelines.requiredCtas?.length
-      ? [`Include required CTA: ${guidelines.requiredCtas.join(', ')}`, 'Deliver original creative content']
-      : ['Deliver original creative content', 'Demonstrate authentic product experience'],
+        ? [`Include required CTA: ${guidelines.requiredCtas.join(', ')}`, 'Deliver original creative content']
+        : ['Deliver original creative content', 'Demonstrate authentic product experience'],
     donts: Array.isArray(guidelines.donts) && guidelines.donts.length > 0
       ? guidelines.donts
       : ['No low-quality audio or video', 'No undisclosed sponsorships or artificial engagement'],

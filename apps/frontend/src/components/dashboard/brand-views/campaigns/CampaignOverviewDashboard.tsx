@@ -216,11 +216,10 @@ export default function CampaignOverviewDashboard({
       <div className="flex items-center gap-2 pb-1">
         <button
           onClick={() => setActiveTab('applicants')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
-            activeTab === 'applicants'
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'applicants'
               ? 'bg-purple-600 text-white shadow-md'
               : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
-          }`}
+            }`}
         >
           <Users className="w-3.5 h-3.5" />
           <span>Applicants ({applications.length})</span>
@@ -228,11 +227,10 @@ export default function CampaignOverviewDashboard({
 
         <button
           onClick={() => setActiveTab('participants')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
-            activeTab === 'participants'
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'participants'
               ? 'bg-purple-600 text-white shadow-md'
               : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
-          }`}
+            }`}
         >
           <CheckCircle className="w-3.5 h-3.5" />
           <span>Confirmed Creators ({participants.length})</span>
@@ -240,11 +238,10 @@ export default function CampaignOverviewDashboard({
 
         <button
           onClick={() => setActiveTab('offers')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
-            activeTab === 'offers'
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'offers'
               ? 'bg-purple-600 text-white shadow-md'
               : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
-          }`}
+            }`}
         >
           <Send className="w-3.5 h-3.5" />
           <span>Offers Sent ({offers.length})</span>

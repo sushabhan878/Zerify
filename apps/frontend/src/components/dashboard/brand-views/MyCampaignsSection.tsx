@@ -70,18 +70,16 @@ export default function MyCampaignsSection() {
               <button
                 key={tab.id}
                 onClick={() => setStatusFilter(tab.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  isSelected
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${isSelected
                     ? 'bg-purple-600 text-white shadow-md shadow-purple-900/30'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-                }`}
+                  }`}
               >
                 <span>{tab.label}</span>
                 {tab.count > 0 && (
                   <span
-                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
-                      isSelected ? 'bg-purple-950/60 text-purple-200' : 'bg-slate-800 text-slate-400'
-                    }`}
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${isSelected ? 'bg-purple-950/60 text-purple-200' : 'bg-slate-800 text-slate-400'
+                      }`}
                   >
                     {tab.count}
                   </span>

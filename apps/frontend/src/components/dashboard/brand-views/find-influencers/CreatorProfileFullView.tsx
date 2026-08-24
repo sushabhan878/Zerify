@@ -221,11 +221,10 @@ export default function CreatorProfileFullView({
               onClick={handleHeartClick}
               type="button"
               aria-label="Save creator"
-              className={`p-3.5 rounded-2xl border transition-all duration-300 ${
-                creator.isBookmarked
-                  ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 shadow-lg shadow-rose-500/30'
-                  : 'bg-slate-900 text-slate-400 border-white/10 hover:text-rose-400'
-              } ${isLiking ? 'scale-125' : ''}`}
+              className={`p-3.5 rounded-2xl border transition-all duration-300 ${creator.isBookmarked
+                ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 shadow-lg shadow-rose-500/30'
+                : 'bg-slate-900 text-slate-400 border-white/10 hover:text-rose-400'
+                } ${isLiking ? 'scale-125' : ''}`}
             >
               <Heart className={`w-4 h-4 ${creator.isBookmarked ? 'fill-rose-500 text-rose-500' : ''}`} />
             </button>
@@ -277,11 +276,10 @@ export default function CreatorProfileFullView({
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
             type="button"
-            className={`px-5 py-3 rounded-2xl text-xs sm:text-sm font-black transition-all shrink-0 ${
-              activeTab === tab.id
-                ? 'bg-purple-600/30 text-purple-300 border border-purple-500/40 shadow-lg shadow-purple-950/40'
-                : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
-            }`}
+            className={`px-5 py-3 rounded-2xl text-xs sm:text-sm font-black transition-all shrink-0 ${activeTab === tab.id
+              ? 'bg-purple-600/30 text-purple-300 border border-purple-500/40 shadow-lg shadow-purple-950/40'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
+              }`}
           >
             {tab.label}
           </button>
