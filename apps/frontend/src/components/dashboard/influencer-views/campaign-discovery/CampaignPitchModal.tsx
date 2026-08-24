@@ -13,7 +13,6 @@ import {
   Gift,
   Check,
   ChevronDown,
-  CheckCircle2,
 } from 'lucide-react';
 import { CampaignItem } from './CampaignCard';
 import { useToast } from '@/components/ui/Toast';
@@ -43,6 +42,7 @@ export default function CampaignPitchModal({
 
   const [proposedRate, setProposedRate] = useState('');
   const [pitchMessage, setPitchMessage] = useState('');
+  const [contentIdea, setContentIdea] = useState('');
   const [sampleLink, setSampleLink] = useState('');
   const [turnaroundDays, setTurnaroundDays] = useState('5');
   const [isTimelineDropdownOpen, setIsTimelineDropdownOpen] = useState(false);
@@ -59,6 +59,7 @@ export default function CampaignPitchModal({
     if (isOpen) {
       setProposedRate('');
       setPitchMessage('');
+      setContentIdea('');
       setSampleLink('');
       setTurnaroundDays('5');
       setIsTimelineDropdownOpen(false);
@@ -75,10 +76,11 @@ export default function CampaignPitchModal({
   const handleGenerateAiPitch = () => {
     setIsGeneratingAi(true);
     setTimeout(() => {
-      const delName = campaign.deliverables[0] || 'deliverables';
-      setPitchMessage(
-        `Hi ${campaign.brandName} team! I'm thrilled about the opportunity to partner on this campaign. I plan to create a high-retention, authentic ${delName} that highlights your product's key strengths, hooks the audience in the first 3 seconds, and drives strong engagement with a clear call-to-action.`
-      );
+      const delName = campaign.deliverables[0] || 'reel';
+      const aiPitch = `Excited to partner on this campaign! My audience loves high-retention tech & lifestyle storytelling. I'll deliver engaging ${delName} with strong organic hooks and clear CTA.`;
+      const aiConcept = `High-energy product unboxing & authentic workflow review showcasing 3 core benefits with seamless b-roll and custom music pacing.`;
+      setPitchMessage(aiPitch.slice(0, 300));
+      setContentIdea(aiConcept.slice(0, 300));
       setIsGeneratingAi(false);
     }, 400);
   };
@@ -104,9 +106,9 @@ export default function CampaignPitchModal({
       await ApplicationService.applyToCampaign(campaign.id, {
         socialAccountId: socialAccountId || '00000000-0000-0000-0000-000000000000',
         proposedAmount: Number(proposedRate) || undefined,
-        applicationMessage: pitchMessage,
+        applicationMessage: pitchMessage.slice(0, 300),
+        contentIdea: contentIdea.slice(0, 300) || pitchMessage.slice(0, 300),
         portfolioUrls: sampleLink ? [sampleLink] : [],
-        contentIdea: pitchMessage,
       });
 
       toastSuccess(`Application submitted to ${campaign.brandName}! They will review your proposal shortly.`);
@@ -150,7 +152,25 @@ export default function CampaignPitchModal({
           </button>
 
           {/* Form Content */}
-          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 sm:p-7 space-y-5 text-xs no-scrollbar">
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 sm:p-7 space-y-4 text-xs no-scrollbar">
+            {/* Header Title with AI Enhance */}
+            <div className="flex items-center justify-between pt-1">
+              <div>
+                <h3 className="text-base font-black text-white">Apply to Campaign</h3>
+                <p className="text-[11px] text-slate-400">Pitch to <strong className="text-purple-300">{campaign.brandName}</strong></p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGenerateAiPitch}
+                disabled={isGeneratingAi}
+                className="text-[11px] text-purple-300 hover:text-purple-200 font-bold flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-950/60 border border-purple-500/30 hover:border-purple-400/50 transition-all shadow-sm mr-8"
+              >
+                <Sparkles className={`w-3 h-3 text-purple-300 ${isGeneratingAi ? 'animate-spin' : ''}`} />
+                <span>{isGeneratingAi ? 'Drafting...' : 'AI Enhance Pitch'}</span>
+              </button>
+            </div>
+
             {/* Proposed Rate */}
             <div className="space-y-1.5">
               <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
@@ -174,29 +194,44 @@ export default function CampaignPitchModal({
               </span>
             </div>
 
-            {/* Custom Pitch Note */}
+            {/* 1. Application Pitch (300 Char Limit) */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Creative Pitch & Concept
+                  Application Pitch
                 </label>
-                <button
-                  type="button"
-                  onClick={handleGenerateAiPitch}
-                  disabled={isGeneratingAi}
-                  className="text-[11px] text-purple-300 hover:text-purple-200 font-bold flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-950/60 border border-purple-500/30 hover:border-purple-400/50 transition-all shadow-sm"
-                >
-                  <Sparkles className={`w-3 h-3 text-purple-300 ${isGeneratingAi ? 'animate-spin' : ''}`} />
-                  <span>{isGeneratingAi ? 'Drafting...' : 'AI Enhance Pitch'}</span>
-                </button>
+                <span className={`text-[10.5px] font-semibold ${pitchMessage.length >= 280 ? 'text-amber-400' : 'text-slate-500'}`}>
+                  {pitchMessage.length}/300
+                </span>
               </div>
               <textarea
-                rows={4}
+                rows={3}
                 required
+                maxLength={300}
                 value={pitchMessage}
                 onChange={(e) => setPitchMessage(e.target.value)}
-                placeholder="Describe your creative concept, hooks, storytelling angle, and why you are the ideal creator for this campaign..."
-                className="w-full px-4 py-3 rounded-2xl bg-slate-900/80 border border-purple-500/20 hover:border-purple-500/40 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-400 resize-none leading-relaxed transition-colors"
+                placeholder="Briefly state why you're a great fit for this campaign (max 300 characters)..."
+                className="w-full px-4 py-2.5 rounded-2xl bg-slate-900/80 border border-purple-500/20 hover:border-purple-500/40 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-400 resize-none leading-relaxed transition-colors"
+              />
+            </div>
+
+            {/* 2. Proposed Content Concept (300 Char Limit) */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Proposed Content Concept
+                </label>
+                <span className={`text-[10.5px] font-semibold ${contentIdea.length >= 280 ? 'text-amber-400' : 'text-slate-500'}`}>
+                  {contentIdea.length}/300
+                </span>
+              </div>
+              <textarea
+                rows={3}
+                maxLength={300}
+                value={contentIdea}
+                onChange={(e) => setContentIdea(e.target.value)}
+                placeholder="Describe the format, hooks, storytelling flow, or deliverables concept (max 300 characters)..."
+                className="w-full px-4 py-2.5 rounded-2xl bg-slate-900/80 border border-purple-500/20 hover:border-purple-500/40 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-400 resize-none leading-relaxed transition-colors"
               />
             </div>
 

@@ -180,4 +180,20 @@ export class InfluencerService {
     await this.clearCache(profile.userId);
     return result;
   }
+
+  async getDiscoveryInfluencers() {
+    const cacheKey = 'influencer:discovery:all';
+    try {
+      const cached = await this.cacheManager.get<any>(cacheKey);
+      if (cached) return cached;
+    } catch (e) {}
+
+    const influencers = await this.influencerRepository.findAllForDiscovery();
+
+    try {
+      await this.cacheManager.set(cacheKey, influencers, 60 * 1000);
+    } catch (e) {}
+
+    return influencers;
+  }
 }

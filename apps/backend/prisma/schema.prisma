@@ -79,6 +79,9 @@ model BrandProfile {
   completionPercentage  Int            @default(0)
   isOnboardingCompleted Boolean        @default(false)
 
+  // Saved Creators relation
+  savedCreators         SavedCreator[]
+
   // Campaign Relation
   campaigns             Campaign[]
 
@@ -104,6 +107,17 @@ model BrandProduct {
   @@map("brand_products")
 }
 
+model SavedCreator {
+  id                String            @id @default(uuid())
+  brandProfileId    String
+  brandProfile      BrandProfile      @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+  influencerId      String
+  influencer        InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  createdAt         DateTime          @default(now())
+
+  @@unique([brandProfileId, influencerId])
+  @@map("saved_creators")
+}
 
 model InfluencerProfile {
   id                      String                        @id @default(uuid())
@@ -141,6 +155,9 @@ model InfluencerProfile {
   // Campaign Relations
   applications            CampaignApplication[]
   participants            CampaignParticipant[]
+
+  // Saved by Brands relation
+  savedByBrands           SavedCreator[]
 
   // Onboarding status & progress
   completionPercentage    Int                           @default(0)

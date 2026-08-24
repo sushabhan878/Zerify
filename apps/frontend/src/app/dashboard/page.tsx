@@ -190,6 +190,16 @@ export default function DashboardPage() {
   const userHandle = user.handle || `@${userName.toLowerCase().replace(/\s+/g, '')}`;
   const companyName = user.companyName || user.name || 'Enterprise Partner';
 
+  const effectiveAvatarUrl =
+    user?.role === 'BRAND'
+      ? brandProfile?.logoUrl || brandProfile?.avatarUrl || user.avatarUrl
+      : influencerProfile?.avatarUrl || influencerProfile?.user?.avatarUrl || user.avatarUrl;
+
+  const effectiveIndustry =
+    user?.role === 'BRAND'
+      ? brandProfile?.industry || 'Tech & Consumer AI'
+      : influencerProfile?.primaryNiche || influencerProfile?.niches?.[0] || 'Content Creator';
+
   return (
     <ThemeProvider>
       <div
@@ -222,7 +232,8 @@ export default function DashboardPage() {
           userEmail={user.email}
           userHandle={userHandle}
           companyName={companyName}
-          avatarUrl={user.avatarUrl}
+          industry={effectiveIndustry}
+          avatarUrl={effectiveAvatarUrl}
           onLogout={handleLogout}
           activeRoute={activeRoute}
           onSelectRoute={(route) => {
@@ -256,7 +267,8 @@ export default function DashboardPage() {
                 userEmail={user.email}
                 userHandle={userHandle}
                 companyName={companyName}
-                avatarUrl={user.avatarUrl}
+                industry={effectiveIndustry}
+                avatarUrl={effectiveAvatarUrl}
                 onLogout={handleLogout}
                 activeRoute={activeRoute}
                 onSelectRoute={(route) => {

@@ -257,4 +257,27 @@ export class InfluencerRepository {
     const influencer = await this.prisma.influencerProfile.findUnique({ where: { id: influencerId } });
     return this.findByUserId(influencer?.userId || '');
   }
+
+  async findAllForDiscovery() {
+    return this.prisma.influencerProfile.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            socialAccounts: {
+              include: {
+                demographics: true,
+                performance: true,
+              },
+            },
+          },
+        },
+        pastDeliverables: true,
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+  }
 }

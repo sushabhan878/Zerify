@@ -103,4 +103,25 @@ export class BrandController {
   async getDiscovery() {
     return this.brandService.getDiscoveryBrands();
   }
+
+  @Post('saved-creators/:influencerId')
+  @ApiOperation({ summary: 'Toggle save/bookmark influencer for brand' })
+  async toggleSavedCreator(@Req() req: any, @Param('influencerId') influencerId: string) {
+    const userId = this.extractUserId(req);
+    return this.brandService.toggleSavedCreator(userId, influencerId);
+  }
+
+  @Get('saved-creators')
+  @ApiOperation({ summary: 'Get all saved creator influencer IDs for brand' })
+  async getSavedCreators(@Req() req: any) {
+    const userId = this.extractUserId(req);
+    return this.brandService.getSavedCreatorIds(userId);
+  }
+
+  @Get('saved-creators/detailed')
+  @ApiOperation({ summary: 'Get full profiles of all saved creators for brand' })
+  async getSavedCreatorsDetailed(@Req() req: any) {
+    const userId = this.extractUserId(req);
+    return this.brandService.getSavedCreatorsDetailed(userId);
+  }
 }

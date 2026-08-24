@@ -247,4 +247,21 @@ export class BrandService {
 
     return brands;
   }
+
+  async toggleSavedCreator(userId: string | undefined, influencerId: string) {
+    if (!userId) {
+      throw new BadRequestException('Authentication required');
+    }
+    return this.brandRepository.toggleSavedCreator(userId, influencerId);
+  }
+
+  async getSavedCreatorIds(userId: string | undefined) {
+    if (!userId) return [];
+    return this.brandRepository.getSavedCreatorIds(userId);
+  }
+
+  async getSavedCreatorsDetailed(userId: string | undefined) {
+    if (!userId) return [];
+    return this.brandRepository.getSavedCreatorsDetailed(userId);
+  }
 }

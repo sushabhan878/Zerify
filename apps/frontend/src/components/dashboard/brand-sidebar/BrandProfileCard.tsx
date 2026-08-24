@@ -1,5 +1,6 @@
-import React from 'react';
-import Image from 'next/image';
+'use client';
+
+import React, { useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 
 interface BrandProfileCardProps {
@@ -19,7 +20,9 @@ export default function BrandProfileCard({
   completionPercentage = 65,
   onCompleteProfile,
 }: BrandProfileCardProps) {
-  const logoChar = companyName.charAt(0).toUpperCase();
+  const [imageError, setImageError] = useState(false);
+  const logoChar = companyName ? companyName.charAt(0).toUpperCase() : 'B';
+  const showImage = Boolean(logoUrl && !imageError);
 
   if (isCollapsed) {
     return (
@@ -29,13 +32,12 @@ export default function BrandProfileCard({
           onClick={onCompleteProfile}
           title={`${companyName} • ${industry} (Profile ${completionPercentage}% Complete)`}
         >
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 p-[2px] shadow-md shadow-purple-950/50">
-            {logoUrl ? (
-              <Image
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 p-[2px] shadow-md shadow-purple-950/50 overflow-hidden">
+            {showImage ? (
+              <img
                 src={logoUrl}
                 alt={companyName}
-                width={36}
-                height={36}
+                onError={() => setImageError(true)}
                 className="w-full h-full object-cover rounded-full"
               />
             ) : (
@@ -59,13 +61,12 @@ export default function BrandProfileCard({
     >
       {/* Avatar with Completion Percentage Badge */}
       <div className="relative shrink-0">
-        <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 p-[2px] shadow-md shadow-purple-950/50">
-          {logoUrl ? (
-            <Image
+        <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 p-[2px] shadow-md shadow-purple-950/50 overflow-hidden">
+          {showImage ? (
+            <img
               src={logoUrl}
               alt={companyName}
-              width={40}
-              height={40}
+              onError={() => setImageError(true)}
               className="w-full h-full object-cover rounded-full"
             />
           ) : (

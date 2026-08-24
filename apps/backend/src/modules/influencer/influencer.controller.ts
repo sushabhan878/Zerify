@@ -72,4 +72,11 @@ export class InfluencerController {
     const userId = this.extractUserId(req);
     return this.influencerService.updatePaymentDetails(userId, body);
   }
+
+  @Get('discovery')
+  @ApiOperation({ summary: 'Get all influencers for discovery directory' })
+  @ApiResponse({ status: 200, description: 'Influencer directory retrieved successfully.' })
+  async getDiscovery() {
+    return this.influencerService.getDiscoveryInfluencers();
+  }
 }
