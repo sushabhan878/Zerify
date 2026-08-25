@@ -122,9 +122,13 @@ export default function CreatorDetailModal({
                     {creator.matchScore}% Match
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-0.5">
+                <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-0.5" title={creator.location}>
                   <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                  <span>{creator.location}</span>
+                  <span>
+                    {creator.location && creator.location.length > 40
+                      ? `${creator.location.slice(0, 40)}...`
+                      : creator.location || 'Global'}
+                  </span>
                   <span className="text-slate-600">•</span>
                   <span className="text-purple-300 font-semibold">{creator.category}</span>
                 </div>
@@ -221,12 +225,21 @@ export default function CreatorDetailModal({
                     <span>Why Zerify AI Recommends {creator.name}</span>
                   </div>
                   <ul className="space-y-1.5 text-[12px] text-slate-300">
-                    {creator.matchReasons.map((reason, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <CheckCircle className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
-                        <span>{reason}</span>
-                      </li>
-                    ))}
+                    {(creator.matchReasons || []).map((reason: any, idx: number) => {
+                      const reasonText =
+                        typeof reason === 'string'
+                          ? reason
+                          : reason?.details ||
+                            (reason?.criterion ? `${reason.criterion.replace(/_/g, ' ')} verified` : '') ||
+                            reason?.description ||
+                            'Verified match requirement met';
+                      return (
+                        <li key={idx} className="flex items-start gap-2">
+                          <CheckCircle className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
+                          <span>{reasonText}</span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               </div>

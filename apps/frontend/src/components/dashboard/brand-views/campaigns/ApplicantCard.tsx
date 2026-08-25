@@ -6,17 +6,19 @@ import {
   Send,
   Eye,
   CheckCircle2,
-  Instagram,
-  Youtube,
-  Twitter,
-  Linkedin,
+  ShieldCheck,
   MessageSquare,
+  ArrowUpRight,
+  User,
 } from 'lucide-react';
 import { CampaignApplicationItem } from '@/services/application.service';
+import { CreatorItem } from '../find-influencers/CreatorCard';
+import { mapApplicationToCreator } from './mapApplicationToCreator';
 
 interface ApplicantCardProps {
   application: CampaignApplicationItem;
   onViewDetails: (app: CampaignApplicationItem) => void;
+  onViewProfile?: (creator: CreatorItem) => void;
   onShortlist: (appId: string) => void;
   onReject: (appId: string) => void;
   onSendOffer: (app: CampaignApplicationItem) => void;
@@ -27,6 +29,7 @@ interface ApplicantCardProps {
 export default function ApplicantCard({
   application,
   onViewDetails,
+  onViewProfile,
   onShortlist,
   onReject,
   onSendOffer,
@@ -35,58 +38,22 @@ export default function ApplicantCard({
 }: ApplicantCardProps) {
   const [imageError, setImageError] = React.useState(false);
 
-  const profile: any = application.profileSnapshot || (application as any).influencerProfile || {};
-  const socialAccount: any = (application as any).socialAccount || {};
-  const influencerProfile: any = (application as any).influencerProfile || {};
-  const user: any = influencerProfile.user || {};
+  const creatorItem = React.useMemo(() => mapApplicationToCreator(application), [application]);
   const match: any = application.matchSnapshot || { score: 95, eligibility: 'ELIGIBLE' };
 
-  // Display Name
-  const displayName =
-    profile.displayName ||
-    user.name ||
-    influencerProfile.handle ||
-    socialAccount.username ||
-    'Creator';
-
-  // Profile Picture URL from influencer profile table or snapshot
-  const avatarUrl =
-    profile.avatarUrl ||
-    influencerProfile.avatarUrl ||
-    profile.avatar ||
-    socialAccount.avatar ||
-    user.image ||
-    null;
-
-  const platform = (
-    profile.platform ||
-    socialAccount.platform ||
-    'INSTAGRAM'
-  ).toUpperCase();
-
-  // Follower Count & Formatting
-  const rawFollowers =
-    profile.followersCount ??
-    profile.followerCount ??
-    socialAccount.followerCount ??
-    socialAccount.followersCount ??
-    null;
-
-  const formatCount = (count: number | null | undefined) => {
-    if (count === null || count === undefined || isNaN(Number(count))) return 'N/A';
-    const n = Number(count);
-    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-    if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-    return n.toLocaleString();
+  const handleOpenProfile = () => {
+    if (onViewProfile) {
+      onViewProfile(creatorItem);
+    } else {
+      onViewDetails(application);
+    }
   };
 
-  const followersDisplay = formatCount(rawFollowers);
+  // Follower Count & Formatting
+  const followersDisplay = creatorItem.reach;
 
   // Engagement Rate
-  const engagementDisplay =
-    profile.engagementRate || socialAccount.engagementRate
-      ? `${profile.engagementRate || socialAccount.engagementRate}%`
-      : 'Active';
+  const engagementDisplay = creatorItem.engRate;
 
   // Proposed Quote Currency
   const currencySym =
@@ -100,45 +67,52 @@ export default function ApplicantCard({
     ? `${currencySym}${Number(application.proposedAmount).toLocaleString()}`
     : 'Flexible';
 
-  const getPlatformIcon = (p: string) => {
-    if (p.includes('INSTA')) return <Instagram className="w-3.5 h-3.5 text-pink-400" />;
-    if (p.includes('YOU')) return <Youtube className="w-3.5 h-3.5 text-red-400" />;
-    if (p.includes('TWIT') || p === 'X') return <Twitter className="w-3.5 h-3.5 text-sky-400" />;
-    if (p.includes('LINK')) return <Linkedin className="w-3.5 h-3.5 text-blue-400" />;
-    return <Instagram className="w-3.5 h-3.5 text-purple-400" />;
-  };
-
   return (
     <div className="p-5 sm:p-6 rounded-3xl bg-slate-950/75 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 space-y-4 shadow-xl shadow-purple-950/20 backdrop-blur-xl group">
       {/* Top Header Row */}
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3.5">
-          {/* Profile Picture / Initial Avatar */}
-          <div className="w-12 h-12 rounded-2xl overflow-hidden border border-purple-500/30 bg-slate-900 shrink-0 shadow-md flex items-center justify-center">
-            {avatarUrl && !imageError ? (
+        <div className="flex items-center gap-3.5 min-w-0">
+          {/* Profile Picture / Initial Avatar Button */}
+          <button
+            type="button"
+            onClick={handleOpenProfile}
+            title={`View ${creatorItem.name}'s platform profile`}
+            className="w-12 h-12 rounded-2xl overflow-hidden border border-purple-500/30 hover:border-purple-400 bg-slate-900 shrink-0 shadow-md flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 group/avatar cursor-pointer text-left relative"
+          >
+            {creatorItem.avatarUrl && !imageError ? (
               <img
-                src={avatarUrl}
-                alt={displayName}
+                src={creatorItem.avatarUrl}
+                alt={creatorItem.name}
                 onError={() => setImageError(true)}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover/avatar:scale-110 transition-transform duration-300"
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 flex items-center justify-center text-white font-black text-base shadow-inner select-none">
-                {displayName ? displayName.charAt(0).toUpperCase() : 'C'}
+                {creatorItem.name ? creatorItem.name.charAt(0).toUpperCase() : 'C'}
               </div>
             )}
-          </div>
+          </button>
 
-          {/* Identity & Platform */}
+          {/* Identity, Arrow & In-Platform Creator Info */}
           <div className="space-y-1 min-w-0">
-            <h4 className="text-sm sm:text-base font-bold text-white group-hover:text-purple-300 transition-colors">
-              {displayName}
-            </h4>
+            <button
+              type="button"
+              onClick={handleOpenProfile}
+              title={`View ${creatorItem.name}'s platform profile`}
+              className="inline-flex items-center gap-1.5 min-w-0 group/name cursor-pointer max-w-full text-left"
+            >
+              <h4 className="text-sm sm:text-base font-bold text-white group-hover/name:text-purple-300 transition-colors truncate">
+                {creatorItem.name}
+              </h4>
+              <span className="p-0.5 rounded-md bg-purple-500/10 group-hover/name:bg-purple-500/25 border border-purple-500/20 text-purple-400 group-hover/name:text-purple-300 transition-all flex items-center justify-center shrink-0">
+                <ArrowUpRight className="w-3.5 h-3.5 group-hover/name:translate-x-0.5 group-hover/name:-translate-y-0.5 transition-transform" />
+              </span>
+            </button>
 
             <div>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-900/90 border border-purple-500/20 text-[11px] font-semibold text-slate-300">
-                {getPlatformIcon(platform)}
-                <span>{platform}</span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-950/60 border border-purple-500/25 text-[11px] font-semibold text-purple-300 shadow-sm">
+                <ShieldCheck className="w-3 h-3 text-purple-400 shrink-0" />
+                <span>Zerify Creator</span>
               </span>
             </div>
           </div>

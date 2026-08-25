@@ -3,18 +3,22 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { X, Sparkles, DollarSign, Users, Activity, MapPin, Send } from 'lucide-react';
+import { X, Sparkles, DollarSign, Users, Activity, MapPin, Send, ArrowUpRight } from 'lucide-react';
 import { CampaignApplicationItem } from '@/services/application.service';
+import { CreatorItem } from '../find-influencers/CreatorCard';
+import { mapApplicationToCreator } from './mapApplicationToCreator';
 
 interface ApplicantComparisonViewProps {
   applicants: CampaignApplicationItem[];
   onClose: () => void;
+  onViewProfile?: (creator: CreatorItem) => void;
   onSendOffer: (app: CampaignApplicationItem) => void;
 }
 
 export default function ApplicantComparisonView({
   applicants,
   onClose,
+  onViewProfile,
   onSendOffer,
 }: ApplicantComparisonViewProps) {
   const [mounted, setMounted] = useState(false);
@@ -24,6 +28,14 @@ export default function ApplicantComparisonView({
   }, []);
 
   if (applicants.length === 0 || !mounted) return null;
+
+  const handleOpenCreator = (app: CampaignApplicationItem) => {
+    if (onViewProfile) {
+      const creator = mapApplicationToCreator(app);
+      onClose();
+      onViewProfile(creator);
+    }
+  };
 
   const modalContent = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
@@ -44,7 +56,8 @@ export default function ApplicantComparisonView({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            type="button"
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -53,7 +66,7 @@ export default function ApplicantComparisonView({
         <div className="p-6 overflow-x-auto">
           <div className="grid grid-flow-col auto-cols-[280px] gap-4">
             {applicants.map((app) => {
-              const profile: any = app.profileSnapshot || {};
+              const creator = mapApplicationToCreator(app);
               const match: any = app.matchSnapshot || { score: 85 };
 
               return (
@@ -63,12 +76,29 @@ export default function ApplicantComparisonView({
                 >
                   <div className="space-y-4">
                     {/* Header */}
-                    <div className="text-center pb-3 border-b border-white/5">
-                      <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-black text-base mx-auto shadow-md mb-2">
-                        {profile.displayName ? profile.displayName.charAt(0).toUpperCase() : 'C'}
-                      </div>
-                      <h4 className="text-sm font-black text-white">{profile.displayName || 'Creator'}</h4>
-                      <p className="text-xs text-slate-400">@{profile.username}</p>
+                    <div className="text-center pb-3 border-b border-white/5 flex flex-col items-center">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCreator(app)}
+                        title={`View ${creator.name}'s platform profile`}
+                        className="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-black text-base mx-auto shadow-md mb-2 hover:scale-105 transition-transform cursor-pointer block border border-purple-500/30"
+                      >
+                        {creator.avatarUrl ? (
+                          <img src={creator.avatarUrl} alt={creator.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span>{creator.name ? creator.name.charAt(0).toUpperCase() : 'C'}</span>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCreator(app)}
+                        title={`View ${creator.name}'s platform profile`}
+                        className="inline-flex items-center justify-center gap-1 text-sm font-black text-white hover:text-purple-300 transition-colors group/name cursor-pointer max-w-full"
+                      >
+                        <span className="truncate">{creator.name}</span>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-purple-400 group-hover/name:translate-x-0.5 group-hover/name:-translate-y-0.5 transition-transform shrink-0" />
+                      </button>
+                      <p className="text-xs text-slate-400">{creator.handle}</p>
                       <div className="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-black border border-purple-500/30">
                         <Sparkles className="w-3 h-3 text-purple-400" />
                         <span>{match.score}% Match Score</span>
@@ -78,34 +108,34 @@ export default function ApplicantComparisonView({
                     {/* Metric Rows */}
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between py-1.5 border-b border-white/5">
-                        <span className="text-slate-400">Platform:</span>
-                        <span className="font-bold text-white uppercase">{profile.platform || 'INSTAGRAM'}</span>
+                        <span className="text-slate-400">Total Reach:</span>
+                        <span className="font-bold text-white uppercase">{creator.reach}</span>
                       </div>
 
                       <div className="flex justify-between py-1.5 border-b border-white/5">
-                        <span className="text-slate-400">Followers:</span>
+                        <span className="text-slate-400">Tier:</span>
                         <span className="font-black text-white">
-                          {profile.followersCount ? profile.followersCount.toLocaleString() : 'N/A'}
+                          {creator.creatorTier}
                         </span>
                       </div>
 
                       <div className="flex justify-between py-1.5 border-b border-white/5">
                         <span className="text-slate-400">Engagement:</span>
                         <span className="font-black text-emerald-400">
-                          {profile.engagementRate ? `${profile.engagementRate}%` : 'N/A'}
+                          {creator.engRate}
                         </span>
                       </div>
 
                       <div className="flex justify-between py-1.5 border-b border-white/5">
                         <span className="text-slate-400">Proposed Fee:</span>
                         <span className="font-black text-purple-300">
-                          {app.proposedAmount ? `$${app.proposedAmount}` : 'Flexible'}
+                          {app.proposedAmount ? `$${Number(app.proposedAmount).toLocaleString()}` : 'Flexible'}
                         </span>
                       </div>
 
                       <div className="py-1.5">
                         <span className="text-slate-400 block mb-1">Pitch Concept:</span>
-                        <p className="text-[11px] text-slate-300 line-clamp-3 italic bg-slate-900 p-2 rounded-lg border border-white/5">
+                        <p className="text-[11px] text-slate-300 line-clamp-3 italic">
                           {app.applicationMessage || 'No text pitch.'}
                         </p>
                       </div>
@@ -114,8 +144,9 @@ export default function ApplicantComparisonView({
 
                   {/* Actions */}
                   <button
+                    type="button"
                     onClick={() => onSendOffer(app)}
-                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:scale-105 text-xs font-black text-white flex items-center justify-center gap-1.5 shadow-md transition-all"
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:scale-105 text-xs font-black text-white flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer"
                   >
                     <Send className="w-3 h-3" />
                     <span>Send Offer</span>
@@ -131,4 +162,3 @@ export default function ApplicantComparisonView({
 
   return createPortal(modalContent, document.body);
 }
-

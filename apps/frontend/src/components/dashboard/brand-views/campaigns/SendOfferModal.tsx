@@ -1,11 +1,11 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { X, Send, DollarSign, Calendar, ShieldCheck, Sparkles } from 'lucide-react';
+import { Send, DollarSign, ShieldCheck, ArrowUpRight, Sparkles } from 'lucide-react';
 import { CampaignApplicationItem } from '@/services/application.service';
 import { OfferService } from '@/services/offer.service';
+import { CreatorItem } from '../find-influencers/CreatorCard';
+import { mapApplicationToCreator } from './mapApplicationToCreator';
 
 import CustomDatePicker from '@/components/ui/CustomDatePicker';
 
@@ -13,10 +13,11 @@ interface SendOfferModalProps {
   application: CampaignApplicationItem | null;
   onClose: () => void;
   onSuccess: () => void;
+  onViewProfile?: (creator: CreatorItem) => void;
 }
 
 
-export default function SendOfferModal({ application, onClose, onSuccess }: SendOfferModalProps) {
+export default function SendOfferModal({ application, onClose, onSuccess, onViewProfile }: SendOfferModalProps) {
   const [mounted, setMounted] = useState(false);
   const [compensationAmount, setCompensationAmount] = useState<number>(
     application?.proposedAmount || 1500,
@@ -32,9 +33,18 @@ export default function SendOfferModal({ application, onClose, onSuccess }: Send
     setMounted(true);
   }, []);
 
-  if (!application || !mounted) return null;
+  const creatorItem = useMemo(() => {
+    return application ? mapApplicationToCreator(application) : null;
+  }, [application]);
 
-  const profile: any = application.profileSnapshot || {};
+  if (!application || !mounted || !creatorItem) return null;
+
+  const handleOpenCreatorProfile = () => {
+    onClose();
+    if (onViewProfile) {
+      onViewProfile(creatorItem);
+    }
+  };
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,35 +69,69 @@ export default function SendOfferModal({ application, onClose, onSuccess }: Send
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/85 backdrop-blur-md"
+    >
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
+        onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+        exit={{ opacity: 0, scale: 0.96 }}
+        className="w-full max-w-lg bg-[#090D16] border border-purple-500/25 rounded-3xl shadow-2xl overflow-hidden flex flex-col backdrop-blur-2xl p-6 sm:p-7 relative"
       >
-        <div className="p-6 border-b border-white/10 flex items-center justify-between bg-slate-950/40">
-          <div>
-            <span className="text-[10px] font-black text-purple-400 uppercase tracking-wider">
-              Send Official Offer
-            </span>
-            <h3 className="text-base font-black text-white">Offer for @{profile.username || 'creator'}</h3>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        {/* Subtle ambient lighting */}
+        <div className="absolute -top-24 -right-24 w-52 h-52 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
 
-        <form onSubmit={handleSend} className="p-6 space-y-4">
+        <form onSubmit={handleSend} className="space-y-4 relative z-10">
           {error && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
+            <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
               {error}
             </div>
           )}
 
+          {/* In-Platform Creator Info Snippet */}
+          <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/5">
+            <button
+              type="button"
+              onClick={handleOpenCreatorProfile}
+              title={`View ${creatorItem.name}'s platform profile`}
+              className="flex items-center gap-3 group/creator cursor-pointer text-left min-w-0"
+            >
+              <div className="w-10 h-10 rounded-xl overflow-hidden border border-purple-500/30 bg-slate-950 flex items-center justify-center text-white font-bold shrink-0 shadow-md group-hover/creator:scale-105 transition-transform">
+                {creatorItem.avatarUrl ? (
+                  <img
+                    src={creatorItem.avatarUrl}
+                    alt={creatorItem.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-tr from-purple-600 to-pink-600 flex items-center justify-center text-white text-xs font-black">
+                    {creatorItem.name.charAt(0)}
+                  </div>
+                )}
+              </div>
+
+              <div className="min-w-0">
+                <div className="flex items-center gap-1">
+                  <span className="text-sm font-bold text-white group-hover/creator:text-purple-300 transition-colors truncate">
+                    Offer for {creatorItem.name}
+                  </span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-purple-400 group-hover/creator:translate-x-0.5 group-hover/creator:-translate-y-0.5 transition-transform shrink-0" />
+                </div>
+                <span className="text-[11px] text-purple-300/80 font-medium block">
+                  Click to inspect in-platform profile
+                </span>
+              </div>
+            </button>
+
+            <span className="px-2.5 py-1 rounded-xl bg-purple-500/15 border border-purple-500/30 text-[11px] font-bold text-purple-300 flex items-center gap-1 shrink-0">
+              <Sparkles className="w-3 h-3 text-purple-400" />
+              <span>{creatorItem.matchScore}% Match</span>
+            </span>
+          </div>
+
+          {/* Agreed Compensation Amount */}
           <div>
             <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
               Agreed Compensation Amount (USD) <span className="text-pink-500">*</span>
@@ -99,13 +143,14 @@ export default function SendOfferModal({ application, onClose, onSuccess }: Send
                 min="1"
                 value={compensationAmount}
                 onChange={(e) => setCompensationAmount(Number(e.target.value))}
-                className="w-full pl-8 pr-4 py-3 bg-slate-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-purple-500"
+                className="w-full pl-9 pr-4 py-3 bg-transparent border border-purple-500/20 hover:border-purple-500/35 focus:border-purple-400 focus:bg-purple-950/10 rounded-2xl text-sm font-semibold text-white placeholder:text-slate-500 focus:outline-none transition-all"
               />
-              <DollarSign className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
+              <DollarSign className="w-4 h-4 text-purple-400 absolute left-3 top-3.5" />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          {/* Date Range */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
                 Campaign Start Date
@@ -128,6 +173,7 @@ export default function SendOfferModal({ application, onClose, onSuccess }: Send
             </div>
           </div>
 
+          {/* Expiration Date */}
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
               Offer Response Expiration Date
@@ -139,7 +185,7 @@ export default function SendOfferModal({ application, onClose, onSuccess }: Send
             />
           </div>
 
-
+          {/* Custom Notes / Scope Additions */}
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
               Custom Notes / Scope Additions
@@ -149,27 +195,29 @@ export default function SendOfferModal({ application, onClose, onSuccess }: Send
               placeholder="e.g. Delighted by your concept! We will ship the product sample immediately upon your acceptance."
               value={customNotes}
               onChange={(e) => setCustomNotes(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500"
+              className="w-full px-3.5 py-3 bg-transparent border border-purple-500/20 hover:border-purple-500/35 focus:border-purple-400 focus:bg-purple-950/10 rounded-2xl text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none transition-all resize-none leading-relaxed"
             />
           </div>
 
-          <div className="p-3 rounded-xl bg-purple-950/20 border border-purple-500/20 flex items-center gap-2.5 text-xs text-purple-300">
+          {/* Confirmation Notice */}
+          <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center gap-2.5 text-xs text-purple-300 font-medium">
             <ShieldCheck className="w-4 h-4 text-purple-400 flex-shrink-0" />
             <span>Upon creator acceptance, a confirmed campaign participant contract is created.</span>
           </div>
 
-          <div className="pt-2 flex items-center justify-end gap-2">
+          {/* Action Footer */}
+          <div className="pt-2 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300"
+              className="px-5 py-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition-all cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSending}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:scale-105 text-xs font-black text-white flex items-center gap-1.5 shadow-md disabled:opacity-50"
+              className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-black text-white flex items-center gap-2 shadow-lg shadow-purple-950/50 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
               <span>{isSending ? 'Sending Offer...' : 'Send Formal Offer'}</span>

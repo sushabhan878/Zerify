@@ -204,9 +204,13 @@ export default function CreatorCard({
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1">
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1" title={creator.location}>
               <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-              <span>{creator.location}</span>
+              <span>
+                {creator.location && creator.location.length > 40
+                  ? `${creator.location.slice(0, 40)}...`
+                  : creator.location}
+              </span>
             </div>
 
             <div className="flex items-center gap-1.5 flex-nowrap mt-1.5 min-w-0">
@@ -333,9 +337,13 @@ export default function CreatorCard({
               {creator.name}
             </h3>
 
-            <div className="flex items-center gap-1.5 mt-0.5 text-[11.5px] text-slate-400 font-medium">
+            <div className="flex items-center gap-1.5 mt-0.5 text-[11.5px] text-slate-400 font-medium" title={creator.location}>
               <MapPin className="w-3 h-3 text-slate-500 shrink-0" />
-              <span>{creator.location}</span>
+              <span>
+                {creator.location && creator.location.length > 40
+                  ? `${creator.location.slice(0, 40)}...`
+                  : creator.location}
+              </span>
             </div>
 
             {/* Show max 2 Niches, then graceful text ellipsis ... */}

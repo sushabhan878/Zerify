@@ -3,11 +3,13 @@
 import React, { useState } from 'react';
 import ApplicantCard from './ApplicantCard';
 import { CampaignApplicationItem } from '@/services/application.service';
+import { CreatorItem } from '../find-influencers/CreatorCard';
 import { Users, Filter, Layers } from 'lucide-react';
 
 interface ApplicationListViewProps {
   applications: CampaignApplicationItem[];
   onViewDetails: (app: CampaignApplicationItem) => void;
+  onViewProfile?: (creator: CreatorItem) => void;
   onShortlist: (appId: string) => void;
   onReject: (appId: string) => void;
   onSendOffer: (app: CampaignApplicationItem) => void;
@@ -26,6 +28,7 @@ const STATUS_TABS = [
 export default function ApplicationListView({
   applications,
   onViewDetails,
+  onViewProfile,
   onShortlist,
   onReject,
   onSendOffer,
@@ -112,6 +115,7 @@ export default function ApplicationListView({
               key={app.id}
               application={app}
               onViewDetails={onViewDetails}
+              onViewProfile={onViewProfile}
               onShortlist={onShortlist}
               onReject={onReject}
               onSendOffer={onSendOffer}

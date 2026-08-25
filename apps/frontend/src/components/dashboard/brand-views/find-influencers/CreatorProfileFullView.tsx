@@ -121,9 +121,9 @@ export default function CreatorProfileFullView({
         <button
           onClick={onBack}
           type="button"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-white/10 hover:border-purple-500/30 text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition-all shadow-md active:scale-95"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-400 hover:text-white transition-colors cursor-pointer group"
         >
-          <ArrowLeft className="w-4 h-4 text-purple-400" />
+          <ArrowLeft className="w-4 h-4 text-purple-400 group-hover:-translate-x-0.5 transition-transform" />
           <span>Back to Influencer Discovery</span>
         </button>
 
@@ -176,12 +176,16 @@ export default function CreatorProfileFullView({
               </div>
 
               <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-400">
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                  {creator.location}
+                <span className="flex items-center gap-1" title={creator.location}>
+                  <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <span>
+                    {creator.location && creator.location.length > 40
+                      ? `${creator.location.slice(0, 40)}...`
+                      : creator.location || 'United States'}
+                  </span>
                 </span>
                 <span>•</span>
-                <span className="flex items-center gap-1 text-slate-300">
+                <span className="flex items-center gap-1 text-slate-300 shrink-0">
                   <Clock className="w-3.5 h-3.5 text-purple-400" />
                   Avg Response: &lt; 2 hrs
                 </span>
@@ -240,8 +244,8 @@ export default function CreatorProfileFullView({
           </div>
         </div>
 
-        {/* 4 Line Separated Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-white/10 pt-6 border-t border-white/10 text-center gap-y-4 md:gap-y-0">
+        {/* 4 Line Separated Stats without Horizontal Line */}
+        <div className="grid grid-cols-2 md:grid-cols-4 md:divide-x divide-white/10 pt-4 text-center gap-y-4 md:gap-y-0">
           <div className="px-4">
             <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1">TOTAL REACH</span>
             <span className="text-2xl sm:text-3xl font-black text-white">{creator.reach}</span>
@@ -304,12 +308,21 @@ export default function CreatorProfileFullView({
                 <span>Zerify AI Match Breakdown ({creator.matchScore}% Compatibility)</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {creator.matchReasons.map((reason, idx) => (
-                  <div key={idx} className="p-4 rounded-2xl bg-slate-900/80 border border-white/5 space-y-1.5">
-                    <CheckCircle className="w-4 h-4 text-emerald-400" />
-                    <p className="text-xs text-slate-300 leading-normal">{reason}</p>
-                  </div>
-                ))}
+                {(creator.matchReasons || []).map((reason: any, idx: number) => {
+                  const reasonText =
+                    typeof reason === 'string'
+                      ? reason
+                      : reason?.details ||
+                      (reason?.criterion ? `${reason.criterion.replace(/_/g, ' ')} verified` : '') ||
+                      reason?.description ||
+                      'Verified match requirement met';
+                  return (
+                    <div key={idx} className="p-4 rounded-2xl bg-slate-900/80 border border-white/5 space-y-1.5">
+                      <CheckCircle className="w-4 h-4 text-emerald-400" />
+                      <p className="text-xs text-slate-300 leading-normal">{reasonText}</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
