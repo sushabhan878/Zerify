@@ -139,6 +139,8 @@ export default function SavedCreatorsSection() {
               skills: inf.collaborationTypes?.length > 0
                 ? inf.collaborationTypes
                 : ['Reels / Shorts', 'Product Reviews', 'Story Sequences'],
+              role: inf.title || inf.role || `${inf.niches?.[0] || 'Content'} Specialist`,
+              statusText: 'Available for Collabs',
               topAudienceAge: '25-34 (58%)',
               topAudienceGender: '64% Female / 36% Male',
               creatorTier: getTierFromReach(followerNum),
@@ -360,8 +362,8 @@ export default function SavedCreatorsSection() {
           <div
             className={
               viewMode === 'grid'
-                ? 'grid grid-cols-1 lg:grid-cols-2 gap-5 pt-1'
-                : 'space-y-3 pt-1'
+                ? 'grid grid-cols-1 xl:grid-cols-2 gap-6 pt-1'
+                : 'space-y-4 pt-1'
             }
           >
             {paginatedCreators.map((creator) => (
