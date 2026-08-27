@@ -288,6 +288,7 @@ export default function SavedCreatorsSection() {
             handleToggleBookmark(id);
             setSelectedCreatorForDetail(null);
           }}
+          onSelectCreator={(c) => setSelectedCreatorForDetail(c)}
         />
 
         <CreatorInviteModal

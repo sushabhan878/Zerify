@@ -307,6 +307,7 @@ export default function SearchCreatorsSection() {
           onBack={() => setSelectedCreatorForDetail(null)}
           onInvite={(c) => setSelectedCreatorForInvite(c)}
           onToggleBookmark={handleToggleBookmark}
+          onSelectCreator={(c) => setSelectedCreatorForDetail(c)}
         />
 
         {/* Direct Campaign Invite Modal */}
