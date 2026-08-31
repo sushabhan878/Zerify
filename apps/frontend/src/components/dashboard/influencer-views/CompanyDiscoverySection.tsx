@@ -840,8 +840,6 @@ export default function CompanyDiscoverySection() {
               <CompanyCard
                 key={company.id}
                 company={company}
-                isSaved={savedIds.has(company.id)}
-                onToggleSave={handleToggleSave}
                 onViewDetails={setDetailCompany}
                 onPitchBrand={setPitchCompany}
                 viewMode={viewMode}

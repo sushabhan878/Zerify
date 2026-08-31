@@ -195,6 +195,33 @@ export default function CampaignDiscoverySection() {
   const [campaignsList, setCampaignsList] = useState<CampaignItem[]>([]);
   const [appliedCampaignsMap, setAppliedCampaignsMap] = useState<Record<string, string>>({});
 
+  // Saved campaigns state with local storage persistence
+  const [savedCampaignIds, setSavedCampaignIds] = useState<Set<string>>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('zerify_saved_campaigns');
+        if (saved) return new Set(JSON.parse(saved));
+      } catch (e) {}
+    }
+    return new Set();
+  });
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
+
+  const handleToggleSaveCampaign = useCallback((id: string) => {
+    setSavedCampaignIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      try {
+        localStorage.setItem('zerify_saved_campaigns', JSON.stringify(Array.from(next)));
+      } catch (e) {}
+      return next;
+    });
+  }, []);
+
   // Fetch live campaigns and creator's active applications from backend API
   const fetchCampaigns = useCallback(async (showRefreshingSpinner = false) => {
     if (showRefreshingSpinner) {
@@ -297,12 +324,18 @@ export default function CampaignDiscoverySection() {
       campaignType: 'All Types',
     });
     setAdvancedFilters(INITIAL_FILTERS);
+    setShowSavedOnly(false);
     setCurrentPage(1);
   };
 
   // Filter Pipeline for live DB campaigns
   const filteredCampaigns = useMemo(() => {
     return campaignsList.filter((c: CampaignItem) => {
+      // 0. Saved Only Filter
+      if (showSavedOnly && !savedCampaignIds.has(c.id)) {
+        return false;
+      }
+
       // 1. Search Query Client Filtering
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
@@ -380,7 +413,7 @@ export default function CampaignDiscoverySection() {
 
       return true;
     });
-  }, [campaignsList, searchQuery, quickFilters, advancedFilters]);
+  }, [campaignsList, searchQuery, quickFilters, advancedFilters, showSavedOnly, savedCampaignIds]);
 
   // Sort Pipeline
   const sortedCampaigns = useMemo(() => {
@@ -410,6 +443,9 @@ export default function CampaignDiscoverySection() {
   // Active Filter Chips
   const activeChips = useMemo(() => {
     const chips: { key: string; label: string }[] = [];
+    if (showSavedOnly) {
+      chips.push({ key: 'showSavedOnly', label: 'Saved Campaigns Only' });
+    }
     if (quickFilters.category !== 'All') {
       chips.push({ key: 'category', label: `Category: ${quickFilters.category}` });
     }
@@ -432,9 +468,10 @@ export default function CampaignDiscoverySection() {
       chips.push({ key: 'isEscrowOnly', label: 'Escrow Protected Only' });
     }
     return chips;
-  }, [quickFilters, advancedFilters]);
+  }, [quickFilters, advancedFilters, showSavedOnly]);
 
   const handleRemoveChip = (key: string) => {
+    if (key === 'showSavedOnly') setShowSavedOnly(false);
     if (key === 'category') handleQuickFilterChange('category', 'All');
     if (key === 'budgetRange') handleQuickFilterChange('budgetRange', 'Any Budget');
     if (key === 'minMatchScore') handleQuickFilterChange('minMatchScore', 0);
@@ -450,6 +487,8 @@ export default function CampaignDiscoverySection() {
       <div className="space-y-4">
         <CampaignDetailView
           campaign={selectedCampaignForDetail}
+          isSaved={savedCampaignIds.has(selectedCampaignForDetail.id)}
+          onToggleSave={handleToggleSaveCampaign}
           onBack={() => {
             setSelectedCampaignForDetail(null);
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -488,6 +527,12 @@ export default function CampaignDiscoverySection() {
         onFilterChange={handleQuickFilterChange}
         onOpenAdvancedModal={() => setIsFiltersModalOpen(true)}
         activeCount={activeChips.length}
+        showSavedOnly={showSavedOnly}
+        onToggleSavedOnly={() => {
+          setShowSavedOnly((prev) => !prev);
+          setCurrentPage(1);
+        }}
+        savedCount={savedCampaignIds.size}
       />
 
       {/* 3. Active Filter Chips (if any) */}
@@ -531,21 +576,38 @@ export default function CampaignDiscoverySection() {
             <AlertCircle className="w-7 h-7" />
           </div>
           <div className="space-y-1 max-w-md">
-            <h3 className="text-base font-bold text-white">No campaigns found</h3>
+            <h3 className="text-base font-bold text-white">
+              {showSavedOnly ? 'No saved campaigns found' : 'No campaigns found'}
+            </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              {campaignsList.length === 0
+              {showSavedOnly
+                ? "You haven't saved any campaigns yet or none matched your active filters. Click the bookmark icon on any campaign card to save it for quick access!"
+                : campaignsList.length === 0
                 ? 'No open campaign briefs are currently published by brands in the database. When brands publish campaigns, they will appear here instantly in real-time!'
                 : 'No active sponsorship briefs matched your current search filters.'}
             </p>
           </div>
           <div className="flex items-center gap-2.5 pt-1">
-            <button
-              onClick={handleResetFilters}
-              type="button"
-              className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md"
-            >
-              Reset all filters
-            </button>
+            {showSavedOnly ? (
+              <button
+                onClick={() => {
+                  setShowSavedOnly(false);
+                  setCurrentPage(1);
+                }}
+                type="button"
+                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md"
+              >
+                Browse all campaigns
+              </button>
+            ) : (
+              <button
+                onClick={handleResetFilters}
+                type="button"
+                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md"
+              >
+                Reset all filters
+              </button>
+            )}
             <button
               onClick={() => fetchCampaigns(true)}
               type="button"
@@ -567,6 +629,8 @@ export default function CampaignDiscoverySection() {
             <CampaignCard
               key={camp.id}
               campaign={camp}
+              isSaved={savedCampaignIds.has(camp.id)}
+              onToggleSave={handleToggleSaveCampaign}
               onViewBrief={(item) => {
                 setSelectedCampaignForDetail(item);
                 window.scrollTo({ top: 0, behavior: 'smooth' });

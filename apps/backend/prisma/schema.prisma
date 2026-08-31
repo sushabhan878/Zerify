@@ -85,6 +85,9 @@ model BrandProfile {
   // Campaign Relation
   campaigns             Campaign[]
 
+  // Reviews given by this brand
+  reviewsGiven          Review[]
+
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @updatedAt
 
@@ -158,6 +161,9 @@ model InfluencerProfile {
 
   // Saved by Brands relation
   savedByBrands           SavedCreator[]
+
+  // Reviews received from brands
+  reviews                 Review[]
 
   // Onboarding status & progress
   completionPercentage    Int                           @default(0)
@@ -857,4 +863,34 @@ model CampaignPayment {
   @@index([campaignId, status])
   @@map("campaign_payments")
 }
+
+// Creator / Brand Review & Rating Model
+model Review {
+  id                  String            @id @default(uuid())
+  influencerProfileId String
+  influencer          InfluencerProfile @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+  brandProfileId      String?
+  brandProfile        BrandProfile?     @relation(fields: [brandProfileId], references: [id], onDelete: SetNull)
+
+  author              String            // Brand or reviewer company name (e.g., "Yunki Studio")
+  authorAvatarUrl     String?
+  authorLetter        String?           // Fallback letter badge (e.g., "Y")
+  authorBg            String?           // Color styling badge classes
+
+  orderType           String?           // e.g. "1 TikTok Video (30 Seconds)", "Dedicated Reel"
+  rating              Float             @default(5.0) // Overall rating (1.0 - 5.0)
+  communicationRating Float?            @default(5.0)
+  timelinessRating    Float?            @default(5.0)
+  satisfactionRating  Float?            @default(5.0)
+  comment             String            @db.Text
+  isVerified          Boolean           @default(true)
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([influencerProfileId, rating])
+  @@index([brandProfileId])
+  @@map("reviews")
+}
+
 

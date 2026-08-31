@@ -12,6 +12,8 @@ interface CustomDatePickerProps {
   maxDate?: string;
   className?: string;
   disabled?: boolean;
+  align?: 'left' | 'right' | 'center';
+  position?: 'bottom' | 'top' | 'auto';
 }
 
 const MONTH_NAMES = [
@@ -29,6 +31,8 @@ export default function CustomDatePicker({
   maxDate,
   className = '',
   disabled = false,
+  align = 'left',
+  position = 'bottom',
 }: CustomDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -62,11 +66,13 @@ export default function CustomDatePicker({
         setIsOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [isOpen]);
 
   const handlePrevMonth = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -93,7 +99,13 @@ export default function CustomDatePicker({
   const daysInCurrentMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
 
-  const calendarDays: { day: number; monthOffset: number; fullDateStr: string }[] = [];
+  const calendarDays: { day: number; monthOffset: number; fullDateStr: string; isDisabled: boolean }[] = [];
+
+  const isDateDisabled = (dateStr: string) => {
+    if (minDate && dateStr < minDate) return true;
+    if (maxDate && dateStr > maxDate) return true;
+    return false;
+  };
 
   // Previous month trailing days
   for (let i = firstDayOfWeek - 1; i >= 0; i--) {
@@ -101,13 +113,13 @@ export default function CustomDatePicker({
     const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
     const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
     const dateStr = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    calendarDays.push({ day: d, monthOffset: -1, fullDateStr: dateStr });
+    calendarDays.push({ day: d, monthOffset: -1, fullDateStr: dateStr, isDisabled: isDateDisabled(dateStr) });
   }
 
   // Current month days
   for (let d = 1; d <= daysInCurrentMonth; d++) {
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    calendarDays.push({ day: d, monthOffset: 0, fullDateStr: dateStr });
+    calendarDays.push({ day: d, monthOffset: 0, fullDateStr: dateStr, isDisabled: isDateDisabled(dateStr) });
   }
 
   // Next month leading days (to fill 35 or 42 grid cells)
@@ -118,11 +130,12 @@ export default function CustomDatePicker({
       const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
       const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
       const dateStr = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      calendarDays.push({ day: d, monthOffset: 1, fullDateStr: dateStr });
+      calendarDays.push({ day: d, monthOffset: 1, fullDateStr: dateStr, isDisabled: isDateDisabled(dateStr) });
     }
   }
 
-  const handleSelectDay = (dateStr: string) => {
+  const handleSelectDay = (dateStr: string, isDisabled: boolean) => {
+    if (isDisabled) return;
     onChange(dateStr);
     setIsOpen(false);
   };
@@ -130,6 +143,7 @@ export default function CustomDatePicker({
   const handleSetToday = () => {
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    if (isDateDisabled(todayStr)) return;
     onChange(todayStr);
     setCurrentYear(today.getFullYear());
     setCurrentMonth(today.getMonth());
@@ -148,6 +162,15 @@ export default function CustomDatePicker({
 
   const todayStr = new Date().toISOString().split('T')[0];
 
+  // Positioning classes
+  const positionClasses = position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2';
+  const alignClasses =
+    align === 'right'
+      ? 'right-0 left-auto'
+      : align === 'center'
+      ? 'left-1/2 -translate-x-1/2'
+      : 'left-0 right-auto';
+
   return (
     <div className={`relative ${className}`} ref={containerRef}>
       {/* Date Trigger Input */}
@@ -155,28 +178,42 @@ export default function CustomDatePicker({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setIsOpen((prev) => !prev)}
-        className={`w-full px-3.5 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs flex items-center justify-between text-left transition-colors ${
-          disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-purple-400/40 cursor-pointer'
-        }`}
+        className={`w-full px-3.5 py-2.5 bg-slate-900/90 hover:bg-slate-900 border border-purple-400/25 hover:border-purple-400/50 rounded-xl text-xs flex items-center justify-between text-left transition-all shadow-sm ${
+          disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+        } ${isOpen ? 'ring-2 ring-purple-500/40 border-purple-400' : ''}`}
       >
         <span className={formattedDisplay ? 'text-white font-medium' : 'text-slate-500'}>
           {formattedDisplay || placeholder}
         </span>
-        <CalendarIcon className="w-3.5 h-3.5 text-purple-300/70 ml-2 flex-shrink-0" />
+        <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
+          {formattedDisplay && !disabled && (
+            <span
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClear();
+              }}
+              className="p-0.5 rounded hover:bg-white/10 text-slate-400 hover:text-slate-200 transition-colors"
+              title="Clear date"
+            >
+              <X className="w-3 h-3" />
+            </span>
+          )}
+          <CalendarIcon className="w-3.5 h-3.5 text-purple-300/80" />
+        </div>
       </button>
 
       {/* Popover Calendar Modal */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 6, scale: 0.96 }}
+            initial={{ opacity: 0, y: position === 'top' ? -6 : 6, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 6, scale: 0.96 }}
+            exit={{ opacity: 0, y: position === 'top' ? -6 : 6, scale: 0.96 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-50 bottom-full mb-2 left-0 sm:left-auto sm:right-0 bg-slate-900/95 border border-purple-400/20 rounded-2xl shadow-2xl backdrop-blur-2xl p-4 w-[280px] text-xs select-none"
+            className={`absolute z-[100] ${positionClasses} ${alignClasses} bg-[#0c101d] border border-purple-500/35 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9)] backdrop-blur-2xl p-4 w-[280px] text-xs select-none`}
           >
             {/* Header: Month & Year Navigator */}
-            <div className="flex items-center justify-between pb-3 border-b border-purple-400/10">
+            <div className="flex items-center justify-between pb-3 border-b border-purple-400/15">
               <span className="font-extrabold text-white text-xs tracking-wide">
                 {MONTH_NAMES[currentMonth]} {currentYear}
               </span>
@@ -184,14 +221,14 @@ export default function CustomDatePicker({
                 <button
                   type="button"
                   onClick={handlePrevMonth}
-                  className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                  className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
                   onClick={handleNextMonth}
-                  className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                  className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -214,19 +251,30 @@ export default function CustomDatePicker({
                 const isToday = todayStr === item.fullDateStr;
                 const isCurrentMonth = item.monthOffset === 0;
 
+                if (item.isDisabled) {
+                  return (
+                    <span
+                      key={idx}
+                      className="h-7 w-7 rounded-xl mx-auto flex items-center justify-center text-[11px] font-medium text-slate-700 opacity-40 cursor-not-allowed"
+                    >
+                      {item.day}
+                    </span>
+                  );
+                }
+
                 return (
                   <button
                     type="button"
                     key={idx}
-                    onClick={() => handleSelectDay(item.fullDateStr)}
-                    className={`h-7 w-7 rounded-xl mx-auto flex items-center justify-center text-[11px] font-semibold transition-all ${
+                    onClick={() => handleSelectDay(item.fullDateStr, item.isDisabled)}
+                    className={`h-7 w-7 rounded-xl mx-auto flex items-center justify-center text-[11px] font-semibold transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-purple-500/25 border border-purple-400/60 text-purple-100 shadow-[0_0_10px_rgba(192,132,252,0.3)] font-bold'
+                        ? 'bg-purple-600 border border-purple-400 text-white shadow-[0_0_12px_rgba(168,85,247,0.5)] font-bold'
                         : isToday
-                        ? 'bg-slate-800 text-purple-300 border border-purple-400/20 font-bold'
+                        ? 'bg-slate-800 text-purple-300 border border-purple-400/30 font-bold'
                         : isCurrentMonth
-                        ? 'text-slate-200 hover:bg-slate-800 hover:text-white'
-                        : 'text-slate-600 hover:text-slate-400'
+                        ? 'text-slate-200 hover:bg-purple-500/20 hover:text-white'
+                        : 'text-slate-500 hover:text-slate-300'
                     }`}
                   >
                     {item.day}
@@ -236,18 +284,19 @@ export default function CustomDatePicker({
             </div>
 
             {/* Footer Actions: Clear & Today */}
-            <div className="flex items-center justify-between pt-3 mt-2 border-t border-purple-400/10">
+            <div className="flex items-center justify-between pt-3 mt-2 border-t border-purple-400/15">
               <button
                 type="button"
                 onClick={handleClear}
-                className="text-[10px] font-bold text-slate-400 hover:text-rose-300 transition-colors"
+                className="text-[11px] font-bold text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
               >
                 Clear
               </button>
               <button
                 type="button"
                 onClick={handleSetToday}
-                className="text-[10px] font-bold text-purple-300 hover:text-purple-200 transition-colors"
+                disabled={isDateDisabled(todayStr)}
+                className="text-[11px] font-bold text-purple-300 hover:text-purple-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
               >
                 Today
               </button>
@@ -258,3 +307,4 @@ export default function CustomDatePicker({
     </div>
   );
 }
+

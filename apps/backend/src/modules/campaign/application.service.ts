@@ -232,6 +232,56 @@ export class ApplicationService {
     return this.repository.listApplicationsForCampaign(campaignId, status);
   }
 
+  async listBrandApplications(userId: string, status?: ApplicationStatus) {
+    return this.prisma.campaignApplication.findMany({
+      where: {
+        campaign: {
+          brandProfile: {
+            userId,
+          },
+        },
+        ...(status ? { status } : {}),
+      },
+      include: {
+        campaign: {
+          include: {
+            brandProfile: true,
+            deliverables: true,
+          },
+        },
+        influencerProfile: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                socialAccounts: {
+                  include: {
+                    metadata: true,
+                    demographics: true,
+                    performance: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        socialAccount: {
+          include: {
+            metadata: true,
+            demographics: true,
+            performance: true,
+          },
+        },
+        offers: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+      orderBy: { submittedAt: 'desc' },
+    });
+  }
+
   async listApplicationsForInfluencer(userId: string) {
     const influencerProfile = await this.prisma.influencerProfile.findUnique({
       where: { userId },

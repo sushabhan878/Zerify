@@ -33,18 +33,18 @@ export default function InfluencerDashboardView({
   userEmail,
   userHandle,
   avatarUrl,
-  activeRoute = 'profile-overview',
+  activeRoute = 'statistics',
   onSelectRoute,
   completionPercentage = 65,
   influencerProfile,
 }: InfluencerDashboardViewProps) {
   const renderSection = () => {
     switch (activeRoute) {
-      case 'activity':
-        return <ActivityView />;
-      case 'traffic':
-        return <TrafficView />;
+      case 'statistics':
       case 'statistic':
+      case 'activity':
+      case 'traffic':
+      case 'profile-overview':
         return <StatisticView />;
       case 'company-discovery':
         return <CompanyDiscoverySection />;
@@ -53,13 +53,13 @@ export default function InfluencerDashboardView({
       case 'ai-profile-match':
         return <AiProfileMatchSection />;
       case 'campaign-invitations':
-        return <CampaignInvitationsSection />;
+        return <CampaignInvitationsSection onNavigate={onSelectRoute} />;
       case 'active-campaigns':
-        return <ActiveCampaignsSection />;
+        return <ActiveCampaignsSection onNavigate={onSelectRoute} />;
       case 'messages':
         return <MessagesSection />;
       case 'applications':
-        return <ApplicationsSection />;
+        return <ApplicationsSection onNavigate={onSelectRoute} />;
       case 'my-network':
         return <MyNetworkSection />;
       case 'payments':
@@ -75,9 +75,8 @@ export default function InfluencerDashboardView({
             initialData={influencerProfile}
           />
         );
-      case 'profile-overview':
       default:
-        return <ProfileOverviewSection userName={userName} />;
+        return <StatisticView />;
     }
   };
 

@@ -1,111 +1,84 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { FileText, Search, Send, Sparkles } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Search, FileText, AlertCircle, Compass, RefreshCw } from 'lucide-react';
 import ApplicationKpiBar from './subcomponents/ApplicationKpiBar';
 import ApplicationCardItem, { ApplicationItem } from './subcomponents/ApplicationCardItem';
-import OfferReceivedCard from './applications/OfferReceivedCard';
-import OfferDetailModal from './applications/OfferDetailModal';
 import { ApplicationService } from '@/services/application.service';
-import { OfferService, CampaignOfferItem } from '@/services/offer.service';
+import LottieLoader from '@/components/ui/LottieLoader';
 
-export default function ApplicationsSection() {
+interface ApplicationsSectionProps {
+  onNavigate?: (routeId: string) => void;
+}
+
+export default function ApplicationsSection({ onNavigate }: ApplicationsSectionProps) {
   const [activeTab, setActiveTab] = useState<'ALL' | 'CONTRACT_SENT' | 'SHORTLISTED' | 'UNDER_REVIEW' | 'DECLINED'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [offers, setOffers] = useState<CampaignOfferItem[]>([]);
-  const [selectedOffer, setSelectedOffer] = useState<CampaignOfferItem | null>(null);
-  const [isAcceptingOffer, setIsAcceptingOffer] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [applications, setApplications] = useState<ApplicationItem[]>([]);
 
-  const [applications, setApplications] = useState<ApplicationItem[]>([
-    {
-      id: 1,
-      brand: 'Sony Audio Systems',
-      industry: 'Consumer Audio & Tech',
-      role: 'WH-1000XM5 Wireless Headphones Unboxing Reel',
-      appliedDate: 'Aug 20, 2026',
-      proposedRate: '$2,800.00',
-      deliveryTime: '5 Days from acceptance',
-      status: 'CONTRACT_SENT',
-      platforms: ['Instagram', 'YouTube'],
-      verifiedBrand: true,
-      pitchSummary: 'Proposed a cinematic 4K unboxing Reel with custom sound-frequency visuals demonstrating active noise cancellation in bustling city spots.',
-      lastViewedByBrand: 'Brand viewed pitch 2h ago',
-    },
-    {
-      id: 2,
-      brand: 'Logitech Gaming',
-      industry: 'Gaming Accessories & Hardware',
-      role: 'Stream Deck + Wireless Gaming Mouse Integration',
-      appliedDate: 'Aug 18, 2026',
-      proposedRate: '$3,200.00',
-      deliveryTime: '7 Days',
-      status: 'SHORTLISTED',
-      platforms: ['YouTube', 'TikTok'],
-      verifiedBrand: true,
-      pitchSummary: 'Will feature macro automation shortcuts for stream creators and dedicated RGB lighting syncing with game triggers.',
-      lastViewedByBrand: 'Brand viewed pitch yesterday',
-    },
-  ]);
+  const loadData = useCallback(async (showRefreshing = false) => {
+    if (showRefreshing) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
 
-  const loadData = async () => {
     try {
-      const [myApps, myOffers] = await Promise.all([
-        ApplicationService.getMyApplications().catch(() => []),
-        OfferService.getMyOffers().catch(() => []),
-      ]);
+      const myApps = await ApplicationService.getMyApplications().catch(() => []);
+      if (myApps && Array.isArray(myApps)) {
+        const formatted: ApplicationItem[] = myApps.map((a: any) => {
+          let statusText: ApplicationItem['status'] = 'UNDER_REVIEW';
+          if (a.status === 'OFFER_SENT' || a.status === 'OFFER_ACCEPTED') {
+            statusText = 'CONTRACT_SENT';
+          } else if (a.status === 'SHORTLISTED') {
+            statusText = 'SHORTLISTED';
+          } else if (a.status === 'REJECTED' || a.status === 'OFFER_DECLINED' || a.status === 'WITHDRAWN') {
+            statusText = 'DECLINED';
+          }
 
-      if (myOffers && myOffers.length > 0) {
-        setOffers(myOffers);
-      }
+          const currency = a.proposedCurrency || 'USD';
+          const sym = currency === 'INR' ? '₹' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
+          const rateStr = a.proposedAmount ? `${sym}${Number(a.proposedAmount).toLocaleString()}` : 'Fixed Barter';
 
-      if (myApps && myApps.length > 0) {
-        const formatted: ApplicationItem[] = myApps.map((a: any) => ({
-          id: a.id,
-          brand: a.campaign?.brandProfile?.companyName || 'Verified Brand',
-          industry: a.campaign?.industry || 'Technology & Creator',
-          role: a.campaign?.title || 'Creator Campaign',
-          appliedDate: new Date(a.submittedAt).toLocaleDateString(),
-          proposedRate: a.proposedAmount ? `$${a.proposedAmount.toLocaleString()}` : '$1,500.00',
-          deliveryTime: '7 Days',
-          status: a.status === 'OFFER_SENT' ? 'CONTRACT_SENT' : a.status === 'APPLIED' ? 'UNDER_REVIEW' : a.status,
-          platforms: a.campaign?.platforms || ['Instagram'],
-          verifiedBrand: true,
-          pitchSummary: a.applicationMessage || 'Submitted pitch concept',
-          lastViewedByBrand: 'Live status synced',
-        }));
+          return {
+            id: a.id,
+            brand: a.campaign?.brandProfile?.companyName || 'Verified Brand',
+            industry: a.campaign?.industry || a.campaign?.brandProfile?.industry || 'Technology & Creator',
+            role: a.campaign?.title || 'Creator Campaign Pitch',
+            appliedDate: new Date(a.submittedAt).toLocaleDateString('en-GB', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+            }),
+            proposedRate: rateStr,
+            deliveryTime: '7 Days from acceptance',
+            status: statusText,
+            platforms: a.campaign?.targetPlatforms || a.campaign?.platforms || ['Instagram'],
+            verifiedBrand: true,
+            pitchSummary: a.applicationMessage || a.contentIdea || 'Submitted pitch concept and content strategy.',
+            lastViewedByBrand: 'Live status synced',
+          };
+        });
         setApplications(formatted);
+      } else {
+        setApplications([]);
       }
     } catch (err) {
-      console.error(err);
+      console.error('Failed to load applications:', err);
+      setApplications([]);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
-  const handleAcceptOffer = async (offerId: string) => {
-    setIsAcceptingOffer(true);
-    try {
-      await OfferService.acceptOffer(offerId);
-      loadData();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsAcceptingOffer(false);
-    }
-  };
-
-  const handleDeclineOffer = async (offerId: string) => {
-    try {
-      await OfferService.declineOffer(offerId);
-      loadData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleWithdraw = async (id: any) => {
+  const handleWithdraw = async (id: string | number) => {
     if (confirm('Are you sure you want to withdraw this application pitch?')) {
       try {
         if (typeof id === 'string') {
@@ -113,130 +86,143 @@ export default function ApplicationsSection() {
         }
         setApplications((prev) => prev.filter((a) => a.id !== id));
       } catch (err) {
-        console.error(err);
+        console.error('Failed to withdraw application:', err);
       }
     }
   };
 
+  const totalProposedNumeric = applications.reduce((acc, app) => {
+    const match = app.proposedRate.replace(/,/g, '').match(/[0-9.]+/);
+    return acc + (match ? parseFloat(match[0]) : 0);
+  }, 0);
+  const totalProposedStr = `$${totalProposedNumeric.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
   const filtered = applications.filter((app) => {
     const matchesTab = activeTab === 'ALL' || app.status === activeTab;
+    const q = searchQuery.toLowerCase().trim();
     const matchesSearch =
-      app.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.industry.toLowerCase().includes(searchQuery.toLowerCase());
+      !q ||
+      app.brand.toLowerCase().includes(q) ||
+      app.role.toLowerCase().includes(q) ||
+      app.industry.toLowerCase().includes(q);
     return matchesTab && matchesSearch;
   });
 
   return (
     <div className="space-y-6">
-      {/* Header Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
-            <FileText className="w-5 h-5 text-purple-400" />
-            <span>Applications & Offers Tracker</span>
-          </h2>
-          <p className="text-xs text-slate-400">
-            Track pitch submissions, proposed rates, and received collaboration contracts
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-xs font-extrabold text-purple-300">
-            {applications.length} Pitches Active
-          </span>
-        </div>
-      </div>
-
-      {/* Offers Received Section */}
-      {offers.filter((o) => o.status === 'PENDING').length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-black text-white flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-purple-400" />
-            <span>Pending Collaboration Offers ({offers.filter((o) => o.status === 'PENDING').length})</span>
-          </h3>
-
-          <div className="space-y-4">
-            {offers
-              .filter((o) => o.status === 'PENDING')
-              .map((offer) => (
-                <OfferReceivedCard
-                  key={offer.id}
-                  offer={offer}
-                  onAccept={handleAcceptOffer}
-                  onDecline={handleDeclineOffer}
-                  onViewDetails={(off) => setSelectedOffer(off)}
-                  isAccepting={isAcceptingOffer}
-                />
-              ))}
-          </div>
-        </div>
-      )}
-
       {/* 1. KPI Stats Summary Bar */}
-      <ApplicationKpiBar totalCount={applications.length} totalProposedValue="$12,500.00" />
+      <ApplicationKpiBar
+        totalCount={applications.length}
+        totalProposedValue={totalProposedStr}
+      />
 
       {/* 2. Controls Bar: Search & Status Filter Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-lg">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search applications by brand, role, or campaign..."
+            placeholder="Search pitches by brand, role, or campaign..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50"
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-950/80 border border-white/10 text-xs font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50"
           />
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-white/5 overflow-x-auto no-scrollbar">
-          {[
-            { id: 'ALL', label: 'All Applications' },
-            { id: 'CONTRACT_SENT', label: 'Contracts Sent' },
-            { id: 'SHORTLISTED', label: 'Shortlisted' },
-            { id: 'UNDER_REVIEW', label: 'Under Review' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
-                activeTab === tab.id
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Filter Tabs & Refresh Button */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-white/10 overflow-x-auto no-scrollbar">
+            {[
+              { id: 'ALL', label: 'All Pitches' },
+              { id: 'CONTRACT_SENT', label: 'Contracts Sent' },
+              { id: 'SHORTLISTED', label: 'Shortlisted' },
+              { id: 'UNDER_REVIEW', label: 'Under Review' },
+              { id: 'DECLINED', label: 'Not Selected' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+                  activeTab === tab.id
+                    ? 'bg-purple-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => loadData(true)}
+            disabled={isLoading || isRefreshing}
+            className="p-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-slate-300 hover:text-white hover:border-purple-500/40 transition-colors shadow-sm shrink-0"
+            title="Refresh applications"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-purple-400' : ''}`} />
+          </button>
         </div>
       </div>
 
-      {/* 3. Application Cards */}
-      <div className="space-y-4">
-        {filtered.length > 0 ? (
-          filtered.map((application) => (
-            <ApplicationCardItem key={application.id} application={application} onWithdraw={handleWithdraw} />
-          ))
-        ) : (
-          <div className="p-8 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl text-center space-y-2">
-            <FileText className="w-8 h-8 text-slate-500 mx-auto" />
-            <h3 className="text-sm font-bold text-white">No Applications Found</h3>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              No pitches match your selected filter criteria. Discover open campaigns from brand discovery.
+      {/* 3. Application Cards List */}
+      {isLoading ? (
+        <div className="p-16 flex flex-col items-center justify-center min-h-[320px]">
+          <LottieLoader size={180} message="Loading your submitted pitches..." />
+        </div>
+      ) : applications.length === 0 ? (
+        <div className="p-12 rounded-3xl bg-slate-950/60 border border-purple-500/20 text-center space-y-4 flex flex-col items-center justify-center min-h-[320px] backdrop-blur-2xl shadow-xl shadow-purple-950/20">
+          <div className="w-14 h-14 rounded-2xl bg-purple-600/15 border border-purple-500/30 flex items-center justify-center text-purple-300 shadow-inner">
+            <FileText className="w-7 h-7" />
+          </div>
+          <div className="space-y-1.5 max-w-md">
+            <h3 className="text-base font-bold text-white">No Pitches Submitted Yet</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              You haven&apos;t pitched or applied to any campaign opportunities yet. Browse open campaign briefs in Campaign Discovery to submit your first concept!
             </p>
           </div>
-        )}
-      </div>
-
-      {/* Offer Detail Modal */}
-      {selectedOffer && (
-        <OfferDetailModal
-          offer={selectedOffer}
-          onClose={() => setSelectedOffer(null)}
-          onAccept={handleAcceptOffer}
-          onDecline={handleDeclineOffer}
-        />
+          {onNavigate && (
+            <button
+              onClick={() => onNavigate('campaign-discovery')}
+              type="button"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold transition-all shadow-lg shadow-purple-950/40 flex items-center gap-2"
+            >
+              <Compass className="w-4 h-4" />
+              <span>Discover Campaigns to Pitch</span>
+            </button>
+          )}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="p-8 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl text-center space-y-3">
+          <AlertCircle className="w-8 h-8 text-slate-500 mx-auto" />
+          <h3 className="text-sm font-bold text-white">No Pitches Found</h3>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+            No submitted pitches match your selected filter criteria.
+          </p>
+          <button
+            onClick={() => {
+              setSearchQuery('');
+              setActiveTab('ALL');
+            }}
+            type="button"
+            className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-purple-500/20 text-xs font-bold text-slate-300 hover:text-white transition-all"
+          >
+            Clear filters
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filtered.map((application) => (
+            <ApplicationCardItem
+              key={application.id}
+              application={application}
+              onWithdraw={handleWithdraw}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

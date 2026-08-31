@@ -60,8 +60,8 @@ export default function ApplicantCard({
     application.proposedCurrency === 'INR' || (application.proposedAmount && application.proposedAmount > 5000)
       ? '₹'
       : application.proposedCurrency === 'EUR'
-      ? '€'
-      : '$';
+        ? '€'
+        : '$';
 
   const quoteDisplay = application.proposedAmount
     ? `${currencySym}${Number(application.proposedAmount).toLocaleString()}`

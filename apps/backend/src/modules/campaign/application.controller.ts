@@ -31,6 +31,17 @@ export class ApplicationController {
     return this.applicationService.applyToCampaign(req.user.id, campaignId, dto);
   }
 
+  @Get('brand/applications')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Brand lists all applications across all their campaigns' })
+  async listBrandApplications(
+    @Req() req: any,
+    @Query('status') status?: ApplicationStatus,
+  ) {
+    return this.applicationService.listBrandApplications(req.user.id, status);
+  }
+
   @Get('campaigns/:campaignId/applications')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

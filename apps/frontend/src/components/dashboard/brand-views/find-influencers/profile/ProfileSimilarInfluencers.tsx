@@ -124,7 +124,7 @@ export default function ProfileSimilarInfluencers({
   };
 
   return (
-    <div className="space-y-10 pt-10 border-t border-white/10">
+    <div className="space-y-10 pt-10">
       {/* 1. Similar Influencers Header & Navigation Arrows */}
       <div className="space-y-5">
         <div className="flex items-center justify-between">
@@ -226,7 +226,7 @@ export default function ProfileSimilarInfluencers({
       </div>
 
       {/* 2. Related Categories Pill Chips */}
-      <div className="space-y-4 pt-4 border-t border-white/10">
+      <div className="space-y-4 pt-4">
         <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
           Related Categories
         </h3>

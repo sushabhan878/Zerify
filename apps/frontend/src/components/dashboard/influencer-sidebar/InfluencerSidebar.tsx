@@ -35,7 +35,7 @@ export default function InfluencerSidebar({
   style,
   completionPercentage = 75,
 }: InfluencerSidebarProps) {
-  const [internalActiveRoute, setInternalActiveRoute] = useState('profile-overview');
+  const [internalActiveRoute, setInternalActiveRoute] = useState('statistics');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
 

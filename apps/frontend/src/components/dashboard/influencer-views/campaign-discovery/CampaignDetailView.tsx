@@ -25,6 +25,7 @@ import {
   Globe,
   Share2,
   ExternalLink,
+  Bookmark,
 } from 'lucide-react';
 import { CampaignItem } from './CampaignCard';
 import LottieLoader from '@/components/ui/LottieLoader';
@@ -33,12 +34,16 @@ interface CampaignDetailViewProps {
   campaign: CampaignItem;
   onBack: () => void;
   onApply: (campaign: CampaignItem) => void;
+  isSaved?: boolean;
+  onToggleSave?: (id: string) => void;
 }
 
 export default function CampaignDetailView({
   campaign,
   onBack,
   onApply,
+  isSaved = false,
+  onToggleSave,
 }: CampaignDetailViewProps) {
   const [isLoading, setIsLoading] = useState(true);
 
@@ -163,25 +168,43 @@ export default function CampaignDetailView({
             </p>
           </div>
 
-          {campaign.isApplied ? (
-            <button
-              disabled
-              type="button"
-              className="px-6 py-2.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2 shadow-sm cursor-default shrink-0 self-start"
-            >
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Applied</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => onApply(campaign)}
-              type="button"
-              className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold transition-all shadow-lg shadow-purple-950/50 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] shrink-0 self-start"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>Apply & Submit Pitch</span>
-            </button>
-          )}
+          <div className="flex items-center gap-2.5 shrink-0 self-start">
+            {onToggleSave && (
+              <button
+                onClick={() => onToggleSave(campaign.id)}
+                type="button"
+                className={`px-4 py-2.5 rounded-2xl border text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm ${
+                  isSaved
+                    ? 'bg-purple-600/30 border-purple-400/70 text-purple-200 shadow-purple-950/40'
+                    : 'bg-slate-900/80 border-purple-500/20 text-slate-300 hover:text-white hover:border-purple-400/40 hover:bg-slate-800'
+                }`}
+                title={isSaved ? 'Remove from saved' : 'Save campaign'}
+              >
+                <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-current text-purple-400' : 'text-purple-400'}`} />
+                <span>{isSaved ? 'Saved' : 'Save Campaign'}</span>
+              </button>
+            )}
+
+            {campaign.isApplied ? (
+              <button
+                disabled
+                type="button"
+                className="px-6 py-2.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2 shadow-sm cursor-default"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Applied</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => onApply(campaign)}
+                type="button"
+                className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold transition-all shadow-lg shadow-purple-950/50 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>Apply & Submit Pitch</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Target Platforms */}

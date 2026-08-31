@@ -80,6 +80,12 @@ export const ApplicationService = {
     return apiRequest(url);
   },
 
+  // Brand: List Applications Across All Campaigns
+  async getBrandApplications(status?: string): Promise<CampaignApplicationItem[]> {
+    const url = status ? `/brand/applications?status=${status}` : `/brand/applications`;
+    return apiRequest(url);
+  },
+
   async getApplicationDetails(applicationId: string): Promise<CampaignApplicationItem> {
     return apiRequest(`/applications/${applicationId}`);
   },

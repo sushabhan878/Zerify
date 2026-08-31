@@ -3,8 +3,6 @@
 import React from 'react';
 import { Star, Award, MapPin } from 'lucide-react';
 import { CreatorItem } from '../CreatorCard';
-import ProfileAnalytics from './ProfileAnalytics';
-import ProfileReviews from './ProfileReviews';
 
 interface ProfileMainInfoProps {
   creator: CreatorItem;
@@ -87,12 +85,6 @@ export default function ProfileMainInfo({ creator }: ProfileMainInfoProps) {
           {creator.bio}
         </p>
       </div>
-
-      {/* Dedicated Analytics Section */}
-      <ProfileAnalytics creator={creator} />
-
-      {/* Verified Reviews Section */}
-      <ProfileReviews creator={creator} />
     </div>
   );
 }

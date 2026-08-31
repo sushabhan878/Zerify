@@ -11,7 +11,6 @@ import {
   CheckCircle2,
   ArrowUpRight,
   ShieldCheck,
-  User,
 } from 'lucide-react';
 import { CampaignApplicationItem } from '@/services/application.service';
 import { CreatorItem } from '../find-influencers/CreatorCard';
@@ -115,17 +114,8 @@ export default function ApplicantDetailModal({
                 </button>
               </div>
 
-              {/* In-Platform Creator Details & View Full Profile Button */}
+              {/* In-Platform Creator Details */}
               <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  type="button"
-                  onClick={handleOpenCreatorProfile}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500/30 text-purple-200 text-xs font-bold transition-all cursor-pointer"
-                >
-                  <User className="w-3.5 h-3.5 text-purple-400" />
-                  <span>View Full Platform Profile</span>
-                </button>
-
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Verified Creator</span>
@@ -228,39 +218,64 @@ export default function ApplicantDetailModal({
         {/* Footer Actions: Seamless in same container without dark background or divider line */}
         <div className="flex items-center justify-between pt-2 shrink-0">
           <div className="flex items-center gap-2.5">
-            <button
-              onClick={() => {
-                onReject(application.id);
-                onClose();
-              }}
-              type="button"
-              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 hover:text-rose-400 text-xs font-bold text-slate-400 border border-white/10 hover:border-rose-500/30 transition-all cursor-pointer"
-            >
-              Reject
-            </button>
-            <button
-              onClick={() => {
-                onShortlist(application.id);
-                onClose();
-              }}
-              type="button"
-              className="px-4 py-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-xs font-bold text-indigo-300 hover:text-white border border-indigo-500/35 transition-all cursor-pointer"
-            >
-              Shortlist
-            </button>
+            {application.status === 'SHORTLISTED' ? (
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold shadow-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Shortlisted Applicant</span>
+              </span>
+            ) : application.status === 'REJECTED' ? (
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-bold shadow-sm">
+                <span>Application Rejected</span>
+              </span>
+            ) : application.status === 'OFFER_SENT' ? (
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-bold shadow-sm">
+                <Send className="w-3.5 h-3.5 text-purple-400" />
+                <span>Offer Sent</span>
+              </span>
+            ) : application.status === 'OFFER_ACCEPTED' ? (
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold shadow-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Offer Accepted (Confirmed Participant)</span>
+              </span>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    onReject(application.id);
+                    onClose();
+                  }}
+                  type="button"
+                  className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 hover:text-rose-400 text-xs font-bold text-slate-400 border border-white/10 hover:border-rose-500/30 transition-all cursor-pointer"
+                >
+                  Reject
+                </button>
+                <button
+                  onClick={() => {
+                    onShortlist(application.id);
+                    onClose();
+                  }}
+                  type="button"
+                  className="px-4 py-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-xs font-bold text-indigo-300 hover:text-white border border-indigo-500/35 transition-all cursor-pointer"
+                >
+                  Shortlist
+                </button>
+              </>
+            )}
           </div>
 
-          <button
-            onClick={() => {
-              onSendOffer(application);
-              onClose();
-            }}
-            type="button"
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-black text-white flex items-center gap-2 shadow-lg shadow-purple-950/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-          >
-            <Send className="w-3.5 h-3.5" />
-            <span>Send Collaboration Offer</span>
-          </button>
+          {application.status !== 'REJECTED' && application.status !== 'OFFER_ACCEPTED' && (
+            <button
+              onClick={() => {
+                onSendOffer(application);
+                onClose();
+              }}
+              type="button"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-black text-white flex items-center gap-2 shadow-lg shadow-purple-950/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>Send Collaboration Offer</span>
+            </button>
+          )}
         </div>
       </motion.div>
     </div>

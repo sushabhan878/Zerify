@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { SlidersHorizontal, ChevronDown, Check, Search, X } from 'lucide-react';
+import { SlidersHorizontal, ChevronDown, Check, Search, X, Bookmark } from 'lucide-react';
 import { ALL_INDUSTRIES_FLAT, ALL_INDUSTRIES_GROUPED } from '@/constants/categories';
 
 export interface CampaignQuickFilterState {
@@ -17,6 +17,9 @@ interface CampaignQuickFiltersProps {
   onFilterChange: (key: keyof CampaignQuickFilterState, val: any) => void;
   onOpenAdvancedModal: () => void;
   activeCount: number;
+  showSavedOnly?: boolean;
+  onToggleSavedOnly?: () => void;
+  savedCount?: number;
 }
 
 export const CAMPAIGN_CATEGORIES = ['All', ...ALL_INDUSTRIES_FLAT];
@@ -64,6 +67,9 @@ export default function CampaignQuickFilters({
   onFilterChange,
   onOpenAdvancedModal,
   activeCount,
+  showSavedOnly = false,
+  onToggleSavedOnly,
+  savedCount = 0,
 }: CampaignQuickFiltersProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [categorySearch, setCategorySearch] = useState('');
@@ -356,6 +362,34 @@ export default function CampaignQuickFilters({
           </div>
         )}
       </div>
+
+      {/* Show Saved Only Toggle Button */}
+      {onToggleSavedOnly && (
+        <button
+          onClick={onToggleSavedOnly}
+          type="button"
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shrink-0 ${
+            showSavedOnly
+              ? 'bg-purple-600/30 text-purple-200 border-purple-400/80 shadow-md shadow-purple-950/40 ring-1 ring-purple-500/50'
+              : 'bg-slate-900 border-white/10 text-slate-300 hover:border-purple-500/30 hover:text-white'
+          }`}
+          title={showSavedOnly ? 'Showing saved campaigns' : 'Show only saved campaigns'}
+        >
+          <Bookmark className={`w-3.5 h-3.5 ${showSavedOnly ? 'fill-current text-purple-400' : 'text-purple-400'}`} />
+          <span>Saved</span>
+          {savedCount > 0 && (
+            <span
+              className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
+                showSavedOnly
+                  ? 'bg-purple-500 text-white'
+                  : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+              }`}
+            >
+              {savedCount}
+            </span>
+          )}
+        </button>
+      )}
 
       {/* Advanced All Filters Button */}
       <button

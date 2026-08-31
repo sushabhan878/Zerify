@@ -14,6 +14,7 @@ import {
   Clock,
   Twitter,
   Linkedin,
+  Bookmark,
 } from 'lucide-react';
 
 export interface CampaignItem {
@@ -56,12 +57,16 @@ export interface CampaignItem {
 
 interface CampaignCardProps {
   campaign: CampaignItem;
+  isSaved?: boolean;
+  onToggleSave?: (id: string) => void;
   onViewBrief: (campaign: CampaignItem) => void;
   onApply: (campaign: CampaignItem) => void;
 }
 
 export default function CampaignCard({
   campaign,
+  isSaved = false,
+  onToggleSave,
   onViewBrief,
   onApply,
 }: CampaignCardProps) {
@@ -133,6 +138,26 @@ export default function CampaignCard({
               <Sparkles className="w-3 h-3 text-purple-300 animate-pulse" />
               <span>{campaign.matchScore}%</span>
             </div>
+
+            {/* Save / Bookmark Campaign Button */}
+            {onToggleSave && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleSave(campaign.id);
+                }}
+                type="button"
+                className={`p-2 rounded-xl border transition-all ${
+                  isSaved
+                    ? 'bg-purple-600/30 border-purple-400/60 text-purple-300 shadow-md shadow-purple-950/40'
+                    : 'bg-slate-900/80 border-purple-500/20 text-slate-400 hover:text-white hover:border-purple-400/40 hover:bg-slate-800'
+                }`}
+                title={isSaved ? 'Remove from saved' : 'Save campaign'}
+                aria-label={isSaved ? 'Remove from saved' : 'Save campaign'}
+              >
+                <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current text-purple-400' : ''}`} />
+              </button>
+            )}
           </div>
         </div>
 

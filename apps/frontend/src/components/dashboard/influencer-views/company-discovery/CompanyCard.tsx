@@ -6,7 +6,6 @@ import {
   Sparkles,
   ShieldCheck,
   Send,
-  Heart,
   Eye,
 } from 'lucide-react';
 
@@ -43,8 +42,8 @@ export interface CompanyItem {
 
 interface CompanyCardProps {
   company: CompanyItem;
-  isSaved: boolean;
-  onToggleSave: (id: string) => void;
+  isSaved?: boolean;
+  onToggleSave?: (id: string) => void;
   onViewDetails: (company: CompanyItem) => void;
   onPitchBrand: (company: CompanyItem) => void;
   viewMode?: 'grid' | 'list';
@@ -145,20 +144,8 @@ export default function CompanyCard({
       }`}>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => onToggleSave(company.id)}
-            className={`p-2 rounded-xl border transition-all ${
-              isSaved
-                ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
-                : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white hover:border-white/20'
-            }`}
-            title={isSaved ? 'Saved to bookmarks' : 'Save opportunity'}
-          >
-            <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
-          </button>
-
-          <button
             onClick={() => onViewDetails(company)}
-            className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center gap-1"
+            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center gap-1.5"
           >
             <Eye className="w-3.5 h-3.5" />
             <span>Details</span>

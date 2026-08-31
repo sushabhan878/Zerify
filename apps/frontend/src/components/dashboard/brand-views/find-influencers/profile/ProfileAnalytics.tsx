@@ -47,7 +47,7 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
   const maleStrokeDash = (malePct / 100) * circumference;
 
   return (
-    <div className="space-y-8 pt-4 border-t border-white/10">
+    <div className="space-y-8 pt-4">
       {/* 1. Header & Platform Tabs */}
       <div className="space-y-4">
         <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
@@ -55,7 +55,7 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
         </h2>
 
         {/* Platform Tabs */}
-        <div className="flex items-center gap-6 border-b border-white/10">
+        <div className="flex items-center gap-6">
           <button
             type="button"
             onClick={() => setActivePlatform('instagram')}
@@ -125,9 +125,9 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
         </div>
       </div>
 
-      {/* 3. Middle Section: Location & Age in 2 Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 pt-2">
-        {/* Audience Location */}
+      {/* 3. Demographics Section: Location, Age & Gender in a single 3-column line */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10 items-start pt-2">
+        {/* 1. Audience Location */}
         <div className="space-y-4">
           <h3 className="text-lg font-bold text-white tracking-tight">
             Audience Location
@@ -163,14 +163,14 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
           </div>
         </div>
 
-        {/* Audience Age */}
+        {/* 2. Audience Age */}
         <div className="space-y-4">
           <h3 className="text-lg font-bold text-white tracking-tight">
             Audience Age
           </h3>
 
           {/* Vertical Bar Chart */}
-          <div className="grid grid-cols-6 gap-2 sm:gap-3 items-end h-[170px] pt-4">
+          <div className="grid grid-cols-6 gap-1.5 sm:gap-2 items-end h-[170px] pt-4">
             {ageData.map((item, idx) => {
               const heightPct = Math.max(item.pct, 3);
               const isHighlight = item.pct >= 30;
@@ -183,7 +183,7 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
                   </span>
 
                   {/* Vertical bar container */}
-                  <div className="w-full max-w-[28px] h-[105px] bg-slate-800/70 rounded-full flex items-end overflow-hidden">
+                  <div className="w-full max-w-[26px] h-[105px] bg-slate-800/70 rounded-full flex items-end overflow-hidden">
                     <div
                       className="w-full rounded-full transition-all duration-700"
                       style={{
@@ -202,58 +202,58 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
             })}
           </div>
         </div>
-      </div>
 
-      {/* 4. Bottom Section: Audience Gender */}
-      <div className="space-y-4 pt-2">
-        <h3 className="text-lg font-bold text-white tracking-tight">
-          Audience Gender
-        </h3>
+        {/* 3. Audience Gender */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-bold text-white tracking-tight">
+            Audience Gender
+          </h3>
 
-        <div className="flex items-center gap-8">
-          {/* Circular Donut Chart */}
-          <div className="relative w-28 h-28 shrink-0">
-            <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-              {/* Background Full Track (Male part) */}
-              <circle
-                cx="50"
-                cy="50"
-                r={radius}
-                className="stroke-slate-800"
-                strokeWidth="14"
-                fill="transparent"
-              />
+          <div className="flex items-center gap-6 pt-3">
+            {/* Circular Donut Chart */}
+            <div className="relative w-28 h-28 shrink-0">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                {/* Background Full Track (Male part) */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r={radius}
+                  className="stroke-slate-800"
+                  strokeWidth="14"
+                  fill="transparent"
+                />
 
-              {/* Female Arc (Blue) */}
-              <circle
-                cx="50"
-                cy="50"
-                r={radius}
-                stroke="#7c9dfc"
-                strokeWidth="14"
-                strokeDasharray={`${femaleStrokeDash} ${circumference - femaleStrokeDash}`}
-                strokeDashoffset="0"
-                strokeLinecap="round"
-                fill="transparent"
-                className="transition-all duration-1000"
-              />
-            </svg>
-          </div>
-
-          {/* Legend */}
-          <div className="space-y-3">
-            {/* Female */}
-            <div className="flex items-center gap-3 text-sm">
-              <span className="w-3 h-3 rounded-full bg-[#7c9dfc] shrink-0" />
-              <span className="text-slate-300 font-medium">Female</span>
-              <span className="font-extrabold text-white">{femalePct}%</span>
+                {/* Female Arc (Blue) */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r={radius}
+                  stroke="#7c9dfc"
+                  strokeWidth="14"
+                  strokeDasharray={`${femaleStrokeDash} ${circumference - femaleStrokeDash}`}
+                  strokeDashoffset="0"
+                  strokeLinecap="round"
+                  fill="transparent"
+                  className="transition-all duration-1000"
+                />
+              </svg>
             </div>
 
-            {/* Male */}
-            <div className="flex items-center gap-3 text-sm">
-              <span className="w-3 h-3 rounded-full bg-slate-700 shrink-0" />
-              <span className="text-slate-300 font-medium">Male</span>
-              <span className="font-extrabold text-white">{malePct}%</span>
+            {/* Legend */}
+            <div className="space-y-3">
+              {/* Female */}
+              <div className="flex items-center gap-3 text-sm">
+                <span className="w-3 h-3 rounded-full bg-[#7c9dfc] shrink-0" />
+                <span className="text-slate-300 font-medium">Female</span>
+                <span className="font-extrabold text-white">{femalePct}%</span>
+              </div>
+
+              {/* Male */}
+              <div className="flex items-center gap-3 text-sm">
+                <span className="w-3 h-3 rounded-full bg-slate-700 shrink-0" />
+                <span className="text-slate-300 font-medium">Male</span>
+                <span className="font-extrabold text-white">{malePct}%</span>
+              </div>
             </div>
           </div>
         </div>

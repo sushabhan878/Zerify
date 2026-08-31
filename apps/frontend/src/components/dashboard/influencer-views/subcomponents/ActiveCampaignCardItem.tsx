@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export interface ActiveCampaignItem {
-  id: number;
+  id: string | number;
   title: string;
   brand: string;
   industry: string;
@@ -34,7 +34,7 @@ export interface ActiveCampaignItem {
 
 interface ActiveCampaignCardItemProps {
   campaign: ActiveCampaignItem;
-  onUploadSubmit: (id: number) => void;
+  onUploadSubmit: (id: string | number) => void;
 }
 
 export default function ActiveCampaignCardItem({ campaign, onUploadSubmit }: ActiveCampaignCardItemProps) {

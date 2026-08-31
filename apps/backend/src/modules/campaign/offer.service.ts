@@ -14,7 +14,7 @@ export class OfferService {
   constructor(
     private readonly repository: CampaignRepository,
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
 
   async sendOffer(userId: string, applicationId: string, dto: CreateOfferDto) {
     const application = await this.repository.findApplicationById(applicationId);

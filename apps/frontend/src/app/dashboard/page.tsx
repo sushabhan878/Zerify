@@ -92,7 +92,7 @@ function DashboardContent() {
         setUser(parsedUser);
 
         const currentTab = searchParams.get('tab') || searchParams.get('view') || searchParams.get('screen');
-        const defaultRoute = parsedUser.role === 'BRAND' ? 'overview' : 'profile-overview';
+        const defaultRoute = parsedUser.role === 'BRAND' ? 'overview' : 'statistics';
         const targetRoute = currentTab || defaultRoute;
 
         setActiveRoute(targetRoute);
