@@ -79,10 +79,70 @@ export class ParticipantService {
       );
     }
 
-    return this.repository.updateParticipantStatus(
+    const updated = await this.repository.updateParticipantStatus(
       participantId,
       ParticipantStatus.PARTICIPANT_COMPLETED,
     );
+
+    // Auto-record to influencer brand partner network
+    try {
+      if (participant.influencerProfileId && participant.campaign?.brandProfileId) {
+        const brand = participant.campaign.brandProfile;
+        const brandName = (brand as any).user?.name || brand.companyName || 'Brand Partner';
+        const contactLead = (brand as any).user?.name || 'Brand Partnerships Lead';
+        const campaignRecord = `${participant.campaign.title || 'Completed Campaign'} ($${(participant.agreedAmount || 0).toLocaleString('en-US')})`;
+
+        const existing = await (this.prisma as any).influencerBrandPartner.findUnique({
+          where: {
+            influencerProfileId_brandProfileId: {
+              influencerProfileId: participant.influencerProfileId,
+              brandProfileId: participant.campaign.brandProfileId,
+            },
+          },
+        });
+
+        if (existing) {
+          const newDeals = existing.totalDeals + 1;
+          const newPaid = (existing.totalPaid || 0) + (participant.agreedAmount || 0);
+          const pastList = Array.isArray(existing.pastCampaignsList)
+            ? [...existing.pastCampaignsList, campaignRecord]
+            : [campaignRecord];
+
+          await (this.prisma as any).influencerBrandPartner.update({
+            where: { id: existing.id },
+            data: {
+              totalDeals: newDeals,
+              totalPaid: newPaid,
+              lastWorked: new Date(),
+              pastCampaignsList: pastList,
+              relationshipTag:
+                newDeals >= 2 && existing.relationshipTag !== 'PREFERRED'
+                  ? 'REPEAT_SPONSOR'
+                  : existing.relationshipTag,
+            },
+          });
+        } else {
+          await (this.prisma as any).influencerBrandPartner.create({
+            data: {
+              influencerProfileId: participant.influencerProfileId,
+              brandProfileId: participant.campaign.brandProfileId,
+              totalDeals: 1,
+              totalPaid: participant.agreedAmount || 0,
+              lastWorked: new Date(),
+              pastCampaignsList: [campaignRecord],
+              relationshipTag: 'COMPLETED',
+              contactPerson: contactLead,
+              contactRole: 'Influencer Marketing Manager',
+              rating: 5.0,
+            },
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('Could not auto-record influencer brand partner network entry:', e);
+    }
+
+    return updated;
   }
 
   async cancelParticipant(userId: string, participantId: string) {

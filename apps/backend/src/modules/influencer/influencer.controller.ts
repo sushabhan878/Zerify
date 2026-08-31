@@ -1,5 +1,6 @@
 import { Controller, Get, Put, Body, Req } from '@nestjs/common';
 import { InfluencerService } from './influencer.service';
+import { NetworkService } from './network.service';
 import { UpdateInfluencerProfileDto } from './dto/update-profile.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import * as jwt from 'jsonwebtoken';
@@ -7,7 +8,10 @@ import * as jwt from 'jsonwebtoken';
 @ApiTags('influencer')
 @Controller('influencer')
 export class InfluencerController {
-  constructor(private readonly influencerService: InfluencerService) {}
+  constructor(
+    private readonly influencerService: InfluencerService,
+    private readonly networkService: NetworkService,
+  ) {}
 
   private extractUserId(req: any): string | undefined {
     if (req.user?.id) return req.user.id;
@@ -78,5 +82,21 @@ export class InfluencerController {
   @ApiResponse({ status: 200, description: 'Influencer directory retrieved successfully.' })
   async getDiscovery() {
     return this.influencerService.getDiscoveryInfluencers();
+  }
+
+  @Get('my-network')
+  @ApiOperation({ summary: 'Get all brand partners in influencer network' })
+  @ApiResponse({ status: 200, description: 'Influencer brand partner network retrieved successfully.' })
+  async getMyNetwork(@Req() req: any) {
+    const userId = this.extractUserId(req);
+    return this.networkService.getMyNetwork(userId);
+  }
+
+  @Put('my-network/:id/tag')
+  @ApiOperation({ summary: 'Update relationship tag for brand partner' })
+  async updateNetworkTag(@Req() req: any, @Body('tag') tag: string) {
+    const userId = this.extractUserId(req);
+    const partnerId = req.params.id;
+    return this.networkService.updateRelationshipTag(userId, partnerId, tag);
   }
 }

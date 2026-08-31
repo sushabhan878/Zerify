@@ -88,6 +88,9 @@ model BrandProfile {
   // Reviews given by this brand
   reviewsGiven          Review[]
 
+  // Brand partners in creators network
+  influencerPartners    InfluencerBrandPartner[]
+
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @updatedAt
 
@@ -164,6 +167,9 @@ model InfluencerProfile {
 
   // Reviews received from brands
   reviews                 Review[]
+
+  // Brand partners in creator network
+  brandPartners           InfluencerBrandPartner[]
 
   // Onboarding status & progress
   completionPercentage    Int                           @default(0)
@@ -891,6 +897,32 @@ model Review {
   @@index([influencerProfileId, rating])
   @@index([brandProfileId])
   @@map("reviews")
+}
+
+// Influencer Brand Partner Network Model
+model InfluencerBrandPartner {
+  id                    String            @id @default(uuid())
+  influencerProfileId   String
+  influencerProfile     InfluencerProfile @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+  brandProfileId        String
+  brandProfile          BrandProfile      @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+
+  relationshipTag       String            @default("COMPLETED") // PREFERRED, REPEAT_SPONSOR, COMPLETED
+  totalDeals            Int               @default(1)
+  totalPaid             Float             @default(0)
+  lastWorked            DateTime          @default(now())
+  contactPerson         String?
+  contactRole           String?           @default("Brand Partnerships Lead")
+  notes                 String?
+  rating                Float?            @default(5.0)
+  pastCampaignsList     String[]          @default([])
+
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@unique([influencerProfileId, brandProfileId])
+  @@index([influencerProfileId, relationshipTag])
+  @@map("influencer_brand_partners")
 }
 
 
