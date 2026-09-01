@@ -13,6 +13,7 @@ import {
   X,
 } from 'lucide-react';
 import { CampaignOfferItem } from '@/services/offer.service';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface OfferReceivedCardProps {
   offer: CampaignOfferItem;
@@ -28,13 +29,12 @@ export default function OfferReceivedCard({
   onDecline,
   isAccepting,
 }: OfferReceivedCardProps) {
+  const { format: formatUserCurrency } = useCurrency();
   const app = offer.application || {};
   const campaign = app.campaign || {};
   const brand = campaign.brandProfile || {};
 
-  const currency = offer.compensationCurrency || 'USD';
-  const sym = currency === 'INR' ? '₹' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
-  const payoutStr = `${sym}${Number(offer.compensationAmount).toLocaleString()} ${currency !== 'USD' && currency !== 'INR' ? currency : ''}`;
+  const payoutStr = formatUserCurrency(Number(offer.compensationAmount || 0));
 
   const deadlineStr = offer.responseDeadline
     ? new Date(offer.responseDeadline).toLocaleDateString('en-GB', {

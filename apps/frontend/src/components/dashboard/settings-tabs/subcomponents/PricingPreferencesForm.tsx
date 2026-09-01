@@ -51,14 +51,12 @@ export default function PricingPreferencesForm({
           </label>
           <div className="flex gap-2">
             <select
-              value={currency}
+              value={currency || 'INR'}
               onChange={(e) => setCurrency(e.target.value)}
               className="px-3 py-2.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500/80 font-medium shrink-0 shadow-inner"
             >
-              <option value="USD">$ USD</option>
               <option value="INR">₹ INR</option>
-              <option value="EUR">€ EUR</option>
-              <option value="GBP">£ GBP</option>
+              <option value="USD">$ USD</option>
             </select>
             <input
               type="number"

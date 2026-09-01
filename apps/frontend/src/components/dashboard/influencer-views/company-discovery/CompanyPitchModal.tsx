@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Sparkles, DollarSign, CheckCircle2, Loader2 } from 'lucide-react';
 import { CompanyItem } from './CompanyCard';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface CompanyPitchModalProps {
   company: CompanyItem | null;
@@ -13,6 +14,7 @@ interface CompanyPitchModalProps {
 }
 
 export default function CompanyPitchModal({ company, onClose, onSubmitPitch }: CompanyPitchModalProps) {
+  const { currency, symbol } = useCurrency();
   const [pitchMessage, setPitchMessage] = useState('');
   const [proposedRate, setProposedRate] = useState('');
   const [selectedDeliverable, setSelectedDeliverable] = useState('Instagram Reel');
@@ -115,12 +117,14 @@ export default function CompanyPitchModal({ company, onClose, onSubmitPitch }: C
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-300">Proposed Rate ($ USD)</label>
+                  <label className="text-xs font-bold text-slate-300">Proposed Rate ({symbol} {currency})</label>
                   <div className="relative">
-                    <DollarSign className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <span className="w-3.5 h-3.5 text-slate-400 font-bold text-xs absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
+                      {symbol}
+                    </span>
                     <input
                       type="number"
-                      placeholder="e.g. 750"
+                      placeholder={currency === 'INR' ? 'e.g. 25000' : 'e.g. 500'}
                       value={proposedRate}
                       onChange={(e) => setProposedRate(e.target.value)}
                       required

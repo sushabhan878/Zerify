@@ -14,6 +14,8 @@ import {
 import { CampaignApplicationItem } from '@/services/application.service';
 import { CreatorItem } from '../find-influencers/CreatorCard';
 import { mapApplicationToCreator } from './mapApplicationToCreator';
+import { useCurrency } from '@/context/CurrencyContext';
+import { formatCurrency } from '@/utils/currency';
 
 interface ApplicantCardProps {
   application: CampaignApplicationItem;
@@ -36,6 +38,7 @@ export default function ApplicantCard({
   onSelectCompare,
   isCompareSelected,
 }: ApplicantCardProps) {
+  const { currency } = useCurrency();
   const [imageError, setImageError] = React.useState(false);
 
   const creatorItem = React.useMemo(() => mapApplicationToCreator(application), [application]);
@@ -55,16 +58,8 @@ export default function ApplicantCard({
   // Engagement Rate
   const engagementDisplay = creatorItem.engRate;
 
-  // Proposed Quote Currency
-  const currencySym =
-    application.proposedCurrency === 'INR' || (application.proposedAmount && application.proposedAmount > 5000)
-      ? '₹'
-      : application.proposedCurrency === 'EUR'
-        ? '€'
-        : '$';
-
   const quoteDisplay = application.proposedAmount
-    ? `${currencySym}${Number(application.proposedAmount).toLocaleString()}`
+    ? formatCurrency(application.proposedAmount, application.proposedCurrency || currency)
     : 'Flexible';
 
   return (

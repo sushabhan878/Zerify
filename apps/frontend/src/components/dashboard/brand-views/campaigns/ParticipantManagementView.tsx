@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { Users, CheckCircle, Clock, Video, ShieldCheck, ChevronRight } from 'lucide-react';
 import DeliverableReviewCard from './DeliverableReviewCard';
+import { useCurrency } from '@/context/CurrencyContext';
+import { formatCurrency } from '@/utils/currency';
 
 interface ParticipantManagementViewProps {
   participants: any[];
@@ -13,6 +15,7 @@ export default function ParticipantManagementView({
   participants,
   onRefresh,
 }: ParticipantManagementViewProps) {
+  const { currency } = useCurrency();
   const [selectedParticipantId, setSelectedParticipantId] = useState<string | null>(null);
 
   if (participants.length === 0) {
@@ -65,7 +68,7 @@ export default function ParticipantManagementView({
                 <div className="text-right">
                   <span className="text-[10px] text-slate-500 uppercase font-bold block">Fee</span>
                   <span className="text-xs font-black text-emerald-400">
-                    ${p.agreedAmount.toLocaleString()} {p.agreedCurrency}
+                    {formatCurrency(p.agreedAmount, p.agreedCurrency || currency)}
                   </span>
                 </div>
               </div>

@@ -71,6 +71,7 @@ model BrandProfile {
   minEngagementRate     Float?         @default(0.0)
   campaignBudget        String?        // Budget range
   campaignFrequency     String?        // One-time, Monthly, Quarterly, Ongoing
+  currency              String?        @default("INR")
 
   // Section 5: Payments & Escrow Setup
   escrowSetup           Json?          // { billingEmail, taxId, paymentMethod, escrowEnabled, autoDeposit, walletBalance }
@@ -148,7 +149,7 @@ model InfluencerProfile {
   availableForRelocation  Boolean                       @default(false)
   collaborationTypes      String[]                      @default([])
   minPricePerReel         Float?
-  currency                String?                       @default("USD")
+  currency                String?                       @default("INR")
   responseTime            String?                       @default("Within 24 hours")
   
   avatarUrl               String?
@@ -530,7 +531,7 @@ model Campaign {
 
   // Budget
   budgetTotalAmount     Float?
-  budgetCurrency        String?             @default("USD")
+  budgetCurrency        String?             @default("INR")
   budgetPaymentModel    PaymentModel?       @default(FIXED)
   budgetMinPerInfluencer Float?
   budgetMaxPerInfluencer Float?
@@ -665,7 +666,7 @@ model CampaignApplication {
   // Application Content
   applicationMessage    String?
   proposedAmount        Float?
-  proposedCurrency      String?             @default("USD")
+  proposedCurrency      String?             @default("INR")
   contentIdea           String?
   portfolioUrls         String[]            @default([])
 
@@ -707,7 +708,7 @@ model CampaignOffer {
 
   // Compensation
   compensationAmount    Float
-  compensationCurrency  String              @default("USD")
+  compensationCurrency  String              @default("INR")
   compensationPaymentModel PaymentModel     @default(FIXED)
 
   // Timeline
@@ -753,7 +754,7 @@ model CampaignParticipant {
 
   // Agreed Compensation
   agreedAmount          Float
-  agreedCurrency        String                  @default("USD")
+  agreedCurrency        String                  @default("INR")
   agreedPaymentModel    PaymentModel            @default(FIXED)
 
   // Allocation Status
@@ -853,7 +854,7 @@ model CampaignPayment {
   influencerProfileId   String
 
   amount                Float
-  currency              String              @default("USD")
+  currency              String              @default("INR")
 
   type                  CampaignPaymentType @default(PARTICIPANT_ALLOCATION)
   status                CampaignPaymentStatus @default(PAYMENT_PENDING)

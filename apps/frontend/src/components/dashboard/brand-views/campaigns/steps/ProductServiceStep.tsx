@@ -26,7 +26,7 @@ export default function ProductServiceStep({ formData, onChange }: ProductServic
     onChange('productType', newVal);
   };
 
-  const currencyCode = formData.budgetCurrency || 'USD';
+  const currencyCode = formData.budgetCurrency || (typeof window !== 'undefined' ? localStorage.getItem('zerify_preferred_currency') : 'INR') || 'INR';
   const currencySymbol = currencyCode === 'INR' ? '₹' : currencyCode === 'EUR' ? '€' : currencyCode === 'GBP' ? '£' : '$';
 
   return (

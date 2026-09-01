@@ -13,6 +13,8 @@ import {
   Clock,
 } from 'lucide-react';
 import { CampaignItem } from '@/services/campaign.service';
+import { formatCurrency as formatMoney } from '@/utils/currency';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface BrandCampaignCardProps {
   campaign: CampaignItem;
@@ -20,6 +22,7 @@ interface BrandCampaignCardProps {
 }
 
 export default function BrandCampaignCard({ campaign: c, onClick }: BrandCampaignCardProps) {
+  const { currency: userCurrency } = useCurrency();
   const hired = c._count?.participants || 0;
   const applicants = c._count?.applications || 0;
   const targetParticipants = c.targetParticipants || 1;
@@ -66,12 +69,7 @@ export default function BrandCampaignCard({ campaign: c, onClick }: BrandCampaig
 
   const formatCurrency = (amount?: number | string, currency?: string) => {
     if (amount === undefined || amount === null || amount === '') return 'Flexible';
-    const num = Number(amount);
-    if (isNaN(num)) return 'Flexible';
-    const curr = currency || 'USD';
-    const symbol =
-      curr === 'INR' ? '₹' : curr === 'EUR' ? '€' : curr === 'GBP' ? '£' : curr === 'CAD' ? 'C$' : curr === 'AUD' ? 'A$' : '$';
-    return `${symbol}${num.toLocaleString()}`;
+    return formatMoney(amount, currency || userCurrency || 'INR');
   };
 
   const formatPaymentModel = (model?: string) => {
@@ -177,11 +175,11 @@ export default function BrandCampaignCard({ campaign: c, onClick }: BrandCampaig
             <span>
               {c.budgetPaymentModel === 'BARTER'
                 ? 'Product Barter'
-                : formatCurrency(c.budgetTotalAmount, c.budgetCurrency)}
+                : formatCurrency(c.budgetTotalAmount, userCurrency)}
             </span>
-            {c.budgetPaymentModel !== 'BARTER' && c.budgetCurrency && (
+            {c.budgetPaymentModel !== 'BARTER' && (
               <span className="text-xs font-bold text-emerald-300/70 uppercase">
-                {c.budgetCurrency}
+                {userCurrency || 'INR'}
               </span>
             )}
           </span>

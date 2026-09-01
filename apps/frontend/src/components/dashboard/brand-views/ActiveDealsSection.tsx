@@ -3,11 +3,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FileText, CheckCircle2, Clock, ShieldCheck, Download } from 'lucide-react';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export default function ActiveDealsSection() {
+  const { formatBudget } = useCurrency();
   const deals = [
-    { id: 'CNT-901', creator: 'Sarah Jenkins (@sarah_creativ)', campaign: 'Q3 Enterprise SaaS', deliverable: 'YouTube Dedicated Video Draft', stage: 'Draft Review Required', amount: '$3,500', releaseEscrow: true },
-    { id: 'CNT-882', creator: 'Marcus Vance (@marcus_vfit)', campaign: 'Summer Desk Showcase', deliverable: '2x IG Reels & Story', stage: 'Published & Verifying Stats', amount: '$2,200', releaseEscrow: false },
+    { id: 'CNT-901', creator: 'Sarah Jenkins (@sarah_creativ)', campaign: 'Q3 Enterprise SaaS', deliverable: 'YouTube Dedicated Video Draft', stage: 'Draft Review Required', amount: formatBudget('$3,500'), releaseEscrow: true },
+    { id: 'CNT-882', creator: 'Marcus Vance (@marcus_vfit)', campaign: 'Summer Desk Showcase', deliverable: '2x IG Reels & Story', stage: 'Published & Verifying Stats', amount: formatBudget('$2,200'), releaseEscrow: false },
   ];
 
   return (

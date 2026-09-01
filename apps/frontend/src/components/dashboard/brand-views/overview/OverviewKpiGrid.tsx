@@ -12,6 +12,7 @@ import {
   Users,
   ArrowUpRight,
 } from 'lucide-react';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface KpiItem {
   id: string;
@@ -26,6 +27,10 @@ interface KpiItem {
 }
 
 export default function OverviewKpiGrid() {
+  const { currency, format } = useCurrency();
+  const spendDisplay = currency === 'INR' ? '₹35,40,000' : '$42,500';
+  const spendChange = currency === 'INR' ? '+₹7.0L' : '+$8.4K';
+
   const kpis: KpiItem[] = [
     {
       id: 'active-campaigns',
@@ -41,9 +46,9 @@ export default function OverviewKpiGrid() {
     {
       id: 'total-spend',
       label: 'Total Campaign Spend',
-      value: '$42,500',
+      value: spendDisplay,
       subtext: '78% of quarterly budget',
-      change: '+$8.4K',
+      change: spendChange,
       isPositive: true,
       icon: DollarSign,
       color: 'text-emerald-400',

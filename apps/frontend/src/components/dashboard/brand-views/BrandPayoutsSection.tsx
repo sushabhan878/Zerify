@@ -3,12 +3,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { DollarSign, Wallet, ShieldCheck, Download, Plus } from 'lucide-react';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export default function BrandPayoutsSection() {
+  const { formatBudget, format } = useCurrency();
   const transactions = [
-    { id: 'PAY-4012', creator: 'Sarah Jenkins', description: 'YouTube Video Integration Release', amount: '-$3,500', date: 'Jul 22, 2026', status: 'PAID' },
-    { id: 'ESC-3910', creator: 'Marcus Vance', description: 'Desk Showcase Escrow Hold', amount: '$2,200', date: 'Jul 18, 2026', status: 'IN ESCROW' },
-    { id: 'DEP-1002', creator: 'Stripe Deposit', description: 'Campaign Fund Top-up', amount: '+$25,000', date: 'Jul 10, 2026', status: 'COMPLETED' },
+    { id: 'PAY-4012', creator: 'Sarah Jenkins', description: 'YouTube Video Integration Release', amount: `-${formatBudget('$3,500')}`, date: 'Jul 22, 2026', status: 'PAID' },
+    { id: 'ESC-3910', creator: 'Marcus Vance', description: 'Desk Showcase Escrow Hold', amount: formatBudget('$2,200'), date: 'Jul 18, 2026', status: 'IN ESCROW' },
+    { id: 'DEP-1002', creator: 'Stripe Deposit', description: 'Campaign Fund Top-up', amount: `+${formatBudget('$25,000')}`, date: 'Jul 10, 2026', status: 'COMPLETED' },
   ];
 
   return (
@@ -17,7 +19,7 @@ export default function BrandPayoutsSection() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-5 rounded-2xl bg-gradient-to-tr from-purple-900/40 to-slate-900 border border-purple-500/30 backdrop-blur-xl">
           <span className="text-xs font-semibold text-slate-400 block mb-1">Available Campaign Balance</span>
-          <div className="text-2xl font-black text-white mb-2">$18,450.00</div>
+          <div className="text-2xl font-black text-white mb-2">{format(18450, { showDecimals: true })}</div>
           <button className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-md">
             <Plus className="w-3.5 h-3.5" />
             <span>Deposit Campaign Funds</span>
@@ -26,7 +28,7 @@ export default function BrandPayoutsSection() {
 
         <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl">
           <span className="text-xs font-semibold text-slate-400 block mb-1">Funds in Active Escrow</span>
-          <div className="text-2xl font-black text-amber-400 mb-2">$5,700.00</div>
+          <div className="text-2xl font-black text-amber-400 mb-2">{format(5700, { showDecimals: true })}</div>
           <span className="text-[11px] text-slate-500 flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
             <span>Protected by Zerify Smart Contracts</span>
@@ -35,7 +37,7 @@ export default function BrandPayoutsSection() {
 
         <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl">
           <span className="text-xs font-semibold text-slate-400 block mb-1">Total Creator Payouts</span>
-          <div className="text-2xl font-black text-emerald-400 mb-2">$64,200.00</div>
+          <div className="text-2xl font-black text-emerald-400 mb-2">{format(64200, { showDecimals: true })}</div>
           <span className="text-[11px] text-emerald-400 font-bold">48 Creator Contracts Settled</span>
         </div>
       </div>

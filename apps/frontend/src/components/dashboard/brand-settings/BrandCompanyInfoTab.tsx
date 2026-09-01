@@ -118,6 +118,7 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
   const [foundedYear, setFoundedYear] = useState(() => cached?.foundedYear || '');
   const [description, setDescription] = useState(() => cached?.description || '');
   const [selectedValues, setSelectedValues] = useState<string[]>(() => cached?.brandValues || []);
+  const [currency, setCurrency] = useState<string>(() => cached?.currency || 'INR');
   
   const [instagram, setInstagram] = useState(() => cached?.socialLinks?.instagram || '');
   const [linkedin, setLinkedin] = useState(() => cached?.socialLinks?.linkedin || '');
@@ -145,6 +146,7 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
       if (initialData.foundedYear !== undefined) setFoundedYear(initialData.foundedYear || '');
       if (initialData.description !== undefined) setDescription(initialData.description || '');
       if (initialData.brandValues !== undefined) setSelectedValues(initialData.brandValues || []);
+      if (initialData.currency) setCurrency(initialData.currency);
       if (initialData.socialLinks) {
         if (initialData.socialLinks.instagram !== undefined) setInstagram(initialData.socialLinks.instagram || '');
         if (initialData.socialLinks.linkedin !== undefined) setLinkedin(initialData.socialLinks.linkedin || '');
@@ -156,6 +158,11 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
       }
     }
   }, [initialData]);
+
+  const currencyOptions: SelectOption[] = [
+    { value: 'INR', label: '₹ INR (Indian Rupee - Default)' },
+    { value: 'USD', label: '$ USD (US Dollar)' },
+  ];
 
   const handleAddCustomLink = () => {
     setCustomLinks((prev) => [
@@ -251,6 +258,7 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
           location,
           foundedYear,
           description,
+          currency,
           brandValues: selectedValues,
           socialLinks: {
             instagram,
@@ -267,7 +275,9 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
       // Sync local storage & trigger real-time UI updates
       try {
         localStorage.setItem('zerify_brand_profile_cache', JSON.stringify(updatedProfile));
+        localStorage.setItem('zerify_preferred_currency', updatedProfile.currency || currency);
         window.dispatchEvent(new Event('zerify_brand_profile_update'));
+        window.dispatchEvent(new Event('zerify_currency_change'));
 
         const stored = localStorage.getItem('zerify_user');
         const userObj = stored ? JSON.parse(stored) : {};
@@ -420,6 +430,16 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
               className="w-full bg-slate-950/80 border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
             />
           </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5">Billing &amp; Platform Currency</label>
+          <CustomSelect
+            options={currencyOptions}
+            value={currency}
+            onChange={(val) => setCurrency(val)}
+            iconLeft={<span className="text-xs font-bold text-purple-400">₹/$</span>}
+          />
         </div>
       </div>
 

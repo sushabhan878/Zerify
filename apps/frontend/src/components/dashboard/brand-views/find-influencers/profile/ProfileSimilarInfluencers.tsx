@@ -3,6 +3,7 @@
 import React, { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Star, Award, Camera } from 'lucide-react';
 import { CreatorItem } from '../CreatorCard';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface ProfileSimilarInfluencersProps {
   creator: CreatorItem;
@@ -25,6 +26,7 @@ export default function ProfileSimilarInfluencers({
   creator,
   onSelectCreator,
 }: ProfileSimilarInfluencersProps) {
+  const { formatBudget } = useCurrency();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const similarCreators: SimilarCreatorItem[] = [
@@ -214,7 +216,7 @@ export default function ProfileSimilarInfluencers({
                   {item.role}
                 </p>
                 <div className="flex items-center justify-between text-xs pt-0.5">
-                  <span className="font-bold text-white text-sm">{item.price}</span>
+                  <span className="font-bold text-white text-sm">{formatBudget(item.price)}</span>
                   <span className="text-slate-400 truncate max-w-[130px]">
                     {item.location}
                   </span>

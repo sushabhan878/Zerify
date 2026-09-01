@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { CompanyItem } from './CompanyCard';
 import CompanyAudienceCharts from './CompanyAudienceCharts';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface CompanyDetailModalProps {
   company: CompanyItem | null;
@@ -27,6 +28,7 @@ interface CompanyDetailModalProps {
 
 export default function CompanyDetailModal({ company, onClose, onPitch }: CompanyDetailModalProps) {
   const [mounted, setMounted] = useState(false);
+  const { formatBudget } = useCurrency();
 
   useEffect(() => {
     setMounted(true);
@@ -247,7 +249,7 @@ export default function CompanyDetailModal({ company, onClose, onPitch }: Compan
               </h4>
               <p className="text-xs text-slate-300">
                 Est. Budget:{' '}
-                <strong className="text-emerald-400 font-black">{company.campaignBudget || 'Negotiable'}</strong>
+                <strong className="text-emerald-400 font-black">{formatBudget(company.campaignBudget)}</strong>
               </p>
               <p className="text-xs text-slate-300">
                 Target Tiers:{' '}

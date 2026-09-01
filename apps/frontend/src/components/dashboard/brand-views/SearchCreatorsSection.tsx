@@ -16,6 +16,8 @@ import CreatorProfileFullView from './find-influencers/CreatorProfileFullView';
 import CreatorInviteModal from './find-influencers/CreatorInviteModal';
 import LottieLoader from '@/components/ui/LottieLoader';
 import { MOCK_CREATORS } from './find-influencers/mockCreators';
+import { useCurrency } from '@/context/CurrencyContext';
+import { formatCurrency } from '@/utils/currency';
 
 const INITIAL_FILTERS: CreatorAdvancedFilterState = {
   category: 'All',
@@ -60,7 +62,14 @@ function getTierFromReach(reachNum: number): string {
 }
 
 export default function SearchCreatorsSection() {
-  const [creators, setCreators] = useState<CreatorItem[]>(MOCK_CREATORS);
+  const { currency, formatBudget } = useCurrency();
+  const [creators, setCreators] = useState<CreatorItem[]>(() => {
+    return MOCK_CREATORS.map((c) => ({
+      ...c,
+      startingRate: c.startingRate ? formatBudget(c.startingRate) : (currency === 'INR' ? '₹25,000' : '$750'),
+      rateNumber: currency === 'INR' ? (c.rateNumber > 1000 ? c.rateNumber : c.rateNumber * 83.5) : (c.rateNumber > 1000 ? Math.round(c.rateNumber / 83.5) : c.rateNumber),
+    }));
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<CreatorAdvancedFilterState>(INITIAL_FILTERS);
@@ -98,7 +107,8 @@ export default function SearchCreatorsSection() {
                 socialAcc.followerCount ||
                 450000;
               const engRateNum = socialAcc.engagementRate || 6.5;
-              const startingRateNum = inf.minPricePerReel || 750;
+              const baseRateUSD = inf.minPricePerReel || 750;
+              const startingRateNum = currency === 'INR' ? Math.round(baseRateUSD * 83.5) : baseRateUSD;
               const baseMatch = Math.min(99, Math.max(68, 97 - (idx % 12) * 2));
               const mainPlatform = socialAcc.platform || 'Instagram';
               const platformsList =
@@ -120,7 +130,7 @@ export default function SearchCreatorsSection() {
                 engRate: `${engRateNum}%`,
                 engRateNumber: engRateNum,
                 rating: Number((4.8 + ((idx % 3) * 0.1)).toFixed(1)),
-                startingRate: `$${startingRateNum}`,
+                startingRate: formatCurrency(startingRateNum, currency),
                 rateNumber: startingRateNum,
                 platforms: Array.from(new Set(platformsList)),
                 primaryPlatform: mainPlatform,
@@ -274,6 +284,26 @@ export default function SearchCreatorsSection() {
       // 8. Location
       if (filters.location !== 'All' && !c.location.toLowerCase().includes(filters.location.toLowerCase())) {
         return false;
+      }
+
+      // 9. Rate Range filter
+      if (filters.rateRange && filters.rateRange !== 'Any Rate') {
+        const r = filters.rateRange;
+        if (r.includes('Under')) {
+          const maxVal = parseInt(r.replace(/[^0-9]/g, '')) || 500;
+          if (c.rateNumber > maxVal) return false;
+        } else if (r.includes('+')) {
+          const minVal = parseInt(r.replace(/[^0-9]/g, '')) || 5000;
+          if (c.rateNumber < minVal) return false;
+        } else if (r.includes('-')) {
+          const parts = r.split('-').map((s) => {
+            let num = parseInt(s.replace(/[^0-9]/g, '')) || 0;
+            if (s.toLowerCase().includes('k') && num < 1000) num *= 1000;
+            return num;
+          });
+          if (parts[0] && c.rateNumber < parts[0]) return false;
+          if (parts[1] && c.rateNumber > parts[1]) return false;
+        }
       }
 
       return true;

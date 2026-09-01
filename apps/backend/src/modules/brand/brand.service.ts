@@ -99,6 +99,7 @@ export class BrandService {
       foundedYear: dto.foundedYear ?? undefined,
       socialLinks: dto.socialLinks ?? undefined,
       brandValues: dto.brandValues ?? undefined,
+      currency: dto.currency ?? undefined,
     });
 
     const result = await this.syncAndSaveCompletionPercentage(userId);

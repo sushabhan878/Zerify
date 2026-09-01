@@ -120,7 +120,11 @@ export default function CreatorDetailsTab({ initialData, onSaveSuccess }: Creato
         const updatedData = await res.json();
         try {
           localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(updatedData));
+          if (updatedData.currency) {
+            localStorage.setItem('zerify_preferred_currency', updatedData.currency);
+          }
           window.dispatchEvent(new Event('zerify_influencer_profile_update'));
+          window.dispatchEvent(new Event('zerify_currency_change'));
         } catch (e) {}
       }
 

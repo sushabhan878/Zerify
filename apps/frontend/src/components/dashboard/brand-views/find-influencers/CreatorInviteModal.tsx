@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Check, DollarSign, Megaphone, Loader2 } from 'lucide-react';
 import { CreatorItem } from './CreatorCard';
 import { CampaignItem, CampaignService } from '@/services/campaign.service';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface CreatorInviteModalProps {
   creator: CreatorItem | null;
@@ -13,9 +14,13 @@ interface CreatorInviteModalProps {
 }
 
 export default function CreatorInviteModal({ creator, onClose }: CreatorInviteModalProps) {
+  const { currency, symbol, convert } = useCurrency();
   const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>('');
-  const [proposedBudget, setProposedBudget] = useState<string>('850');
+  const [proposedBudget, setProposedBudget] = useState<string>(() => {
+    const rawRate = creator?.rateNumber || 250;
+    return String(Math.round(convert(rawRate, 'USD', currency)));
+  });
   const [message, setMessage] = useState<string>('');
   const [isSending, setIsSending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -113,12 +118,12 @@ export default function CreatorInviteModal({ creator, onClose }: CreatorInviteMo
 
               {/* Proposed Budget */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300 block">Proposed Deliverable Budget ($ USD)</label>
+                <label className="text-xs font-bold text-slate-300 block">Proposed Deliverable Budget ({symbol} {currency})</label>
                 <input
                   type="number"
                   value={proposedBudget}
                   onChange={(e) => setProposedBudget(e.target.value)}
-                  placeholder="e.g. 750"
+                  placeholder={currency === 'INR' ? 'e.g. 50000' : 'e.g. 750'}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-xs font-semibold text-white focus:outline-none focus:border-purple-500"
                 />
               </div>

@@ -14,6 +14,8 @@ import CreatorAdvancedFiltersModal, {
 import CreatorProfileFullView from './find-influencers/CreatorProfileFullView';
 import CreatorInviteModal from './find-influencers/CreatorInviteModal';
 import LottieLoader from '@/components/ui/LottieLoader';
+import { useCurrency } from '@/context/CurrencyContext';
+import { formatCurrency } from '@/utils/currency';
 
 const INITIAL_FILTERS: CreatorAdvancedFilterState = {
   category: 'All',
@@ -58,6 +60,7 @@ function getTierFromReach(reachNum: number): string {
 }
 
 export default function SavedCreatorsSection() {
+  const { currency, formatBudget } = useCurrency();
   const [savedCreators, setSavedCreators] = useState<CreatorItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -101,7 +104,8 @@ export default function SavedCreatorsSection() {
               socialAcc.followerCount ||
               450000;
             const engRateNum = socialAcc.engagementRate || 6.5;
-            const startingRateNum = inf.minPricePerReel || 750;
+            const baseRateUSD = inf.minPricePerReel || 750;
+            const startingRateNum = currency === 'INR' ? Math.round(baseRateUSD * 83.5) : baseRateUSD;
             const baseMatch = Math.min(99, Math.max(68, 97 - (idx % 12) * 2));
             const mainPlatform = socialAcc.platform || 'Instagram';
             const platformsList =
@@ -123,7 +127,7 @@ export default function SavedCreatorsSection() {
               engRate: `${engRateNum}%`,
               engRateNumber: engRateNum,
               rating: Number((4.8 + ((idx % 3) * 0.1)).toFixed(1)),
-              startingRate: `$${startingRateNum}`,
+              startingRate: formatCurrency(startingRateNum, currency),
               rateNumber: startingRateNum,
               platforms: Array.from(new Set(platformsList)),
               primaryPlatform: mainPlatform,

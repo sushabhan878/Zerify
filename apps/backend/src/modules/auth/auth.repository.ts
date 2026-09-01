@@ -32,7 +32,7 @@ export class AuthRepository {
    * Atomically creates a User record with BRAND role and populates BrandProfile
    */
   async createBrandUser(dto: RegisterBrandDto, hashedPassword: string) {
-    const { email, name, companyName, website } = dto;
+    const { email, name, companyName, website, currency, budget } = dto;
 
     return this.prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
@@ -49,6 +49,8 @@ export class AuthRepository {
           userId: user.id,
           companyName: companyName || name || 'My Brand',
           website: website || null,
+          currency: currency || 'INR',
+          campaignBudget: budget !== undefined && budget !== null ? String(budget) : null,
         },
       });
 
@@ -102,7 +104,7 @@ export class AuthRepository {
           availableForRelocation: Boolean(dto.availableForRelocation),
           collaborationTypes: dto.collaborationTypes || [],
           minPricePerReel: dto.minPricePerReel ? Number(dto.minPricePerReel) : null,
-          currency: dto.currency || 'USD',
+          currency: dto.currency || 'INR',
           responseTime: dto.responseTime || 'Within 24 hours',
           pricingRange: pricingRange || null,
         },

@@ -19,6 +19,8 @@ import { AlertCircle, RefreshCw } from 'lucide-react';
 import { CampaignService } from '@/services/campaign.service';
 import { ApplicationService } from '@/services/application.service';
 import { ALL_INDUSTRIES_GROUPED } from '@/constants/categories';
+import { useCurrency } from '@/context/CurrencyContext';
+import { formatCurrency, getCurrencySymbol } from '@/utils/currency';
 
 const INITIAL_FILTERS: CampaignAdvancedFilterState = {
   category: 'All',
@@ -39,6 +41,71 @@ function parseBudgetNumeric(str: string): number {
   return match ? parseInt(match[0], 10) : 0;
 }
 
+function parseCampaignBounds(budgetStr?: string): [number, number] {
+  if (!budgetStr) return [0, Infinity];
+  const cleaned = budgetStr.replace(/,/g, '').trim();
+
+  if (cleaned.includes('+')) {
+    const match = cleaned.match(/\d+/);
+    const val = match ? Number(match[0]) : 0;
+    return [val, Infinity];
+  }
+
+  const nums = cleaned.match(/\d+/g)?.map(Number) || [];
+  if (nums.length === 0) return [0, Infinity];
+  if (nums.length === 1) {
+    if (cleaned.toLowerCase().includes('under') || cleaned.toLowerCase().includes('<')) {
+      return [0, nums[0]];
+    }
+    return [nums[0], nums[0]];
+  }
+
+  return [Math.min(nums[0], nums[1]), Math.max(nums[0], nums[1])];
+}
+
+function matchesCampaignBudget(payoutStr: string, filterRange: string): boolean {
+  if (!filterRange || filterRange === 'Any Budget') return true;
+  if (!payoutStr) return true;
+
+  const [campMin, campMax] = parseCampaignBounds(payoutStr);
+  const campMid = (campMin + (campMax === Infinity ? campMin : campMax)) / 2;
+
+  switch (filterRange) {
+    // USD
+    case 'Under $500':
+      return campMin < 500 || campMax <= 500 || campMid <= 500;
+    case '$500 - $1K':
+      return (campMin >= 400 && campMax <= 1200) || (campMid >= 500 && campMid <= 1000);
+    case '$1K - $3K':
+      return (campMin >= 900 && campMax <= 3500) || (campMid >= 1000 && campMid <= 3000);
+    case '$3K - $5K':
+      return (campMin >= 2500 && campMax <= 5500) || (campMid >= 3000 && campMid <= 5000);
+    case '$5K - $10K':
+      return (campMin >= 4500 && campMax <= 11000) || (campMid >= 5000 && campMid <= 10000);
+    case '$10K - $25K':
+      return (campMin >= 9000 && campMax <= 26000) || (campMid >= 10000 && campMid <= 25000);
+    case '$25K+':
+      return campMax >= 25000 || campMin >= 25000;
+
+    // INR
+    case 'Under ₹50,000':
+      return campMin < 50000 || campMax <= 50000 || campMid <= 50000;
+    case '₹50,000 - ₹2,00,000':
+      return (campMin >= 40000 && campMax <= 250000) || (campMid >= 50000 && campMid <= 200000);
+    case '₹2,00,000 - ₹5,00,000':
+      return (campMin >= 180000 && campMax <= 600000) || (campMid >= 200000 && campMid <= 500000);
+    case '₹5,00,000 - ₹10,00,000':
+      return (campMin >= 450000 && campMax <= 1200000) || (campMid >= 500000 && campMid <= 1000000);
+    case '₹10,00,000 - ₹25,00,000':
+      return (campMin >= 900000 && campMax <= 3000000) || (campMid >= 1000000 && campMid <= 2500000);
+    case '₹25,00,000+':
+      return campMax >= 2500000 || campMin >= 2500000;
+
+    default:
+      return true;
+  }
+}
+
 function normalizePlatform(p: string): 'Instagram' | 'YouTube' | 'TikTok' | 'LinkedIn' | 'Twitter' {
   const upper = (p || '').toUpperCase();
   if (upper.includes('INSTA')) return 'Instagram';
@@ -49,23 +116,23 @@ function normalizePlatform(p: string): 'Instagram' | 'YouTube' | 'TikTok' | 'Lin
   return 'Instagram';
 }
 
-function mapDbCampaignToItem(c: any): CampaignItem {
-  const currencyCode = c.budgetCurrency || 'USD';
-  const sym = currencyCode === 'INR' ? '₹' : currencyCode === 'EUR' ? '€' : currencyCode === 'GBP' ? '£' : '$';
+function mapDbCampaignToItem(c: any, userCurrency = 'INR'): CampaignItem {
+  const currencyCode = c.budgetCurrency || userCurrency || 'INR';
+  const sym = getCurrencySymbol(currencyCode);
 
   let payoutAmount = 'Flexible / Negotiable';
   if (c.budgetPaymentModel === 'BARTER') {
-    payoutAmount = 'Product Barter ($0 Escrow)';
+    payoutAmount = `Product Barter (${sym}0 Escrow)`;
   } else if (c.budgetTotalAmount) {
-    payoutAmount = `${sym}${Number(c.budgetTotalAmount).toLocaleString()}`;
+    payoutAmount = formatCurrency(c.budgetTotalAmount, currencyCode);
   } else if (c.budgetMinPerInfluencer && c.budgetMaxPerInfluencer) {
     if (Number(c.budgetMinPerInfluencer) === Number(c.budgetMaxPerInfluencer)) {
-      payoutAmount = `${sym}${Number(c.budgetMinPerInfluencer).toLocaleString()}`;
+      payoutAmount = formatCurrency(c.budgetMinPerInfluencer, currencyCode);
     } else {
-      payoutAmount = `${sym}${Number(c.budgetMinPerInfluencer).toLocaleString()} – ${sym}${Number(c.budgetMaxPerInfluencer).toLocaleString()}`;
+      payoutAmount = `${formatCurrency(c.budgetMinPerInfluencer, currencyCode)} – ${formatCurrency(c.budgetMaxPerInfluencer, currencyCode)}`;
     }
   } else if (c.budgetMinPerInfluencer || c.budgetMaxPerInfluencer) {
-    payoutAmount = `${sym}${Number(c.budgetMinPerInfluencer || c.budgetMaxPerInfluencer).toLocaleString()}`;
+    payoutAmount = formatCurrency(c.budgetMinPerInfluencer || c.budgetMaxPerInfluencer, currencyCode);
   }
 
   let payoutModel: 'Fixed Fee' | 'Paid + Commission' | 'Product Barter' = 'Fixed Fee';
@@ -173,6 +240,7 @@ function mapDbCampaignToItem(c: any): CampaignItem {
 }
 
 export default function CampaignDiscoverySection() {
+  const { currency: userCurrency } = useCurrency();
   const [searchQuery, setSearchQuery] = useState('');
   const [quickFilters, setQuickFilters] = useState<CampaignQuickFilterState>({
     category: 'All',
@@ -254,7 +322,7 @@ export default function CampaignDiscoverySection() {
 
       if (resResult.status === 'fulfilled' && resResult.value?.campaigns && Array.isArray(resResult.value.campaigns)) {
         const formatted: CampaignItem[] = resResult.value.campaigns.map((c: any) => {
-          const item = mapDbCampaignToItem(c);
+          const item = mapDbCampaignToItem(c, userCurrency);
           if (myAppsMap[c.id]) {
             item.isApplied = true;
             item.applicationStatus = myAppsMap[c.id];
@@ -272,7 +340,7 @@ export default function CampaignDiscoverySection() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [searchQuery, quickFilters]);
+  }, [searchQuery, quickFilters, userCurrency]);
 
   useEffect(() => {
     fetchCampaigns();
@@ -400,15 +468,21 @@ export default function CampaignDiscoverySection() {
         if (!hasPlatform) return false;
       }
 
-      // 5. Minimum Match Score
+      // 5. Budget Range Filter
+      if (quickFilters.budgetRange !== 'Any Budget') {
+        const matches = matchesCampaignBudget(c.payoutAmount, quickFilters.budgetRange);
+        if (!matches) return false;
+      }
+
+      // 6. Minimum Match Score
       if (quickFilters.minMatchScore > 0 && c.matchScore < quickFilters.minMatchScore) {
         return false;
       }
 
-      // 6. Verified Brand
+      // 7. Verified Brand
       if (advancedFilters.isVerifiedOnly && !c.isVerifiedBrand) return false;
 
-      // 7. Escrow Only
+      // 8. Escrow Only
       if (advancedFilters.isEscrowOnly && !c.isEscrowGuaranteed) return false;
 
       return true;

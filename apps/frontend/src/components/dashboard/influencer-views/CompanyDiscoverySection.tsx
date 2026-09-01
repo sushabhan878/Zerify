@@ -626,6 +626,7 @@ export default function CompanyDiscoverySection() {
     const brandMid = (brandMin + (brandMax === Infinity ? brandMin : brandMax)) / 2;
 
     switch (filterRange) {
+      // USD Ranges
       case 'Under $500':
         return brandMin < 500 || brandMax <= 500 || brandMid <= 500;
       case '$500 - $1K':
@@ -640,6 +641,21 @@ export default function CompanyDiscoverySection() {
         return (brandMin >= 9000 && brandMax <= 26000) || (brandMid >= 10000 && brandMid <= 25000);
       case '$25K+':
         return brandMax >= 25000 || brandMin >= 25000;
+
+      // INR Ranges
+      case 'Under ₹50,000':
+        return brandMin < 600 || brandMax <= 600 || brandMid <= 600;
+      case '₹50,000 - ₹2,00,000':
+        return (brandMin >= 500 && brandMax <= 2600) || (brandMid >= 600 && brandMid <= 2400);
+      case '₹2,00,000 - ₹5,00,000':
+        return (brandMin >= 2000 && brandMax <= 6500) || (brandMid >= 2400 && brandMid <= 6000);
+      case '₹5,00,000 - ₹10,00,000':
+        return (brandMin >= 5000 && brandMax <= 13000) || (brandMid >= 6000 && brandMid <= 12000);
+      case '₹10,00,000 - ₹25,00,000':
+        return (brandMin >= 10000 && brandMax <= 32000) || (brandMid >= 12000 && brandMid <= 30000);
+      case '₹25,00,000+':
+        return brandMax >= 25000 || brandMin >= 25000;
+
       default: {
         const [filterMin, filterMax] = getFilterRangeBounds(filterRange);
         return brandMax >= filterMin && brandMin <= filterMax;

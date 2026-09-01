@@ -10,6 +10,8 @@ interface RegisterInfluencerStepProps {
   setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>;
   pricePerReel: number;
   setPricePerReel: (val: number) => void;
+  currency: 'INR' | 'USD';
+  setCurrency: (curr: 'INR' | 'USD') => void;
   loading: boolean;
   errorMessage: string;
   onSubmit: (e: React.FormEvent) => void;
@@ -40,6 +42,8 @@ export default function RegisterInfluencerStep({
   setSelectedCategories,
   pricePerReel,
   setPricePerReel,
+  currency,
+  setCurrency,
   loading,
   errorMessage,
   onSubmit,
@@ -79,10 +83,29 @@ export default function RegisterInfluencerStep({
       !selectedCategories.includes(c)
   );
 
+  const handleCurrencyChange = (newCurr: 'INR' | 'USD') => {
+    if (newCurr === currency) return;
+    if (newCurr === 'USD') {
+      // Convert INR (e.g. 20000) to USD (~240)
+      const converted = Math.round(pricePerReel / 83.5);
+      setPricePerReel(Math.max(0, Math.min(converted, 5000)));
+    } else {
+      // Convert USD (e.g. 250) to INR (~20000)
+      const converted = Math.round((pricePerReel * 83.5) / 1000) * 1000;
+      setPricePerReel(Math.max(0, Math.min(converted, 500000)));
+    }
+    setCurrency(newCurr);
+  };
+
   const formatReelPrice = (val: number) => {
-    if (val === 0) return '$0 (Product Gifting)';
-    if (val >= 5000) return '$5,000+ / reel';
-    return `$${val.toLocaleString()} / reel`;
+    if (val === 0) return `${currency === 'INR' ? '₹0' : '$0'} (Product Gifting)`;
+    if (currency === 'INR') {
+      if (val >= 500000) return '₹5,00,000+ / reel';
+      return `₹${val.toLocaleString('en-IN')} / reel`;
+    } else {
+      if (val >= 5000) return '$5,000+ / reel';
+      return `$${val.toLocaleString()} / reel`;
+    }
   };
 
   return (
@@ -174,7 +197,7 @@ export default function RegisterInfluencerStep({
               </button>
             )}
 
-            {/* Filtered Categories Search Dropdown (Excludes already selected categories) */}
+            {/* Filtered Categories Search Dropdown */}
             {dropdownOpen && filteredCategories.length > 0 && (
               <div className="absolute left-0 right-0 top-full mt-1.5 z-30 max-h-48 overflow-y-auto rounded-xl bg-[#090d16] border border-white/15 shadow-2xl p-1.5 space-y-1 backdrop-blur-xl">
                 {filteredCategories.map((cat) => (
@@ -192,7 +215,7 @@ export default function RegisterInfluencerStep({
             )}
           </div>
 
-          {/* Available Preset Category Quick Pills (Excludes Selected Categories) */}
+          {/* Available Preset Category Quick Pills */}
           {PRESET_CATEGORIES.filter((c) => !selectedCategories.includes(c)).length > 0 && (
             <div className="pt-2">
               <span className="block text-[11px] font-medium text-slate-400 mb-1.5">
@@ -217,33 +240,77 @@ export default function RegisterInfluencerStep({
           )}
         </div>
 
-        {/* 2. Rate Per Reel Sliding Bar */}
-        <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 space-y-3">
+        {/* 2. Rate Per Reel Sliding Bar with Currency Selector */}
+        <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 space-y-3.5">
+          {/* Header Row: Label & Currency Segmented Toggle */}
           <div className="flex items-center justify-between">
             <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
               <Video className="w-3.5 h-3.5 text-pink-400" />
               <span>Rate Per Reel / Video</span>
             </label>
-            <span className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 px-2.5 py-0.5 rounded-full bg-pink-500/10 border border-pink-500/20">
+
+            {/* Currency Selector Pill */}
+            <div className="flex items-center gap-1 bg-slate-950/80 p-0.5 rounded-lg border border-white/10">
+              <button
+                type="button"
+                onClick={() => handleCurrencyChange('INR')}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
+                  currency === 'INR'
+                    ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                ₹ INR
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCurrencyChange('USD')}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
+                  currency === 'USD'
+                    ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                $ USD
+              </button>
+            </div>
+          </div>
+
+          {/* Rate Badge Display */}
+          <div className="flex justify-end">
+            <span className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/20">
               {formatReelPrice(pricePerReel)}
             </span>
           </div>
 
+          {/* Dynamic Slider (Adapts to INR / USD) */}
           <input
             type="range"
             min={0}
-            max={5000}
-            step={50}
+            max={currency === 'INR' ? 500000 : 5000}
+            step={currency === 'INR' ? 1000 : 50}
             value={pricePerReel}
             onChange={(e) => setPricePerReel(Number(e.target.value))}
             className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-pink-500 hover:accent-pink-400 transition-all"
           />
 
+          {/* Slider Axis Ticks */}
           <div className="flex justify-between text-[10px] text-slate-500 font-semibold px-0.5">
-            <span>$0</span>
-            <span>$500</span>
-            <span>$2,500</span>
-            <span>$5,000+</span>
+            {currency === 'INR' ? (
+              <>
+                <span>₹0</span>
+                <span>₹50,000</span>
+                <span>₹2,50,000</span>
+                <span>₹5,00,000+</span>
+              </>
+            ) : (
+              <>
+                <span>$0</span>
+                <span>$500</span>
+                <span>$2,500</span>
+                <span>$5,000+</span>
+              </>
+            )}
           </div>
         </div>
 

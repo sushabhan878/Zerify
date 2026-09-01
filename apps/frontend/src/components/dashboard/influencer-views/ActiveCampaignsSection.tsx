@@ -7,12 +7,14 @@ import ActiveCampaignCardItem, { ActiveCampaignItem } from './subcomponents/Acti
 import CollaborationWorkspace from './collaborations/CollaborationWorkspace';
 import { DeliverableService } from '@/services/deliverable.service';
 import LottieLoader from '@/components/ui/LottieLoader';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface ActiveCampaignsSectionProps {
   onNavigate?: (routeId: string) => void;
 }
 
 export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSectionProps) {
+  const { currency: userCurrency, format: formatUserCurrency } = useCurrency();
   const [activeTab, setActiveTab] = useState<'ALL' | 'IN_PRODUCTION' | 'CONTENT_REVIEW' | 'READY_TO_PUBLISH' | 'COMPLETED'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeParticipantId, setActiveParticipantId] = useState<string | null>(null);
@@ -50,10 +52,9 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
             stage = 'CONTENT_REVIEW';
           }
 
-          const currency = p.agreedCurrency || 'USD';
-          const sym = currency === 'INR' ? '₹' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
+          const agreedCurr = p.agreedCurrency || p.campaign?.currency || userCurrency || 'INR';
           const amountNum = Number(p.agreedAmount || p.agreedBudget || 0);
-          const payoutStr = amountNum > 0 ? `${sym}${amountNum.toLocaleString()}` : 'Product Barter / Fixed';
+          const payoutStr = amountNum > 0 ? formatUserCurrency(amountNum) : 'Product Barter / Fixed';
 
           let deadlineStr = 'Rolling Milestone';
           if (p.campaign?.endDate) {
@@ -100,7 +101,7 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, []);
+  }, [userCurrency, formatUserCurrency]);
 
   useEffect(() => {
     loadData();
@@ -137,10 +138,7 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
     const match = c.payout.replace(/,/g, '').match(/[0-9.]+/);
     return acc + (match ? parseFloat(match[0]) : 0);
   }, 0);
-  const totalEscrowStr = `$${totalEscrowNumeric.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+  const totalEscrowStr = formatUserCurrency(totalEscrowNumeric, { showDecimals: true });
 
   return (
     <div className="space-y-6">

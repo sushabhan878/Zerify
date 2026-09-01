@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { SlidersHorizontal, ChevronDown, Check } from 'lucide-react';
 import { PRIMARY_CATEGORY_NAMES } from '@/constants/categories';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export interface CreatorQuickFilterState {
   category: string;
@@ -23,7 +24,17 @@ interface CreatorQuickFiltersProps {
 
 const CATEGORIES = ['All', ...PRIMARY_CATEGORY_NAMES];
 
-const RATE_RANGES = [
+export const RATE_RANGES_INR = [
+  'Any Rate',
+  'Under ₹20,000',
+  '₹20,000 - ₹50,000',
+  '₹50,000 - ₹1,00,000',
+  '₹1,00,000 - ₹2,50,000',
+  '₹2,50,000 - ₹5,00,000',
+  '₹5,00,000+',
+];
+
+export const RATE_RANGES_USD = [
   'Any Rate',
   'Under $250',
   '$250 - $500',
@@ -32,6 +43,8 @@ const RATE_RANGES = [
   '$2.5K - $5K',
   '$5K+',
 ];
+
+export const RATE_RANGES = RATE_RANGES_INR;
 
 const MATCH_SCORES = [
   { label: 'Any Match', value: 0 },
@@ -58,6 +71,8 @@ export default function CreatorQuickFilters({
   onOpenAdvancedModal,
   activeCount,
 }: CreatorQuickFiltersProps) {
+  const { currency } = useCurrency();
+  const rateRanges = currency === 'INR' ? RATE_RANGES_INR : RATE_RANGES_USD;
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   const toggleDropdown = (name: string) => {
@@ -129,8 +144,8 @@ export default function CreatorQuickFilters({
             <ChevronDown className="w-3.5 h-3.5 opacity-70" />
           </button>
           {openDropdown === 'rate' && (
-            <div className="absolute top-full left-0 mt-1.5 w-48 bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
-              {RATE_RANGES.map((rate) => (
+            <div className="absolute top-full left-0 mt-1.5 w-52 bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+              {rateRanges.map((rate) => (
                 <button
                   key={rate}
                   type="button"

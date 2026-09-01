@@ -25,6 +25,7 @@ export const metadata = {
 };
 
 import { ToastProvider } from '@/components/ui/Toast';
+import { CurrencyProvider } from '@/context/CurrencyContext';
 
 export default function RootLayout({
   children,
@@ -34,7 +35,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`dark ${syne.variable}`}>
       <body className="bg-[#07090E] text-slate-100 antialiased selection:bg-purple-500 selection:text-white">
-        <ToastProvider>{children}</ToastProvider>
+        <CurrencyProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </CurrencyProvider>
       </body>
     </html>
   );
