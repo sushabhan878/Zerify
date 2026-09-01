@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   User,
   Building2,
+  Compass,
   Sparkles,
   MailCheck,
   Megaphone,
@@ -18,6 +19,7 @@ import {
   BarChart3,
   TrendingUp,
 } from 'lucide-react';
+import { OfferService } from '@/services/offer.service';
 
 import ThemeToggle from '../subcomponents/ThemeToggle';
 
@@ -44,20 +46,33 @@ export default function InfluencerNavMenu({
   isCollapsed = false,
 }: InfluencerNavMenuProps) {
   const [activeSubTab, setActiveSubTab] = useState('statistic');
+  const [pendingOffersCount, setPendingOffersCount] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchPendingOffers = async () => {
+      try {
+        const offers = await OfferService.getMyOffers().catch(() => []);
+        if (Array.isArray(offers)) {
+          const pending = offers.filter((o) => o.status === 'PENDING').length;
+          setPendingOffersCount(pending);
+        }
+      } catch (e) {}
+    };
+
+    fetchPendingOffers();
+    window.addEventListener('zerify_offers_updated', fetchPendingOffers);
+    return () => window.removeEventListener('zerify_offers_updated', fetchPendingOffers);
+  }, []);
 
   const mainRoutes: NavItem[] = [
     {
-      id: 'profile-overview',
-      label: 'Dashboard',
-      icon: User,
+      id: 'statistics',
+      label: 'Statistics',
+      icon: BarChart3,
       section: 'MAIN',
-      subItems: [
-        { id: 'activity', label: 'Activity', icon: Activity },
-        { id: 'traffic', label: 'Traffic', icon: TrendingUp },
-        { id: 'statistic', label: 'Statistic', icon: BarChart3 },
-      ],
     },
     { id: 'company-discovery', label: 'Company Discovery', icon: Building2, section: 'MAIN' },
+    { id: 'campaign-discovery', label: 'Campaign Discovery', icon: Compass, section: 'MAIN' },
     {
       id: 'ai-profile-match',
       label: 'AI Profile Match',
@@ -74,7 +89,7 @@ export default function InfluencerNavMenu({
       id: 'campaign-invitations',
       label: 'Invitations',
       icon: MailCheck,
-      badge: '3',
+      badge: pendingOffersCount > 0 ? `${pendingOffersCount}` : undefined,
       badgeColor: 'bg-purple-500/20 text-purple-300 border border-purple-500/30',
       section: 'CREATOR HUB',
     },

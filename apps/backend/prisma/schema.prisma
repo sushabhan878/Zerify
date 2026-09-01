@@ -25,6 +25,7 @@ model User {
   updatedAt     DateTime           @updatedAt
   brandProfile  BrandProfile?
   influencer    InfluencerProfile?
+  socialAccounts SocialAccount[]
 
   @@map("users")
 }
@@ -39,36 +40,176 @@ model Organization {
 }
 
 model BrandProfile {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyName String?
-  website     String?
-  logoUrl     String?  // Cloudinary image URL
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                    String         @id @default(uuid())
+  userId                String         @unique
+  user                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Section 1: Company / Brand Info
+  companyName           String?
+  logoUrl               String?        // Cloudinary image URL
+  website               String?
+  industry              String?
+  location              String?
+  description           String?
+  foundedYear           String?
+  socialLinks           Json?          // { instagram, linkedin, twitter, youtube, facebook, tiktok }
+  brandValues           String[]       @default([]) // Sustainability, Inclusivity, Innovation, Quality, Affordability, Community, Transparency
+
+  // Section 2: Campaign Goals
+  primaryGoals          String[]       @default([]) // Brand Awareness, Sales & Conversions, Content Creation, etc.
+  targetPlatforms       String[]       @default([]) // Instagram, YouTube, TikTok, LinkedIn, Twitter, Facebook
+  targetAudience        Json?          // { ageRanges: [], gender: "All", locations: [], interests: [] }
+
+  // Section 3: Product / Services Relation
+  products              BrandProduct[]
+
+  // Section 4: Targeted Influencers Preferences
+  creatorTiers          String[]       @default([]) // Nano, Micro, Mid, Macro, Mega
+  creatorLocations      String[]       @default([]) // India, USA, Canada, UK, etc.
+  preferredCreatorGender String?       @default("Any") // Any, Female, Male, Non-binary
+  verifiedOnly          Boolean        @default(false)
+  minEngagementRate     Float?         @default(0.0)
+  campaignBudget        String?        // Budget range
+  campaignFrequency     String?        // One-time, Monthly, Quarterly, Ongoing
+
+  // Section 5: Payments & Escrow Setup
+  escrowSetup           Json?          // { billingEmail, taxId, paymentMethod, escrowEnabled, autoDeposit, walletBalance }
+
+  // Onboarding status & progress
+  completionPercentage  Int            @default(0)
+  isOnboardingCompleted Boolean        @default(false)
+
+  // Saved Creators relation
+  savedCreators         SavedCreator[]
+
+  // Campaign Relation
+  campaigns             Campaign[]
+
+  // Reviews given by this brand
+  reviewsGiven          Review[]
+
+  // Brand partners in creators network
+  influencerPartners    InfluencerBrandPartner[]
+
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
 
   @@map("brand_profiles")
 }
 
+model BrandProduct {
+  id             String       @id @default(uuid())
+  brandProfileId String
+  brandProfile   BrandProfile @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+  name           String
+  imageUrl       String?
+  productUrl     String?
+  category       String?
+  price          String?
+  description    String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("brand_products")
+}
+
+model SavedCreator {
+  id                String            @id @default(uuid())
+  brandProfileId    String
+  brandProfile      BrandProfile      @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+  influencerId      String
+  influencer        InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  createdAt         DateTime          @default(now())
+
+  @@unique([brandProfileId, influencerId])
+  @@map("saved_creators")
+}
+
 model InfluencerProfile {
-  id              String   @id @default(uuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  handle          String?
-  platform        String?  @default("Instagram")
-  avatarUrl       String?  // Cloudinary image URL
-  bio             String?
-  gender          String?
-  category        String?
-  openToAffiliate Boolean  @default(false)
-  openToUgc       Boolean  @default(false)
-  contactInfo     String?
-  pricingRange    String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                      String                        @id @default(uuid())
+  userId                  String                        @unique
+  user                    User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic Information
+  handle                  String?
+  bio                     String?
+  location                String?
+  phoneCode               String?                       @default("+1")
+  phoneNumber             String?
+  dob                     DateTime?
+  gender                  String?
+  
+  // Niche & Language Attributes (niches stores categories/niches)
+  niches                  String[]                      @default([])
+  contentLanguages        String[]                      @default([])
+  
+  // Collaboration Preferences & Pricing
+  availableForBarter      Boolean                       @default(false)
+  availableForRelocation  Boolean                       @default(false)
+  collaborationTypes      String[]                      @default([])
+  minPricePerReel         Float?
+  currency                String?                       @default("USD")
+  responseTime            String?                       @default("Within 24 hours")
+  
+  avatarUrl               String?
+  pricingRange            String?
+
+  // Deliverables & Payment Relations
+  pastDeliverables        InfluencerPastDeliverable[]
+  paymentDetails          InfluencerPaymentDetails?
+
+  // Campaign Relations
+  applications            CampaignApplication[]
+  participants            CampaignParticipant[]
+
+  // Saved by Brands relation
+  savedByBrands           SavedCreator[]
+
+  // Reviews received from brands
+  reviews                 Review[]
+
+  // Brand partners in creator network
+  brandPartners           InfluencerBrandPartner[]
+
+  // Onboarding status & progress
+  completionPercentage    Int                           @default(0)
+  isOnboardingCompleted  Boolean                       @default(false)
+
+  createdAt               DateTime                      @default(now())
+  updatedAt               DateTime                      @updatedAt
 
   @@map("influencer_profiles")
+}
+
+model InfluencerPastDeliverable {
+  id           String            @id @default(uuid())
+  influencerId String
+  influencer   InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  title        String?
+  brandName    String?
+  contentType  String?           // e.g. "Reel", "Video", "Post"
+  contentUrl   String
+  metrics      Json?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@map("influencer_past_deliverables")
+}
+
+model InfluencerPaymentDetails {
+  id            String            @id @default(uuid())
+  influencerId  String            @unique
+  influencer    InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  bankName      String?
+  accountNumber String?
+  ifscCode      String?
+  paypalEmail   String?
+  upiId         String?
+  panTaxId      String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@map("influencer_payment_details")
 }
 
 enum VipType {
@@ -85,3 +226,703 @@ model VipAccess {
 
   @@map("vip_access")
 }
+
+enum SocialPlatform {
+  META
+  INSTAGRAM
+  FACEBOOK
+  THREADS
+  YOUTUBE
+  TIKTOK
+  LINKEDIN
+  TWITTER
+}
+
+enum SocialAccountStatus {
+  CONNECTED
+  DISCONNECTED
+  EXPIRED
+}
+
+model SocialAccount {
+  id             String              @id @default(uuid())
+  userId         String
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform       SocialPlatform
+  platformUserId String
+  username       String?
+  handle         String?
+  avatar         String?
+  followerCount  Int?                @default(0)
+  engagementRate Float?
+  profileUrl     String?
+  isVerified     Boolean             @default(false)
+  accessToken    String              // Encrypted token
+  refreshToken   String?             // Encrypted token
+  expiresAt      DateTime?
+  status         SocialAccountStatus @default(CONNECTED)
+  connectedAt    DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  // Linked Small Modular Tables
+  metadata       SocialProfileMetadata?
+  demographics   SocialAudienceDemographic[]
+  performance    SocialAccountPerformance[]
+  contents       SocialMediaContent[]
+  syncStates     SocialSyncState[]
+
+  // Campaign Relations
+  applications   CampaignApplication[]
+
+  @@unique([userId, platform, platformUserId])
+  @@map("social_accounts")
+}
+
+enum DemographicType {
+  AGE_GENDER
+  COUNTRY
+  CITY
+  LOCALE
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  CAROUSEL
+  REEL
+  STORY
+}
+
+enum SyncTarget {
+  PROFILE_METADATA
+  AUDIENCE_DEMOGRAPHICS
+  ACCOUNT_PERFORMANCE
+  MEDIA_CONTENT
+}
+
+enum SyncStatus {
+  IDLE
+  SYNCING
+  SUCCESS
+  FAILED
+  RATE_LIMITED
+}
+
+// 1. Basic Metadata Table (1-to-1 with SocialAccount)
+model SocialProfileMetadata {
+  id              String        @id @default(uuid())
+  socialAccountId String        @unique
+  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  username        String?
+  displayName     String?
+  avatarUrl       String?
+  bio             String?
+  website         String?
+  profileUrl      String?
+  isVerified      Boolean       @default(false)
+  followerCount   Int           @default(0)
+  followingCount  Int           @default(0)
+  mediaCount      Int           @default(0)
+  category        String?
+  updatedAt       DateTime      @updatedAt
+
+  @@map("social_profile_metadata")
+}
+
+// 2. Audience Demographic Table (1-to-many with SocialAccount)
+model SocialAudienceDemographic {
+  id              String          @id @default(uuid())
+  socialAccountId String
+  socialAccount   SocialAccount   @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  type            DemographicType
+  key             String          // e.g., "18-24.M", "US", "New York", "en_US"
+  label           String?         // Human-readable label
+  value           Float           @default(0) // Percentage or count
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([socialAccountId, type, key])
+  @@map("social_audience_demographics")
+}
+
+// 3. Account Performance Table (Time-series / Snapshots 1-to-many with SocialAccount)
+model SocialAccountPerformance {
+  id                String        @id @default(uuid())
+  socialAccountId   String
+  socialAccount     SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  recordedAt        DateTime      // Snapshot timestamp/date
+  reach             Int           @default(0)
+  impressions       Int           @default(0)
+  profileViews      Int           @default(0)
+  websiteClicks     Int           @default(0)
+  accountsEngaged   Int           @default(0)
+  totalInteractions Int           @default(0)
+  followerCount     Int           @default(0)
+  engagementRate    Float         @default(0)
+  createdAt         DateTime      @default(now())
+
+  @@unique([socialAccountId, recordedAt])
+  @@map("social_account_performance")
+}
+
+// 4. Unified Media / Posts & Performance Table (1-to-many with SocialAccount)
+model SocialMediaContent {
+  id                 String        @id @default(uuid())
+  socialAccountId    String
+  socialAccount      SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  platformMediaId    String
+  mediaType          MediaType     @default(IMAGE)
+  caption            String?
+  permalink          String?
+  thumbnailUrl       String?
+  publishedAt        DateTime?
+  likeCount          Int           @default(0)
+  commentCount       Int           @default(0)
+  shareCount         Int           @default(0)
+  saveCount          Int           @default(0)
+  playCount          Int           @default(0)
+  reach              Int           @default(0)
+  impressions        Int           @default(0)
+  videoViewTotalTime Float?
+  avgWatchTime       Float?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@unique([socialAccountId, platformMediaId])
+  @@map("social_media_contents")
+}
+
+
+// 6. Sync State & Rate-Limit Tracking Table (1-to-many with SocialAccount)
+model SocialSyncState {
+  id              String        @id @default(uuid())
+  socialAccountId String
+  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  target          SyncTarget
+  lastSyncedAt    DateTime      @default(now())
+  nextSyncDueAt   DateTime?
+  syncStatus      SyncStatus    @default(IDLE)
+  lastError       String?
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([socialAccountId, target])
+  @@map("social_sync_states")
+}
+
+
+// ============================================================================
+// CAMPAIGN DISCOVERY & COLLABORATION MODELS
+// ============================================================================
+
+enum CampaignStatus {
+  DRAFT
+  OPEN
+  FILLING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  PAUSED
+}
+
+enum CampaignObjective {
+  BRAND_AWARENESS
+  PRODUCT_LAUNCH
+  WEBSITE_TRAFFIC
+  APP_INSTALLS
+  LEAD_GENERATION
+  SALES_CONVERSIONS
+  UGC_CREATION
+  SOCIAL_GROWTH
+  EVENT_PROMOTION
+  OTHER
+}
+
+enum PaymentModel {
+  FIXED
+  NEGOTIABLE
+  RANGE
+  PERFORMANCE_BASED
+  COMMISSION
+  BARTER
+  HYBRID
+}
+
+enum ApplicationStatus {
+  APPLIED
+  UNDER_REVIEW
+  SHORTLISTED
+  REJECTED
+  WITHDRAWN
+  EXPIRED
+  OFFER_SENT
+  OFFER_ACCEPTED
+  OFFER_DECLINED
+  OFFER_EXPIRED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  OFFER_EXPIRED
+  CANCELLED
+}
+
+enum ParticipantStatus {
+  CONFIRMED
+  PARTICIPANT_ACTIVE
+  PARTICIPANT_COMPLETED
+  PARTICIPANT_CANCELLED
+}
+
+enum DeliverableStatus {
+  PENDING
+  IN_PROGRESS
+  SUBMITTED
+  REVISION_REQUESTED
+  APPROVED
+  READY_TO_PUBLISH
+  PUBLISHED
+  VERIFIED
+  DELIVERABLE_REJECTED
+}
+
+enum EligibilityResult {
+  ELIGIBLE
+  PARTIALLY_ELIGIBLE
+  NOT_ELIGIBLE
+}
+
+enum CampaignPaymentType {
+  CAMPAIGN_FUNDING
+  PARTICIPANT_ALLOCATION
+  PAYOUT
+  REFUND
+}
+
+enum CampaignPaymentStatus {
+  PAYMENT_PENDING
+  PROCESSING
+  FUNDED
+  HELD
+  RELEASED
+  PAYMENT_FAILED
+  REFUNDED
+}
+
+// Core Campaign entity — owned by a BrandProfile
+model Campaign {
+  id                    String              @id @default(uuid())
+  brandProfileId        String
+  brandProfile          BrandProfile        @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+
+  // Basic Info
+  title                 String
+  slug                  String              @unique
+  objective             String[]            @default([])
+  description           String?
+  industry              String?
+  coverImageUrl         String?
+
+  status                CampaignStatus      @default(DRAFT)
+
+  // Target Platforms
+  platforms             String[]            @default([]) // INSTAGRAM, YOUTUBE, TIKTOK, etc.
+
+  // Budget
+  budgetTotalAmount     Float?
+  budgetCurrency        String?             @default("USD")
+  budgetPaymentModel    PaymentModel?       @default(FIXED)
+  budgetMinPerInfluencer Float?
+  budgetMaxPerInfluencer Float?
+  performanceMetric     String?
+  performanceRate       Float?
+  barterItems           String?
+  shippingCovered       Boolean?
+
+  // Participant Settings
+  targetParticipants    Int                 @default(1)
+  maxParticipants       Int                 @default(1)
+  autoCloseWhenFilled   Boolean             @default(false)
+
+  // Content Guidelines (stored as JSON)
+  contentGuidelines     Json?               // { description, requiredHashtags, requiredMentions, requiredCtas, referenceUrls, assetUrls }
+
+  // Timeline
+  applicationDeadline   DateTime?
+  startDate             DateTime?
+  endDate               DateTime?
+
+  // Status Timestamps
+  publishedAt           DateTime?
+  applicationsClosedAt  DateTime?
+  completedAt           DateTime?
+  cancelledAt           DateTime?
+
+  // Relations
+  product               CampaignProduct?
+  requirement           CampaignRequirement?
+  deliverables          CampaignDeliverable[]
+  applications          CampaignApplication[]
+  participants          CampaignParticipant[]
+
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([brandProfileId, status])
+  @@index([status, applicationDeadline])
+  @@index([status, createdAt])
+  @@map("campaigns")
+}
+
+// Dedicated Product / Service Table for Campaigns
+model CampaignProduct {
+  id                  String    @id @default(uuid())
+  campaignId          String    @unique
+  campaign            Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  productName         String
+  productType         String?   // PHYSICAL, DIGITAL_SAAS, MOBILE_APP, SERVICE_EXPERIENCE
+  landingPageUrl      String?
+  coverImageUrl       String?
+  hasFreeProduct      Boolean   @default(false)
+  freeProductValue    Float?
+  shippingDetails     String?
+  productInstructions String?
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@map("campaign_products")
+}
+
+// Dedicated Campaign Requirements Table
+model CampaignRequirement {
+  id                  String    @id @default(uuid())
+  campaignId          String    @unique
+  campaign            Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  strictEligibility   Boolean   @default(false)
+
+  // Social criteria
+  minFollowers        Int?
+  minEngagementRate   Float?
+  verifiedOnly        Boolean   @default(false)
+
+  // Influencer criteria
+  targetCountries     String[]  @default([])
+  targetGenders       String[]  @default([])
+  targetLanguages     String[]  @default([])
+
+  // Audience / Age criteria
+  targetAgeGroup      String[]  @default([])
+  audienceCountries   String[]  @default([])
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@map("campaign_requirements")
+}
+
+// Template deliverables defined at campaign level (what company expects)
+model CampaignDeliverable {
+  id                String      @id @default(uuid())
+  campaignId        String
+  campaign          Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  platform          String?     // INSTAGRAM, YOUTUBE, etc.
+  type              String      // Reel, Feed Post, Carousel, Story, Dedicated Video, Short, UGC, etc.
+  title             String?
+  description       String?
+  quantity          Int         @default(1)
+  dueDate           DateTime?
+
+  // Content Requirements
+  requiredCta       String?
+  mandatoryHashtags String[]    @default([])
+  mandatoryMentions String[]    @default([])
+  instructions      String?
+  revisionLimit     Int         @default(2)
+
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([campaignId])
+  @@map("campaign_deliverables")
+}
+
+// Influencer applies to a campaign
+model CampaignApplication {
+  id                    String              @id @default(uuid())
+  campaignId            String
+  campaign              Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  influencerProfileId   String
+  influencerProfile     InfluencerProfile   @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+  socialAccountId       String
+  socialAccount         SocialAccount       @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  status                ApplicationStatus   @default(APPLIED)
+
+  // Application Content
+  applicationMessage    String?
+  proposedAmount        Float?
+  proposedCurrency      String?             @default("USD")
+  contentIdea           String?
+  portfolioUrls         String[]            @default([])
+
+  // Match & Eligibility Snapshot (immutable after submission)
+  matchSnapshot         Json?               // { score, eligibility, reasons[], calculatedAt, algorithmVersion }
+  profileSnapshot       Json?               // { displayName, username, platform, followersCount, engagementRate, categories, location }
+
+  // Review
+  reviewedBy            String?
+  reviewedAt            DateTime?
+  reviewNotes           String?
+
+  // Status Timestamps
+  submittedAt           DateTime            @default(now())
+  withdrawnAt           DateTime?
+  rejectedAt            DateTime?
+
+  // Relations
+  offers                CampaignOffer[]
+
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@unique([campaignId, socialAccountId])
+  @@index([campaignId, status])
+  @@index([influencerProfileId, createdAt])
+  @@map("campaign_applications")
+}
+
+// Company sends offer to shortlisted applicant
+model CampaignOffer {
+  id                    String              @id @default(uuid())
+  campaignId            String
+  applicationId         String
+  application           CampaignApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  influencerProfileId   String
+
+  status                OfferStatus         @default(PENDING)
+
+  // Compensation
+  compensationAmount    Float
+  compensationCurrency  String              @default("USD")
+  compensationPaymentModel PaymentModel     @default(FIXED)
+
+  // Timeline
+  startDate             DateTime?
+  endDate               DateTime?
+  responseDeadline      DateTime?
+
+  // Terms
+  termsSnapshot         Json?               // snapshot of campaign terms at offer time
+  customNotes           String?
+
+  // Tracking
+  sentBy                String?
+  sentAt                DateTime            @default(now())
+  respondedAt           DateTime?
+
+  // Relations
+  participant           CampaignParticipant?
+
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([campaignId, status])
+  @@index([applicationId])
+  @@index([influencerProfileId, status])
+  @@index([responseDeadline])
+  @@map("campaign_offers")
+}
+
+// Confirmed influencer in a campaign (created on offer acceptance)
+model CampaignParticipant {
+  id                    String                  @id @default(uuid())
+  campaignId            String
+  campaign              Campaign                @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  influencerProfileId   String
+  influencerProfile     InfluencerProfile       @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+  socialAccountId       String
+  applicationId         String
+  offerId               String                  @unique
+  offer                 CampaignOffer           @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  status                ParticipantStatus       @default(CONFIRMED)
+
+  // Agreed Compensation
+  agreedAmount          Float
+  agreedCurrency        String                  @default("USD")
+  agreedPaymentModel    PaymentModel            @default(FIXED)
+
+  // Allocation Status
+  allocationStatus      String                  @default("PENDING") // PENDING, ALLOCATED, FUNDED, RELEASED
+
+  // Status Timestamps
+  joinedAt              DateTime                @default(now())
+  startedAt             DateTime?
+  completedAt           DateTime?
+  cancelledAt           DateTime?
+
+  // Relations
+  deliverables          ParticipantDeliverable[]
+  payments              CampaignPayment[]
+
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+
+  @@unique([campaignId, influencerProfileId])
+  @@index([campaignId, status])
+  @@index([influencerProfileId, status])
+  @@map("campaign_participants")
+}
+
+// Per-participant deliverable tracking (instantiated from campaign deliverable templates)
+model ParticipantDeliverable {
+  id                String              @id @default(uuid())
+  campaignId        String
+  participantId     String
+  participant       CampaignParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  // Deliverable Info
+  platform          String?
+  type              String
+  title             String?
+  description       String?
+  quantity          Int                 @default(1)
+  dueDate           DateTime?
+
+  status            DeliverableStatus   @default(PENDING)
+
+  // Submission
+  contentUrls       String[]            @default([])
+  submissionNotes   String?
+  submittedAt       DateTime?
+
+  // Review
+  reviewStatus      String?             // PENDING, APPROVED, REVISION_REQUESTED, REJECTED
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  reviewComments    String?
+  revisionCount     Int                 @default(0)
+
+  // Publication
+  publishedUrl      String?
+  publishedAt       DateTime?
+  proofUrls         String[]            @default([])
+  verifiedAt        DateTime?
+  verifiedBy        String?
+
+  // Relations
+  revisions         DeliverableRevision[]
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([participantId, status])
+  @@index([campaignId, status])
+  @@index([dueDate, status])
+  @@map("participant_deliverables")
+}
+
+// Audit trail for deliverable revisions
+model DeliverableRevision {
+  id              String                @id @default(uuid())
+  deliverableId   String
+  deliverable     ParticipantDeliverable @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
+  version         Int
+  submittedBy     String?
+  files           String[]              @default([])
+  notes           String?
+  status          String                @default("SUBMITTED") // SUBMITTED, APPROVED, REVISION_REQUESTED, REJECTED
+  reviewComments  String?
+  createdAt       DateTime              @default(now())
+
+  @@index([deliverableId, version])
+  @@map("deliverable_revisions")
+}
+
+// Payment allocation per participant
+model CampaignPayment {
+  id                    String              @id @default(uuid())
+  campaignId            String
+  participantId         String
+  participant           CampaignParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  companyId             String
+  influencerProfileId   String
+
+  amount                Float
+  currency              String              @default("USD")
+
+  type                  CampaignPaymentType @default(PARTICIPANT_ALLOCATION)
+  status                CampaignPaymentStatus @default(PAYMENT_PENDING)
+
+  provider              String?
+  providerTransactionId String?
+  releaseCondition      String?
+
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([participantId, status])
+  @@index([campaignId, status])
+  @@map("campaign_payments")
+}
+
+// Creator / Brand Review & Rating Model
+model Review {
+  id                  String            @id @default(uuid())
+  influencerProfileId String
+  influencer          InfluencerProfile @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+  brandProfileId      String?
+  brandProfile        BrandProfile?     @relation(fields: [brandProfileId], references: [id], onDelete: SetNull)
+
+  author              String            // Brand or reviewer company name (e.g., "Yunki Studio")
+  authorAvatarUrl     String?
+  authorLetter        String?           // Fallback letter badge (e.g., "Y")
+  authorBg            String?           // Color styling badge classes
+
+  orderType           String?           // e.g. "1 TikTok Video (30 Seconds)", "Dedicated Reel"
+  rating              Float             @default(5.0) // Overall rating (1.0 - 5.0)
+  communicationRating Float?            @default(5.0)
+  timelinessRating    Float?            @default(5.0)
+  satisfactionRating  Float?            @default(5.0)
+  comment             String            @db.Text
+  isVerified          Boolean           @default(true)
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([influencerProfileId, rating])
+  @@index([brandProfileId])
+  @@map("reviews")
+}
+
+// Influencer Brand Partner Network Model
+model InfluencerBrandPartner {
+  id                    String            @id @default(uuid())
+  influencerProfileId   String
+  influencerProfile     InfluencerProfile @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+  brandProfileId        String
+  brandProfile          BrandProfile      @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+
+  relationshipTag       String            @default("COMPLETED") // PREFERRED, REPEAT_SPONSOR, COMPLETED
+  totalDeals            Int               @default(1)
+  totalPaid             Float             @default(0)
+  lastWorked            DateTime          @default(now())
+  contactPerson         String?
+  contactRole           String?           @default("Brand Partnerships Lead")
+  notes                 String?
+  rating                Float?            @default(5.0)
+  pastCampaignsList     String[]          @default([])
+
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@unique([influencerProfileId, brandProfileId])
+  @@index([influencerProfileId, relationshipTag])
+  @@map("influencer_brand_partners")
+}
+
+

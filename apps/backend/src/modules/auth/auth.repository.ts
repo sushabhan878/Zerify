@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
-import { UserRole } from '@prisma/client';
+import { UserRole, SocialPlatform, SocialAccountStatus } from '@prisma/client';
 import { RegisterBrandDto } from './dto/register-brand.dto';
 import { RegisterInfluencerDto } from './dto/register-influencer.dto';
 
@@ -72,9 +72,6 @@ export class AuthRepository {
       bio,
       gender,
       category,
-      openToAffiliate,
-      openToUgc,
-      contactInfo,
       pricingRange,
     } = dto;
 
@@ -88,21 +85,51 @@ export class AuthRepository {
         },
       });
 
-      await tx.influencerProfile.create({
+      const profile = await tx.influencerProfile.create({
         data: {
           userId: user.id,
           handle: handle || `@${(name || 'creator').toLowerCase().replace(/\s+/g, '')}`,
-          platform: platform || 'Instagram',
           avatarUrl: avatarUrl || null,
           bio: bio || null,
           gender: gender || null,
-          category: category || null,
-          openToAffiliate: Boolean(openToAffiliate),
-          openToUgc: Boolean(openToUgc),
-          contactInfo: contactInfo || null,
+          niches: dto.niches || (category ? [category] : []),
+          location: dto.location || null,
+          phoneCode: dto.phoneCode || '+1',
+          phoneNumber: dto.phoneNumber || null,
+          dob: dto.dob ? new Date(dto.dob) : null,
+          contentLanguages: dto.contentLanguages || [],
+          availableForBarter: Boolean(dto.availableForBarter),
+          availableForRelocation: Boolean(dto.availableForRelocation),
+          collaborationTypes: dto.collaborationTypes || [],
+          minPricePerReel: dto.minPricePerReel ? Number(dto.minPricePerReel) : null,
+          currency: dto.currency || 'USD',
+          responseTime: dto.responseTime || 'Within 24 hours',
           pricingRange: pricingRange || null,
-        } as any,
+        },
       });
+
+      if (platform) {
+        const platformUpper = (platform || 'INSTAGRAM').toUpperCase();
+        let socialPlatform: SocialPlatform = SocialPlatform.INSTAGRAM;
+        if (Object.values(SocialPlatform).includes(platformUpper as SocialPlatform)) {
+          socialPlatform = platformUpper as SocialPlatform;
+        }
+
+        const handleStr = handle || `@${(name || 'creator').toLowerCase().replace(/\s+/g, '')}`;
+
+        await tx.socialAccount.create({
+          data: {
+            userId: user.id,
+            platform: socialPlatform,
+            platformUserId: `user_${user.id.slice(0, 8)}`,
+            username: handleStr.replace(/^@/, ''),
+            handle: handleStr,
+            isVerified: true,
+            accessToken: 'initial_registration_token',
+            status: SocialAccountStatus.CONNECTED,
+          },
+        });
+      }
 
       return tx.user.findUnique({
         where: { id: user.id },

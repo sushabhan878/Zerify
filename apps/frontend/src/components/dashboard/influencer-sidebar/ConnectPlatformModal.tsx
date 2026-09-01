@@ -16,7 +16,8 @@ export default function ConnectPlatformModal({ isOpen, onClose }: ConnectPlatfor
   if (!isOpen) return null;
 
   const platforms = [
-    { name: 'Instagram', icon: Instagram, color: 'from-pink-500 to-purple-600', description: 'Sync followers, engagement & reels stats' },
+    { name: 'Instagram', icon: Instagram, color: 'from-amber-500 via-rose-500 to-purple-600', description: 'Connect Instagram Business profile & metrics' },
+    { name: 'Facebook', icon: Globe, color: 'from-blue-700 via-indigo-600 to-blue-400', description: 'Connect managed Facebook Pages & engagement' },
     { name: 'YouTube', icon: Youtube, color: 'from-red-500 to-rose-700', description: 'Connect channel analytics & video metrics' },
     { name: 'TikTok', icon: Globe, color: 'from-cyan-400 to-blue-600', description: 'Connect short-form video reach & views' },
     { name: 'X / Twitter', icon: Twitter, color: 'from-sky-400 to-indigo-600', description: 'Import tweet impressions & follower growth' },

@@ -18,6 +18,7 @@ interface BrandSidebarProps {
   onSelectRoute?: (routeId: string) => void;
   isMobileDrawer?: boolean;
   style?: React.CSSProperties;
+  completionPercentage?: number;
 }
 
 export default function BrandSidebar({
@@ -31,8 +32,9 @@ export default function BrandSidebar({
   onSelectRoute: externalOnSelectRoute,
   isMobileDrawer = false,
   style,
+  completionPercentage = 65,
 }: BrandSidebarProps) {
-  const [internalActiveRoute, setInternalActiveRoute] = useState('search-creators');
+  const [internalActiveRoute, setInternalActiveRoute] = useState('overview');
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const activeRoute = externalActiveRoute || internalActiveRoute;
@@ -104,7 +106,7 @@ export default function BrandSidebar({
           industry={industry}
           logoUrl={logoUrl}
           isCollapsed={isCollapsed}
-          completionPercentage={65}
+          completionPercentage={completionPercentage}
           onCompleteProfile={() => handleSelectRoute('brand-settings')}
         />
       </div>
@@ -189,7 +191,7 @@ export default function BrandSidebar({
                 <p className="text-[10px] text-slate-400 mt-0.5">Creating or adding new campaigns couldn&apos;t be easier</p>
               </div>
               <button
-                onClick={() => handleSelectRoute('search-creators')}
+                onClick={() => handleSelectRoute('my-campaigns')}
                 type="button"
                 className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-orange-950/40"
               >
@@ -200,7 +202,7 @@ export default function BrandSidebar({
           ) : (
             <div className="flex justify-center">
               <button
-                onClick={() => handleSelectRoute('search-creators')}
+                onClick={() => handleSelectRoute('my-campaigns')}
                 type="button"
                 title="Add New Campaign"
                 className="w-10 h-10 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black flex items-center justify-center transition-all shadow-md shadow-orange-950/40 scale-105"

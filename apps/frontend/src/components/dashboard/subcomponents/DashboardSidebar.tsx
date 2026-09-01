@@ -17,6 +17,7 @@ interface DashboardSidebarProps {
   onSelectRoute?: (routeId: string) => void;
   isMobileDrawer?: boolean;
   style?: React.CSSProperties;
+  completionPercentage?: number;
 }
 
 export default function DashboardSidebar({
@@ -32,6 +33,7 @@ export default function DashboardSidebar({
   onSelectRoute,
   isMobileDrawer = false,
   style,
+  completionPercentage,
 }: DashboardSidebarProps) {
   if (userRole === 'BRAND') {
     return (
@@ -46,6 +48,7 @@ export default function DashboardSidebar({
         onSelectRoute={onSelectRoute}
         isMobileDrawer={isMobileDrawer}
         style={style}
+        completionPercentage={completionPercentage}
       />
     );
   }
@@ -61,6 +64,7 @@ export default function DashboardSidebar({
       onSelectRoute={onSelectRoute}
       isMobileDrawer={isMobileDrawer}
       style={style}
+      completionPercentage={completionPercentage}
     />
   );
 }

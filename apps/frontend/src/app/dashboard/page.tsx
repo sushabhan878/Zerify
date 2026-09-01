@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import DashboardSidebar from '@/components/dashboard/subcomponents/DashboardSidebar';
 import BrandDashboardView from '@/components/dashboard/BrandDashboardView';
 import InfluencerDashboardView from '@/components/dashboard/InfluencerDashboardView';
@@ -11,11 +11,16 @@ import { Menu, X } from 'lucide-react';
 
 import { ThemeProvider } from '@/context/ThemeContext';
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeRoute, setActiveRoute] = useState<string>('');
+  const [activeRoute, setActiveRoute] = useState<string>(() => {
+    return searchParams.get('tab') || searchParams.get('view') || searchParams.get('screen') || '';
+  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Dynamic Sidebar Resizing State
@@ -50,6 +55,28 @@ export default function DashboardPage() {
     };
   }, [isResizing]);
 
+  // Sync state when URL search params change (e.g. browser back/forward buttons)
+  useEffect(() => {
+    const urlTab = searchParams.get('tab') || searchParams.get('view') || searchParams.get('screen');
+    if (urlTab && urlTab !== activeRoute) {
+      setActiveRoute(urlTab);
+    }
+  }, [searchParams, activeRoute]);
+
+  const handleSelectRoute = useCallback((route: string) => {
+    setActiveRoute(route);
+    setIsMobileMenuOpen(false);
+
+    const currentTab = searchParams.get('tab') || searchParams.get('view') || searchParams.get('screen');
+    if (currentTab !== route) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('tab', route);
+      params.delete('view');
+      params.delete('screen');
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+  }, [pathname, router, searchParams]);
+
   useEffect(() => {
     const loadUser = () => {
       try {
@@ -63,9 +90,19 @@ export default function DashboardPage() {
 
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
-        setActiveRoute((currentRoute) =>
-          currentRoute || (parsedUser.role === 'BRAND' ? 'search-creators' : 'profile-overview')
-        );
+
+        const currentTab = searchParams.get('tab') || searchParams.get('view') || searchParams.get('screen');
+        const defaultRoute = parsedUser.role === 'BRAND' ? 'overview' : 'statistics';
+        const targetRoute = currentTab || defaultRoute;
+
+        setActiveRoute(targetRoute);
+
+        // If no tab in URL, seamlessly set the default tab in URL
+        if (!currentTab) {
+          const params = new URLSearchParams(searchParams.toString());
+          params.set('tab', defaultRoute);
+          router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+        }
       } catch {
         router.push('/login');
       } finally {
@@ -76,7 +113,7 @@ export default function DashboardPage() {
     loadUser();
     window.addEventListener('zerify_auth_change', loadUser);
     return () => window.removeEventListener('zerify_auth_change', loadUser);
-  }, [router]);
+  }, [pathname, router, searchParams]);
 
   const handleLogout = () => {
     localStorage.removeItem('zerify_token');
@@ -85,6 +122,95 @@ export default function DashboardPage() {
     window.dispatchEvent(new Event('zerify_auth_change'));
     router.push('/login');
   };
+
+  // Brand & Influencer Profile State & Hydration
+  const [brandProfile, setBrandProfile] = useState<any>(null);
+  const [influencerProfile, setInfluencerProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      const cachedBrand = typeof window !== 'undefined' ? localStorage.getItem('zerify_brand_profile_cache') : null;
+      if (cachedBrand) {
+        try {
+          setBrandProfile(JSON.parse(cachedBrand));
+        } catch (e) {}
+      }
+
+      const cachedInfluencer = typeof window !== 'undefined' ? localStorage.getItem('zerify_influencer_profile_cache') : null;
+      if (cachedInfluencer) {
+        try {
+          setInfluencerProfile(JSON.parse(cachedInfluencer));
+        } catch (e) {}
+      }
+    };
+
+    handleProfileUpdate();
+
+    const fetchProfiles = async () => {
+      try {
+        const token = localStorage.getItem('zerify_token');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
+        const headers = { Authorization: token ? `Bearer ${token}` : '' };
+
+        // Fetch Brand Profile
+        fetch(`${apiUrl}/brand/profile`, { headers })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (data) {
+              setBrandProfile(data);
+              try {
+                localStorage.setItem('zerify_brand_profile_cache', JSON.stringify(data));
+              } catch (err) {}
+            }
+          })
+          .catch(() => {});
+
+        // Fetch Influencer Profile and Social Accounts
+        fetch(`${apiUrl}/influencer/profile`, { headers })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (data) {
+              setInfluencerProfile(data);
+              try {
+                localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(data));
+                window.dispatchEvent(new Event('zerify_influencer_profile_update'));
+              } catch (err) {}
+            }
+          })
+          .catch(() => {});
+
+        // Prefetch Social Accounts
+        fetch(`${apiUrl}/social/accounts`, { headers })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (data && Array.isArray(data.data)) {
+              try {
+                localStorage.setItem('zerify_social_accounts_cache', JSON.stringify(data.data));
+              } catch (err) {}
+            }
+          })
+          .catch(() => {});
+      } catch (e) {}
+    };
+
+    fetchProfiles();
+    window.addEventListener('zerify_brand_profile_update', handleProfileUpdate);
+    window.addEventListener('zerify_influencer_profile_update', handleProfileUpdate);
+    return () => {
+      window.removeEventListener('zerify_brand_profile_update', handleProfileUpdate);
+      window.removeEventListener('zerify_influencer_profile_update', handleProfileUpdate);
+    };
+  }, []);
+
+  const completionPercentage =
+    user?.role === 'BRAND'
+      ? brandProfile?.completionPercentage !== undefined
+        ? brandProfile.completionPercentage
+        : 65
+      : influencerProfile?.completionPercentage !== undefined
+      ? influencerProfile.completionPercentage
+      : 75;
 
   if (loading) {
     return (
@@ -100,6 +226,16 @@ export default function DashboardPage() {
   const userName = user.name || user.email?.split('@')[0] || 'User';
   const userHandle = user.handle || `@${userName.toLowerCase().replace(/\s+/g, '')}`;
   const companyName = user.companyName || user.name || 'Enterprise Partner';
+
+  const effectiveAvatarUrl =
+    user?.role === 'BRAND'
+      ? brandProfile?.logoUrl || brandProfile?.avatarUrl || user.avatarUrl
+      : influencerProfile?.avatarUrl || influencerProfile?.user?.avatarUrl || user.avatarUrl;
+
+  const effectiveIndustry =
+    user?.role === 'BRAND'
+      ? brandProfile?.industry || 'Tech & Consumer AI'
+      : influencerProfile?.primaryNiche || influencerProfile?.niches?.[0] || 'Content Creator';
 
   return (
     <ThemeProvider>
@@ -133,14 +269,13 @@ export default function DashboardPage() {
           userEmail={user.email}
           userHandle={userHandle}
           companyName={companyName}
-          avatarUrl={user.avatarUrl}
+          industry={effectiveIndustry}
+          avatarUrl={effectiveAvatarUrl}
           onLogout={handleLogout}
           activeRoute={activeRoute}
-          onSelectRoute={(route) => {
-            setActiveRoute(route);
-            setIsMobileMenuOpen(false);
-          }}
+          onSelectRoute={handleSelectRoute}
           style={{ width: `${sidebarWidth}px` }}
+          completionPercentage={completionPercentage}
         />
 
         {/* Resizable Divider Handle (Desktop) */}
@@ -166,44 +301,70 @@ export default function DashboardPage() {
                 userEmail={user.email}
                 userHandle={userHandle}
                 companyName={companyName}
-                avatarUrl={user.avatarUrl}
+                industry={effectiveIndustry}
+                avatarUrl={effectiveAvatarUrl}
                 onLogout={handleLogout}
                 activeRoute={activeRoute}
-                onSelectRoute={(route) => {
-                  setActiveRoute(route);
-                  setIsMobileMenuOpen(false);
-                }}
+                onSelectRoute={handleSelectRoute}
                 isMobileDrawer
+                completionPercentage={completionPercentage}
               />
             </div>
           </div>
         )}
 
-        {/* Main Content View - Right Independent Scroll Container */}
-        <main className="flex-1 h-full overflow-y-auto no-scrollbar p-4 sm:p-8 md:p-10 max-w-7xl mx-auto">
-          {userRole === 'BRAND' ? (
-            <BrandDashboardView
-              userName={userName}
-              userEmail={user.email}
-              userHandle={userHandle}
-              companyName={companyName}
-              avatarUrl={user.avatarUrl}
-              activeRoute={activeRoute}
-              onSelectRoute={(route) => setActiveRoute(route)}
-            />
-          ) : (
-            <InfluencerDashboardView
-              userName={userName}
-              userEmail={user.email}
-              userHandle={userHandle}
-              avatarUrl={user.avatarUrl}
-              activeRoute={activeRoute}
-              onSelectRoute={(route) => setActiveRoute(route)}
-            />
-          )}
-        </main>
+        {/* Main Content View - Right Independent Scroll Container with Purplish Grid Background */}
+        <div className="relative flex-1 h-full overflow-hidden bg-[#07090E] bg-gradient-to-b from-purple-950/25 via-[#07090E] to-[#05060a]">
+          {/* Right-Side Purple Glow Spotlights */}
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[130px] pointer-events-none" />
+          <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+
+          {/* Prominent High-Tech Grid Pattern Background */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(168,85,247,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(168,85,247,0.12)_1px,transparent_1px)] bg-[size:36px_36px] pointer-events-none" />
+
+          <main className="relative z-10 h-full overflow-y-auto no-scrollbar p-4 sm:p-8 md:p-10 max-w-7xl mx-auto">
+            {userRole === 'BRAND' ? (
+              <BrandDashboardView
+                userName={userName}
+                userEmail={user.email}
+                userHandle={userHandle}
+                companyName={companyName}
+                avatarUrl={user.avatarUrl}
+                activeRoute={activeRoute}
+                onSelectRoute={handleSelectRoute}
+                completionPercentage={completionPercentage}
+                brandProfile={brandProfile}
+              />
+            ) : (
+              <InfluencerDashboardView
+                userName={userName}
+                userEmail={user.email}
+                userHandle={userHandle}
+                avatarUrl={user.avatarUrl}
+                activeRoute={activeRoute}
+                onSelectRoute={handleSelectRoute}
+                completionPercentage={completionPercentage}
+                influencerProfile={influencerProfile}
+              />
+            )}
+          </main>
+        </div>
       </div>
     </ThemeProvider>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="h-screen w-screen bg-[#07090E] flex flex-col items-center justify-center text-white">
+          <LottieLoader size={220} message="Loading Zerify Dashboard..." />
+        </div>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
   );
 }
 

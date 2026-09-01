@@ -1,255 +1,354 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Instagram,
   Youtube,
-  Facebook,
   Linkedin,
   Twitter,
-  Tv,
   Video,
-  CheckCircle2,
-  ExternalLink,
-  PlusCircle,
+  Facebook,
   Sparkles,
   Check,
+  Loader2,
 } from 'lucide-react';
-
-interface SocialAccount {
-  id: string;
-  name: string;
-  icon: React.ComponentType<{ className?: string }>;
-  color: string;
-  badgeBg: string;
-  connected: boolean;
-  handle: string;
-  followers: string;
-}
+import SingleSocialAccountsCard, { SocialAccountItem } from './subcomponents/SingleSocialAccountsCard';
+import { useToast } from '@/components/ui/Toast';
 
 interface SocialAccountsTabProps {
+  initialData?: any;
   onSaveSuccess?: () => void;
 }
 
-export default function SocialAccountsTab({ onSaveSuccess }: SocialAccountsTabProps) {
-  const [accounts, setAccounts] = useState<SocialAccount[]>([
-    {
-      id: 'instagram',
-      name: 'Instagram',
-      icon: Instagram,
-      color: 'from-pink-500 to-purple-600',
-      badgeBg: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
-      connected: true,
-      handle: '@sarah_creativ',
-      followers: '485,000',
-    },
-    {
-      id: 'youtube',
-      name: 'YouTube',
-      icon: Youtube,
-      color: 'from-red-600 to-rose-700',
-      badgeBg: 'bg-red-500/20 text-red-300 border-red-500/30',
-      connected: true,
-      handle: 'youtube.com/@sarahjenkins',
-      followers: '320,000',
-    },
-    {
-      id: 'tiktok',
-      name: 'TikTok',
-      icon: Video,
-      color: 'from-cyan-500 to-slate-900',
-      badgeBg: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-      connected: true,
-      handle: '@sarah_glow',
-      followers: '210,000',
-    },
-    {
-      id: 'x',
-      name: 'X (Twitter)',
-      icon: Twitter,
-      color: 'from-slate-700 to-slate-900',
-      badgeBg: 'bg-slate-700/40 text-slate-300 border-slate-600/30',
-      connected: false,
-      handle: '',
-      followers: '',
-    },
-    {
-      id: 'facebook',
-      name: 'Facebook',
-      icon: Facebook,
-      color: 'from-blue-600 to-indigo-700',
-      badgeBg: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-      connected: false,
-      handle: '',
-      followers: '',
-    },
-    {
-      id: 'linkedin',
-      name: 'LinkedIn',
-      icon: Linkedin,
-      color: 'from-blue-700 to-cyan-700',
-      badgeBg: 'bg-blue-600/20 text-blue-300 border-blue-600/30',
-      connected: false,
-      handle: '',
-      followers: '',
-    },
-    {
-      id: 'twitch',
-      name: 'Twitch',
-      icon: Tv,
-      color: 'from-purple-700 to-indigo-800',
-      badgeBg: 'bg-purple-600/20 text-purple-300 border-purple-600/30',
-      connected: false,
-      handle: '',
-      followers: '',
-    },
-  ]);
+const DEFAULT_ACCOUNTS: SocialAccountItem[] = [
+  {
+    id: 'instagram',
+    name: 'Instagram',
+    icon: Instagram,
+    gradientColor: 'from-amber-500 via-rose-500 to-purple-600',
+    connected: false,
+    handle: '',
+    followers: '',
+  },
+  {
+    id: 'facebook',
+    name: 'Facebook',
+    icon: Facebook,
+    gradientColor: 'from-blue-700 via-indigo-600 to-blue-400',
+    connected: false,
+    handle: '',
+    followers: '',
+  },
+  {
+    id: 'youtube',
+    name: 'YouTube',
+    icon: Youtube,
+    gradientColor: 'from-red-600 to-rose-700',
+    connected: false,
+    handle: '',
+    followers: '',
+  },
+  {
+    id: 'tiktok',
+    name: 'TikTok',
+    icon: Video,
+    gradientColor: 'from-cyan-500 to-slate-900',
+    connected: false,
+    handle: '',
+    followers: '',
+  },
+  {
+    id: 'x',
+    name: 'X (Twitter)',
+    icon: Twitter,
+    gradientColor: 'from-slate-700 to-slate-900',
+    connected: false,
+    handle: '',
+    followers: '',
+  },
+  {
+    id: 'linkedin',
+    name: 'LinkedIn',
+    icon: Linkedin,
+    gradientColor: 'from-blue-700 to-cyan-700',
+    connected: false,
+    handle: '',
+    followers: '',
+  },
+];
 
+function buildInitialAccountsFromCache(initialData?: any): SocialAccountItem[] {
+  let dbAccounts: any[] = [];
+  let profileAccounts: any[] = [];
+
+  if (typeof window !== 'undefined') {
+    try {
+      const socialStored = localStorage.getItem('zerify_social_accounts_cache');
+      if (socialStored) dbAccounts = JSON.parse(socialStored);
+
+      const profileStored = initialData || (localStorage.getItem('zerify_influencer_profile_cache') ? JSON.parse(localStorage.getItem('zerify_influencer_profile_cache')!) : null);
+      if (profileStored) {
+        const userSocials = profileStored.user?.socialAccounts || profileStored.connectedAccounts;
+        if (Array.isArray(userSocials)) profileAccounts = userSocials;
+      }
+    } catch (e) {}
+  }
+
+  return DEFAULT_ACCOUNTS.map((acc) => {
+    let matched: any = null;
+    if (acc.id === 'instagram') {
+      matched = dbAccounts.find(
+        (item: any) =>
+          (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+          ((item.platform || '').toUpperCase() === 'INSTAGRAM' || (item.platform || '').toLowerCase() === 'instagram')
+      );
+    } else if (acc.id === 'facebook') {
+      matched = dbAccounts.find(
+        (item: any) =>
+          (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+          ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase())
+      );
+    } else {
+      matched = dbAccounts.find(
+        (item: any) =>
+          (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+          ((item.platform || '').toLowerCase() === acc.id.toLowerCase() ||
+            (item.platform || '').toLowerCase() === acc.name.toLowerCase())
+      );
+    }
+
+    const profileMatch = profileAccounts.find(
+      (dbAcc: any) =>
+        (dbAcc.status ? (dbAcc.status || '').toUpperCase() === 'CONNECTED' : true) &&
+        ((dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
+          (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase())
+    );
+
+    if (matched || profileMatch) {
+      const rawHandle = matched?.handle || matched?.username || profileMatch?.handle || profileMatch?.username;
+      const handle = rawHandle
+        ? rawHandle.startsWith('@')
+          ? rawHandle
+          : `@${rawHandle}`
+        : `@${acc.id}_user`;
+
+      const platformUserId = matched?.platformUserId || profileMatch?.platformUserId || acc.platformUserId;
+      const avatar = matched?.avatar || profileMatch?.avatar || acc.avatar;
+      const followers = matched?.followerCount
+        ? matched.followerCount.toLocaleString()
+        : profileMatch?.followerCount
+        ? profileMatch.followerCount.toLocaleString()
+        : acc.followers;
+      const dbId = matched?.id || profileMatch?.id;
+
+      return {
+        ...acc,
+        connected: true,
+        handle,
+        platformUserId,
+        avatar,
+        followers,
+        dbId,
+      };
+    }
+
+    return acc;
+  });
+}
+
+export default function SocialAccountsTab({ initialData, onSaveSuccess }: SocialAccountsTabProps) {
+  const { toastSuccess, toastError } = useToast();
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
+  const [accounts, setAccounts] = useState<SocialAccountItem[]>(() => buildInitialAccountsFromCache(initialData));
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const toggleConnection = (id: string) => {
-    setAccounts((prev) =>
-      prev.map((acc) =>
-        acc.id === id
-          ? {
+  // Fetch saved connected accounts from DB on mount and after OAuth redirect
+  const fetchAccounts = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('zerify_token');
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      // Fetch both profile and raw social accounts concurrently
+      const [profileRes, socialRes] = await Promise.allSettled([
+        fetch(`${apiUrl}/influencer/profile`, { headers }),
+        fetch(`${apiUrl}/social/accounts`, { headers }),
+      ]);
+
+      let dbAccounts: any[] = [];
+      let profileAccounts: any[] = [];
+
+      if (socialRes.status === 'fulfilled' && socialRes.value.ok) {
+        const socialData = await socialRes.value.json();
+        dbAccounts = Array.isArray(socialData.data) ? socialData.data : [];
+      }
+
+      if (profileRes.status === 'fulfilled' && profileRes.value.ok) {
+        const profileData = await profileRes.value.json();
+        const userSocials = profileData.user?.socialAccounts || profileData.connectedAccounts;
+        profileAccounts = Array.isArray(userSocials) ? userSocials : [];
+      }
+
+      // Perform a single atomic state update to avoid React state race conditions
+      setAccounts((prev) =>
+        prev.map((acc) => {
+          // 1. Check social_accounts DB table match
+          let matched: any = null;
+
+          if (acc.id === 'instagram') {
+            matched = dbAccounts.find(
+              (item: any) =>
+                (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+                ((item.platform || '').toUpperCase() === 'INSTAGRAM' ||
+                 (item.platform || '').toLowerCase() === 'instagram'),
+            );
+          } else if (acc.id === 'facebook') {
+            matched = dbAccounts.find(
+              (item: any) =>
+                (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+                ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()),
+            );
+          } else {
+            matched = dbAccounts.find(
+              (item: any) =>
+                (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+                ((item.platform || '').toLowerCase() === acc.id.toLowerCase() ||
+                 (item.platform || '').toLowerCase() === acc.name.toLowerCase()),
+            );
+          }
+
+          // 2. Check profile connectedAccounts fallback match (only connected accounts)
+          const profileMatch = profileAccounts.find(
+            (dbAcc: any) =>
+              (dbAcc.status ? (dbAcc.status || '').toUpperCase() === 'CONNECTED' : true) &&
+              ((dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
+               (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase()),
+          );
+
+          if (matched || profileMatch) {
+            const rawHandle = matched?.handle || matched?.username || profileMatch?.handle || profileMatch?.username;
+            const handle = rawHandle
+              ? rawHandle.startsWith('@')
+                ? rawHandle
+                : `@${rawHandle}`
+              : `@${acc.id}_user`;
+
+            const platformUserId = matched?.platformUserId || profileMatch?.platformUserId || acc.platformUserId;
+            const avatar = matched?.avatar || profileMatch?.avatar || acc.avatar;
+            const followers = matched?.followerCount
+              ? matched.followerCount.toLocaleString()
+              : profileMatch?.followerCount
+              ? profileMatch.followerCount.toLocaleString()
+              : acc.followers;
+            const dbId = matched?.id || profileMatch?.id;
+
+            return {
               ...acc,
-              connected: !acc.connected,
-              handle: !acc.connected ? acc.handle || `@user_${id}` : '',
-              followers: !acc.connected ? acc.followers || '10,000' : '',
-            }
-          : acc
-      )
-    );
-  };
+              connected: true,
+              handle,
+              platformUserId,
+              avatar,
+              followers,
+              dbId,
+            };
+          }
 
-  const handleUpdate = (id: string, field: 'handle' | 'followers', value: string) => {
-    setAccounts((prev) =>
-      prev.map((acc) => (acc.id === id ? { ...acc, [field]: value } : acc))
-    );
-  };
+          return {
+            ...acc,
+            connected: false,
+            handle: '',
+            platformUserId: undefined,
+            followers: '',
+            dbId: undefined,
+          };
+        }),
+      );
+    } catch (err) {
+      console.warn('Could not load social accounts from DB:', err);
+    }
+  }, [apiUrl]);
 
-  const handleSave = (e: React.FormEvent) => {
+  useEffect(() => {
+    fetchAccounts();
+  }, [fetchAccounts]);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    setTimeout(() => {
+
+    try {
+      const token = localStorage.getItem('zerify_token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(`${apiUrl}/influencer/social-accounts`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(accounts),
+      });
+
+      if (res.ok) {
+        const updatedData = await res.json();
+        try {
+          localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(updatedData));
+          window.dispatchEvent(new Event('zerify_influencer_profile_update'));
+        } catch (e) {}
+      }
+
+      toastSuccess('Social accounts updated successfully!');
+    } catch (err: any) {
+      console.warn('API save failed, using client state:', err);
+      toastError('Failed to update social accounts.');
+    } finally {
       setIsSaving(false);
       setSaved(true);
-      if (onSaveSuccess) onSaveSuccess();
-      setTimeout(() => setSaved(false), 2500);
-    }, 600);
+      setTimeout(() => {
+        setSaved(false);
+        if (onSaveSuccess) onSaveSuccess();
+      }, 700);
+    }
   };
 
   return (
-    <form onSubmit={handleSave} className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-purple-400" />
-            <span>Connected Social Media Accounts</span>
-          </h3>
-          <p className="text-xs text-slate-400">
-            Connect your platforms to enable live follower count verification & AI content analysis
-          </p>
-        </div>
-      </div>
+    <form onSubmit={handleSave} className="space-y-5">
+      <SingleSocialAccountsCard
+        accounts={accounts}
+        setAccounts={setAccounts}
+        onRefreshAccounts={fetchAccounts}
+      />
 
-      {/* Grid of Social Platform Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {accounts.map((acc) => {
-          const Icon = acc.icon;
-          return (
-            <div
-              key={acc.id}
-              className={`p-4 rounded-2xl bg-slate-900/80 border transition-all space-y-3.5 backdrop-blur-xl ${
-                acc.connected
-                  ? 'border-purple-500/30 shadow-lg shadow-purple-950/20'
-                  : 'border-white/10 opacity-80 hover:opacity-100'
-              }`}
-            >
-              {/* Card Header Row */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2.5 rounded-xl bg-gradient-to-tr ${acc.color} text-white shadow-md`}>
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-black text-white">{acc.name}</h4>
-                    <span
-                      className={`text-[9.5px] font-extrabold px-2 py-0.5 rounded-full border ${
-                        acc.connected
-                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                          : 'bg-slate-800 text-slate-400 border-white/5'
-                      }`}
-                    >
-                      {acc.connected ? 'Connected' : 'Not Connected'}
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => toggleConnection(acc.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
-                    acc.connected
-                      ? 'bg-red-500/15 hover:bg-red-500/30 text-red-300 border border-red-500/30'
-                      : 'bg-purple-600 hover:bg-purple-500 text-white shadow-md shadow-purple-950/40'
-                  }`}
-                >
-                  {acc.connected ? 'Disconnect' : 'Connect Account'}
-                </button>
-              </div>
-
-              {/* Editable Fields when Connected */}
-              {acc.connected ? (
-                <div className="grid grid-cols-2 gap-2.5 pt-1">
-                  <div>
-                    <label className="text-[10.5px] font-bold text-slate-400 block mb-1">Handle / URL</label>
-                    <input
-                      type="text"
-                      value={acc.handle}
-                      onChange={(e) => handleUpdate(acc.id, 'handle', e.target.value)}
-                      placeholder="@username"
-                      className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500 font-semibold"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[10.5px] font-bold text-slate-400 block mb-1">Followers / Audience</label>
-                    <input
-                      type="text"
-                      value={acc.followers}
-                      onChange={(e) => handleUpdate(acc.id, 'followers', e.target.value)}
-                      placeholder="e.g. 100K"
-                      className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500 font-semibold"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <p className="text-[11px] text-slate-500 font-medium italic pt-1">
-                  Connect your {acc.name} profile to showcase reach to prospective brand sponsors.
-                </p>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Save Trigger */}
+      {/* Save Button */}
       <div className="flex items-center justify-end gap-3 pt-2">
         {saved && (
-          <span className="text-xs font-extrabold text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
-            <Check className="w-4 h-4" /> Social Accounts Saved!
+          <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
+            <Check className="w-4 h-4" /> Social Accounts Saved! Redirecting...
           </span>
         )}
 
         <button
           type="submit"
           disabled={isSaving}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold shadow-lg shadow-purple-950/50 transition-all hover:scale-105 flex items-center gap-2"
+          className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-purple-950/50 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 border border-purple-400/20 disabled:opacity-50"
         >
-          <Sparkles className="w-4 h-4" />
-          <span>{isSaving ? 'Saving...' : 'Save Social Accounts'}</span>
+          {isSaving ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Saving Social Accounts...</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4" />
+              <span>Save Social Accounts</span>
+            </>
+          )}
         </button>
       </div>
     </form>

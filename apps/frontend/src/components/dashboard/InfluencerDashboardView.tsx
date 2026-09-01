@@ -3,6 +3,7 @@
 import React from 'react';
 import ProfileOverviewSection from './influencer-views/ProfileOverviewSection';
 import CompanyDiscoverySection from './influencer-views/CompanyDiscoverySection';
+import CampaignDiscoverySection from './influencer-views/CampaignDiscoverySection';
 import AiProfileMatchSection from './influencer-views/AiProfileMatchSection';
 import CampaignInvitationsSection from './influencer-views/CampaignInvitationsSection';
 import ActiveCampaignsSection from './influencer-views/ActiveCampaignsSection';
@@ -24,6 +25,7 @@ interface InfluencerDashboardViewProps {
   activeRoute?: string;
   onSelectRoute?: (routeId: string) => void;
   completionPercentage?: number;
+  influencerProfile?: any;
 }
 
 export default function InfluencerDashboardView({
@@ -31,30 +33,33 @@ export default function InfluencerDashboardView({
   userEmail,
   userHandle,
   avatarUrl,
-  activeRoute = 'profile-overview',
+  activeRoute = 'statistics',
   onSelectRoute,
   completionPercentage = 65,
+  influencerProfile,
 }: InfluencerDashboardViewProps) {
   const renderSection = () => {
     switch (activeRoute) {
-      case 'activity':
-        return <ActivityView />;
-      case 'traffic':
-        return <TrafficView />;
+      case 'statistics':
       case 'statistic':
+      case 'activity':
+      case 'traffic':
+      case 'profile-overview':
         return <StatisticView />;
       case 'company-discovery':
         return <CompanyDiscoverySection />;
+      case 'campaign-discovery':
+        return <CampaignDiscoverySection />;
       case 'ai-profile-match':
         return <AiProfileMatchSection />;
       case 'campaign-invitations':
-        return <CampaignInvitationsSection />;
+        return <CampaignInvitationsSection onNavigate={onSelectRoute} />;
       case 'active-campaigns':
-        return <ActiveCampaignsSection />;
+        return <ActiveCampaignsSection onNavigate={onSelectRoute} />;
       case 'messages':
         return <MessagesSection />;
       case 'applications':
-        return <ApplicationsSection />;
+        return <ApplicationsSection onNavigate={onSelectRoute} />;
       case 'my-network':
         return <MyNetworkSection />;
       case 'payments':
@@ -66,11 +71,12 @@ export default function InfluencerDashboardView({
             userEmail={userEmail}
             userHandle={userHandle}
             avatarUrl={avatarUrl}
+            completionPercentage={completionPercentage}
+            initialData={influencerProfile}
           />
         );
-      case 'profile-overview':
       default:
-        return <ProfileOverviewSection userName={userName} />;
+        return <StatisticView />;
     }
   };
 

@@ -84,14 +84,18 @@ export default function LoginModal() {
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto">
+    <div className="relative w-full max-w-xl mx-auto p-1 transition-all duration-300">
+      <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-indigo-600/20 rounded-3xl blur-xl opacity-[0.04] pointer-events-none" />
+
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
-        className="relative rounded-3xl bg-slate-950/80 border border-white/10 p-8 sm:p-10 backdrop-blur-2xl shadow-2xl shadow-purple-950/40 overflow-hidden"
+        className="relative rounded-3xl bg-[#07090e]/30 border border-white/10 p-6 sm:p-10 backdrop-blur-2xl shadow-2xl overflow-hidden transition-all duration-300"
       >
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-40 bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-indigo-600/30 rounded-full blur-3xl pointer-events-none" />
+        {/* Full-Width Bottom Ambient Lighting Rim */}
+        <div className="absolute -bottom-0.5 left-6 right-6 h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent blur-[2px] rounded-full pointer-events-none" />
+        <div className="absolute -top-28 left-1/2 -translate-x-1/2 w-80 h-36 bg-purple-600/05 rounded-full blur-3xl pointer-events-none" />
 
         {success ? (
           <LoginSuccessScreen userEmail={loggedInUser?.email || email} />

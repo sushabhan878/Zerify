@@ -9,8 +9,32 @@ import RegisterBrandStep from './subcomponents/RegisterBrandStep';
 import RegisterInfluencerStep from './subcomponents/RegisterInfluencerStep';
 import RegisterSuccessScreen from './subcomponents/RegisterSuccessScreen';
 
-export default function RegisterModal() {
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+interface RegisterModalProps {
+  step?: 1 | 2 | 3 | 4;
+  setStep?: React.Dispatch<React.SetStateAction<1 | 2 | 3 | 4>>;
+  onStepChange?: (step: 1 | 2 | 3 | 4) => void;
+}
+
+export default function RegisterModal({
+  step: externalStep,
+  setStep: externalSetStep,
+  onStepChange,
+}: RegisterModalProps = {}) {
+  const [internalStep, setInternalStep] = useState<1 | 2 | 3 | 4>(1);
+  const step = externalStep !== undefined ? externalStep : internalStep;
+
+  const setStep = (newStepAction: 1 | 2 | 3 | 4 | ((prev: 1 | 2 | 3 | 4) => 1 | 2 | 3 | 4)) => {
+    const nextStep = typeof newStepAction === 'function' ? newStepAction(step) : newStepAction;
+    if (externalSetStep) {
+      externalSetStep(nextStep);
+    } else {
+      setInternalStep(nextStep);
+    }
+    if (onStepChange) {
+      onStepChange(nextStep);
+    }
+  };
+
   const [role, setRole] = useState<'BRAND' | 'INFLUENCER'>('INFLUENCER');
 
   // Auth Credentials
@@ -21,11 +45,14 @@ export default function RegisterModal() {
   // Brand fields
   const [companyName, setCompanyName] = useState('');
   const [website, setWebsite] = useState('');
+  const [budget, setBudget] = useState(0);
 
   // Influencer fields
   const [handle, setHandle] = useState('');
   const [platform, setPlatform] = useState('Instagram');
   const [category, setCategory] = useState('Fashion & Beauty');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(['Fashion & Beauty']);
+  const [pricePerReel, setPricePerReel] = useState(250);
   const [gender, setGender] = useState('Prefer not to say');
   const [openToAffiliate, setOpenToAffiliate] = useState(false);
   const [openToUgc, setOpenToUgc] = useState(false);
@@ -79,25 +106,25 @@ export default function RegisterModal() {
       const payload =
         role === 'BRAND'
           ? {
-              email,
-              password,
-              name: fullName,
-              companyName: companyName || fullName || 'My Brand',
-              website: website || undefined,
-            }
+            email,
+            password,
+            name: fullName,
+            companyName: companyName || fullName || 'My Brand',
+            website: website || undefined,
+          }
           : {
-              email,
-              password,
-              name: fullName,
-              handle: handle.startsWith('@') ? handle : `@${handle}`,
-              platform,
-              category,
-              gender,
-              openToAffiliate,
-              openToUgc,
-              contactInfo: contactInfo || undefined,
-              pricingRange,
-            };
+            email,
+            password,
+            name: fullName,
+            handle: handle.startsWith('@') ? handle : `@${handle}`,
+            platform,
+            category,
+            gender,
+            openToAffiliate,
+            openToUgc,
+            contactInfo: contactInfo || undefined,
+            pricingRange,
+          };
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -129,10 +156,10 @@ export default function RegisterModal() {
   };
 
   return (
-    <div className="relative w-full max-w-lg mx-auto p-1">
-      <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 rounded-3xl blur-xl opacity-30 animate-pulse pointer-events-none" />
+    <div className={`relative w-full mx-auto p-1 transition-all duration-300 ${step === 1 ? 'max-w-3xl sm:max-w-4xl' : 'max-w-lg'}`}>
+      <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-indigo-600/20 rounded-3xl blur-xl opacity-[0.04] pointer-events-none" />
 
-      <div className="relative rounded-3xl bg-slate-950/90 border border-white/10 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl overflow-hidden">
+      <div className="relative rounded-3xl bg-[#07090e]/30 border border-white/10 backdrop-blur-2xl p-6 sm:p-10 shadow-2xl overflow-hidden transition-all duration-300">
         <RegisterProgressHeader step={step} />
 
         <AnimatePresence mode="wait">
@@ -141,6 +168,8 @@ export default function RegisterModal() {
           {step === 2 && (
             <RegisterCredentialsStep
               role={role}
+              companyName={companyName}
+              setCompanyName={setCompanyName}
               fullName={fullName}
               setFullName={setFullName}
               email={email}
@@ -156,10 +185,10 @@ export default function RegisterModal() {
 
           {step === 3 && role === 'BRAND' && (
             <RegisterBrandStep
-              companyName={companyName}
-              setCompanyName={setCompanyName}
               website={website}
               setWebsite={setWebsite}
+              budget={budget}
+              setBudget={setBudget}
               loading={loading}
               errorMessage={errorMessage}
               onSubmit={handleCompleteRegistration}
@@ -169,22 +198,10 @@ export default function RegisterModal() {
 
           {step === 3 && role === 'INFLUENCER' && (
             <RegisterInfluencerStep
-              handle={handle}
-              setHandle={setHandle}
-              platform={platform}
-              setPlatform={setPlatform}
-              category={category}
-              setCategory={setCategory}
-              gender={gender}
-              setGender={setGender}
-              openToAffiliate={openToAffiliate}
-              setOpenToAffiliate={setOpenToAffiliate}
-              openToUgc={openToUgc}
-              setOpenToUgc={setOpenToUgc}
-              contactInfo={contactInfo}
-              setContactInfo={setContactInfo}
-              pricingRange={pricingRange}
-              setPricingRange={setPricingRange}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
+              pricePerReel={pricePerReel}
+              setPricePerReel={setPricePerReel}
               loading={loading}
               errorMessage={errorMessage}
               onSubmit={handleCompleteRegistration}

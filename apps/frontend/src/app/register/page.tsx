@@ -8,10 +8,12 @@ import { motion } from 'framer-motion';
 import LottieLoader from '@/components/ui/LottieLoader';
 import { ArrowLeft } from 'lucide-react';
 import RegisterModal from '@/components/auth/RegisterModal';
+import InteractiveDotGrid from '@/components/landing/InteractiveDotGrid';
 
 export default function RegisterPage() {
   const router = useRouter();
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   useEffect(() => {
     try {
@@ -28,6 +30,14 @@ export default function RegisterPage() {
     setCheckingAuth(false);
   }, [router]);
 
+  const handleGoBack = () => {
+    if (step > 1 && step < 4) {
+      setStep((prev) => (prev - 1) as 1 | 2 | 3 | 4);
+    } else {
+      router.push('/');
+    }
+  };
+
   if (checkingAuth) {
     return (
       <div className="min-h-screen bg-[#07090E] flex flex-col items-center justify-center text-white">
@@ -35,31 +45,35 @@ export default function RegisterPage() {
       </div>
     );
   }
+
   return (
     <main className="relative min-h-screen bg-[#07090E] flex flex-col justify-between overflow-hidden selection:bg-purple-500 selection:text-white">
+      {/* Interactive Cursor-Reactive Dotted Grid Background */}
+      <InteractiveDotGrid />
+
       {/* Motion Background Graphics */}
       <div className="absolute inset-0 bg-hero-gradient pointer-events-none" />
 
       {/* Motion Background Glowing Spheres */}
       <motion.div
         animate={{
-          scale: [1, 1.25, 1],
-          opacity: [0.15, 0.35, 0.15],
-          x: [0, 40, 0],
-          y: [0, -30, 0],
+          scale: [1, 1.15, 1],
+          opacity: [0.05, 0.12, 0.05],
+          x: [0, 30, 0],
+          y: [0, -20, 0],
         }}
-        transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-1/6 left-1/5 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[150px] pointer-events-none"
+        transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute top-1/6 left-1/5 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[160px] pointer-events-none"
       />
       <motion.div
         animate={{
-          scale: [1, 1.3, 1],
-          opacity: [0.1, 0.3, 0.1],
-          x: [0, -50, 0],
-          y: [0, 50, 0],
+          scale: [1, 1.2, 1],
+          opacity: [0.04, 0.10, 0.04],
+          x: [0, -30, 0],
+          y: [0, 30, 0],
         }}
-        transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute bottom-1/6 right-1/5 w-[500px] h-[500px] bg-pink-600/20 rounded-full blur-[140px] pointer-events-none"
+        transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute bottom-1/6 right-1/5 w-[450px] h-[450px] bg-pink-600/10 rounded-full blur-[150px] pointer-events-none"
       />
 
       {/* Grid Overlay */}
@@ -82,19 +96,21 @@ export default function RegisterPage() {
           </span>
         </Link>
 
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 border border-white/10 hover:border-white/20 text-xs font-semibold text-slate-300 hover:text-white transition-all backdrop-blur-md"
+        {/* Go Back Button (Navigates to previous registration step or home) */}
+        <button
+          type="button"
+          onClick={handleGoBack}
+          className="inline-flex items-center gap-2 px-4.5 py-2 rounded-full bg-slate-900/80 border border-white/10 hover:border-white/20 text-xs font-semibold text-slate-300 hover:text-white transition-all backdrop-blur-md cursor-pointer shadow-lg"
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Home</span>
-        </Link>
+          <ArrowLeft className="w-4 h-4 text-purple-400" />
+          <span>Go Back</span>
+        </button>
       </header>
 
       {/* Main Registration Modal View */}
       <section className="relative z-20 flex-1 flex items-center justify-center p-4 sm:p-6 my-auto">
         <div className="w-full">
-          <RegisterModal />
+          <RegisterModal step={step} setStep={setStep} />
         </div>
       </section>
 

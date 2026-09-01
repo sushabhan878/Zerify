@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import LottieLoader from '@/components/ui/LottieLoader';
 import { ArrowLeft } from 'lucide-react';
 import LoginModal from '@/components/auth/LoginModal';
+import InteractiveDotGrid from '@/components/landing/InteractiveDotGrid';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,6 +38,9 @@ export default function LoginPage() {
   }
   return (
     <main className="relative min-h-screen bg-[#07090E] flex flex-col justify-between overflow-hidden selection:bg-purple-500 selection:text-white">
+      {/* Interactive Cursor-Reactive Dotted Grid Background */}
+      <InteractiveDotGrid />
+
       {/* Motion Background Graphics */}
       <div className="absolute inset-0 bg-hero-gradient pointer-events-none" />
 

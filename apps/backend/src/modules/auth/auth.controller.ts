@@ -1,15 +1,37 @@
-import { Controller, Post, Body, Get, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, Res, UseGuards, Req } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
+import { SocialService } from '../social/social.service';
 import { RegisterBrandDto } from './dto/register-brand.dto';
 import { RegisterInfluencerDto } from './dto/register-influencer.dto';
 import { LoginDto } from './dto/login.dto';
+import { ConnectCallbackQueryDto } from '../social/dto/connect-callback-query.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly socialService: SocialService,
+  ) {}
+
+  // Meta OAuth Callback Endpoint
+  @ApiOperation({ summary: 'Meta OAuth Authorization Callback (/api/v1/auth/meta/callback)' })
+  @Get('meta/callback')
+  async metaCallback(
+    @Query() query: ConnectCallbackQueryDto,
+    @Res() res: Response,
+  ) {
+    const redirectUrl = await this.socialService.handleMetaCallback(
+      query.code,
+      query.state,
+      query.error,
+      query.error_description || query.error_reason,
+    );
+    return res.redirect(redirectUrl);
+  }
 
   // Brand / Agency Endpoints
   @Post('brand/register')

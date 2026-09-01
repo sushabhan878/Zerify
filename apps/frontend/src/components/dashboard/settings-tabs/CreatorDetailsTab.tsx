@@ -1,263 +1,178 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Sliders, DollarSign, Languages, Tag, Plane, RefreshCw, Clock, Check, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Sparkles, Loader2 } from 'lucide-react';
+import SingleCreatorDetailsCard from './subcomponents/SingleCreatorDetailsCard';
+import { useToast } from '@/components/ui/Toast';
 
 interface CreatorDetailsTabProps {
+  initialData?: any;
   onSaveSuccess?: () => void;
 }
 
-export default function CreatorDetailsTab({ onSaveSuccess }: CreatorDetailsTabProps) {
-  const [categories, setCategories] = useState<string[]>(['Tech & AI', 'Lifestyle']);
-  const [languages, setLanguages] = useState<string[]>(['English', 'Hindi']);
-  const [minAmount, setMinAmount] = useState('1500');
-  const [currency, setCurrency] = useState('USD');
-  const [collabTypes, setCollabTypes] = useState<string[]>(['Dedicated Video', 'Instagram Reel', 'Integrated Sponsorship']);
-  const [barterAvailable, setBarterAvailable] = useState(false);
-  const [travelReady, setTravelReady] = useState(true);
-  const [responseTime, setResponseTime] = useState('Within 24 hours');
+export default function CreatorDetailsTab({ initialData, onSaveSuccess }: CreatorDetailsTabProps) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+  const { toastSuccess, toastError } = useToast();
+
+  const getCachedData = () => {
+    if (initialData) return initialData;
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('zerify_influencer_profile_cache');
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+    }
+    return null;
+  };
+
+  const cached = getCachedData();
+
+  const [categories, setCategories] = useState<string[]>(() => (Array.isArray(cached?.niches) ? cached.niches : []));
+  const [languages, setLanguages] = useState<string[]>(() => (Array.isArray(cached?.contentLanguages) ? cached.contentLanguages : []));
+  const [minAmount, setMinAmount] = useState<string>(() => (cached?.minPricePerReel != null ? String(cached.minPricePerReel) : ''));
+  const [currency, setCurrency] = useState<string>(() => cached?.currency || 'INR');
+  const [collabTypes, setCollabTypes] = useState<string[]>(() => (Array.isArray(cached?.collaborationTypes) ? cached.collaborationTypes : []));
+  const [barterAvailable, setBarterAvailable] = useState<boolean>(() => cached?.availableForBarter ?? false);
+  const [travelReady, setTravelReady] = useState<boolean>(() => cached?.availableForRelocation ?? false);
+  const [responseTime, setResponseTime] = useState<string>(() => cached?.responseTime || 'Within 24 hours');
   const [isSaving, setIsSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
 
-  const categoryOptions = [
-    'Tech & AI', 'Gaming', 'Lifestyle', 'Fashion & Apparel', 'Beauty & Skincare',
-    'Fitness & Health', 'Food & Cooking', 'Travel & Vlogs', 'Business & Finance', 'Education'
-  ];
+  // Sync state whenever initialData changes
+  useEffect(() => {
+    if (initialData) {
+      if (Array.isArray(initialData.niches)) setCategories(initialData.niches);
+      if (Array.isArray(initialData.contentLanguages)) setLanguages(initialData.contentLanguages);
+      if (initialData.minPricePerReel != null) setMinAmount(String(initialData.minPricePerReel));
+      if (initialData.currency) setCurrency(initialData.currency);
+      if (Array.isArray(initialData.collaborationTypes)) setCollabTypes(initialData.collaborationTypes);
+      if (initialData.availableForBarter !== undefined) setBarterAvailable(initialData.availableForBarter);
+      if (initialData.availableForRelocation !== undefined) setTravelReady(initialData.availableForRelocation);
+      if (initialData.responseTime) setResponseTime(initialData.responseTime);
+    }
+  }, [initialData]);
 
-  const languageOptions = ['English', 'Hindi', 'Spanish', 'French', 'German', 'Japanese', 'Multi-lingual'];
+  // Fetch in background to ensure fresh cache
+  useEffect(() => {
+    async function loadCreatorDetails() {
+      try {
+        const token = localStorage.getItem('zerify_token');
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
 
-  const collabTypeOptions = [
-    'Dedicated Video', 'Integrated Sponsorship', 'Instagram Reel', 'Story Series',
-    'Product Unboxing & Review', 'Live Stream Host'
-  ];
+        const res = await fetch(`${apiUrl}/influencer/profile`, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.niches)) setCategories(data.niches);
+          if (Array.isArray(data.contentLanguages)) setLanguages(data.contentLanguages);
+          if (data.minPricePerReel !== null && data.minPricePerReel !== undefined) {
+            setMinAmount(String(data.minPricePerReel));
+          }
+          if (data.currency) setCurrency(data.currency);
+          if (Array.isArray(data.collaborationTypes)) setCollabTypes(data.collaborationTypes);
+          if (data.availableForBarter !== undefined) setBarterAvailable(data.availableForBarter);
+          if (data.availableForRelocation !== undefined) setTravelReady(data.availableForRelocation);
+          if (data.responseTime) setResponseTime(data.responseTime);
 
-  const toggleArrayItem = (list: string[], setList: (val: string[]) => void, item: string) => {
-    if (list.includes(item)) {
-      setList(list.filter((i) => i !== item));
-    } else {
-      setList([...list, item]);
+          try {
+            localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(data));
+          } catch (e) {}
+        }
+      } catch (err) {
+        // Silently use cached data
+      }
+    }
+    loadCreatorDetails();
+  }, [apiUrl]);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+
+    const payload = {
+      niches: categories,
+      contentLanguages: languages,
+      minPricePerReel: minAmount ? Number(minAmount) : undefined,
+      currency,
+      collaborationTypes: collabTypes,
+      availableForBarter: barterAvailable,
+      availableForRelocation: travelReady,
+      responseTime,
+    };
+
+    try {
+      const token = localStorage.getItem('zerify_token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(`${apiUrl}/influencer/creator-details`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const updatedData = await res.json();
+        try {
+          localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(updatedData));
+          window.dispatchEvent(new Event('zerify_influencer_profile_update'));
+        } catch (e) {}
+      }
+
+      toastSuccess('Creator details saved successfully!');
+      if (onSaveSuccess) onSaveSuccess();
+    } catch (err: any) {
+      console.warn('API save failed, using client state:', err);
+      toastError('Failed to save creator details.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      setSaved(true);
-      if (onSaveSuccess) onSaveSuccess();
-      setTimeout(() => setSaved(false), 2500);
-    }, 600);
-  };
-
   return (
-    <form onSubmit={handleSave} className="space-y-6">
-      {/* Content Niche & Language Preferences */}
-      <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl space-y-5">
-        <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-          <Tag className="w-4 h-4 text-purple-400" />
-          <span>Content Niche & Languages</span>
-        </h3>
+    <form onSubmit={handleSave} className="space-y-5">
+      <SingleCreatorDetailsCard
+        categories={categories}
+        setCategories={setCategories}
+        languages={languages}
+        setLanguages={setLanguages}
+        minAmount={minAmount}
+        setMinAmount={setMinAmount}
+        currency={currency}
+        setCurrency={setCurrency}
+        collabTypes={collabTypes}
+        setCollabTypes={setCollabTypes}
+        barterAvailable={barterAvailable}
+        setBarterAvailable={setBarterAvailable}
+        travelReady={travelReady}
+        setTravelReady={setTravelReady}
+        responseTime={responseTime}
+        setResponseTime={setResponseTime}
+      />
 
-        <div>
-          <label className="text-xs font-bold text-slate-400 block mb-2">
-            Content Category (Select all that apply)
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {categoryOptions.map((cat) => {
-              const selected = categories.includes(cat);
-              return (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => toggleArrayItem(categories, setCategories, cat)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
-                    selected
-                      ? 'bg-purple-600 text-white shadow-md shadow-purple-950/40 border border-purple-400/40'
-                      : 'bg-slate-950 border border-white/10 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {selected && <Check className="w-3 h-3 inline-block mr-1" />}
-                  {cat}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div>
-          <label className="text-xs font-bold text-slate-400 block mb-2">
-            Content Languages
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {languageOptions.map((lang) => {
-              const selected = languages.includes(lang);
-              return (
-                <button
-                  key={lang}
-                  type="button"
-                  onClick={() => toggleArrayItem(languages, setLanguages, lang)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
-                    selected
-                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/40 border border-indigo-400/40'
-                      : 'bg-slate-950 border border-white/10 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {selected && <Check className="w-3 h-3 inline-block mr-1" />}
-                  {lang}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Pricing & Collaboration Details */}
-      <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl space-y-5">
-        <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-purple-400" />
-          <span>Pricing & Deal Preferences</span>
-        </h3>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs font-bold text-slate-400 block mb-1.5">Minimum Collaboration Amount</label>
-            <div className="flex gap-2">
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className="px-3 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500 font-bold shrink-0"
-              >
-                <option value="USD">$ USD</option>
-                <option value="INR">₹ INR</option>
-                <option value="EUR">€ EUR</option>
-                <option value="GBP">£ GBP</option>
-              </select>
-              <input
-                type="number"
-                value={minAmount}
-                onChange={(e) => setMinAmount(e.target.value)}
-                placeholder="e.g. 1000"
-                className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500 font-bold"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-bold text-slate-400 block mb-1.5">Average Response Time</label>
-            <div className="relative">
-              <Clock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <select
-                value={responseTime}
-                onChange={(e) => setResponseTime(e.target.value)}
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500 font-semibold"
-              >
-                <option value="Within 1 hour">Within 1 hour</option>
-                <option value="Within 24 hours">Within 24 hours</option>
-                <option value="1-3 business days">1-3 business days</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label className="text-xs font-bold text-slate-400 block mb-2">Accepted Collaboration Types</label>
-          <div className="flex flex-wrap gap-2">
-            {collabTypeOptions.map((type) => {
-              const selected = collabTypes.includes(type);
-              return (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => toggleArrayItem(collabTypes, setCollabTypes, type)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
-                    selected
-                      ? 'bg-pink-600 text-white shadow-md shadow-pink-950/40 border border-pink-400/40'
-                      : 'bg-slate-950 border border-white/10 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {selected && <Check className="w-3 h-3 inline-block mr-1" />}
-                  {type}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Barter & Travel Readiness Toggles */}
-      <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl space-y-4">
-        <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-          <Sliders className="w-4 h-4 text-purple-400" />
-          <span>Flexibility & Availability</span>
-        </h3>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Barter Toggle */}
-          <div className="p-4 rounded-xl bg-slate-950 border border-white/10 flex items-center justify-between">
-            <div className="space-y-0.5">
-              <span className="text-xs font-extrabold text-white flex items-center gap-1.5">
-                <RefreshCw className="w-3.5 h-3.5 text-purple-400" />
-                Available for Barter Deals?
-              </span>
-              <p className="text-[10.5px] text-slate-400">Accept product/service exchanges without cash fee.</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setBarterAvailable(!barterAvailable)}
-              className={`w-11 h-6 rounded-full transition-colors relative shrink-0 p-0.5 ${
-                barterAvailable ? 'bg-purple-600' : 'bg-slate-800'
-              }`}
-            >
-              <div
-                className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                  barterAvailable ? 'translate-x-5' : 'translate-x-0'
-                }`}
-              />
-            </button>
-          </div>
-
-          {/* Travel Ready Toggle */}
-          <div className="p-4 rounded-xl bg-slate-950 border border-white/10 flex items-center justify-between">
-            <div className="space-y-0.5">
-              <span className="text-xs font-extrabold text-white flex items-center gap-1.5">
-                <Plane className="w-3.5 h-3.5 text-indigo-400" />
-                Travel Ready for Shoots?
-              </span>
-              <p className="text-[10.5px] text-slate-400">Available to travel for brand events & video shoots.</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setTravelReady(!travelReady)}
-              className={`w-11 h-6 rounded-full transition-colors relative shrink-0 p-0.5 ${
-                travelReady ? 'bg-indigo-600' : 'bg-slate-800'
-              }`}
-            >
-              <div
-                className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                  travelReady ? 'translate-x-5' : 'translate-x-0'
-                }`}
-              />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Save Trigger */}
+      {/* Save Button */}
       <div className="flex items-center justify-end gap-3 pt-2">
-        {saved && (
-          <span className="text-xs font-extrabold text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
-            <Check className="w-4 h-4" /> Creator Details Saved!
-          </span>
-        )}
-
         <button
           type="submit"
           disabled={isSaving}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold shadow-lg shadow-purple-950/50 transition-all hover:scale-105 flex items-center gap-2"
+          className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-purple-950/50 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 border border-purple-400/20 disabled:opacity-50"
         >
-          <Sparkles className="w-4 h-4" />
-          <span>{isSaving ? 'Saving...' : 'Save Creator Details'}</span>
+          {isSaving ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Saving Creator Details...</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4" />
+              <span>Save Creator Details</span>
+            </>
+          )}
         </button>
       </div>
     </form>
