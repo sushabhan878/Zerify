@@ -81,17 +81,6 @@ export default function MessagesSection() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-purple-400" />
-            <span>Brand Messenger Workspace</span>
-          </h2>
-          <p className="text-xs text-slate-400">Direct encrypted chat channel with brand managers and campaign leads</p>
-        </div>
-      </div>
-
       {/* Main Glass Chat Container */}
       <div className="h-[620px] rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl flex flex-col md:flex-row overflow-hidden shadow-2xl">
         {/* Chat List Sidebar */}

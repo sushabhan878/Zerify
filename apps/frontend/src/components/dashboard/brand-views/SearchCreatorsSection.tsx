@@ -453,6 +453,7 @@ export default function SearchCreatorsSection() {
 
       {/* 7. Creator Detail Profile & Media Kit Modal */}
       <CreatorDetailModal
+        isOpen={Boolean(selectedCreatorForDetail)}
         creator={selectedCreatorForDetail}
         onClose={() => setSelectedCreatorForDetail(null)}
         onInvite={(c) => setSelectedCreatorForInvite(c)}

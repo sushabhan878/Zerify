@@ -97,16 +97,26 @@ export class MetaProvider implements ISocialProvider {
     url.searchParams.append('client_id', appId);
     url.searchParams.append('redirect_uri', redirectUri);
     url.searchParams.append('state', state);
-    url.searchParams.append('config_id', configId);
     url.searchParams.append('response_type', 'code');
     url.searchParams.append('override_default_response_type', 'true');
+    if (configId) {
+      url.searchParams.append('config_id', configId);
+    }
 
-    const scopes = this.configService.get<string>(
-      'META_SCOPES',
-      'public_profile,email,pages_show_list,pages_read_user_content,pages_read_engagement,pages_manage_posts,read_insights,instagram_basic,instagram_manage_insights,business_management',
-    );
+    // Modern valid Meta permissions (deprecated permissions like read_insights,
+    // pages_read_user_content, and pages_manage_posts are removed)
+    const defaultScopes =
+      'public_profile,email,pages_show_list,pages_read_engagement,instagram_basic,instagram_manage_insights,business_management';
+    const customScopes = this.configService.get<string>('META_SCOPES');
 
-    url.searchParams.append('scope', scopes);
+    // For Meta Business Login with config_id, permissions are configured directly
+    // within the Meta App Dashboard Configuration. Passing an explicit scope parameter
+    // can conflict or trigger 'Invalid Scopes' if deprecated/unconfigured permissions are present.
+    if (customScopes) {
+      url.searchParams.append('scope', customScopes);
+    } else if (!configId) {
+      url.searchParams.append('scope', defaultScopes);
+    }
 
     return url.toString();
   }

@@ -229,6 +229,10 @@ export class SocialService implements OnModuleInit {
   }
 
   async disconnectAccount(userId: string, accountId: string): Promise<{ success: boolean; id: string }> {
+    const existing = await this.socialRepository.findById(accountId);
+    if (!existing || (userId && existing.userId !== userId)) {
+      throw new NotFoundException('Social account not found');
+    }
     await this.socialRepository.disconnectAccount(accountId);
     if (this.cacheManager) {
       try {

@@ -29,7 +29,7 @@ import { useCurrency } from '@/context/CurrencyContext';
 
 interface CreatorDetailModalProps {
   creator: CreatorItem | null;
-  isOpen: boolean;
+  isOpen?: boolean;
   onClose: () => void;
   onInvite: (creator: CreatorItem) => void;
 }
@@ -41,7 +41,7 @@ export default function CreatorDetailModal({
   onInvite,
 }: CreatorDetailModalProps) {
   const { formatBudget, format } = useCurrency();
-  const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'rates'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'works' | 'analytics' | 'rates'>('overview');
 
   if (!creator) return null;
 

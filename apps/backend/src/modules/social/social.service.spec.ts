@@ -48,7 +48,7 @@ describe('SocialService', () => {
       upsertAccount: jest.fn(),
       findByUserId: jest.fn(),
       findById: jest.fn(),
-      deleteAccount: jest.fn(),
+      disconnectAccount: jest.fn(),
     };
 
     metaProvider = {
@@ -74,6 +74,8 @@ describe('SocialService', () => {
         { provide: SocialRepository, useValue: repository },
         { provide: MetaProvider, useValue: metaProvider },
         { provide: ConfigService, useValue: configService },
+        { provide: require('./providers/instagram/instagram.provider').InstagramProvider, useValue: { getAuthUrl: jest.fn(), exchangeCodeAndGetAccounts: jest.fn() } },
+        { provide: require('./social.gateway').SocialGateway, useValue: { emitAccountConnected: jest.fn(), emitAccountUpdated: jest.fn() } },
       ],
     }).compile();
 
@@ -184,11 +186,11 @@ describe('SocialService', () => {
       id: 'acc-1',
       userId: mockUserId,
     });
-    (repository.deleteAccount as jest.Mock).mockResolvedValue({} as any);
+    (repository.disconnectAccount as jest.Mock).mockResolvedValue(undefined);
 
     const res = await service.disconnectAccount(mockUserId, 'acc-1');
     expect(res).toEqual({ success: true, id: 'acc-1' });
-    expect(repository.deleteAccount).toHaveBeenCalledWith('acc-1', mockUserId);
+    expect(repository.disconnectAccount).toHaveBeenCalledWith('acc-1');
   });
 
   it('should throw NotFoundException when disconnecting non-existent account', async () => {

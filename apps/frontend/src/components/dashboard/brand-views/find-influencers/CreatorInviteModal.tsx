@@ -19,7 +19,7 @@ export default function CreatorInviteModal({ creator, onClose }: CreatorInviteMo
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>('');
   const [proposedBudget, setProposedBudget] = useState<string>(() => {
     const rawRate = creator?.rateNumber || 250;
-    return String(Math.round(convert(rawRate, 'USD', currency)));
+    return String(Math.round(convert(rawRate, 'USD')));
   });
   const [message, setMessage] = useState<string>('');
   const [isSending, setIsSending] = useState(false);
