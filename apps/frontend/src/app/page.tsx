@@ -34,7 +34,7 @@ export default function Home() {
 
   if (checkingAuth) {
     return (
-      <div className="min-[#07090E] min-h-screen bg-[#07090E] flex flex-col items-center justify-center text-white">
+      <div className="min-h-screen bg-[#07090E] flex flex-col items-center justify-center text-white">
         <LottieLoader size={220} message="Loading Zerify Studio..." />
       </div>
     );

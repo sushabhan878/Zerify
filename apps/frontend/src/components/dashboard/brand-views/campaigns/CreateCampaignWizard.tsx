@@ -14,6 +14,7 @@ import SlotsStep from './steps/SlotsStep';
 import ReviewPublishStep from './steps/ReviewPublishStep';
 import { CampaignService } from '@/services/campaign.service';
 import { useToast } from '@/components/ui/Toast';
+import { useCurrency } from '@/context/CurrencyContext';
 
 const STEPS = [
   { id: 1, label: 'Basic Info', description: 'Brief & objectives' },
@@ -31,6 +32,7 @@ interface CreateCampaignWizardProps {
 }
 
 export default function CreateCampaignWizard({ onClose, onSuccess }: CreateCampaignWizardProps) {
+  const { currency: userCurrency } = useCurrency();
   const { toastError, toastSuccess } = useToast();
   const [mounted, setMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -61,7 +63,7 @@ export default function CreateCampaignWizard({ onClose, onSuccess }: CreateCampa
     coverImageUrl: '',
     platforms: [],
     budgetPaymentModel: '',
-    budgetCurrency: 'USD',
+    budgetCurrency: userCurrency || 'INR',
     budgetTotalAmount: '',
     budgetMinPerInfluencer: '',
     budgetMaxPerInfluencer: '',

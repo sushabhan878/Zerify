@@ -16,6 +16,7 @@ import {
   Linkedin,
   Bookmark,
 } from 'lucide-react';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export interface CampaignItem {
   id: string;
@@ -70,6 +71,7 @@ export default function CampaignCard({
   onViewBrief,
   onApply,
 }: CampaignCardProps) {
+  const { formatBudget } = useCurrency();
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
       case 'Instagram':
@@ -197,7 +199,7 @@ export default function CampaignCard({
               Compensation
             </span>
             <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              {campaign.payoutAmount}
+              {formatBudget(campaign.payoutAmount)}
             </span>
 
             {campaign.hasFreeProduct && (

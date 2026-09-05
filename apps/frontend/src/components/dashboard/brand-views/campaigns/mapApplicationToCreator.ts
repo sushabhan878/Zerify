@@ -1,5 +1,6 @@
 import { CampaignApplicationItem } from '@/services/application.service';
 import { CreatorItem } from '../find-influencers/CreatorCard';
+import { formatCurrency } from '@/utils/currency';
 
 export function mapApplicationToCreator(app: CampaignApplicationItem): CreatorItem {
   const profile: any = app.profileSnapshot || (app as any).influencerProfile || {};
@@ -30,7 +31,9 @@ export function mapApplicationToCreator(app: CampaignApplicationItem): CreatorIt
     return count.toLocaleString();
   };
 
-  const startingRateNum = Number(app.proposedAmount) || influencerProfile.minPricePerReel || 750;
+  const userCur = typeof window !== 'undefined' ? localStorage.getItem('zerify_preferred_currency') || 'INR' : 'INR';
+  const defaultRate = userCur === 'INR' ? 25000 : 750;
+  const startingRateNum = Number(app.proposedAmount) || influencerProfile.minPricePerReel || defaultRate;
   const engRateNum = profile.engagementRate || socialAccount.engagementRate || 5.8;
 
   const niches =
@@ -68,7 +71,7 @@ export function mapApplicationToCreator(app: CampaignApplicationItem): CreatorIt
     engRate: `${engRateNum}%`,
     engRateNumber: Number(engRateNum),
     rating: 5.0,
-    startingRate: `$${startingRateNum}`,
+    startingRate: formatCurrency(startingRateNum, userCur),
     rateNumber: startingRateNum,
     platforms: Array.from(new Set(platformsList)),
     primaryPlatform: profile.platform || socialAccount.platform || 'Instagram',

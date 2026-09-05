@@ -3,9 +3,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Bell, Clock, CheckCircle2, DollarSign, MessageSquare, Briefcase, Filter, ShieldAlert } from 'lucide-react';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export default function ActivityView() {
+  const { currency, format } = useCurrency();
   const [activeFilter, setActiveFilter] = useState('all');
+
+  const paymentAmount = currency === 'INR' ? format(100000, { showDecimals: true }) : format(1200, { showDecimals: true });
 
   const notifications = [
     {
@@ -22,7 +26,7 @@ export default function ActivityView() {
     {
       id: 2,
       title: 'Payment Released',
-      desc: '$1,200.00 escrow milestone released to your bank account for Nordic Audio Reel.',
+      desc: `${paymentAmount} escrow milestone released to your bank account for Nordic Audio Reel.`,
       time: '45 mins ago',
       category: 'payments',
       unread: true,

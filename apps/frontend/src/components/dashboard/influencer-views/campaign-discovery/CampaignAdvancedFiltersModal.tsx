@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, SlidersHorizontal, RotateCcw, Check, Sparkles, ShieldCheck } from 'lucide-react';
 import { CAMPAIGN_CATEGORIES, CAMPAIGN_TYPES } from './CampaignQuickFilters';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export interface CampaignAdvancedFilterState {
   category: string;
@@ -26,7 +27,17 @@ interface CampaignAdvancedFiltersModalProps {
   onResetFilters: () => void;
 }
 
-export const BUDGET_RANGES = [
+const BUDGET_RANGES_INR = [
+  'Any Budget',
+  'Under ₹50,000',
+  '₹50,000 - ₹2,00,000',
+  '₹2,00,000 - ₹5,00,000',
+  '₹5,00,000 - ₹10,00,000',
+  '₹10,00,000 - ₹25,00,000',
+  '₹25,00,000+',
+];
+
+const BUDGET_RANGES_USD = [
   'Any Budget',
   'Under $500',
   '$500 - $1K',
@@ -36,6 +47,8 @@ export const BUDGET_RANGES = [
   '$10K - $25K',
   '$25K+',
 ];
+
+export const BUDGET_RANGES = BUDGET_RANGES_INR;
 
 export const PLATFORM_OPTIONS = [
   'All Platforms',
@@ -55,6 +68,8 @@ export default function CampaignAdvancedFiltersModal({
   onApplyFilters,
   onResetFilters,
 }: CampaignAdvancedFiltersModalProps) {
+  const { currency } = useCurrency();
+  const budgetRanges = currency === 'INR' ? BUDGET_RANGES_INR : BUDGET_RANGES_USD;
   const [localFilters, setLocalFilters] = React.useState<CampaignAdvancedFilterState>(filters);
   const [mounted, setMounted] = React.useState(false);
 
@@ -100,29 +115,29 @@ export default function CampaignAdvancedFiltersModal({
           className="relative w-full max-w-xl max-h-[85vh] bg-slate-900 border border-white/15 rounded-2xl shadow-2xl overflow-hidden flex flex-col z-10"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-5 border-b border-white/10 shrink-0">
+          <div className="p-5 border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <SlidersHorizontal className="w-4 h-4 text-purple-400" />
-              <h3 className="text-base font-bold text-white">Advanced Campaign Filters</h3>
+              <SlidersHorizontal className="w-5 h-5 text-purple-400" />
+              <h2 className="text-base font-bold text-white">Advanced Campaign Filters</h2>
             </div>
             <button
-              onClick={onClose}
               type="button"
-              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Scrollable Filters Content */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-5 no-scrollbar text-xs">
-            {/* Category Select */}
+          {/* Form Body */}
+          <div className="p-5 overflow-y-auto space-y-6 flex-1 text-xs">
+            {/* Category / Subcategory Grid */}
             <div>
               <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
-                Niche / Category
+                Industry Category
               </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {CAMPAIGN_CATEGORIES.map((cat) => {
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1 border border-white/5 rounded-xl">
+                {CAMPAIGN_CATEGORIES.slice(0, 30).map((cat) => {
                   const isSelected = localFilters.category === cat;
                   return (
                     <button
@@ -148,7 +163,7 @@ export default function CampaignAdvancedFiltersModal({
                 Compensation & Budget Range
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {BUDGET_RANGES.map((b) => {
+                {budgetRanges.map((b) => {
                   const isSelected = localFilters.budgetRange === b;
                   return (
                     <button

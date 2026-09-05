@@ -8,6 +8,7 @@ import {
   Send,
   Eye,
 } from 'lucide-react';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export interface CompanyItem {
   id: string;
@@ -57,6 +58,8 @@ export default function CompanyCard({
   onPitchBrand,
   viewMode = 'grid',
 }: CompanyCardProps) {
+  const { formatBudget } = useCurrency();
+
   const getMatchColor = (score: number) => {
     if (score >= 85) return 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400';
     if (score >= 70) return 'bg-purple-500/15 border-purple-500/40 text-purple-300';
@@ -133,7 +136,7 @@ export default function CompanyCard({
         {/* Budget Highlight */}
         <div className="pt-1">
           <span className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight">
-            {company.campaignBudget || '$5,000 – $20,000'}
+            {formatBudget(company.campaignBudget)}
           </span>
         </div>
       </div>

@@ -29,6 +29,8 @@ import OfferManagementView from './OfferManagementView';
 import CreatorProfileFullView from '../find-influencers/CreatorProfileFullView';
 import { CreatorItem } from '../find-influencers/CreatorCard';
 import LottieLoader from '@/components/ui/LottieLoader';
+import { useCurrency } from '@/context/CurrencyContext';
+import { formatCurrency } from '@/utils/currency';
 
 interface CampaignOverviewDashboardProps {
   campaignId: string;
@@ -39,6 +41,7 @@ export default function CampaignOverviewDashboard({
   campaignId,
   onBack,
 }: CampaignOverviewDashboardProps) {
+  const { currency, formatBudget } = useCurrency();
   const [campaign, setCampaign] = useState<CampaignItem | null>(null);
   const [applications, setApplications] = useState<CampaignApplicationItem[]>([]);
   const [offers, setOffers] = useState<CampaignOfferItem[]>([]);
@@ -208,7 +211,7 @@ export default function CampaignOverviewDashboard({
                   Budget
                 </span>
                 <span className="text-2xl sm:text-3xl font-black text-purple-300 tracking-tight block">
-                  ${Number(campaign.budgetTotalAmount || 0).toLocaleString()}
+                  {formatCurrency(Number(campaign.budgetTotalAmount || 0), campaign.budgetCurrency || currency)}
                 </span>
               </div>
               <div className="space-y-0.5 text-left sm:text-right">

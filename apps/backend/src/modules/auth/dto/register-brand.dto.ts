@@ -18,4 +18,11 @@ export class RegisterBrandDto {
   @IsString()
   @IsOptional()
   website?: string;
+
+  @IsString()
+  @IsOptional()
+  currency?: string;
+
+  @IsOptional()
+  budget?: number | string;
 }

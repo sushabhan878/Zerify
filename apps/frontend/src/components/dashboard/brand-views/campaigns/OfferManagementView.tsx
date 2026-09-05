@@ -3,6 +3,8 @@
 import React from 'react';
 import { Send, Check, X, Clock, DollarSign } from 'lucide-react';
 import { CampaignOfferItem, OfferService } from '@/services/offer.service';
+import { useCurrency } from '@/context/CurrencyContext';
+import { formatCurrency } from '@/utils/currency';
 
 interface OfferManagementViewProps {
   offers: CampaignOfferItem[];
@@ -10,6 +12,7 @@ interface OfferManagementViewProps {
 }
 
 export default function OfferManagementView({ offers, onRefresh }: OfferManagementViewProps) {
+  const { currency } = useCurrency();
   const handleCancel = async (offerId: string) => {
     try {
       await OfferService.cancelOffer(offerId);
@@ -72,7 +75,7 @@ export default function OfferManagementView({ offers, onRefresh }: OfferManageme
               <div className="text-right">
                 <span className="text-[10px] text-slate-500 uppercase font-bold block">Offered Fee</span>
                 <span className="text-sm font-black text-emerald-400">
-                  ${offer.compensationAmount.toLocaleString()} {offer.compensationCurrency}
+                  {formatCurrency(offer.compensationAmount, offer.compensationCurrency || currency)}
                 </span>
               </div>
 

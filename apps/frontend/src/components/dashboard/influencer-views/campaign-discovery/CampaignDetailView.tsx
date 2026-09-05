@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { CampaignItem } from './CampaignCard';
 import LottieLoader from '@/components/ui/LottieLoader';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface CampaignDetailViewProps {
   campaign: CampaignItem;
@@ -45,6 +46,7 @@ export default function CampaignDetailView({
   isSaved = false,
   onToggleSave,
 }: CampaignDetailViewProps) {
+  const { formatBudget, symbol } = useCurrency();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -230,7 +232,7 @@ export default function CampaignDetailView({
           {/* Compensation */}
           <div className="pb-3 sm:pb-0 sm:pr-6 space-y-1 flex flex-col justify-center">
             <span className="text-2xl sm:text-3xl font-black text-white block tracking-tight">
-              {campaign.payoutAmount}
+              {formatBudget(campaign.payoutAmount)}
             </span>
             {campaign.hasFreeProduct && (
               <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400">
@@ -263,7 +265,7 @@ export default function CampaignDetailView({
             </h3>
             {product?.hasFreeProduct && product?.freeProductValue && (
               <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-[11px] font-bold text-emerald-400 shadow-sm">
-                Free Sample Valued at ₹{product.freeProductValue}
+                Free Sample Valued at {symbol}{Number(product.freeProductValue).toLocaleString()}
               </span>
             )}
           </div>

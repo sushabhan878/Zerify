@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { CampaignItem } from './CampaignCard';
 import { useToast } from '@/components/ui/Toast';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface CampaignPitchModalProps {
   isOpen: boolean;
@@ -38,6 +39,7 @@ export default function CampaignPitchModal({
   onSuccess,
 }: CampaignPitchModalProps) {
   const { toastSuccess, toastError } = useToast();
+  const { currency: userCurrency, symbol } = useCurrency();
   const [mounted, setMounted] = useState(false);
 
   const [proposedRate, setProposedRate] = useState('');
@@ -69,9 +71,9 @@ export default function CampaignPitchModal({
 
   if (!isOpen || !campaign || !mounted) return null;
 
-  const isRupee = campaign.payoutAmount.includes('₹');
-  const currencySymbol = isRupee ? '₹' : '$';
-  const currencyLabel = isRupee ? '₹ INR' : '$ USD';
+  const isRupee = userCurrency === 'INR';
+  const currencySymbol = symbol;
+  const currencyLabel = `${symbol} ${userCurrency}`;
 
   const handleGenerateAiPitch = () => {
     setIsGeneratingAi(true);

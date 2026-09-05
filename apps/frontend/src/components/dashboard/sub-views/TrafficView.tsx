@@ -5,8 +5,12 @@ import { TrendingUp, Globe, Eye, ArrowUpRight, Smartphone, Monitor } from 'lucid
 import RealTimeTrafficCard from './traffic-subcomponents/RealTimeTrafficCard';
 import TrafficSourcesCard from './traffic-subcomponents/TrafficSourcesCard';
 import TrafficFunnelCard from './traffic-subcomponents/TrafficFunnelCard';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export default function TrafficView() {
+  const { currency } = useCurrency();
+  const salesStr = currency === 'INR' ? '₹3.5L Sales' : '$4.2K Sales';
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -44,7 +48,7 @@ export default function TrafficView() {
           <div className="p-3.5 rounded-xl bg-slate-950/60 border border-white/10 space-y-1">
             <span className="text-[11px] font-bold text-slate-400 uppercase">Affiliate Tracking Links</span>
             <div className="text-xl font-black text-white">1,180 Clicks</div>
-            <span className="text-[10px] font-bold text-purple-400">12.2% Conv • $4.2K Sales</span>
+            <span className="text-[10px] font-bold text-purple-400">12.2% Conv • {salesStr}</span>
           </div>
         </div>
       </div>

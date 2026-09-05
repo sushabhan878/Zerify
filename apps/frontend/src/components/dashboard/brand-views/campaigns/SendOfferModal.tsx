@@ -6,6 +6,7 @@ import { CampaignApplicationItem } from '@/services/application.service';
 import { OfferService } from '@/services/offer.service';
 import { CreatorItem } from '../find-influencers/CreatorCard';
 import { mapApplicationToCreator } from './mapApplicationToCreator';
+import { useCurrency } from '@/context/CurrencyContext';
 
 import CustomDatePicker from '@/components/ui/CustomDatePicker';
 
@@ -22,9 +23,10 @@ export default function SendOfferModal({
   onSuccess,
   onViewProfile,
 }: SendOfferModalProps) {
+  const { currency, symbol } = useCurrency();
   const [mounted, setMounted] = useState(false);
   const [compensationAmount, setCompensationAmount] = useState<number>(
-    application?.proposedAmount || 1500,
+    application?.proposedAmount || (currency === 'INR' ? 25000 : 850),
   );
   const [responseDeadline, setResponseDeadline] = useState<string>('');
   const [startDate, setStartDate] = useState<string>('');
@@ -58,7 +60,7 @@ export default function SendOfferModal({
 
     // Validation
     if (!compensationAmount || compensationAmount <= 0) {
-      setError('Please enter a valid compensation amount greater than $0.');
+      setError(`Please enter a valid compensation amount greater than ${symbol}0.`);
       return;
     }
 
@@ -76,7 +78,7 @@ export default function SendOfferModal({
     try {
       await OfferService.sendOffer(application.id, {
         compensationAmount,
-        compensationCurrency: application.proposedCurrency || 'USD',
+        compensationCurrency: application.proposedCurrency || currency || 'INR',
         responseDeadline: responseDeadline ? new Date(responseDeadline).toISOString() : undefined,
         startDate: startDate ? new Date(startDate).toISOString() : undefined,
         endDate: endDate ? new Date(endDate).toISOString() : undefined,
@@ -98,25 +100,42 @@ export default function SendOfferModal({
     >
       <motion.div
         onClick={(e) => e.stopPropagation()}
-        initial={{ opacity: 0, scale: 0.96, y: 10 }}
+        initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.96, y: 10 }}
-        transition={{ duration: 0.2 }}
-        className="w-full max-w-lg bg-[#090D16] border border-purple-500/30 rounded-3xl shadow-2xl overflow-visible flex flex-col backdrop-blur-2xl p-6 sm:p-7 relative my-auto"
+        exit={{ opacity: 0, scale: 0.95, y: 15 }}
+        className="w-full max-w-lg bg-[#0c0a1d] border border-purple-500/30 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden"
       >
-        {/* Subtle ambient lighting */}
-        <div className="absolute -top-24 -right-24 w-52 h-52 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-52 h-52 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
+        {/* Glow Header Accent */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent blur-sm" />
 
-        <form onSubmit={handleSend} className="space-y-4 relative z-10">
-          {/* Error Banner */}
+        {/* Title */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-300">
+              <Send className="w-4 h-4" />
+            </div>
+            <h3 className="text-lg font-bold text-white tracking-tight">
+              Send Official Offer
+            </h3>
+          </div>
+          <button
+            onClick={onClose}
+            type="button"
+            className="text-slate-400 hover:text-white transition-colors text-xs font-bold px-2 py-1 rounded-lg hover:bg-white/5"
+          >
+            Cancel
+          </button>
+        </div>
+
+        {/* Form Body */}
+        <form onSubmit={handleSend} className="space-y-4">
           <AnimatePresence>
             {error && (
               <motion.div
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-rose-300 text-xs flex items-center gap-2"
               >
                 <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
                 <span className="flex-1 font-medium">{error}</span>
@@ -168,7 +187,7 @@ export default function SendOfferModal({
           {/* Agreed Compensation Amount */}
           <div>
             <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-              Agreed Compensation Amount (USD) <span className="text-pink-500">*</span>
+              Agreed Compensation Amount ({currency}) <span className="text-pink-500">*</span>
             </label>
             <div className="relative">
               <input
@@ -180,7 +199,7 @@ export default function SendOfferModal({
                 onChange={(e) => setCompensationAmount(Number(e.target.value))}
                 className="w-full pl-9 pr-4 py-3 bg-slate-900/60 border border-purple-500/20 hover:border-purple-500/40 focus:border-purple-400 focus:bg-purple-950/20 rounded-2xl text-sm font-semibold text-white placeholder:text-slate-500 focus:outline-none transition-all"
               />
-              <DollarSign className="w-4 h-4 text-purple-400 absolute left-3 top-3.5" />
+              <span className="text-purple-400 font-bold text-sm absolute left-3.5 top-3.5 select-none">{symbol}</span>
             </div>
           </div>
 

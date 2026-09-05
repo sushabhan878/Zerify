@@ -47,6 +47,11 @@ export class UpdateBrandCompanyInfoDto {
   @IsArray()
   @IsString({ each: true })
   brandValues?: string[];
+
+  @ApiPropertyOptional({ example: 'INR' })
+  @IsOptional()
+  @IsString()
+  currency?: string;
 }
 
 export class UpdateBrandCampaignGoalsDto {

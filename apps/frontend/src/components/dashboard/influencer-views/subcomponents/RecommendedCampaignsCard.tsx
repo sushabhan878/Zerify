@@ -3,8 +3,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Target, Clock, ArrowRight, Instagram, Youtube, Send } from 'lucide-react';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export default function RecommendedCampaignsCard() {
+  const { formatBudget } = useCurrency();
   const campaigns = [
     {
       title: 'Summer Fitness Apparel Launch',
@@ -65,7 +67,7 @@ export default function RecommendedCampaignsCard() {
               </div>
               <h4 className="text-sm font-bold text-white">{camp.title}</h4>
               <div className="flex items-center gap-3 pt-1">
-                <span className="text-xs font-black text-emerald-400">{camp.budget}</span>
+                <span className="text-xs font-black text-emerald-400">{formatBudget(camp.budget)}</span>
                 <div className="flex items-center gap-1.5">
                   {camp.platforms.includes('Instagram') && <Instagram className="w-3.5 h-3.5 text-pink-400" />}
                   {camp.platforms.includes('YouTube') && <Youtube className="w-3.5 h-3.5 text-red-400" />}

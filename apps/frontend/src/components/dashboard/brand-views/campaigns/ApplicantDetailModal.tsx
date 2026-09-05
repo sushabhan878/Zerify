@@ -15,6 +15,8 @@ import {
 import { CampaignApplicationItem } from '@/services/application.service';
 import { CreatorItem } from '../find-influencers/CreatorCard';
 import { mapApplicationToCreator } from './mapApplicationToCreator';
+import { useCurrency } from '@/context/CurrencyContext';
+import { formatCurrency } from '@/utils/currency';
 
 interface ApplicantDetailModalProps {
   application: CampaignApplicationItem | null;
@@ -33,6 +35,7 @@ export default function ApplicantDetailModal({
   onShortlist,
   onReject,
 }: ApplicantDetailModalProps) {
+  const { currency, formatBudget } = useCurrency();
   const [mounted, setMounted] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -186,7 +189,7 @@ export default function ApplicantDetailModal({
             </span>
             <span className="text-base sm:text-lg font-black text-emerald-400 tracking-tight">
               {application.proposedAmount
-                ? `${application.proposedCurrency || 'USD'} $${Number(application.proposedAmount).toLocaleString()}`
+                ? formatCurrency(application.proposedAmount, application.proposedCurrency || currency)
                 : 'Flexible / Standard Rate'}
             </span>
           </div>

@@ -27,6 +27,7 @@ import {
   Globe,
 } from 'lucide-react';
 import { CampaignItem } from './CampaignCard';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface CampaignDetailModalProps {
   isOpen: boolean;
@@ -41,6 +42,7 @@ export default function CampaignDetailModal({
   campaign,
   onApply,
 }: CampaignDetailModalProps) {
+  const { formatBudget, symbol } = useCurrency();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -186,7 +188,7 @@ export default function CampaignDetailModal({
                   Budget / Compensation
                 </span>
                 <span className="text-xl sm:text-2xl font-black text-white block tracking-tight">
-                  {campaign.payoutAmount}
+                  {formatBudget(campaign.payoutAmount)}
                 </span>
                 <span className="text-[11px] text-purple-300 font-semibold block">
                   {campaign.payoutModel}
@@ -311,7 +313,7 @@ export default function CampaignDetailModal({
                   </h4>
                   {product.freeProductValue && (
                     <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-[11px] font-bold text-emerald-400">
-                      Valued at ₹{product.freeProductValue}
+                      Valued at {symbol}{Number(product.freeProductValue).toLocaleString()}
                     </span>
                   )}
                 </div>

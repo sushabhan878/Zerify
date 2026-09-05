@@ -26,6 +26,8 @@ interface SingleBasicInfoCardProps {
   setDob: (val: string) => void;
   gender: string;
   setGender: (val: string) => void;
+  currency?: string;
+  setCurrency?: (val: string) => void;
   avatarUrl: string | null;
   onAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveAvatar: () => void;
@@ -49,6 +51,8 @@ export default function SingleBasicInfoCard({
   setDob,
   gender,
   setGender,
+  currency = 'INR',
+  setCurrency,
   avatarUrl,
   onAvatarChange,
   onRemoveAvatar,
@@ -106,6 +110,11 @@ export default function SingleBasicInfoCard({
     { value: 'Male', label: 'Male' },
     { value: 'Female', label: 'Female' },
     { value: 'Prefer not to say', label: 'Prefer not to say' },
+  ];
+
+  const currencyOptions = [
+    { value: 'INR', label: '₹ INR (Indian Rupee - Default)' },
+    { value: 'USD', label: '$ USD (US Dollar)' },
   ];
 
   return (
@@ -291,8 +300,8 @@ export default function SingleBasicInfoCard({
         </div>
       </div>
 
-      {/* 6. DOB & Gender Selection */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* 5. DOB, Gender Selection & Preferred Currency */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
             Date of Birth (DOB)
@@ -317,6 +326,18 @@ export default function SingleBasicInfoCard({
             value={gender}
             onChange={setGender}
             iconLeft={<Users className="w-4 h-4 text-purple-400" />}
+          />
+        </div>
+
+        <div>
+          <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
+            Preferred Currency
+          </label>
+          <CustomSelect
+            options={currencyOptions}
+            value={currency}
+            onChange={(val) => setCurrency?.(val)}
+            iconLeft={<span className="text-xs font-bold text-pink-400">₹/$</span>}
           />
         </div>
       </div>

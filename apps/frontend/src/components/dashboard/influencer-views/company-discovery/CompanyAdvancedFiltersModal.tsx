@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Check, RotateCcw } from 'lucide-react';
 import { QuickFilterState } from './CompanyQuickFilters';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export interface AdvancedFilterState extends QuickFilterState {
   companySize: string;
@@ -42,7 +43,17 @@ const INDUSTRIES = [
   'Automotive & EV',
 ];
 
-const BUDGET_RANGES = [
+const BUDGET_RANGES_INR = [
+  'Any Budget',
+  'Under ₹50,000',
+  '₹50,000 - ₹2,00,000',
+  '₹2,00,000 - ₹5,00,000',
+  '₹5,00,000 - ₹10,00,000',
+  '₹10,00,000 - ₹25,00,000',
+  '₹25,00,000+',
+];
+
+const BUDGET_RANGES_USD = [
   'Any Budget',
   'Under $500',
   '$500 - $1K',
@@ -132,6 +143,8 @@ export default function CompanyAdvancedFiltersModal({
   onApplyFilters,
   onResetFilters,
 }: CompanyAdvancedFiltersModalProps) {
+  const { currency } = useCurrency();
+  const budgetRanges = currency === 'INR' ? BUDGET_RANGES_INR : BUDGET_RANGES_USD;
   const [localState, setLocalState] = useState<AdvancedFilterState>(filters);
   const [mounted, setMounted] = useState(false);
 
@@ -175,9 +188,7 @@ export default function CompanyAdvancedFiltersModal({
             transition={{ type: 'spring', damping: 26, stiffness: 280 }}
             className="relative z-50 w-full max-w-md h-screen bg-slate-950 border-l border-white/10 shadow-2xl flex flex-col overflow-hidden selection:bg-purple-500 selection:text-white"
           >
-            {/* Scrollable Filter Form Body */}
             <div className="flex-1 overflow-y-auto p-5 space-y-6 text-xs">
-              {/* 1. Category / Industry Dropdown */}
               <FilterDropdown
                 label="Primary Industry Category"
                 value={localState.industry}
@@ -185,17 +196,15 @@ export default function CompanyAdvancedFiltersModal({
                 onChange={(val) => handleFieldChange('industry', val)}
               />
 
-              {/* 2. Budget Range Dropdown */}
               <div className="pt-3 border-t border-white/5">
                 <FilterDropdown
                   label="Campaign Budget Range"
                   value={localState.budgetRange}
-                  options={BUDGET_RANGES}
+                  options={budgetRanges}
                   onChange={(val) => handleFieldChange('budgetRange', val)}
                 />
               </div>
 
-              {/* 3. Platform & Campaign Type */}
               <div className="space-y-3 pt-3 border-t border-white/5">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-300 block">Target Social Platform</label>

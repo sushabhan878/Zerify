@@ -11,6 +11,7 @@ import {
   Headphones,
   BadgeCheck,
 } from 'lucide-react';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export interface CreatorItem {
   id: string;
@@ -144,11 +145,12 @@ function PlatformBadge({ platform }: { platform: string }) {
 
 export default function CreatorCard({
   creator,
-  viewMode,
+  viewMode = 'grid',
   onInvite,
   onViewProfile,
   onToggleBookmark,
 }: CreatorCardProps) {
+  const { formatBudget } = useCurrency();
   const [isLiking, setIsLiking] = useState(false);
 
   const categoryList =
@@ -268,7 +270,7 @@ export default function CreatorCard({
           </div>
           <div className="px-4">
             <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">STARTS AT</span>
-            <span className="text-lg font-black text-purple-300">{creator.startingRate}</span>
+            <span className="text-lg font-black text-purple-300">{formatBudget(creator.startingRate)}</span>
           </div>
         </div>
 
@@ -455,7 +457,7 @@ export default function CreatorCard({
                 STARTS AT
               </span>
               <span className="text-lg sm:text-xl font-black text-purple-300 mt-0.5 leading-tight">
-                {creator.startingRate}
+                {formatBudget(creator.startingRate)}
               </span>
             </div>
           </div>

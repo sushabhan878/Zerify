@@ -37,7 +37,7 @@ export default function ReviewPublishStep({
   const platforms = formData.platforms || [];
 
   const isValid = Boolean(formData.title && formData.description);
-  const currencyCode = formData.budgetCurrency || 'USD';
+  const currencyCode = formData.budgetCurrency || (typeof window !== 'undefined' ? localStorage.getItem('zerify_preferred_currency') : 'INR') || 'INR';
   const currencySymbol =
     currencyCode === 'INR' ? '₹' : currencyCode === 'EUR' ? '€' : currencyCode === 'GBP' ? '£' : currencyCode === 'CAD' ? 'C$' : currencyCode === 'AUD' ? 'A$' : '$';
 
@@ -129,7 +129,7 @@ export default function ReviewPublishStep({
             <span className="text-xs text-slate-400">Total Campaign Budget:</span>
             <span className="text-sm font-black text-emerald-400">
               {formData.budgetPaymentModel === 'BARTER'
-                ? 'Product Barter ($0 Escrow)'
+                ? `Product Barter (${currencySymbol}0 Escrow)`
                 : formData.budgetTotalAmount
                   ? `${currencySymbol} ${Number(formData.budgetTotalAmount).toLocaleString()} ${currencyCode}`
                   : 'Not Set / Flexible'}

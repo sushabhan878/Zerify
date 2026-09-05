@@ -10,6 +10,8 @@ interface RegisterBrandStepProps {
   setWebsite: (val: string) => void;
   budget: number;
   setBudget: (val: number) => void;
+  currency: 'INR' | 'USD';
+  setCurrency: (curr: 'INR' | 'USD') => void;
   loading: boolean;
   errorMessage: string;
   onSubmit: (e: React.FormEvent) => void;
@@ -21,14 +23,35 @@ export default function RegisterBrandStep({
   setWebsite,
   budget,
   setBudget,
+  currency,
+  setCurrency,
   loading,
   errorMessage,
   onSubmit,
 }: RegisterBrandStepProps) {
+  const handleCurrencyChange = (newCurr: 'INR' | 'USD') => {
+    if (newCurr === currency) return;
+    if (newCurr === 'USD') {
+      // Convert INR (e.g. 500000) to USD (~6000)
+      const converted = Math.round(budget / 83.5);
+      setBudget(Math.max(0, Math.min(converted, 25000)));
+    } else {
+      // Convert USD (e.g. 7000) to INR (~580000)
+      const converted = Math.round((budget * 83.5) / 25000) * 25000;
+      setBudget(Math.max(0, Math.min(converted, 2500000)));
+    }
+    setCurrency(newCurr);
+  };
+
   const formatBudget = (val: number) => {
-    if (val === 0) return '$0 / month';
-    if (val >= 25000) return '$25,000+ / month';
-    return `$${val.toLocaleString()} / month`;
+    if (val === 0) return `${currency === 'INR' ? '₹0' : '$0'} / month`;
+    if (currency === 'INR') {
+      if (val >= 2500000) return '₹25,00,000+ / month';
+      return `₹${val.toLocaleString('en-IN')} / month`;
+    } else {
+      if (val >= 25000) return '$25,000+ / month';
+      return `$${val.toLocaleString()} / month`;
+    }
   };
 
   return (
@@ -66,33 +89,77 @@ export default function RegisterBrandStep({
           </div>
         </div>
 
-        {/* 2. Campaign Budget Slider */}
-        <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 space-y-3">
+        {/* 2. Campaign Budget Slider with Currency Selector */}
+        <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 space-y-3.5">
+          {/* Header Row: Label & Currency Segmented Toggle */}
           <div className="flex items-center justify-between">
             <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
               <DollarSign className="w-3.5 h-3.5 text-purple-400" />
               <span>Monthly Creator Budget</span>
             </label>
-            <span className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">
+
+            {/* Currency Selector Pill */}
+            <div className="flex items-center gap-1 bg-slate-950/80 p-0.5 rounded-lg border border-white/10">
+              <button
+                type="button"
+                onClick={() => handleCurrencyChange('INR')}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
+                  currency === 'INR'
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                ₹ INR
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCurrencyChange('USD')}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
+                  currency === 'USD'
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                $ USD
+              </button>
+            </div>
+          </div>
+
+          {/* Budget Badge Display */}
+          <div className="flex justify-end">
+            <span className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">
               {formatBudget(budget)}
             </span>
           </div>
 
+          {/* Dynamic Range Slider (INR / USD) */}
           <input
             type="range"
             min={0}
-            max={25000}
-            step={500}
+            max={currency === 'INR' ? 2500000 : 25000}
+            step={currency === 'INR' ? 25000 : 500}
             value={budget}
             onChange={(e) => setBudget(Number(e.target.value))}
             className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-500 hover:accent-purple-400 transition-all"
           />
 
+          {/* Slider Axis Ticks */}
           <div className="flex justify-between text-[10px] text-slate-500 font-semibold px-0.5">
-            <span>$0</span>
-            <span>$5,000</span>
-            <span>$15,000</span>
-            <span>$25,000+</span>
+            {currency === 'INR' ? (
+              <>
+                <span>₹0</span>
+                <span>₹5,00,000</span>
+                <span>₹15,00,000</span>
+                <span>₹25,00,000+</span>
+              </>
+            ) : (
+              <>
+                <span>$0</span>
+                <span>$5,000</span>
+                <span>$15,000</span>
+                <span>$25,000+</span>
+              </>
+            )}
           </div>
         </div>
 

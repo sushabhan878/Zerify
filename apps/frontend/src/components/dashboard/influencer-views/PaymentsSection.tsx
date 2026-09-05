@@ -4,52 +4,72 @@ import React, { useState } from 'react';
 import { DollarSign, Search, Download } from 'lucide-react';
 import PaymentsKpiBar from './subcomponents/PaymentsKpiBar';
 import TransactionCardItem, { TransactionItem } from './subcomponents/TransactionCardItem';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export default function PaymentsSection() {
+  const { currency, format } = useCurrency();
   const [activeTab, setActiveTab] = useState<'ALL' | 'COMPLETED' | 'PENDING_APPROVAL'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [transactions, setTransactions] = useState<TransactionItem[]>([
+  const rawTx = [
     {
       id: 'TX-90214',
       brand: 'Sony Audio Systems',
       campaign: 'WH-1000XM5 Wireless Headphones Launch',
-      amount: '+$3,500.00',
+      usdAmount: 3500,
+      inrAmount: 292250,
       date: 'Jul 26, 2026',
-      type: 'PAYOUT_RELEASE',
-      status: 'COMPLETED',
+      type: 'PAYOUT_RELEASE' as const,
+      status: 'COMPLETED' as const,
     },
     {
       id: 'TX-89420',
       brand: 'Gymshark Apparel',
       campaign: 'Summer Activewear Story Feature',
-      amount: '+$1,500.00',
+      usdAmount: 1500,
+      inrAmount: 125250,
       date: 'Jul 14, 2026',
-      type: 'PAYOUT_RELEASE',
-      status: 'COMPLETED',
+      type: 'PAYOUT_RELEASE' as const,
+      status: 'COMPLETED' as const,
     },
     {
       id: 'TX-88105',
       brand: 'FlexiSpot Official',
       campaign: 'Ergonomic Desk Setup Showcase',
-      amount: '+$2,800.00',
+      usdAmount: 2800,
+      inrAmount: 233800,
       date: 'Locked in Escrow',
-      type: 'ESCROW_DEPOSIT',
-      status: 'PENDING_APPROVAL',
+      type: 'ESCROW_DEPOSIT' as const,
+      status: 'PENDING_APPROVAL' as const,
     },
     {
       id: 'TX-87410',
       brand: 'NordVPN Security',
       campaign: 'Tech Sponsorship Integration',
-      amount: '+$1,800.00',
+      usdAmount: 1800,
+      inrAmount: 150300,
       date: 'Jul 02, 2026',
-      type: 'PAYOUT_RELEASE',
-      status: 'COMPLETED',
+      type: 'PAYOUT_RELEASE' as const,
+      status: 'COMPLETED' as const,
     },
-  ]);
+  ];
+
+  const transactions: TransactionItem[] = rawTx.map((t) => ({
+    id: t.id,
+    brand: t.brand,
+    campaign: t.campaign,
+    amount: `+${format(currency === 'INR' ? t.inrAmount : t.usdAmount, { showDecimals: true })}`,
+    date: t.date,
+    type: t.type,
+    status: t.status,
+  }));
+
+  const availableBalanceStr = format(currency === 'INR' ? 705575 : 8450, { showDecimals: true });
+  const inEscrowStr = format(currency === 'INR' ? 1135600 : 13600, { showDecimals: true });
+  const lifetimeEarningsStr = format(currency === 'INR' ? 4084000 : 48910, { showDecimals: true });
 
   const handleWithdraw = () => {
-    alert('Withdrawal request of $8,450.00 initiated to connected bank account! Funds will transfer within 24 hours.');
+    alert(`Withdrawal request of ${availableBalanceStr} initiated to connected bank account! Funds will transfer within 24 hours.`);
   };
 
   const handleDownloadInvoice = (id: string) => {
@@ -88,9 +108,9 @@ export default function PaymentsSection() {
 
       {/* 1. Financial KPI Overview Bar */}
       <PaymentsKpiBar
-        availableBalance="$8,450.00"
-        inEscrow="$13,600.00"
-        lifetimeEarnings="$48,910.00"
+        availableBalance={availableBalanceStr}
+        inEscrow={inEscrowStr}
+        lifetimeEarnings={lifetimeEarningsStr}
         onWithdraw={handleWithdraw}
       />
 

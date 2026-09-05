@@ -42,22 +42,24 @@ export default function RegisterModal({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
+
   // Brand fields
   const [companyName, setCompanyName] = useState('');
   const [website, setWebsite] = useState('');
-  const [budget, setBudget] = useState(0);
+  const [budget, setBudget] = useState(500000);
 
   // Influencer fields
   const [handle, setHandle] = useState('');
   const [platform, setPlatform] = useState('Instagram');
   const [category, setCategory] = useState('Fashion & Beauty');
   const [selectedCategories, setSelectedCategories] = useState<string[]>(['Fashion & Beauty']);
-  const [pricePerReel, setPricePerReel] = useState(250);
+  const [pricePerReel, setPricePerReel] = useState(20000);
   const [gender, setGender] = useState('Prefer not to say');
   const [openToAffiliate, setOpenToAffiliate] = useState(false);
   const [openToUgc, setOpenToUgc] = useState(false);
   const [contactInfo, setContactInfo] = useState('');
-  const [pricingRange, setPricingRange] = useState('$100 - $500');
+  const [pricingRange, setPricingRange] = useState('₹10,000 - ₹50,000');
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -111,6 +113,8 @@ export default function RegisterModal({
             name: fullName,
             companyName: companyName || fullName || 'My Brand',
             website: website || undefined,
+            currency,
+            budget,
           }
           : {
             email,
@@ -124,6 +128,8 @@ export default function RegisterModal({
             openToUgc,
             contactInfo: contactInfo || undefined,
             pricingRange,
+            currency,
+            minPricePerReel: pricePerReel,
           };
 
       const response = await fetch(endpoint, {
@@ -145,6 +151,7 @@ export default function RegisterModal({
       if (data.user) {
         localStorage.setItem('zerify_user', JSON.stringify(data.user));
       }
+      localStorage.setItem('zerify_preferred_currency', currency);
 
       window.dispatchEvent(new Event('zerify_auth_change'));
       setStep(4);
@@ -189,6 +196,8 @@ export default function RegisterModal({
               setWebsite={setWebsite}
               budget={budget}
               setBudget={setBudget}
+              currency={currency}
+              setCurrency={setCurrency}
               loading={loading}
               errorMessage={errorMessage}
               onSubmit={handleCompleteRegistration}
@@ -202,6 +211,8 @@ export default function RegisterModal({
               setSelectedCategories={setSelectedCategories}
               pricePerReel={pricePerReel}
               setPricePerReel={setPricePerReel}
+              currency={currency}
+              setCurrency={setCurrency}
               loading={loading}
               errorMessage={errorMessage}
               onSubmit={handleCompleteRegistration}

@@ -46,6 +46,7 @@ export default function BasicInfoTab({
   const [phoneNumber, setPhoneNumber] = useState(() => cached?.phoneNumber || '');
   const [dob, setDob] = useState(() => (cached?.dob ? new Date(cached.dob).toISOString().split('T')[0] : ''));
   const [gender, setGender] = useState(() => cached?.gender || 'Prefer not to say');
+  const [currency, setCurrency] = useState(() => cached?.currency || 'INR');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(() => cached?.avatarUrl || cached?.user?.avatarUrl || initialAvatar || null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -61,6 +62,7 @@ export default function BasicInfoTab({
       if (initialData.phoneNumber !== undefined) setPhoneNumber(initialData.phoneNumber || '');
       if (initialData.dob) setDob(new Date(initialData.dob).toISOString().split('T')[0]);
       if (initialData.gender) setGender(initialData.gender);
+      if (initialData.currency) setCurrency(initialData.currency);
       if (initialData.avatarUrl !== undefined) setAvatarUrl(initialData.avatarUrl || null);
     }
   }, [initialData]);
@@ -86,10 +88,14 @@ export default function BasicInfoTab({
           if (data.phoneNumber !== undefined) setPhoneNumber(data.phoneNumber || '');
           if (data.dob) setDob(new Date(data.dob).toISOString().split('T')[0]);
           if (data.gender) setGender(data.gender);
+          if (data.currency) setCurrency(data.currency);
           if (data.avatarUrl) setAvatarUrl(data.avatarUrl);
 
           try {
             localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(data));
+            if (data.currency) {
+              localStorage.setItem('zerify_preferred_currency', data.currency);
+            }
           } catch (e) {}
         }
       } catch (err) {
@@ -156,6 +162,7 @@ export default function BasicInfoTab({
       phoneNumber,
       dob,
       gender,
+      currency,
       avatarUrl: avatarUrl || null,
     };
 
@@ -190,6 +197,7 @@ export default function BasicInfoTab({
         if (updatedData.phoneNumber) setPhoneNumber(updatedData.phoneNumber);
         if (updatedData.dob) setDob(new Date(updatedData.dob).toISOString().split('T')[0]);
         if (updatedData.gender) setGender(updatedData.gender);
+        if (updatedData.currency) setCurrency(updatedData.currency);
         if (updatedData.avatarUrl) setAvatarUrl(updatedData.avatarUrl);
       }
 
@@ -205,8 +213,10 @@ export default function BasicInfoTab({
       };
       localStorage.setItem('zerify_user', JSON.stringify(updatedUser));
       localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(updatedData));
+      localStorage.setItem('zerify_preferred_currency', updatedData.currency || currency);
       window.dispatchEvent(new Event('zerify_influencer_profile_update'));
       window.dispatchEvent(new Event('zerify_auth_change'));
+      window.dispatchEvent(new Event('zerify_currency_change'));
 
       toastSuccess('Basic info saved successfully!');
       if (onSaveSuccess) onSaveSuccess();
@@ -220,7 +230,7 @@ export default function BasicInfoTab({
 
   return (
     <form onSubmit={handleSave} className="space-y-5">
-      {/* Single Unified Card containing image upload, name, username, bio, location suggestions, contact & gender */}
+      {/* Single Unified Card containing image upload, name, username, bio, location suggestions, contact, gender & currency */}
       <SingleBasicInfoCard
         name={name}
         setName={setName}
@@ -239,6 +249,8 @@ export default function BasicInfoTab({
         setDob={setDob}
         gender={gender}
         setGender={setGender}
+        currency={currency}
+        setCurrency={setCurrency}
         avatarUrl={avatarUrl}
         onAvatarChange={handleAvatarChange}
         onRemoveAvatar={() => setAvatarUrl(null)}

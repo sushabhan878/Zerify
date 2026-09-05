@@ -60,10 +60,10 @@ const PAYMENT_MODELS = [
 ];
 
 const CURRENCIES = [
+  { code: 'INR', symbol: '₹', label: 'INR - Indian Rupee (Default)' },
   { code: 'USD', symbol: '$', label: 'USD - US Dollar' },
   { code: 'EUR', symbol: '€', label: 'EUR - Euro' },
   { code: 'GBP', symbol: '£', label: 'GBP - British Pound' },
-  { code: 'INR', symbol: '₹', label: 'INR - Indian Rupee' },
   { code: 'CAD', symbol: 'C$', label: 'CAD - Canadian Dollar' },
   { code: 'AUD', symbol: 'A$', label: 'AUD - Australian Dollar' },
 ];
@@ -104,7 +104,8 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
     };
   }, []);
 
-  const selectedCurrency = CURRENCIES.find((c) => c.code === (formData.budgetCurrency || 'USD')) || CURRENCIES[0];
+  const preferredCurrency = typeof window !== 'undefined' ? localStorage.getItem('zerify_preferred_currency') || 'INR' : 'INR';
+  const selectedCurrency = CURRENCIES.find((c) => c.code === (formData.budgetCurrency || preferredCurrency)) || CURRENCIES[0];
   const selectedMetric = PERFORMANCE_METRICS.find((m) => m.id === formData.performanceMetric);
 
   return (

@@ -3,6 +3,7 @@
 import React from 'react';
 import { Send, ShieldCheck, Zap } from 'lucide-react';
 import { CreatorItem } from '../CreatorCard';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface ProfileBookingCardProps {
   creator: CreatorItem;
@@ -13,7 +14,10 @@ export default function ProfileBookingCard({
   creator,
   onInvite,
 }: ProfileBookingCardProps) {
-  const startingRate = creator.rateNumber || 200;
+  const { formatBudget, format } = useCurrency();
+  const startingRateDisplay = creator.startingRate
+    ? formatBudget(creator.startingRate)
+    : format(creator.rateNumber || 200);
 
   return (
     <div className="sticky top-20 rounded-2xl sm:rounded-3xl bg-[#090C15]/95 border border-white/10 p-5 sm:p-6 space-y-4 shadow-2xl backdrop-blur-xl">
@@ -21,7 +25,7 @@ export default function ProfileBookingCard({
       <div className="space-y-1">
         <div className="flex items-baseline gap-2">
           <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            ${startingRate}
+            {startingRateDisplay}
           </span>
           <span className="text-xs sm:text-sm font-semibold text-slate-400">
             starting rate

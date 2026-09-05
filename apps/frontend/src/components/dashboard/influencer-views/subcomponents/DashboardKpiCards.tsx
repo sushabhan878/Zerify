@@ -3,12 +3,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Briefcase, Mail, DollarSign, Sparkles } from 'lucide-react';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export default function DashboardKpiCards() {
+  const { currency, format } = useCurrency();
+  const earningsVal = currency === 'INR' ? format(1540000) : format(18450);
+  const earningsChange = currency === 'INR' ? '+₹2.6L this month' : '+$3.2K this month';
+
   const stats = [
     { label: 'Active Collaborations', value: '4 Active', change: '+2 this week', icon: Briefcase, color: 'text-purple-400' },
     { label: 'Pending Invitations', value: '3 Pending', change: 'Action required', icon: Mail, color: 'text-pink-400' },
-    { label: 'Total Earnings', value: '$18,450', change: '+$3.2K this month', icon: DollarSign, color: 'text-emerald-400' },
+    { label: 'Total Earnings', value: earningsVal, change: earningsChange, icon: DollarSign, color: 'text-emerald-400' },
     { label: 'AI Match Score', value: '94%', change: 'Top 5% Creator', icon: Sparkles, color: 'text-indigo-400' },
   ];
 

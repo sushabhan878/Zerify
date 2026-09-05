@@ -14,6 +14,7 @@ export interface QuickFilterState {
 }
 
 import { PRIMARY_CATEGORY_NAMES } from '@/constants/categories';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface CompanyQuickFiltersProps {
   filters: QuickFilterState;
@@ -24,7 +25,17 @@ interface CompanyQuickFiltersProps {
 
 const INDUSTRIES = ['All', ...PRIMARY_CATEGORY_NAMES];
 
-const BUDGET_RANGES = [
+const BUDGET_RANGES_INR = [
+  'Any Budget',
+  'Under ₹50,000',
+  '₹50,000 - ₹2,00,000',
+  '₹2,00,000 - ₹5,00,000',
+  '₹5,00,000 - ₹10,00,000',
+  '₹10,00,000 - ₹25,00,000',
+  '₹25,00,000+',
+];
+
+const BUDGET_RANGES_USD = [
   'Any Budget',
   'Under $500',
   '$500 - $1K',
@@ -62,6 +73,8 @@ export default function CompanyQuickFilters({
   onOpenAdvancedModal,
   activeCount,
 }: CompanyQuickFiltersProps) {
+  const { currency } = useCurrency();
+  const budgetRanges = currency === 'INR' ? BUDGET_RANGES_INR : BUDGET_RANGES_USD;
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   const toggleDropdown = (name: string) => {
@@ -131,8 +144,8 @@ export default function CompanyQuickFilters({
           <ChevronDown className="w-3.5 h-3.5 opacity-70" />
         </button>
         {openDropdown === 'budget' && (
-          <div className="absolute top-full left-0 mt-1.5 w-52 max-h-64 overflow-y-auto bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
-            {BUDGET_RANGES.map((b) => (
+          <div className="absolute top-full left-0 mt-1.5 w-56 max-h-64 overflow-y-auto bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+            {budgetRanges.map((b) => (
               <button
                 key={b}
                 type="button"

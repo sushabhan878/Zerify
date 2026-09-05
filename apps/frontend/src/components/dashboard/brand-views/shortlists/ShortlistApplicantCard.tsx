@@ -16,6 +16,8 @@ import {
 import { CampaignApplicationItem } from '@/services/application.service';
 import { CreatorItem } from '../find-influencers/CreatorCard';
 import { mapApplicationToCreator } from '../campaigns/mapApplicationToCreator';
+import { useCurrency } from '@/context/CurrencyContext';
+import { formatCurrency } from '@/utils/currency';
 
 interface ShortlistApplicantCardProps {
   application: CampaignApplicationItem;
@@ -40,6 +42,7 @@ export default function ShortlistApplicantCard({
   viewMode = 'grid',
   onFilterByCampaign,
 }: ShortlistApplicantCardProps) {
+  const { currency } = useCurrency();
   const [imageError, setImageError] = useState(false);
 
   const creatorItem = mapApplicationToCreator(application);
@@ -52,16 +55,8 @@ export default function ShortlistApplicantCard({
     }
   };
 
-  const currencySym =
-    application.proposedCurrency === 'INR' ||
-    (application.proposedAmount && application.proposedAmount > 5000)
-      ? '₹'
-      : application.proposedCurrency === 'EUR'
-      ? '€'
-      : '$';
-
   const quoteDisplay = application.proposedAmount
-    ? `${currencySym}${Number(application.proposedAmount).toLocaleString()}`
+    ? formatCurrency(application.proposedAmount, application.proposedCurrency || currency)
     : 'Flexible';
 
   const hasExistingOffer =
