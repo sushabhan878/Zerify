@@ -90,6 +90,198 @@ export class SocialController {
     return res.redirect(redirectUrl);
   }
 
+  @ApiOperation({ summary: 'Generate YouTube Google OAuth Login URL' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('youtube/login')
+  getYoutubeLoginUrl(@Req() req: RequestWithUser, @Query('userId') queryUserId?: string) {
+    const userId = req.user?.id || queryUserId || 'default-user-id';
+    const result = this.socialService.getYouTubeAuthUrl(userId);
+    return {
+      statusCode: HttpStatus.OK,
+      data: result,
+    };
+  }
+
+  @ApiOperation({ summary: 'YouTube Google OAuth Authorization Callback' })
+  @Get('youtube/callback')
+  async youtubeCallback(
+    @Query() query: ConnectCallbackQueryDto,
+    @Res() res: Response,
+  ) {
+    const redirectUrl = await this.socialService.handleYouTubeCallback(
+      query.code,
+      query.state,
+      query.error,
+      query.error_description || query.error_reason,
+    );
+    return res.redirect(redirectUrl);
+  }
+
+  @ApiOperation({ summary: 'Trigger manual sync for a YouTube connected channel' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Post('youtube/sync/:id')
+  @HttpCode(HttpStatus.OK)
+  async syncYouTubeChannel(@Param('id') id: string) {
+    await this.socialService.syncYouTubeChannelDetails(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'YouTube channel synchronization triggered successfully.',
+    };
+  }
+
+  @ApiOperation({ summary: 'Generate LinkedIn OAuth 2.0 / OIDC Login URL for popup' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('linkedin/login')
+  getLinkedInLoginUrl(@Req() req: RequestWithUser, @Query('userId') queryUserId?: string) {
+    const userId = req.user?.id || queryUserId || 'default-user-id';
+    const result = this.socialService.getLinkedInAuthUrl(userId);
+    return {
+      statusCode: HttpStatus.OK,
+      data: result,
+    };
+  }
+
+  @ApiOperation({ summary: 'Direct redirect to LinkedIn OAuth 2.0 / OIDC Authorization (TRD Spec)' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('linkedin/connect')
+  connectLinkedIn(
+    @Req() req: RequestWithUser,
+    @Res() res: Response,
+    @Query('userId') queryUserId?: string,
+  ) {
+    const userId = req.user?.id || queryUserId || 'default-user-id';
+    const result = this.socialService.getLinkedInAuthUrl(userId);
+    return res.redirect(result.url);
+  }
+
+  @ApiOperation({ summary: 'LinkedIn OAuth 2.0 Authorization Callback' })
+  @Get('linkedin/callback')
+  async linkedinCallback(
+    @Query() query: ConnectCallbackQueryDto,
+    @Res() res: Response,
+  ) {
+    const redirectUrl = await this.socialService.handleLinkedInCallback(
+      query.code,
+      query.state,
+      query.error,
+      query.error_description || query.error_reason,
+    );
+    return res.redirect(redirectUrl);
+  }
+
+  @ApiOperation({ summary: 'Trigger manual sync for a LinkedIn connected profile' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Post('linkedin/sync/:id')
+  @HttpCode(HttpStatus.OK)
+  async syncLinkedInProfile(@Param('id') id: string) {
+    await this.socialService.syncLinkedInAccountDetails(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'LinkedIn profile synchronization triggered successfully.',
+    };
+  }
+
+  // --- X (Twitter) Routes (PRD Spec) ---
+
+  @ApiOperation({ summary: 'Generate X (Twitter) OAuth 2.0 PKCE Authorization URL for popup login flow' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('x/login')
+  getXLoginUrl(@Req() req: RequestWithUser, @Query('userId') queryUserId?: string) {
+    const userId = req.user?.id || queryUserId || 'default-user-id';
+    const result = this.socialService.getXAuthUrl(userId);
+    return {
+      statusCode: HttpStatus.OK,
+      data: result,
+    };
+  }
+
+  @ApiOperation({ summary: 'Alias for X OAuth 2.0 PKCE login URL' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('twitter/login')
+  getTwitterLoginUrl(@Req() req: RequestWithUser, @Query('userId') queryUserId?: string) {
+    return this.getXLoginUrl(req, queryUserId);
+  }
+
+  @ApiOperation({ summary: 'Direct redirect to X (Twitter) OAuth 2.0 Authorization (PRD Spec)' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('x/connect')
+  connectX(
+    @Req() req: RequestWithUser,
+    @Res() res: Response,
+    @Query('userId') queryUserId?: string,
+  ) {
+    const userId = req.user?.id || queryUserId || 'default-user-id';
+    const result = this.socialService.getXAuthUrl(userId);
+    return res.redirect(result.url);
+  }
+
+  @ApiOperation({ summary: 'Alias for direct redirect to X (Twitter) OAuth 2.0' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('twitter/connect')
+  connectTwitter(
+    @Req() req: RequestWithUser,
+    @Res() res: Response,
+    @Query('userId') queryUserId?: string,
+  ) {
+    return this.connectX(req, res, queryUserId);
+  }
+
+  @ApiOperation({ summary: 'X (Twitter) OAuth 2.0 Authorization Callback' })
+  @Get('x/callback')
+  async xCallback(
+    @Query() query: ConnectCallbackQueryDto,
+    @Res() res: Response,
+  ) {
+    const redirectUrl = await this.socialService.handleXCallback(
+      query.code,
+      query.state,
+      query.error,
+      query.error_description || query.error_reason,
+    );
+    return res.redirect(redirectUrl);
+  }
+
+  @ApiOperation({ summary: 'Alias for X (Twitter) OAuth 2.0 Authorization Callback' })
+  @Get('twitter/callback')
+  async twitterCallback(
+    @Query() query: ConnectCallbackQueryDto,
+    @Res() res: Response,
+  ) {
+    return this.xCallback(query, res);
+  }
+
+  @ApiOperation({ summary: 'Trigger manual sync for an X (Twitter) connected profile' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Post('x/sync/:id')
+  @HttpCode(HttpStatus.OK)
+  async syncXProfile(@Param('id') id: string) {
+    await this.socialService.syncXAccountDetails(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'X (Twitter) profile and tweets synchronization triggered successfully.',
+    };
+  }
+
+  @ApiOperation({ summary: 'Alias for manual sync for X (Twitter) profile' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Post('twitter/sync/:id')
+  @HttpCode(HttpStatus.OK)
+  async syncTwitterProfile(@Param('id') id: string) {
+    return this.syncXProfile(id);
+  }
+
+
   @ApiOperation({ summary: 'Get list of connected social accounts for the user' })
   @ApiBearerAuth()
   @UseGuards(OptionalJwtAuthGuard)

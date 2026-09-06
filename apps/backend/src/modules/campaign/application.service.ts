@@ -7,15 +7,96 @@ import {
 } from '@nestjs/common';
 import { CampaignRepository } from './campaign.repository';
 import { CreateApplicationDto } from './dto/create-application.dto';
-import { ApplicationStatus, CampaignStatus } from '@prisma/client';
+import { ApplicationStatus, CampaignStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
+import { OutboxService } from '../messaging/outbox.service';
+import {
+  ApplicationEventPayload,
+  OUTBOX_EVENTS,
+} from '../messaging/events/messaging-events';
 
 @Injectable()
 export class ApplicationService {
   constructor(
     private readonly repository: CampaignRepository,
     private readonly prisma: PrismaService,
+    private readonly outbox: OutboxService,
   ) {}
+
+  /**
+   * Collects the brand/creator identities a system message needs.
+   * Returns null when the application cannot be resolved — messaging must never
+   * be the reason a status change fails.
+   */
+  private async buildApplicationEventPayload(
+    applicationId: string,
+    actor: 'BRAND' | 'INFLUENCER',
+  ): Promise<ApplicationEventPayload | null> {
+    const application = await this.prisma.campaignApplication.findUnique({
+      where: { id: applicationId },
+      select: {
+        id: true,
+        campaign: {
+          select: {
+            id: true,
+            title: true,
+            brandProfile: { select: { userId: true, companyName: true } },
+          },
+        },
+        influencerProfile: {
+          select: { handle: true, user: { select: { id: true, name: true } } },
+        },
+      },
+    });
+
+    const brandUserId = application?.campaign?.brandProfile?.userId;
+    const influencerUserId = application?.influencerProfile?.user?.id;
+    if (!application || !brandUserId || !influencerUserId) {
+      return null;
+    }
+
+    return {
+      applicationId: application.id,
+      campaignId: application.campaign.id,
+      campaignTitle: application.campaign.title,
+      brandUserId,
+      brandName: application.campaign.brandProfile?.companyName ?? null,
+      influencerUserId,
+      influencerName:
+        application.influencerProfile?.user?.name ??
+        application.influencerProfile?.handle ??
+        null,
+      actor,
+    };
+  }
+
+  /**
+   * Applies a status change and enqueues its system message in one transaction,
+   * so the two can never diverge (PRD §38).
+   */
+  private async updateStatusWithEvent(
+    applicationId: string,
+    status: ApplicationStatus,
+    extra: Prisma.CampaignApplicationUpdateInput,
+    eventType: string,
+    actor: 'BRAND' | 'INFLUENCER',
+  ) {
+    const payload = await this.buildApplicationEventPayload(applicationId, actor);
+
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.campaignApplication.update({
+        where: { id: applicationId },
+        data: { status, ...extra },
+        include: { campaign: true, influencerProfile: true, offers: true },
+      });
+
+      if (payload) {
+        await this.outbox.enqueue(tx, eventType, applicationId, payload);
+      }
+
+      return updated;
+    });
+  }
 
   async applyToCampaign(userId: string, campaignId: string, dto: CreateApplicationDto) {
     const influencerProfile = await this.prisma.influencerProfile.findUnique({
@@ -97,19 +178,51 @@ export class ApplicationService {
       );
     }
 
-    return this.repository.createApplication({
-      campaign: { connect: { id: campaignId } },
-      influencerProfile: { connect: { id: influencerProfile.id } },
-      socialAccount: { connect: { id: dto.socialAccountId } },
-      status: ApplicationStatus.APPLIED,
-      applicationMessage: dto.applicationMessage,
-      proposedAmount: dto.proposedAmount,
-      proposedCurrency: dto.proposedCurrency || 'USD',
-      contentIdea: dto.contentIdea,
-      portfolioUrls: dto.portfolioUrls || [],
-      matchSnapshot: matchData as any,
-      profileSnapshot: profileSnapshot as any,
-      submittedAt: new Date(),
+    const brandUserId = (campaign as any).brandProfile?.userId;
+
+    // Create the application and enqueue its system message atomically.
+    return this.prisma.$transaction(async (tx) => {
+      const application = await tx.campaignApplication.create({
+        data: {
+          campaign: { connect: { id: campaignId } },
+          influencerProfile: { connect: { id: influencerProfile.id } },
+          socialAccount: { connect: { id: dto.socialAccountId } },
+          status: ApplicationStatus.APPLIED,
+          applicationMessage: dto.applicationMessage,
+          proposedAmount: dto.proposedAmount,
+          proposedCurrency: dto.proposedCurrency || 'USD',
+          contentIdea: dto.contentIdea,
+          portfolioUrls: dto.portfolioUrls || [],
+          matchSnapshot: matchData as any,
+          profileSnapshot: profileSnapshot as any,
+          submittedAt: new Date(),
+        },
+        include: {
+          campaign: { include: { brandProfile: true } },
+          influencerProfile: true,
+          socialAccount: true,
+        },
+      });
+
+      if (brandUserId) {
+        await this.outbox.enqueue(
+          tx,
+          OUTBOX_EVENTS.COLLABORATION_REQUEST_CREATED,
+          application.id,
+          {
+            applicationId: application.id,
+            campaignId,
+            campaignTitle: campaign.title,
+            brandUserId,
+            brandName: (campaign as any).brandProfile?.companyName ?? null,
+            influencerUserId: userId,
+            influencerName: influencerProfile.user?.name ?? influencerProfile.handle ?? null,
+            actor: 'INFLUENCER',
+          },
+        );
+      }
+
+      return application;
     });
   }
 
@@ -314,27 +427,42 @@ export class ApplicationService {
       throw new BadRequestException('Cannot withdraw an application after accepting an offer');
     }
 
-    return this.repository.updateApplicationStatus(applicationId, ApplicationStatus.WITHDRAWN, {
-      withdrawnAt: new Date(),
-    });
+    return this.updateStatusWithEvent(
+      applicationId,
+      ApplicationStatus.WITHDRAWN,
+      { withdrawnAt: new Date() },
+      OUTBOX_EVENTS.COLLABORATION_REQUEST_WITHDRAWN,
+      'INFLUENCER',
+    );
   }
 
   async reviewApplication(applicationId: string, reviewedBy: string, notes?: string) {
-    return this.repository.updateApplicationStatus(applicationId, ApplicationStatus.UNDER_REVIEW, {
-      reviewedBy,
-      reviewedAt: new Date(),
-      reviewNotes: notes,
-    });
+    return this.updateStatusWithEvent(
+      applicationId,
+      ApplicationStatus.UNDER_REVIEW,
+      { reviewedBy, reviewedAt: new Date(), reviewNotes: notes },
+      OUTBOX_EVENTS.COLLABORATION_REQUEST_UNDER_REVIEW,
+      'BRAND',
+    );
   }
 
   async shortlistApplication(applicationId: string) {
-    return this.repository.updateApplicationStatus(applicationId, ApplicationStatus.SHORTLISTED);
+    return this.updateStatusWithEvent(
+      applicationId,
+      ApplicationStatus.SHORTLISTED,
+      {},
+      OUTBOX_EVENTS.COLLABORATION_REQUEST_SHORTLISTED,
+      'BRAND',
+    );
   }
 
   async rejectApplication(applicationId: string, reviewNotes?: string) {
-    return this.repository.updateApplicationStatus(applicationId, ApplicationStatus.REJECTED, {
-      rejectedAt: new Date(),
-      reviewNotes,
-    });
+    return this.updateStatusWithEvent(
+      applicationId,
+      ApplicationStatus.REJECTED,
+      { rejectedAt: new Date(), reviewNotes },
+      OUTBOX_EVENTS.COLLABORATION_REQUEST_REJECTED,
+      'BRAND',
+    );
   }
 }

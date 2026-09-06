@@ -11,32 +11,55 @@ function SocialCallbackContent() {
   const count = searchParams.get('count');
 
   useEffect(() => {
-    // Notify the parent opener window if available
-    if (window.opener) {
+    const payload = {
+      type: 'ZERIFY_SOCIAL_CONNECTED',
+      status,
+      message,
+      count,
+      timestamp: Date.now(),
+    };
+
+    // 1. Notify the parent opener window if available
+    if (typeof window !== 'undefined' && window.opener) {
       try {
-        window.opener.postMessage(
-          {
-            type: 'ZERIFY_SOCIAL_CONNECTED',
-            status,
-            message,
-            count,
-          },
-          '*',
-        );
+        window.opener.postMessage(payload, '*');
       } catch (err) {
         console.error('Could not postMessage to opener:', err);
       }
     }
 
-    // Automatically close the popup window after 1.8 seconds
-    const timer = setTimeout(() => {
-      if (window.opener) {
-        window.close();
+    // 2. Broadcast via BroadcastChannel (works even if cross-origin navigation severed window.opener)
+    try {
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        const bc = new BroadcastChannel('zerify_social_oauth');
+        bc.postMessage(payload);
+        bc.close();
       }
-    }, 1800);
+    } catch (bcErr) {
+      console.error('BroadcastChannel error:', bcErr);
+    }
+
+    // 3. Set localStorage event to wake up opener tab via storage event
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('zerify_social_connected_event', JSON.stringify(payload));
+      }
+    } catch (lsErr) {
+      console.error('localStorage event error:', lsErr);
+    }
+
+    // 4. Automatically close the popup window
+    const timer = setTimeout(() => {
+      try {
+        window.close();
+      } catch (e) {
+        console.warn('Could not auto-close window:', e);
+      }
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, [status, message, count]);
+
 
   return (
     <div className="min-h-screen bg-[#07090E] text-white flex flex-col items-center justify-center p-6 text-center">

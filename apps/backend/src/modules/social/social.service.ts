@@ -15,7 +15,11 @@ import { SocialRepository } from './social.repository';
 import { SocialGateway } from './social.gateway';
 import { MetaProvider } from './providers/meta/meta.provider';
 import { InstagramProvider } from './providers/instagram/instagram.provider';
-import { encryptToken, decryptToken, generateOAuthState, verifyOAuthState } from './utils/crypto.util';
+import { YoutubeProvider } from './providers/youtube/youtube.provider';
+import { LinkedinProvider } from './providers/linkedin/linkedin.provider';
+import { TwitterProvider } from './providers/twitter/twitter.provider';
+import { SocialPlatform } from '@prisma/client';
+import { encryptToken, decryptToken, generateOAuthState, verifyOAuthState, generatePkcePair } from './utils/crypto.util';
 import { SocialAccountResponseDto } from './dto/social-account-response.dto';
 
 @Injectable()
@@ -27,9 +31,13 @@ export class SocialService implements OnModuleInit {
     private readonly socialRepository: SocialRepository,
     private readonly metaProvider: MetaProvider,
     private readonly instagramProvider: InstagramProvider,
+    private readonly youtubeProvider: YoutubeProvider,
+    private readonly linkedinProvider: LinkedinProvider,
+    private readonly twitterProvider: TwitterProvider,
     private readonly socialGateway: SocialGateway,
     @Optional() @Inject(CACHE_MANAGER) private readonly cacheManager?: Cache,
   ) { }
+
 
   onModuleInit() {
     this.logger.log('Initializing automated 15-minute background real-time sync timer for connected social accounts...');
@@ -82,6 +90,52 @@ export class SocialService implements OnModuleInit {
     const url = this.instagramProvider.getAuthUrl(redirectUri, state);
     return { url, state };
   }
+
+  private getYouTubeRedirectUri(): string {
+    return (
+      this.configService.get<string>('YOUTUBE_REDIRECT_URI') ||
+      'https://gyration-dragging-freebie.ngrok-free.dev/api/v1/social/youtube/callback'
+    );
+  }
+
+  getYouTubeAuthUrl(userId: string): { url: string; state: string } {
+    const state = generateOAuthState(userId);
+    const redirectUri = this.getYouTubeRedirectUri();
+    const url = this.youtubeProvider.getAuthUrl(redirectUri, state);
+    return { url, state };
+  }
+
+  private getLinkedInRedirectUri(): string {
+    return (
+      this.configService.get<string>('LINKEDIN_REDIRECT_URI') ||
+      process.env.LINKEDIN_REDIRECT_URI ||
+      'https://gyration-dragging-freebie.ngrok-free.dev/api/v1/social/linkedin/callback'
+    );
+  }
+
+  getLinkedInAuthUrl(userId: string): { url: string; state: string } {
+    const state = generateOAuthState(userId);
+    const redirectUri = this.getLinkedInRedirectUri();
+    const url = this.linkedinProvider.getAuthUrl(redirectUri, state);
+    return { url, state };
+  }
+
+  private getXRedirectUri(): string {
+    return (
+      this.configService.get<string>('X_REDIRECT_URI') ||
+      this.configService.get<string>('TWITTER_REDIRECT_URI') ||
+      'https://gyration-dragging-freebie.ngrok-free.dev/api/v1/social/x/callback'
+    );
+  }
+
+  getXAuthUrl(userId: string): { url: string; state: string } {
+    const { codeVerifier, codeChallenge } = generatePkcePair();
+    const state = generateOAuthState(userId, { codeVerifier });
+    const redirectUri = this.getXRedirectUri();
+    const url = this.twitterProvider.getAuthUrl(redirectUri, state, codeChallenge);
+    return { url, state };
+  }
+
 
   async handleMetaCallback(
     code?: string,
@@ -207,6 +261,559 @@ export class SocialService implements OnModuleInit {
     }
   }
 
+  async handleYouTubeCallback(
+    code?: string,
+    state?: string,
+    error?: string,
+    errorDescription?: string,
+  ): Promise<string> {
+    const frontendUrl = this.getFrontendUrl();
+
+    if (error || !code || !state) {
+      this.logger.warn(`YouTube OAuth Callback received error: ${error} - ${errorDescription}`);
+      const reason = encodeURIComponent(errorDescription || error || 'YouTube authorization was cancelled or denied');
+      return `${frontendUrl}/social/callback?status=error&message=${reason}`;
+    }
+
+    const { userId, isValid } = verifyOAuthState(state);
+    if (!isValid || !userId) {
+      this.logger.warn('YouTube OAuth callback received invalid or expired state token');
+      const reason = encodeURIComponent('Invalid or expired OAuth state parameter. Please try connecting again.');
+      return `${frontendUrl}/social/callback?status=error&message=${reason}`;
+    }
+
+    const redirectUri = this.getYouTubeRedirectUri();
+
+    try {
+      const profiles = await this.youtubeProvider.exchangeCodeAndGetAccounts(code, redirectUri);
+      let savedCount = 0;
+
+      for (const profile of profiles) {
+        const encryptedAccessToken = encryptToken(profile.accessToken);
+        const encryptedRefreshToken = profile.refreshToken
+          ? encryptToken(profile.refreshToken)
+          : null;
+
+        const savedAcc = await this.socialRepository.upsertAccount({
+          userId,
+          platform: profile.platform,
+          platformUserId: profile.platformUserId,
+          username: profile.username || 'YouTube Channel',
+          displayName: profile.displayName || profile.username,
+          avatar: profile.avatar,
+          followerCount: profile.followerCount,
+          accessToken: encryptedAccessToken,
+          refreshToken: encryptedRefreshToken,
+          expiresAt: profile.expiresAt,
+        });
+
+        if (profile.rawData) {
+          const raw = profile.rawData;
+          await this.socialRepository.upsertYouTubeChannel(savedAcc.id, {
+            channelId: raw.channelId,
+            channelTitle: raw.channelTitle,
+            channelDescription: raw.channelDescription,
+            customUrl: raw.customUrl,
+            thumbnailUrl: raw.thumbnailUrl,
+            subscriberCount: raw.subscriberCount,
+            videoCount: raw.videoCount,
+            viewCount: raw.viewCount,
+            publishedAt: raw.publishedAt,
+            country: raw.country,
+          });
+
+          // Trigger asynchronous initial synchronization (TRD Section 12)
+          this.syncYouTubeChannelDetails(savedAcc.id, profile.accessToken, raw.uploadsPlaylistId).catch((syncErr) => {
+            this.logger.error(`Initial YouTube sync failed for account ${savedAcc.id}:`, syncErr);
+          });
+        }
+
+        savedCount++;
+      }
+
+      return `${frontendUrl}/social/callback?status=success&count=${savedCount}`;
+    } catch (err: any) {
+      this.logger.error('Error during YouTube OAuth callback processing:', err?.stack || err);
+      const message = encodeURIComponent(err?.message || 'Failed to connect YouTube account');
+      return `${frontendUrl}/social/callback?status=error&message=${message}`;
+    }
+  }
+
+  async handleLinkedInCallback(
+    code?: string,
+    state?: string,
+    error?: string,
+    errorDescription?: string,
+  ): Promise<string> {
+    const frontendUrl = this.getFrontendUrl();
+
+    if (error || !code || !state) {
+      this.logger.warn(`LinkedIn OAuth Callback received error: ${error} - ${errorDescription}`);
+      const reason = encodeURIComponent(
+        errorDescription || error || 'LinkedIn authorization was cancelled or denied',
+      );
+      return `${frontendUrl}/social/callback?status=error&message=${reason}`;
+    }
+
+    const { userId, isValid } = verifyOAuthState(state);
+    if (!isValid || !userId) {
+      this.logger.warn('LinkedIn OAuth callback received invalid or expired state token');
+      const reason = encodeURIComponent(
+        'Invalid or expired OAuth state parameter. Please try connecting again.',
+      );
+      return `${frontendUrl}/social/callback?status=error&message=${reason}`;
+    }
+
+    const redirectUri = this.getLinkedInRedirectUri();
+
+    try {
+      const profiles = await this.linkedinProvider.exchangeCodeAndGetAccounts(code, redirectUri);
+      let savedCount = 0;
+
+      for (const profile of profiles) {
+        // TRD Section 25: Account Collision Protection
+        const existingAcc = await this.socialRepository.findByPlatformAndPlatformUserId(
+          SocialPlatform.LINKEDIN,
+          profile.platformUserId,
+        );
+
+        if (existingAcc && existingAcc.userId !== userId && existingAcc.status === 'CONNECTED') {
+          this.logger.warn(
+            `Collision detected: LinkedIn member ${profile.platformUserId} is already connected to user ${existingAcc.userId}`,
+          );
+          const collMsg = encodeURIComponent(
+            'This LinkedIn account is already connected to another Zerify user.',
+          );
+          return `${frontendUrl}/social/callback?status=error&message=${collMsg}`;
+        }
+
+        const encryptedAccessToken = encryptToken(profile.accessToken);
+        const encryptedRefreshToken = profile.refreshToken
+          ? encryptToken(profile.refreshToken)
+          : null;
+
+        const savedAcc = await this.socialRepository.upsertAccount({
+          userId,
+          platform: profile.platform,
+          platformUserId: profile.platformUserId,
+          username: profile.username || 'LinkedIn Member',
+          displayName: profile.displayName || profile.username,
+          avatar: profile.avatar,
+          followerCount: profile.followerCount || 0,
+          accessToken: encryptedAccessToken,
+          refreshToken: encryptedRefreshToken,
+          expiresAt: profile.expiresAt,
+        });
+
+        // Upsert LinkedInProfile table
+        if (profile.rawData) {
+          const raw = profile.rawData;
+          await this.socialRepository.upsertLinkedInProfile(savedAcc.id, {
+            linkedinId: raw.linkedinId || profile.platformUserId,
+            localizedFirstName: raw.localizedFirstName,
+            localizedLastName: raw.localizedLastName,
+            profilePictureUrl: raw.profilePictureUrl || profile.avatar,
+            email: raw.email,
+            emailVerified: raw.emailVerified,
+            locale: raw.locale,
+          });
+
+          // Also populate basic profile metadata
+          await this.socialRepository.upsertProfileMetadata(savedAcc.id, {
+            username: profile.username,
+            displayName: profile.displayName,
+            avatarUrl: profile.avatar,
+            profileUrl: profile.profileUrl,
+            followerCount: profile.followerCount || 0,
+            followingCount: 0,
+            mediaCount: 0,
+          });
+        }
+
+        // Notify realtime subscribers
+        this.socialGateway.emitAccountMetricsUpdated(savedAcc.id, savedAcc);
+
+        savedCount++;
+      }
+
+      return `${frontendUrl}/social/callback?status=success&count=${savedCount}`;
+    } catch (err: any) {
+      this.logger.error('Error during LinkedIn OAuth callback processing:', err?.stack || err);
+      const message = encodeURIComponent(err?.message || 'Failed to connect LinkedIn account');
+      return `${frontendUrl}/social/callback?status=error&message=${message}`;
+    }
+  }
+
+  async syncLinkedInAccountDetails(socialAccountId: string): Promise<void> {
+    const account = await this.socialRepository.findById(socialAccountId);
+    if (!account || !account.accessToken || account.platform !== SocialPlatform.LINKEDIN) return;
+
+    try {
+      await this.socialRepository.updateSyncState(socialAccountId, 'PROFILE_METADATA', 'SYNCING');
+      const rawToken = decryptToken(account.accessToken);
+      const userInfo = await this.linkedinProvider.fetchUserInfo(rawToken);
+
+      if (userInfo) {
+        const fullName =
+          userInfo.name ||
+          [userInfo.given_name, userInfo.family_name].filter(Boolean).join(' ') ||
+          account.username ||
+          'LinkedIn Member';
+        const avatarUrl = userInfo.picture || account.avatar;
+
+        let localeStr: string | undefined;
+        if (typeof userInfo.locale === 'string') {
+          localeStr = userInfo.locale;
+        } else if (userInfo.locale && typeof userInfo.locale === 'object') {
+          localeStr = `${userInfo.locale.language}_${userInfo.locale.country}`;
+        }
+
+        await this.socialRepository.upsertLinkedInProfile(socialAccountId, {
+          linkedinId: userInfo.sub || account.platformUserId,
+          localizedFirstName: userInfo.given_name,
+          localizedLastName: userInfo.family_name,
+          profilePictureUrl: avatarUrl,
+          email: userInfo.email,
+          emailVerified: userInfo.email_verified,
+          locale: localeStr,
+        });
+
+        await this.socialRepository.upsertProfileMetadata(socialAccountId, {
+          username: fullName,
+          displayName: fullName,
+          avatarUrl,
+          profileUrl: `https://www.linkedin.com/in/${userInfo.sub || account.platformUserId}`,
+        });
+
+        await this.socialRepository.updateSyncState(socialAccountId, 'PROFILE_METADATA', 'SUCCESS');
+        this.socialGateway.emitAccountMetricsUpdated(account.id, account);
+        this.logger.log(`Successfully synced LinkedIn profile metadata for account ${socialAccountId}`);
+      }
+    } catch (err: any) {
+      this.logger.error(`Failed to sync LinkedIn account ${socialAccountId}:`, err?.stack || err);
+      await this.socialRepository.updateSyncState(
+        socialAccountId,
+        'PROFILE_METADATA',
+        'FAILED',
+        err?.message,
+      );
+    }
+  }
+
+  async handleXCallback(
+    code?: string,
+    state?: string,
+    error?: string,
+    errorDescription?: string,
+  ): Promise<string> {
+    const frontendUrl = this.getFrontendUrl();
+
+    if (error || !code || !state) {
+      this.logger.warn(`X OAuth Callback received error: ${error} - ${errorDescription}`);
+      const reason = encodeURIComponent(
+        errorDescription || error || 'X authorization was cancelled or denied',
+      );
+      return `${frontendUrl}/social/callback?status=error&message=${reason}`;
+    }
+
+    const { userId, isValid, data } = verifyOAuthState<{ codeVerifier?: string }>(state);
+    if (!isValid || !userId) {
+      this.logger.warn('X OAuth callback received invalid or expired state token');
+      const reason = encodeURIComponent(
+        'Invalid or expired OAuth state parameter. Please try connecting again.',
+      );
+      return `${frontendUrl}/social/callback?status=error&message=${reason}`;
+    }
+
+    const redirectUri = this.getXRedirectUri();
+    const codeVerifier = data?.codeVerifier;
+
+    try {
+      const profiles = await this.twitterProvider.exchangeCodeAndGetAccounts(
+        code,
+        redirectUri,
+        codeVerifier,
+      );
+      let savedCount = 0;
+
+      for (const profile of profiles) {
+        // Account Collision Protection
+        const existingAcc = await this.socialRepository.findByPlatformAndPlatformUserId(
+          SocialPlatform.TWITTER,
+          profile.platformUserId,
+        );
+
+        if (existingAcc && existingAcc.userId !== userId && existingAcc.status === 'CONNECTED') {
+          this.logger.warn(
+            `Collision detected: X account ${profile.platformUserId} is already connected to user ${existingAcc.userId}`,
+          );
+          const collMsg = encodeURIComponent(
+            'This X (Twitter) account is already connected to another Zerify user.',
+          );
+          return `${frontendUrl}/social/callback?status=error&message=${collMsg}`;
+        }
+
+        const encryptedAccessToken = encryptToken(profile.accessToken);
+        const encryptedRefreshToken = profile.refreshToken
+          ? encryptToken(profile.refreshToken)
+          : null;
+
+        const savedAcc = await this.socialRepository.upsertAccount({
+          userId,
+          platform: profile.platform,
+          platformUserId: profile.platformUserId,
+          username: profile.username || 'X User',
+          displayName: profile.displayName || profile.username,
+          avatar: profile.avatar,
+          followerCount: profile.followerCount || 0,
+          accessToken: encryptedAccessToken,
+          refreshToken: encryptedRefreshToken,
+          expiresAt: profile.expiresAt,
+        });
+
+        // Upsert TwitterProfile table
+        const raw = profile.rawData || {};
+        const twitterProfile = await this.socialRepository.upsertTwitterProfile(savedAcc.id, {
+          twitterId: raw.id || profile.platformUserId,
+          username: raw.username || profile.username || 'XUser',
+          name: raw.name || profile.displayName || 'X User',
+          description: raw.description,
+          profileImageUrl: raw.profile_image_url || profile.avatar,
+          followersCount: raw.public_metrics?.followers_count || profile.followerCount || 0,
+          followingCount: raw.public_metrics?.following_count || 0,
+          tweetCount: raw.public_metrics?.tweet_count || 0,
+          verifiedType: raw.verified_type,
+        });
+
+        // Also populate basic profile metadata
+        await this.socialRepository.upsertProfileMetadata(savedAcc.id, {
+          username: profile.username,
+          displayName: profile.displayName,
+          avatarUrl: profile.avatar,
+          profileUrl: profile.profileUrl,
+          followerCount: profile.followerCount || 0,
+          followingCount: raw.public_metrics?.following_count || 0,
+          mediaCount: raw.public_metrics?.tweet_count || 0,
+        });
+
+        // Trigger initial deep sync in background
+        this.syncXAccountDetails(savedAcc.id).catch((syncErr) => {
+          this.logger.error(`Initial background sync for X account ${savedAcc.id} failed:`, syncErr);
+        });
+
+        // Notify realtime subscribers
+        this.socialGateway.emitAccountMetricsUpdated(savedAcc.id, savedAcc);
+
+        savedCount++;
+      }
+
+      return `${frontendUrl}/social/callback?status=success&count=${savedCount}`;
+    } catch (err: any) {
+      this.logger.error('Error during X OAuth callback processing:', err?.stack || err);
+      const message = encodeURIComponent(err?.message || 'Failed to connect X account');
+      return `${frontendUrl}/social/callback?status=error&message=${message}`;
+    }
+  }
+
+  async syncXAccountDetails(socialAccountId: string): Promise<void> {
+    const account = await this.socialRepository.findById(socialAccountId);
+    if (!account || !account.accessToken || account.platform !== SocialPlatform.TWITTER) return;
+
+    try {
+      await this.socialRepository.updateSyncState(socialAccountId, 'PROFILE_METADATA', 'SYNCING');
+      let rawToken = decryptToken(account.accessToken);
+
+      // Refresh token if expired
+      if (account.expiresAt && new Date(account.expiresAt) <= new Date() && account.refreshToken) {
+        try {
+          const decryptedRefresh = decryptToken(account.refreshToken);
+          const refreshed = await this.twitterProvider.refreshAccessToken(decryptedRefresh);
+          rawToken = refreshed.accessToken;
+          await this.socialRepository.upsertAccount({
+            userId: account.userId,
+            platform: account.platform,
+            platformUserId: account.platformUserId,
+            username: account.username || '',
+            accessToken: encryptToken(refreshed.accessToken),
+            refreshToken: refreshed.refreshToken ? encryptToken(refreshed.refreshToken) : account.refreshToken,
+            expiresAt: refreshed.expiresAt,
+          });
+        } catch (refreshErr) {
+          this.logger.warn(`Could not refresh X token for account ${socialAccountId}:`, refreshErr);
+        }
+      }
+
+      // Fetch latest profile
+      const userInfo = await this.twitterProvider.fetchUserInfo(rawToken).catch(() => null);
+      if (userInfo) {
+        const twitterProfile = await this.socialRepository.upsertTwitterProfile(socialAccountId, {
+          twitterId: userInfo.id,
+          username: userInfo.username,
+          name: userInfo.name,
+          description: userInfo.description,
+          profileImageUrl: userInfo.profile_image_url,
+          followersCount: userInfo.public_metrics?.followers_count || 0,
+          followingCount: userInfo.public_metrics?.following_count || 0,
+          tweetCount: userInfo.public_metrics?.tweet_count || 0,
+          verifiedType: userInfo.verified_type,
+        });
+
+        await this.socialRepository.upsertProfileMetadata(socialAccountId, {
+          username: userInfo.username,
+          displayName: userInfo.name,
+          avatarUrl: userInfo.profile_image_url,
+          profileUrl: `https://x.com/${userInfo.username}`,
+          followerCount: userInfo.public_metrics?.followers_count || 0,
+          followingCount: userInfo.public_metrics?.following_count || 0,
+          mediaCount: userInfo.public_metrics?.tweet_count || 0,
+        });
+
+        // Fetch recent tweets
+        const tweets = await this.twitterProvider.fetchUserTweets(userInfo.id, rawToken, 10);
+        let totalEngagements = 0;
+
+        for (const tweet of tweets) {
+          const metrics = tweet.public_metrics || {};
+          const likeCount = metrics.like_count || 0;
+          const retweetCount = metrics.retweet_count || 0;
+          const replyCount = metrics.reply_count || 0;
+          const quoteCount = metrics.quote_count || 0;
+          const bookmarkCount = metrics.bookmark_count || 0;
+          const impressionCount = metrics.impression_count || 0;
+
+          totalEngagements += likeCount + retweetCount + replyCount + quoteCount;
+
+          await this.socialRepository.upsertTwitterTweet(twitterProfile.id, {
+            tweetId: tweet.id,
+            text: tweet.text,
+            publishedAt: tweet.created_at ? new Date(tweet.created_at) : new Date(),
+            retweetCount,
+            replyCount,
+            likeCount,
+            quoteCount,
+            bookmarkCount,
+            impressionCount,
+          });
+        }
+
+        // Calculate normalized engagement rate
+        const followers = userInfo.public_metrics?.followers_count || 0;
+        let engagementRate: number | undefined;
+        if (followers > 0 && tweets.length > 0) {
+          const avgEngagementPerTweet = totalEngagements / tweets.length;
+          engagementRate = Number(((avgEngagementPerTweet / followers) * 100).toFixed(2));
+        }
+
+        if (engagementRate !== undefined) {
+          await this.socialRepository.upsertAccount({
+            userId: account.userId,
+            platform: account.platform,
+            platformUserId: account.platformUserId,
+            username: userInfo.username,
+            followerCount: followers,
+            engagementRate,
+            accessToken: account.accessToken,
+          });
+        }
+      }
+
+      await this.socialRepository.updateSyncState(socialAccountId, 'PROFILE_METADATA', 'SUCCESS');
+      this.socialGateway.emitAccountMetricsUpdated(socialAccountId, account);
+      this.logger.log(`Successfully synced X (Twitter) profile & tweets for account ${socialAccountId}`);
+    } catch (err: any) {
+      this.logger.error(`Failed to sync X account ${socialAccountId}:`, err?.stack || err);
+      await this.socialRepository.updateSyncState(
+        socialAccountId,
+        'PROFILE_METADATA',
+        'FAILED',
+        err?.message,
+      );
+    }
+  }
+
+
+  async syncYouTubeChannelDetails(
+    socialAccountId: string,
+    accessTokenOverride?: string,
+    uploadsPlaylistId?: string,
+  ): Promise<void> {
+    const account = await this.socialRepository.findById(socialAccountId);
+    if (!account) return;
+
+    let accessToken = accessTokenOverride;
+    if (!accessToken && account.accessToken) {
+      try {
+        accessToken = decryptToken(account.accessToken);
+        if (account.expiresAt && new Date(account.expiresAt) <= new Date() && account.refreshToken) {
+          const decryptedRefresh = decryptToken(account.refreshToken);
+          const refreshed = await this.youtubeProvider.refreshAccessToken(decryptedRefresh);
+          accessToken = refreshed.accessToken;
+          await this.socialRepository.upsertAccount({
+            userId: account.userId,
+            platform: account.platform,
+            platformUserId: account.platformUserId,
+            username: account.username || '',
+            accessToken: encryptToken(refreshed.accessToken),
+            refreshToken: account.refreshToken,
+            expiresAt: refreshed.expiresAt,
+          });
+        }
+      } catch (tokenErr) {
+        this.logger.error(`Failed to decrypt or refresh token for YouTube account ${socialAccountId}:`, tokenErr);
+        return;
+      }
+    }
+
+    if (!accessToken) return;
+
+    try {
+      this.logger.log(`Starting YouTube channel deep sync for account ${socialAccountId}...`);
+      await this.socialRepository.updateSyncState(socialAccountId, 'MEDIA_CONTENT', 'SYNCING');
+
+      const ytChannel = await this.socialRepository.findYouTubeChannelBySocialAccountId(socialAccountId);
+      if (ytChannel) {
+        const playlistId = uploadsPlaylistId || `UU${ytChannel.channelId.substring(2)}`;
+        const videos = await this.youtubeProvider.fetchChannelVideos(accessToken, playlistId, 25);
+
+        for (const video of videos) {
+          await this.socialRepository.upsertYouTubeVideo(ytChannel.id, {
+            videoId: video.videoId,
+            title: video.title,
+            description: video.description,
+            thumbnailUrl: video.thumbnailUrl,
+            publishedAt: video.publishedAt,
+            duration: video.duration,
+            viewCount: video.viewCount,
+            likeCount: video.likeCount,
+            commentCount: video.commentCount,
+            privacyStatus: video.privacyStatus,
+            liveBroadcastContent: video.liveBroadcastContent,
+          });
+        }
+
+        const analytics = await this.youtubeProvider.fetchChannelAnalytics(accessToken);
+        for (const snap of analytics) {
+          await this.socialRepository.upsertYouTubeChannelAnalytics(ytChannel.id, snap);
+        }
+
+        await this.socialRepository.updateSyncState(socialAccountId, 'MEDIA_CONTENT', 'SUCCESS');
+
+        const fullAnalytics = await this.socialRepository.getAccountAnalytics(socialAccountId);
+        this.socialGateway.emitAccountMetricsUpdated(socialAccountId, fullAnalytics);
+        this.logger.log(`YouTube channel sync successfully finished for ${socialAccountId}`);
+      }
+    } catch (err: any) {
+      this.logger.error(`YouTube channel sync failed for ${socialAccountId}:`, err);
+      await this.socialRepository.updateSyncState(
+        socialAccountId,
+        'MEDIA_CONTENT',
+        'FAILED',
+        undefined,
+        err?.message || 'Sync failed',
+      );
+    }
+  }
+
   async getUserAccounts(userId: string): Promise<SocialAccountResponseDto[]> {
     const accounts = await this.socialRepository.findByUserId(userId);
     return accounts.map((acc) => ({
@@ -229,11 +836,32 @@ export class SocialService implements OnModuleInit {
   }
 
   async disconnectAccount(userId: string, accountId: string): Promise<{ success: boolean; id: string }> {
-    const existing = await this.socialRepository.findById(accountId);
-    if (!existing || (userId && existing.userId !== userId)) {
+    let existing = await this.socialRepository.findById(accountId);
+
+    const platformUpper = accountId.toUpperCase() as SocialPlatform;
+    const isPlatformEnum = Object.values(SocialPlatform).includes(platformUpper);
+
+    if (!existing && isPlatformEnum) {
+      const userAccounts = await this.socialRepository.findByUserId(userId);
+      existing = (userAccounts || []).find((a) => a.platform === platformUpper) || null;
+    }
+
+    if (!existing) {
+      const userAccounts = await this.socialRepository.findByUserId(userId);
+      existing = (userAccounts || []).find((a) => a.platformUserId === accountId) || null;
+    }
+
+    if (!existing && !isPlatformEnum) {
       throw new NotFoundException('Social account not found');
     }
-    await this.socialRepository.disconnectAccount(accountId);
+
+    if (existing && userId && existing.userId !== userId) {
+      throw new NotFoundException('Social account not found');
+    }
+
+    const targetId = existing ? existing.id : accountId;
+    await this.socialRepository.disconnectAccount(targetId);
+
     if (this.cacheManager) {
       try {
         if (userId) {
@@ -244,7 +872,7 @@ export class SocialService implements OnModuleInit {
         this.logger.warn('Error clearing influencer cache on disconnect:', err);
       }
     }
-    return { success: true, id: accountId };
+    return { success: true, id: targetId };
   }
 
   async getAccountAnalytics(socialAccountId: string) {
@@ -369,6 +997,19 @@ export class SocialService implements OnModuleInit {
   async syncAccountDetails(socialAccountId: string): Promise<void> {
     const account = await this.socialRepository.findById(socialAccountId);
     if (!account || !account.accessToken) return;
+
+    if (account.platform === SocialPlatform.YOUTUBE) {
+      return this.syncYouTubeChannelDetails(socialAccountId);
+    }
+
+    if (account.platform === SocialPlatform.LINKEDIN) {
+      return this.syncLinkedInAccountDetails(socialAccountId);
+    }
+
+    if (account.platform === SocialPlatform.TWITTER) {
+      return this.syncXAccountDetails(socialAccountId);
+    }
+
 
     this.logger.log(`Starting smart analytics & media fetch for SocialAccount ${socialAccountId} (${account.platform})...`);
 

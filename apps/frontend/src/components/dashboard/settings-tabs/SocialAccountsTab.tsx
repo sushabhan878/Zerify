@@ -108,6 +108,12 @@ function buildInitialAccountsFromCache(initialData?: any): SocialAccountItem[] {
           (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
           ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase())
       );
+    } else if (acc.id === 'x' || acc.id === 'twitter') {
+      matched = dbAccounts.find(
+        (item: any) =>
+          (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+          ['TWITTER', 'X'].includes((item.platform || '').toUpperCase())
+      );
     } else {
       matched = dbAccounts.find(
         (item: any) =>
@@ -120,9 +126,12 @@ function buildInitialAccountsFromCache(initialData?: any): SocialAccountItem[] {
     const profileMatch = profileAccounts.find(
       (dbAcc: any) =>
         (dbAcc.status ? (dbAcc.status || '').toUpperCase() === 'CONNECTED' : true) &&
-        ((dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
-          (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase())
+        (acc.id === 'x' || acc.id === 'twitter'
+          ? ['TWITTER', 'X'].includes((dbAcc.platform || '').toUpperCase())
+          : ((dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
+            (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase()))
     );
+
 
     if (matched || profileMatch) {
       const rawHandle = matched?.handle || matched?.username || profileMatch?.handle || profileMatch?.username;
@@ -212,6 +221,12 @@ export default function SocialAccountsTab({ initialData, onSaveSuccess }: Social
                 (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
                 ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()),
             );
+          } else if (acc.id === 'x' || acc.id === 'twitter') {
+            matched = dbAccounts.find(
+              (item: any) =>
+                (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+                ['TWITTER', 'X'].includes((item.platform || '').toUpperCase()),
+            );
           } else {
             matched = dbAccounts.find(
               (item: any) =>
@@ -225,9 +240,12 @@ export default function SocialAccountsTab({ initialData, onSaveSuccess }: Social
           const profileMatch = profileAccounts.find(
             (dbAcc: any) =>
               (dbAcc.status ? (dbAcc.status || '').toUpperCase() === 'CONNECTED' : true) &&
-              ((dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
-               (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase()),
+              (acc.id === 'x' || acc.id === 'twitter'
+                ? ['TWITTER', 'X'].includes((dbAcc.platform || '').toUpperCase())
+                : ((dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
+                 (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase())),
           );
+
 
           if (matched || profileMatch) {
             const rawHandle = matched?.handle || matched?.username || profileMatch?.handle || profileMatch?.username;

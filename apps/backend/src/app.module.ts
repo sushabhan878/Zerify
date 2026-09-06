@@ -10,6 +10,7 @@ import { InfluencerModule } from './modules/influencer/influencer.module';
 import { SocialModule } from './modules/social/social.module';
 import { BrandModule } from './modules/brand/brand.module';
 import { CampaignModule } from './modules/campaign/campaign.module';
+import { MessagingModule } from './modules/messaging/messaging.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { CampaignModule } from './modules/campaign/campaign.module';
     SocialModule,
     BrandModule,
     CampaignModule,
+    MessagingModule,
   ],
   controllers: [AppController],
   providers: [],

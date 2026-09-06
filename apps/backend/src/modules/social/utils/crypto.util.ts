@@ -51,11 +51,24 @@ export function decryptToken(encryptedText: string): string {
 }
 
 /**
- * Generates an encrypted OAuth state token containing user context and timestamp.
+ * Generates a PKCE code_verifier and code_challenge (S256).
  */
-export function generateOAuthState(userId: string): string {
+export function generatePkcePair(): { codeVerifier: string; codeChallenge: string } {
+  const codeVerifier = crypto.randomBytes(32).toString('base64url');
+  const codeChallenge = crypto
+    .createHash('sha256')
+    .update(codeVerifier)
+    .digest('base64url');
+  return { codeVerifier, codeChallenge };
+}
+
+/**
+ * Generates an encrypted OAuth state token containing user context, timestamp, and optional extra payload.
+ */
+export function generateOAuthState(userId: string, extra?: Record<string, any>): string {
   const payload = JSON.stringify({
     userId,
+    ...(extra || {}),
     ts: Date.now(),
     nonce: crypto.randomBytes(8).toString('hex'),
   });
@@ -63,12 +76,12 @@ export function generateOAuthState(userId: string): string {
 }
 
 /**
- * Verifies and parses an OAuth state token.
+ * Verifies and parses an OAuth state token, returning userId, validity, and any extra payload data.
  */
-export function verifyOAuthState(
+export function verifyOAuthState<T = Record<string, any>>(
   state: string,
   maxAgeMs = 15 * 60 * 1000,
-): { userId: string; isValid: boolean } {
+): { userId: string; isValid: boolean; data?: T } {
   if (!state || typeof state !== 'string') {
     return { userId: '', isValid: false };
   }
@@ -85,8 +98,10 @@ export function verifyOAuthState(
       return { userId: payload.userId, isValid: false };
     }
 
-    return { userId: payload.userId, isValid: true };
+    const { userId, ts, nonce, ...extra } = payload;
+    return { userId, isValid: true, data: extra as T };
   } catch {
     return { userId: '', isValid: false };
   }
 }
+

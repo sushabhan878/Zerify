@@ -1,14 +1,13 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+import { PrismaClient, UserRole, VipType } from '@prisma/client';
+const prisma = new PrismaClient();
 async function main() {
     console.log('🌱 Starting database seed...');
+    // 1. Seed VIP Access Waitlist entries
     const vipEntries = [
-        { email: 'sarah.fashion@example.com', type: client_1.VipType.INFLUENCER },
-        { email: 'glow.skincare@brand.com', type: client_1.VipType.BRAND },
-        { email: 'alex.tech@example.com', type: client_1.VipType.INFLUENCER },
-        { email: 'horizon.apparel@brand.com', type: client_1.VipType.BRAND },
+        { email: 'sarah.fashion@example.com', type: VipType.INFLUENCER },
+        { email: 'glow.skincare@brand.com', type: VipType.BRAND },
+        { email: 'alex.tech@example.com', type: VipType.INFLUENCER },
+        { email: 'horizon.apparel@brand.com', type: VipType.BRAND },
     ];
     for (const entry of vipEntries) {
         await prisma.vipAccess.upsert({
@@ -21,12 +20,13 @@ async function main() {
         });
     }
     console.log(`✅ Seeded ${vipEntries.length} VIP Access entries.`);
+    // 2. Seed Mock Brand User & Profile
     const brandUser = await prisma.user.upsert({
         where: { email: 'demo.brand@zerify.com' },
         update: {},
         create: {
             email: 'demo.brand@zerify.com',
-            role: client_1.UserRole.BRAND,
+            role: UserRole.BRAND,
             brandProfile: {
                 create: {
                     companyName: 'Lumina Skincare Co.',
@@ -36,12 +36,13 @@ async function main() {
         },
     });
     console.log(`✅ Seeded Brand User: ${brandUser.email}`);
+    // 3. Seed Mock Influencer User & Profile
     const creatorUser = await prisma.user.upsert({
         where: { email: 'demo.creator@zerify.com' },
         update: {},
         create: {
             email: 'demo.creator@zerify.com',
-            role: client_1.UserRole.INFLUENCER,
+            role: UserRole.INFLUENCER,
             influencer: {
                 create: {
                     handle: '@elena_ugc',
@@ -62,4 +63,3 @@ main()
     .finally(async () => {
     await prisma.$disconnect();
 });
-//# sourceMappingURL=seed.js.map

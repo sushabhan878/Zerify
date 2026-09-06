@@ -7,7 +7,9 @@ export class SocialAccountProfileDto {
   displayName?: string;
   avatar?: string;
   followerCount?: number;
+  profileUrl?: string;
   accessToken: string;
   refreshToken?: string;
   expiresAt?: Date;
+  rawData?: any;
 }

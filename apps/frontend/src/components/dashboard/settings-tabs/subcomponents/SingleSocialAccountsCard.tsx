@@ -112,27 +112,56 @@ export default function SingleSocialAccountsCard({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
-  // Listen to OAuth popup postMessage
+  // Listen to OAuth completion via postMessage, BroadcastChannel, and localStorage storage event
   React.useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'ZERIFY_SOCIAL_CONNECTED') {
-        if (event.data.status === 'success') {
+    const processOAuthEvent = (payload: any) => {
+      if (payload && payload.type === 'ZERIFY_SOCIAL_CONNECTED') {
+        if (payload.status === 'success') {
           if (onRefreshAccounts) onRefreshAccounts();
-        } else if (event.data.message) {
-          setErrorMsg(decodeURIComponent(event.data.message));
+        } else if (payload.message) {
+          setErrorMsg(decodeURIComponent(payload.message));
         }
         setConnectingId(null);
       }
     };
 
+    const handleMessage = (event: MessageEvent) => {
+      processOAuthEvent(event.data);
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === 'zerify_social_connected_event' && event.newValue) {
+        try {
+          const parsed = JSON.parse(event.newValue);
+          processOAuthEvent(parsed);
+        } catch (e) {}
+      }
+    };
+
     window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    window.addEventListener('storage', handleStorage);
+
+    let bc: BroadcastChannel | null = null;
+    try {
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        bc = new BroadcastChannel('zerify_social_oauth');
+        bc.onmessage = (ev) => processOAuthEvent(ev.data);
+      }
+    } catch (e) {}
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      window.removeEventListener('storage', handleStorage);
+      if (bc) bc.close();
+    };
   }, [onRefreshAccounts]);
+
 
   const handleActionClick = async (acc: SocialAccountItem) => {
     setErrorMsg(null);
+    const platformId = (acc.id || '').toLowerCase();
 
-    // Disconnect handling
+    // 1. Disconnect handling
     if (acc.connected) {
       setConnectingId(acc.id);
       try {
@@ -142,21 +171,31 @@ export default function SingleSocialAccountsCard({
           headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const deleteId = acc.dbId || acc.id;
-        const res = await fetch(`${apiUrl}/social/accounts/${deleteId}`, {
-          method: 'DELETE',
-          headers,
-        });
+        const deleteId = acc.dbId || acc.platformUserId || acc.id;
 
-        if (!res.ok) {
-          const json = await res.json().catch(() => ({}));
-          throw new Error(json.message || `Failed to disconnect ${acc.name}`);
+        // Attempt backend deletion
+        try {
+          const res = await fetch(`${apiUrl}/social/accounts/${deleteId}`, {
+            method: 'DELETE',
+            headers,
+          });
+
+          if (!res.ok && res.status !== 404) {
+            const json = await res.json().catch(() => ({}));
+            throw new Error(json.message || `Failed to disconnect ${acc.name}`);
+          }
+        } catch (delErr: any) {
+          if (!delErr?.message?.includes('404') && !delErr?.message?.includes('not found')) {
+            throw delErr;
+          }
         }
 
         // Immediately update local state to disconnected
         setAccounts((prev) =>
           prev.map((item) =>
-            item.id === acc.id || item.dbId === deleteId || (acc.platformUserId && item.platformUserId === acc.platformUserId)
+            (item.id || '').toLowerCase() === platformId ||
+            item.dbId === deleteId ||
+            (acc.platformUserId && item.platformUserId === acc.platformUserId)
               ? {
                   ...item,
                   connected: false,
@@ -181,10 +220,43 @@ export default function SingleSocialAccountsCard({
       return;
     }
 
-
-    // Connect handling for Meta/Facebook & Instagram
-    if (acc.id === 'meta' || acc.id === 'instagram' || acc.id === 'facebook') {
+    // 2. Connect handling for Supported OAuth Platforms
+    const supportedOAuthPlatforms = ['meta', 'instagram', 'facebook', 'youtube', 'linkedin', 'x', 'twitter'];
+    if (supportedOAuthPlatforms.includes(platformId)) {
       setConnectingId(acc.id);
+
+      // Open centered popup window synchronously immediately during user click event
+      // This prevents modern browser popup blockers from suppressing the window
+      const width = 600;
+      const height = 750;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+
+      const popup = window.open(
+        'about:blank',
+        `Zerify${platformId.toUpperCase()}OAuth`,
+        `width=${width},height=${height},left=${left},top=${top},status=yes,scrollbars=yes`,
+      );
+
+      if (popup) {
+        try {
+          popup.document.write(`
+            <!DOCTYPE html>
+            <html>
+              <head><title>Connecting to ${acc.name}...</title></head>
+              <body style="background:#07090E;color:white;font-family:system-ui,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
+                <div style="text-align:center;">
+                  <div style="width:36px;height:36px;border:3px solid #3b82f6;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px auto;"></div>
+                  <p style="font-size:14px;color:#e2e8f0;margin:0;font-weight:600;">Connecting to ${acc.name}...</p>
+                  <p style="font-size:12px;color:#64748b;margin:8px 0 0 0;">Please wait while we redirect to authorization...</p>
+                </div>
+                <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+              </body>
+            </html>
+          `);
+        } catch (e) {}
+      }
+
       try {
         const token = localStorage.getItem('zerify_token');
         const headers: Record<string, string> = {};
@@ -192,74 +264,60 @@ export default function SingleSocialAccountsCard({
           headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const endpoint = acc.id === 'instagram' ? `${apiUrl}/social/instagram/login` : `${apiUrl}/social/meta/login`;
+        let endpoint = `${apiUrl}/social/meta/login`;
+        if (platformId === 'instagram') {
+          endpoint = `${apiUrl}/social/instagram/login`;
+        } else if (platformId === 'youtube') {
+          endpoint = `${apiUrl}/social/youtube/login`;
+        } else if (platformId === 'linkedin') {
+          endpoint = `${apiUrl}/social/linkedin/login`;
+        } else if (platformId === 'x' || platformId === 'twitter') {
+          endpoint = `${apiUrl}/social/x/login`;
+        }
+
         const res = await fetch(endpoint, { headers });
         const json = await res.json();
 
         if (!res.ok || !json.data?.url) {
+          if (popup && !popup.closed) popup.close();
           throw new Error(json.message || json.data?.message || `Failed to initialize ${acc.name} OAuth`);
         }
 
         const authUrl = json.data.url;
 
-        // Open centered popup window
-        const width = 600;
-        const height = 750;
-        const left = window.screenX + (window.outerWidth - width) / 2;
-        const top = window.screenY + (window.outerHeight - height) / 2;
+        // Redirect popup window to OAuth authorization URL
+        if (popup && !popup.closed) {
+          popup.location.href = authUrl;
 
-        const popup = window.open(
-          authUrl,
-          `Zerify${acc.id.toUpperCase()}OAuth`,
-          `width=${width},height=${height},left=${left},top=${top},status=yes,scrollbars=yes`,
-        );
+          // Monitor popup close event to refresh accounts
+          const timer = setInterval(() => {
+            try {
+              if (!popup || popup.closed) {
+                clearInterval(timer);
+                setConnectingId(null);
+                if (onRefreshAccounts) onRefreshAccounts();
+              }
+            } catch (e) {
+              // Ignore cross-origin access errors until popup closes
+            }
+          }, 800);
 
-        if (!popup) {
-          setErrorMsg('Popup window blocked. Please allow popups for Zerify to connect your account.');
-          setConnectingId(null);
-          return;
+        } else {
+          // If popup was completely blocked by browser, navigate in current window
+          window.location.href = authUrl;
         }
 
-        // Monitor popup close event
-        const timer = setInterval(() => {
-          if (popup.closed) {
-            clearInterval(timer);
-            setConnectingId(null);
-            if (onRefreshAccounts) onRefreshAccounts();
-          }
-        }, 1000);
-
       } catch (err: any) {
-        console.error(`${acc.name} OAuth popup launch error:`, err);
+        console.error(`${acc.name} OAuth launch error:`, err);
         setErrorMsg(err.message || 'Could not launch OAuth window');
         setConnectingId(null);
+        if (popup && !popup.closed) {
+          popup.close();
+        }
       }
     } else {
-      // Fallback toggle for non-Meta social platforms
-      handleToggleConnection(acc.id);
+      setErrorMsg(`${acc.name} OAuth integration is coming soon.`);
     }
-  };
-
-  // Toggle connection state
-  const handleToggleConnection = (id: string) => {
-    setConnectingId(id);
-    setTimeout(() => {
-      setAccounts((prev) =>
-        prev.map((acc) => {
-          if (acc.id === id) {
-            const nextConnected = !acc.connected;
-            return {
-              ...acc,
-              connected: nextConnected,
-              handle: nextConnected ? acc.handle || `@${acc.id}_account` : '',
-              followers: nextConnected ? acc.followers || '0' : '',
-            };
-          }
-          return acc;
-        })
-      );
-      setConnectingId(null);
-    }, 400);
   };
 
   const connectedCount = accounts.filter((a) => a.connected).length;

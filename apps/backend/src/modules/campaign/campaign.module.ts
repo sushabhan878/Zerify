@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../database/prisma.module';
+import { MessagingModule } from '../messaging/messaging.module';
 import { CampaignController } from './campaign.controller';
 import { ApplicationController } from './application.controller';
 import { OfferController } from './offer.controller';
@@ -19,7 +20,9 @@ import { CampaignOwnerGuard } from './guards/campaign-owner.guard';
 import { ApplicationOwnerGuard } from './guards/application-owner.guard';
 
 @Module({
-  imports: [PrismaModule],
+  // MessagingModule provides OutboxService so application lifecycle changes can
+  // enqueue their system messages inside the same transaction.
+  imports: [PrismaModule, MessagingModule],
   controllers: [
     DiscoveryController,
     CampaignController,

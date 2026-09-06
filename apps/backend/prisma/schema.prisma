@@ -27,6 +27,12 @@ model User {
   influencer    InfluencerProfile?
   socialAccounts SocialAccount[]
 
+  // Messaging
+  conversationsCreated       Conversation[]            @relation("ConversationCreatedBy")
+  conversationParticipations ConversationParticipant[]
+  messagesSent               Message[]
+  attachmentsUploaded        MessageAttachment[]
+
   @@map("users")
 }
 
@@ -272,6 +278,15 @@ model SocialAccount {
   contents       SocialMediaContent[]
   syncStates     SocialSyncState[]
 
+  // Dedicated Platform-Specific Tables
+  instagramProfile InstagramProfile?
+  facebookProfile  FacebookProfile?
+  facebookPages    FacebookPage[]
+  youtubeChannel   YouTubeChannel?
+  linkedInProfile  LinkedInProfile?
+  twitterProfile   TwitterProfile?
+  tiktokProfile    TikTokProfile?
+
   // Campaign Relations
   applications   CampaignApplication[]
 
@@ -407,6 +422,469 @@ model SocialSyncState {
 
   @@unique([socialAccountId, target])
   @@map("social_sync_states")
+}
+
+// ============================================================================
+// DEDICATED PLATFORM-SPECIFIC SOCIAL MEDIA TABLES
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// 1. INSTAGRAM TABLES
+// ----------------------------------------------------------------------------
+model InstagramProfile {
+  id                  String             @id @default(uuid())
+  socialAccountId     String             @unique
+  socialAccount       SocialAccount      @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  igUserId            String             @unique
+  username            String
+  displayName         String?
+  biography           String?
+  profilePictureUrl   String?
+  website             String?
+  followerCount       Int                @default(0)
+  followingCount      Int                @default(0)
+  mediaCount          Int                @default(0)
+  isBusinessAccount   Boolean            @default(false)
+  isVerified          Boolean            @default(false)
+
+  media               InstagramMedia[]
+  insights            InstagramInsight[]
+
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@map("instagram_profiles")
+}
+
+model InstagramMedia {
+  id                  String           @id @default(uuid())
+  instagramProfileId  String
+  instagramProfile    InstagramProfile @relation(fields: [instagramProfileId], references: [id], onDelete: Cascade)
+  mediaId             String           @unique
+  mediaType           String           @default("IMAGE") // IMAGE, VIDEO, CAROUSEL_ALBUM, REEL, STORY
+  caption             String?          @db.Text
+  permalink           String?
+  thumbnailUrl        String?
+  mediaUrl            String?
+  publishedAt         DateTime?
+  likeCount           Int              @default(0)
+  commentCount        Int              @default(0)
+  saveCount           Int              @default(0)
+  shareCount          Int              @default(0)
+  reach               Int              @default(0)
+  impressions         Int              @default(0)
+  videoViews          Int              @default(0)
+
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  @@index([instagramProfileId, publishedAt])
+  @@map("instagram_media")
+}
+
+model InstagramInsight {
+  id                  String           @id @default(uuid())
+  instagramProfileId  String
+  instagramProfile    InstagramProfile @relation(fields: [instagramProfileId], references: [id], onDelete: Cascade)
+  date                DateTime
+  reach               Int              @default(0)
+  impressions         Int              @default(0)
+  profileViews        Int              @default(0)
+  websiteClicks       Int              @default(0)
+  accountsEngaged     Int              @default(0)
+  totalInteractions   Int              @default(0)
+  followerCount       Int              @default(0)
+  demographics        Json?
+
+  createdAt           DateTime         @default(now())
+
+  @@unique([instagramProfileId, date])
+  @@map("instagram_insights")
+}
+
+// ----------------------------------------------------------------------------
+// 2. FACEBOOK & FACEBOOK PAGES TABLES
+// ----------------------------------------------------------------------------
+model FacebookProfile {
+  id                  String             @id @default(uuid())
+  socialAccountId     String             @unique
+  socialAccount       SocialAccount      @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  facebookUserId      String             @unique
+  name                String
+  email               String?
+  avatarUrl           String?
+  profileUrl          String?
+
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@map("facebook_profiles")
+}
+
+model FacebookPage {
+  id                  String                 @id @default(uuid())
+  socialAccountId     String
+  socialAccount       SocialAccount          @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  pageId              String                 @unique
+  name                String
+  category            String?
+  tasks               String[]               @default([])
+  pageAccessToken     String?
+  pictureUrl          String?
+  fanCount            Int                    @default(0)
+  followersCount      Int                    @default(0)
+  website             String?
+  about               String?
+
+  posts               FacebookPagePost[]
+  insights            FacebookPageInsight[]
+
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  @@index([socialAccountId])
+  @@map("facebook_pages")
+}
+
+model FacebookPagePost {
+  id                  String           @id @default(uuid())
+  facebookPageId      String
+  facebookPage        FacebookPage     @relation(fields: [facebookPageId], references: [id], onDelete: Cascade)
+  postId              String           @unique
+  message             String?          @db.Text
+  permalink           String?
+  createdTime         DateTime?
+  likesCount          Int              @default(0)
+  commentsCount       Int              @default(0)
+  sharesCount         Int              @default(0)
+  reactionsCount      Int              @default(0)
+  impressionsCount    Int              @default(0)
+
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  @@index([facebookPageId, createdTime])
+  @@map("facebook_page_posts")
+}
+
+model FacebookPageInsight {
+  id                  String           @id @default(uuid())
+  facebookPageId      String
+  facebookPage        FacebookPage     @relation(fields: [facebookPageId], references: [id], onDelete: Cascade)
+  date                DateTime
+  pageViews           Int              @default(0)
+  pageImpressions     Int              @default(0)
+  pageEngagements     Int              @default(0)
+  pagePostEngagements Int              @default(0)
+  pageDailyLikes      Int              @default(0)
+
+  createdAt           DateTime         @default(now())
+
+  @@unique([facebookPageId, date])
+  @@map("facebook_page_insights")
+}
+
+// ----------------------------------------------------------------------------
+// 3. YOUTUBE TABLES (per Zerify YouTube TRD)
+// ----------------------------------------------------------------------------
+model YouTubeChannel {
+  id                  String                    @id @default(uuid())
+  socialAccountId     String                    @unique
+  socialAccount       SocialAccount             @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  channelId           String                    @unique
+  channelTitle        String
+  channelDescription  String?                   @db.Text
+  customUrl           String?
+  thumbnailUrl        String?
+  subscriberCount     Int                       @default(0)
+  videoCount          Int                       @default(0)
+  viewCount           BigInt                    @default(0)
+  publishedAt         DateTime?
+  country             String?
+  lastSyncedAt        DateTime?
+
+  videos              YouTubeVideo[]
+  channelAnalytics    YouTubeChannelAnalytics[]
+
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+
+  @@map("youtube_channels")
+}
+
+model YouTubeVideo {
+  id                     String                  @id @default(uuid())
+  youtubeChannelId       String
+  youtubeChannel         YouTubeChannel          @relation(fields: [youtubeChannelId], references: [id], onDelete: Cascade)
+  videoId                String                  @unique
+  title                  String
+  description            String?                 @db.Text
+  thumbnailUrl           String?
+  publishedAt            DateTime?
+  duration               String?
+  viewCount              BigInt                  @default(0)
+  likeCount              Int                     @default(0)
+  commentCount           Int                     @default(0)
+  privacyStatus          String?                 @default("public")
+  liveBroadcastContent   String?                 @default("none")
+  lastSyncedAt           DateTime?
+
+  analytics              YouTubeVideoAnalytics[]
+
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+
+  @@index([youtubeChannelId, publishedAt])
+  @@map("youtube_videos")
+}
+
+model YouTubeChannelAnalytics {
+  id                     String         @id @default(uuid())
+  youtubeChannelId       String
+  youtubeChannel         YouTubeChannel @relation(fields: [youtubeChannelId], references: [id], onDelete: Cascade)
+  date                   DateTime
+  views                  BigInt         @default(0)
+  likes                  Int            @default(0)
+  comments               Int            @default(0)
+  shares                 Int            @default(0)
+  subscribersGained      Int            @default(0)
+  subscribersLost        Int            @default(0)
+  estimatedMinutesWatched BigInt         @default(0)
+  averageViewDuration    Float          @default(0)
+
+  createdAt              DateTime       @default(now())
+
+  @@unique([youtubeChannelId, date])
+  @@map("youtube_channel_analytics")
+}
+
+model YouTubeVideoAnalytics {
+  id                     String       @id @default(uuid())
+  youtubeVideoId         String
+  youtubeVideo           YouTubeVideo @relation(fields: [youtubeVideoId], references: [id], onDelete: Cascade)
+  date                   DateTime
+  views                  BigInt       @default(0)
+  likes                  Int          @default(0)
+  comments               Int          @default(0)
+  shares                 Int          @default(0)
+  subscribersGained      Int          @default(0)
+  subscribersLost        Int          @default(0)
+  estimatedMinutesWatched BigInt       @default(0)
+  averageViewDuration    Float        @default(0)
+
+  createdAt              DateTime     @default(now())
+
+  @@unique([youtubeVideoId, date])
+  @@map("youtube_video_analytics")
+}
+
+// ----------------------------------------------------------------------------
+// 4. LINKEDIN TABLES
+// ----------------------------------------------------------------------------
+model LinkedInProfile {
+  id                 String              @id @default(uuid())
+  socialAccountId    String              @unique
+  socialAccount      SocialAccount       @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  linkedinId         String              @unique
+  localizedFirstName String?
+  localizedLastName  String?
+  vanityName         String?
+  headline           String?
+  profilePictureUrl  String?
+  connectionsCount   Int                 @default(0)
+  followersCount     Int                 @default(0)
+  email              String?
+  emailVerified      Boolean?            @default(false)
+  locale             String?
+
+  posts              LinkedInPost[]
+  analytics          LinkedInAnalytics[]
+
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@map("linkedin_profiles")
+}
+
+model LinkedInOrganization {
+  id                 String             @id @default(uuid())
+  orgId              String             @unique
+  name               String
+  vanityName         String?
+  logoUrl            String?
+  website            String?
+  staffCount         Int                @default(0)
+  followerCount      Int                @default(0)
+
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@map("linkedin_organizations")
+}
+
+model LinkedInPost {
+  id                 String          @id @default(uuid())
+  linkedinProfileId  String
+  linkedinProfile    LinkedInProfile @relation(fields: [linkedinProfileId], references: [id], onDelete: Cascade)
+  urn                String          @unique
+  commentary         String?         @db.Text
+  publishedAt        DateTime?
+  likesCount         Int             @default(0)
+  commentsCount      Int             @default(0)
+  sharesCount        Int             @default(0)
+  clicksCount        Int             @default(0)
+  impressionsCount   Int             @default(0)
+
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@index([linkedinProfileId, publishedAt])
+  @@map("linkedin_posts")
+}
+
+model LinkedInAnalytics {
+  id                 String          @id @default(uuid())
+  linkedinProfileId  String
+  linkedinProfile    LinkedInProfile @relation(fields: [linkedinProfileId], references: [id], onDelete: Cascade)
+  date               DateTime
+  profileViews       Int             @default(0)
+  uniqueVisitors     Int             @default(0)
+  impressions        Int             @default(0)
+  engagements        Int             @default(0)
+
+  createdAt          DateTime        @default(now())
+
+  @@unique([linkedinProfileId, date])
+  @@map("linkedin_analytics")
+}
+
+// ----------------------------------------------------------------------------
+// 5. TWITTER / X TABLES
+// ----------------------------------------------------------------------------
+model TwitterProfile {
+  id                 String             @id @default(uuid())
+  socialAccountId    String             @unique
+  socialAccount      SocialAccount      @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  twitterId          String             @unique
+  username           String
+  name               String
+  description        String?            @db.Text
+  profileImageUrl    String?
+  followersCount     Int                @default(0)
+  followingCount     Int                @default(0)
+  tweetCount         Int                @default(0)
+  verifiedType       String?
+
+  tweets             TwitterTweet[]
+  analytics          TwitterAnalytics[]
+
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@map("twitter_profiles")
+}
+
+model TwitterTweet {
+  id                 String         @id @default(uuid())
+  twitterProfileId   String
+  twitterProfile     TwitterProfile @relation(fields: [twitterProfileId], references: [id], onDelete: Cascade)
+  tweetId            String         @unique
+  text               String         @db.Text
+  publishedAt        DateTime?
+  retweetCount       Int            @default(0)
+  replyCount         Int            @default(0)
+  likeCount          Int            @default(0)
+  quoteCount         Int            @default(0)
+  bookmarkCount      Int            @default(0)
+  impressionCount    Int            @default(0)
+
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@index([twitterProfileId, publishedAt])
+  @@map("twitter_tweets")
+}
+
+model TwitterAnalytics {
+  id                 String         @id @default(uuid())
+  twitterProfileId   String
+  twitterProfile     TwitterProfile @relation(fields: [twitterProfileId], references: [id], onDelete: Cascade)
+  date               DateTime
+  impressions        Int            @default(0)
+  engagements        Int            @default(0)
+  profileVisits      Int            @default(0)
+  followersNetChange Int            @default(0)
+
+  createdAt          DateTime       @default(now())
+
+  @@unique([twitterProfileId, date])
+  @@map("twitter_analytics")
+}
+
+// ----------------------------------------------------------------------------
+// 6. TIKTOK TABLES
+// ----------------------------------------------------------------------------
+model TikTokProfile {
+  id                 String            @id @default(uuid())
+  socialAccountId    String            @unique
+  socialAccount      SocialAccount     @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  openId             String            @unique
+  unionId            String?
+  displayName        String
+  avatarUrl          String?
+  bioDescription     String?           @db.Text
+  followerCount      Int               @default(0)
+  followingCount     Int               @default(0)
+  likesCount         Int               @default(0)
+  videoCount         Int               @default(0)
+  isVerified         Boolean           @default(false)
+
+  videos             TikTokVideo[]
+  analytics          TikTokAnalytics[]
+
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@map("tiktok_profiles")
+}
+
+model TikTokVideo {
+  id                 String        @id @default(uuid())
+  tiktokProfileId    String
+  tiktokProfile      TikTokProfile @relation(fields: [tiktokProfileId], references: [id], onDelete: Cascade)
+  videoId            String        @unique
+  title              String?       @db.Text
+  coverImageUrl      String?
+  publishedAt        DateTime?
+  duration           Int           @default(0)
+  playCount          BigInt        @default(0)
+  diggCount          Int           @default(0)
+  commentCount       Int           @default(0)
+  shareCount         Int           @default(0)
+
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([tiktokProfileId, publishedAt])
+  @@map("tiktok_videos")
+}
+
+model TikTokAnalytics {
+  id                 String        @id @default(uuid())
+  tiktokProfileId    String
+  tiktokProfile      TikTokProfile @relation(fields: [tiktokProfileId], references: [id], onDelete: Cascade)
+  date               DateTime
+  videoViews         BigInt        @default(0)
+  profileViews       Int           @default(0)
+  likes              Int           @default(0)
+  comments           Int           @default(0)
+  shares             Int           @default(0)
+  netFollowers       Int           @default(0)
+
+  createdAt          DateTime      @default(now())
+
+  @@unique([tiktokProfileId, date])
+  @@map("tiktok_analytics")
 }
 
 
@@ -565,6 +1043,7 @@ model Campaign {
   deliverables          CampaignDeliverable[]
   applications          CampaignApplication[]
   participants          CampaignParticipant[]
+  conversations         Conversation[]
 
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
@@ -686,6 +1165,7 @@ model CampaignApplication {
 
   // Relations
   offers                CampaignOffer[]
+  conversation          Conversation?
 
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
@@ -924,6 +1404,167 @@ model InfluencerBrandPartner {
   @@unique([influencerProfileId, brandProfileId])
   @@index([influencerProfileId, relationshipTag])
   @@map("influencer_brand_partners")
+}
+
+// ============================================================
+// MESSAGING — Brand ↔ Influencer real-time conversations
+// ============================================================
+
+enum ConversationType {
+  DIRECT
+  COLLABORATION
+  CAMPAIGN
+}
+
+enum MessageType {
+  TEXT
+  FILE
+  IMAGE
+  SYSTEM
+}
+
+enum AttachmentStatus {
+  PENDING
+  SCANNING
+  AVAILABLE
+  BLOCKED
+  FAILED
+}
+
+enum OutboxStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+  FAILED
+}
+
+model Conversation {
+  id              String                    @id @default(uuid())
+  type            ConversationType          @default(DIRECT)
+
+  createdById     String
+  createdBy       User                      @relation("ConversationCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+
+  campaignId      String?
+  campaign        Campaign?                 @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  applicationId   String?                   @unique
+  application     CampaignApplication?      @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+
+  // Denormalised pointers for cheap conversation-list rendering
+  lastMessageId   String?
+  lastMessageAt   DateTime?
+
+  // Monotonic per-conversation counter used for ordering + missed-message sync
+  messageSequence Int                       @default(0)
+
+  participants    ConversationParticipant[]
+  messages        Message[]
+  attachments     MessageAttachment[]
+
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+
+  @@index([lastMessageAt])
+  @@index([campaignId])
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  id                String        @id @default(uuid())
+  conversationId    String
+  conversation      Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userType          UserRole
+
+  lastReadMessageId String?
+  lastReadAt        DateTime?
+  unreadCount       Int           @default(0)
+
+  muted             Boolean       @default(false)
+  archived          Boolean       @default(false)
+
+  joinedAt          DateTime      @default(now())
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id              String              @id @default(uuid())
+  conversationId  String
+  conversation    Conversation        @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  // null sender = backend-generated SYSTEM message
+  senderId        String?
+  sender          User?               @relation(fields: [senderId], references: [id], onDelete: SetNull)
+
+  type            MessageType         @default(TEXT)
+  content         String?             @db.Text
+  metadata        Json?
+
+  // Client-supplied idempotency key for safe retries
+  clientMessageId String?
+  sequenceNumber  Int
+
+  // Business event key for SYSTEM messages (e.g. COLLABORATION_REQUEST_CREATED)
+  systemEvent     String?
+
+  attachments     MessageAttachment[]
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@unique([conversationId, senderId, clientMessageId])
+  @@index([conversationId, sequenceNumber])
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+model MessageAttachment {
+  id             String           @id @default(uuid())
+
+  // Nullable: the row is created when the upload URL is issued, before the message exists
+  messageId      String?
+  message        Message?         @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  conversationId String
+  conversation   Conversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  uploaderId     String
+  uploader       User             @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+
+  objectKey      String
+  publicId       String?
+  resourceType   String           @default("auto")
+  fileName       String
+  mimeType       String
+  fileSize       Int
+
+  status         AttachmentStatus @default(PENDING)
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([conversationId])
+  @@index([messageId])
+  @@map("message_attachments")
+}
+
+model OutboxEvent {
+  id          String       @id @default(uuid())
+  eventType   String
+  aggregateId String
+  payload     Json
+  status      OutboxStatus @default(PENDING)
+  attempts    Int          @default(0)
+  lastError   String?      @db.Text
+
+  createdAt   DateTime     @default(now())
+  processedAt DateTime?
+
+  @@index([status, createdAt])
+  @@map("outbox_events")
 }
 
 
