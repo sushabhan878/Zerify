@@ -5,3 +5,4 @@ export * from './youtube/youtube.provider';
 export * from './tiktok/tiktok.provider';
 export * from './linkedin/linkedin.provider';
 export * from './twitter/twitter.provider';
+export * from './threads/threads.provider';

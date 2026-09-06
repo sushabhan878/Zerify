@@ -285,6 +285,7 @@ model SocialAccount {
   youtubeChannel   YouTubeChannel?
   linkedInProfile  LinkedInProfile?
   twitterProfile   TwitterProfile?
+  threadsProfile   ThreadsProfile?
   tiktokProfile    TikTokProfile?
 
   // Campaign Relations
@@ -822,7 +823,75 @@ model TwitterAnalytics {
 }
 
 // ----------------------------------------------------------------------------
-// 6. TIKTOK TABLES
+// 6. THREADS TABLES (per Zerify Threads PRD)
+// ----------------------------------------------------------------------------
+model ThreadsProfile {
+  id                 String             @id @default(uuid())
+  socialAccountId    String             @unique
+  socialAccount      SocialAccount      @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  threadsId          String             @unique
+  username           String
+  name               String?
+  biography          String?            @db.Text
+  profilePictureUrl  String?
+  followersCount     Int                @default(0)
+  followingCount     Int                @default(0)
+  postCount          Int                @default(0)
+  isVerified         Boolean            @default(false)
+
+  posts              ThreadsPost[]
+  analytics          ThreadsAnalytics[]
+
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@map("threads_profiles")
+}
+
+model ThreadsPost {
+  id                 String         @id @default(uuid())
+  threadsProfileId   String
+  threadsProfile     ThreadsProfile @relation(fields: [threadsProfileId], references: [id], onDelete: Cascade)
+  threadsPostId      String         @unique
+  text               String?        @db.Text
+  mediaType          String?        // TEXT_POST, IMAGE, VIDEO, CAROUSEL_ALBUM
+  permalink          String?
+  publishedAt        DateTime?
+  likeCount          Int            @default(0)
+  replyCount         Int            @default(0)
+  repostCount        Int            @default(0)
+  quoteCount         Int            @default(0)
+  viewsCount         Int            @default(0)
+  hasReplies         Boolean        @default(false)
+  isQuotePost        Boolean        @default(false)
+
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@index([threadsProfileId, publishedAt])
+  @@map("threads_posts")
+}
+
+model ThreadsAnalytics {
+  id                 String         @id @default(uuid())
+  threadsProfileId   String
+  threadsProfile     ThreadsProfile @relation(fields: [threadsProfileId], references: [id], onDelete: Cascade)
+  date               DateTime
+  views              Int            @default(0)
+  likes              Int            @default(0)
+  replies            Int            @default(0)
+  reposts            Int            @default(0)
+  quotes             Int            @default(0)
+  followersNetChange Int            @default(0)
+
+  createdAt          DateTime       @default(now())
+
+  @@unique([threadsProfileId, date])
+  @@map("threads_analytics")
+}
+
+// ----------------------------------------------------------------------------
+// 7. TIKTOK TABLES
 // ----------------------------------------------------------------------------
 model TikTokProfile {
   id                 String            @id @default(uuid())

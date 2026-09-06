@@ -75,6 +75,15 @@ const DEFAULT_ACCOUNTS: SocialAccountItem[] = [
     handle: '',
     followers: '',
   },
+  {
+    id: 'threads',
+    name: 'Threads',
+    icon: Sparkles,
+    gradientColor: 'from-neutral-900 via-zinc-800 to-black',
+    connected: false,
+    handle: '',
+    followers: '',
+  },
 ];
 
 function buildInitialAccountsFromCache(initialData?: any): SocialAccountItem[] {

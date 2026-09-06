@@ -18,6 +18,7 @@ import { InstagramProvider } from './providers/instagram/instagram.provider';
 import { YoutubeProvider } from './providers/youtube/youtube.provider';
 import { LinkedinProvider } from './providers/linkedin/linkedin.provider';
 import { TwitterProvider } from './providers/twitter/twitter.provider';
+import { ThreadsProvider } from './providers/threads/threads.provider';
 import { SocialPlatform } from '@prisma/client';
 import { encryptToken, decryptToken, generateOAuthState, verifyOAuthState, generatePkcePair } from './utils/crypto.util';
 import { SocialAccountResponseDto } from './dto/social-account-response.dto';
@@ -34,6 +35,7 @@ export class SocialService implements OnModuleInit {
     private readonly youtubeProvider: YoutubeProvider,
     private readonly linkedinProvider: LinkedinProvider,
     private readonly twitterProvider: TwitterProvider,
+    private readonly threadsProvider: ThreadsProvider,
     private readonly socialGateway: SocialGateway,
     @Optional() @Inject(CACHE_MANAGER) private readonly cacheManager?: Cache,
   ) { }
@@ -135,6 +137,21 @@ export class SocialService implements OnModuleInit {
     const url = this.twitterProvider.getAuthUrl(redirectUri, state, codeChallenge);
     return { url, state };
   }
+
+  private getThreadsRedirectUri(): string {
+    return (
+      this.configService.get<string>('THREADS_REDIRECT_URI') ||
+      'https://gyration-dragging-freebie.ngrok-free.dev/api/v1/social/threads/callback'
+    );
+  }
+
+  getThreadsAuthUrl(userId: string): { url: string; state: string } {
+    const state = generateOAuthState(userId);
+    const redirectUri = this.getThreadsRedirectUri();
+    const url = this.threadsProvider.getAuthUrl(redirectUri, state);
+    return { url, state };
+  }
+
 
 
   async handleMetaCallback(
@@ -731,6 +748,195 @@ export class SocialService implements OnModuleInit {
     }
   }
 
+  async handleThreadsCallback(
+    code?: string,
+    state?: string,
+    error?: string,
+    errorDescription?: string,
+  ): Promise<string> {
+    const frontendUrl = this.getFrontendUrl();
+
+    if (error || !code || !state) {
+      this.logger.warn(`Threads OAuth Callback received error: ${error} - ${errorDescription}`);
+      const reason = encodeURIComponent(
+        errorDescription || error || 'Threads authorization was cancelled or denied',
+      );
+      return `${frontendUrl}/social/callback?status=error&message=${reason}`;
+    }
+
+    const { userId, isValid } = verifyOAuthState(state);
+    if (!isValid || !userId) {
+      this.logger.warn('Threads OAuth callback received invalid or expired state token');
+      const reason = encodeURIComponent(
+        'Invalid or expired OAuth state parameter. Please try connecting again.',
+      );
+      return `${frontendUrl}/social/callback?status=error&message=${reason}`;
+    }
+
+    const redirectUri = this.getThreadsRedirectUri();
+
+    try {
+      const profiles = await this.threadsProvider.exchangeCodeAndGetAccounts(
+        code,
+        redirectUri,
+      );
+      let savedCount = 0;
+
+      for (const profile of profiles) {
+        // Account Collision Protection
+        const existingAcc = await this.socialRepository.findByPlatformAndPlatformUserId(
+          SocialPlatform.THREADS,
+          profile.platformUserId,
+        );
+
+        if (existingAcc && existingAcc.userId !== userId && existingAcc.status === 'CONNECTED') {
+          this.logger.warn(
+            `Collision detected: Threads account ${profile.platformUserId} is already connected to user ${existingAcc.userId}`,
+          );
+          const collMsg = encodeURIComponent(
+            'This Threads account is already connected to another Zerify user.',
+          );
+          return `${frontendUrl}/social/callback?status=error&message=${collMsg}`;
+        }
+
+        const encryptedAccessToken = encryptToken(profile.accessToken);
+        const encryptedRefreshToken = profile.refreshToken
+          ? encryptToken(profile.refreshToken)
+          : null;
+
+        const savedAcc = await this.socialRepository.upsertAccount({
+          userId,
+          platform: profile.platform,
+          platformUserId: profile.platformUserId,
+          username: profile.username || 'Threads User',
+          displayName: profile.displayName || profile.username,
+          avatar: profile.avatar,
+          followerCount: profile.followerCount || 0,
+          accessToken: encryptedAccessToken,
+          refreshToken: encryptedRefreshToken,
+          expiresAt: profile.expiresAt,
+        });
+
+        // Upsert ThreadsProfile table
+        const raw = profile.rawData || {};
+        await this.socialRepository.upsertThreadsProfile(savedAcc.id, {
+          threadsId: raw.id || profile.platformUserId,
+          username: raw.username || profile.username || 'ThreadsUser',
+          name: raw.name || profile.displayName || 'Threads User',
+          biography: raw.threads_biography || raw.biography,
+          profilePictureUrl: raw.threads_profile_picture_url || profile.avatar,
+          followersCount: raw.followersCount || profile.followerCount || 0,
+          followingCount: raw.followingCount || 0,
+          postCount: raw.postCount || 0,
+          isVerified: raw.isVerified || false,
+        });
+
+        // Upsert profile metadata
+        await this.socialRepository.upsertProfileMetadata(savedAcc.id, {
+          username: profile.username,
+          displayName: profile.displayName,
+          avatarUrl: profile.avatar,
+          profileUrl: profile.profileUrl,
+          followerCount: profile.followerCount || 0,
+          bio: raw.threads_biography,
+        });
+
+        // Trigger initial deep sync in background
+        this.syncThreadsAccountDetails(savedAcc.id).catch((syncErr) => {
+          this.logger.error(`Initial background sync for Threads account ${savedAcc.id} failed:`, syncErr);
+        });
+
+        // Notify realtime subscribers
+        this.socialGateway.emitAccountMetricsUpdated(savedAcc.id, savedAcc);
+
+        savedCount++;
+      }
+
+      return `${frontendUrl}/social/callback?status=success&platform=threads&count=${savedCount}`;
+    } catch (err: any) {
+      this.logger.error('Error during Threads OAuth callback processing:', err?.stack || err);
+      const message = encodeURIComponent(err?.message || 'Failed to connect Threads account');
+      return `${frontendUrl}/social/callback?status=error&message=${message}`;
+    }
+  }
+
+  async syncThreadsAccountDetails(socialAccountId: string): Promise<void> {
+    const account = await this.socialRepository.findById(socialAccountId);
+    if (!account || !account.accessToken || account.platform !== SocialPlatform.THREADS) return;
+
+    try {
+      await this.socialRepository.updateSyncState(socialAccountId, 'PROFILE_METADATA', 'SYNCING');
+      let rawToken = decryptToken(account.accessToken);
+
+      // Refresh token if near expiration (within 7 days)
+      if (account.expiresAt && new Date(account.expiresAt).getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000) {
+        try {
+          const refreshed = await this.threadsProvider.refreshAccessToken(rawToken);
+          rawToken = refreshed.accessToken;
+          await this.socialRepository.upsertAccount({
+            userId: account.userId,
+            platform: account.platform,
+            platformUserId: account.platformUserId,
+            username: account.username || '',
+            accessToken: encryptToken(refreshed.accessToken),
+            expiresAt: refreshed.expiresAt,
+          });
+        } catch (refreshErr) {
+          this.logger.warn(`Could not refresh Threads token for account ${socialAccountId}:`, refreshErr);
+        }
+      }
+
+      // Fetch user profile
+      const userInfo = await this.threadsProvider.fetchUserProfile(rawToken, account.platformUserId).catch(() => null);
+      if (userInfo) {
+        const profile = await this.socialRepository.upsertThreadsProfile(socialAccountId, {
+          threadsId: userInfo.id || account.platformUserId,
+          username: userInfo.username,
+          name: userInfo.name,
+          biography: userInfo.threads_biography,
+          profilePictureUrl: userInfo.threads_profile_picture_url,
+        });
+
+        await this.socialRepository.upsertProfileMetadata(socialAccountId, {
+          username: userInfo.username,
+          displayName: userInfo.name,
+          avatarUrl: userInfo.threads_profile_picture_url,
+          profileUrl: `https://threads.net/@${userInfo.username}`,
+          bio: userInfo.threads_biography,
+        });
+
+        // Fetch user threads
+        const threads = await this.threadsProvider.fetchUserThreads(rawToken, 10);
+        if (profile?.id && threads.length > 0) {
+          for (const post of threads) {
+            await this.socialRepository.upsertThreadsPost(profile.id, {
+              threadsPostId: post.id,
+              text: post.text,
+              mediaType: post.media_type || post.media_product_type,
+              permalink: post.permalink,
+              publishedAt: post.timestamp ? new Date(post.timestamp) : new Date(),
+              hasReplies: post.has_replies ?? false,
+              isQuotePost: post.is_quote_post ?? false,
+            });
+          }
+        }
+      }
+
+      await this.socialRepository.updateSyncState(socialAccountId, 'PROFILE_METADATA', 'SUCCESS');
+      this.socialGateway.emitAccountMetricsUpdated(socialAccountId, account);
+      this.logger.log(`Successfully synced Threads profile & posts for account ${socialAccountId}`);
+    } catch (err: any) {
+      this.logger.error(`Failed to sync Threads account ${socialAccountId}:`, err?.stack || err);
+      await this.socialRepository.updateSyncState(
+        socialAccountId,
+        'PROFILE_METADATA',
+        'FAILED',
+        err?.message,
+      );
+    }
+  }
+
+
 
   async syncYouTubeChannelDetails(
     socialAccountId: string,
@@ -1008,6 +1214,10 @@ export class SocialService implements OnModuleInit {
 
     if (account.platform === SocialPlatform.TWITTER) {
       return this.syncXAccountDetails(socialAccountId);
+    }
+
+    if (account.platform === SocialPlatform.THREADS) {
+      return this.syncThreadsAccountDetails(socialAccountId);
     }
 
 

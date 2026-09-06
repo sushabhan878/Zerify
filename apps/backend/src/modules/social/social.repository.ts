@@ -704,5 +704,88 @@ export class SocialRepository {
       update: { ...data, updatedAt: new Date() },
     });
   }
+
+  // --- Threads ---
+  async upsertThreadsProfile(
+    socialAccountId: string,
+    data: {
+      threadsId: string;
+      username: string;
+      name?: string | null;
+      biography?: string | null;
+      profilePictureUrl?: string | null;
+      followersCount?: number;
+      followingCount?: number;
+      postCount?: number;
+      isVerified?: boolean;
+    },
+  ) {
+    return (this.prisma as any).threadsProfile.upsert({
+      where: { socialAccountId },
+      create: { socialAccountId, ...data },
+      update: { ...data, updatedAt: new Date() },
+    });
+  }
+
+  async upsertThreadsPost(
+    threadsProfileId: string,
+    data: {
+      threadsPostId: string;
+      text?: string | null;
+      mediaType?: string | null;
+      permalink?: string | null;
+      publishedAt?: Date | null;
+      likeCount?: number;
+      replyCount?: number;
+      repostCount?: number;
+      quoteCount?: number;
+      viewsCount?: number;
+      hasReplies?: boolean;
+      isQuotePost?: boolean;
+    },
+  ) {
+    return (this.prisma as any).threadsPost.upsert({
+      where: { threadsPostId: data.threadsPostId },
+      create: { threadsProfileId, ...data },
+      update: { ...data, updatedAt: new Date() },
+    });
+  }
+
+  async upsertThreadsAnalytics(
+    threadsProfileId: string,
+    data: {
+      date: Date;
+      views?: number;
+      likes?: number;
+      replies?: number;
+      reposts?: number;
+      quotes?: number;
+      followersNetChange?: number;
+    },
+  ) {
+    return (this.prisma as any).threadsAnalytics.upsert({
+      where: {
+        threadsProfileId_date: {
+          threadsProfileId,
+          date: data.date,
+        },
+      },
+      create: { threadsProfileId, ...data },
+      update: { ...data },
+    });
+  }
+
+  async findThreadsProfile(socialAccountId: string) {
+    return (this.prisma as any).threadsProfile.findUnique({
+      where: { socialAccountId },
+      include: {
+        posts: {
+          orderBy: { publishedAt: 'desc' },
+          take: 20,
+        },
+      },
+    });
+  }
 }
+
 

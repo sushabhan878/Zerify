@@ -12,6 +12,7 @@ import {
   TiktokProvider,
   LinkedinProvider,
   TwitterProvider,
+  ThreadsProvider,
 } from './providers';
 
 @Module({
@@ -27,6 +28,7 @@ import {
     TiktokProvider,
     LinkedinProvider,
     TwitterProvider,
+    ThreadsProvider,
   ],
   exports: [SocialService, SocialRepository, SocialGateway],
 })

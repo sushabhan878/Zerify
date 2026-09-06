@@ -281,6 +281,62 @@ export class SocialController {
     return this.syncXProfile(id);
   }
 
+  @ApiOperation({ summary: 'Generate Meta Threads OAuth 2.0 Authorization URL for popup login flow' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('threads/login')
+  getThreadsLoginUrl(@Req() req: RequestWithUser, @Query('userId') queryUserId?: string) {
+    const userId = req.user?.id || queryUserId || 'default-user-id';
+    const result = this.socialService.getThreadsAuthUrl(userId);
+    return {
+      statusCode: HttpStatus.OK,
+      data: result,
+    };
+  }
+
+  @ApiOperation({ summary: 'Direct redirect to Meta Threads OAuth 2.0 Authorization (PRD Spec)' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('threads/connect')
+  connectThreads(
+    @Req() req: RequestWithUser,
+    @Res() res: Response,
+    @Query('userId') queryUserId?: string,
+  ) {
+    const userId = req.user?.id || queryUserId || 'default-user-id';
+    const result = this.socialService.getThreadsAuthUrl(userId);
+    return res.redirect(result.url);
+  }
+
+  @ApiOperation({ summary: 'Meta Threads OAuth 2.0 Authorization Callback' })
+  @Get('threads/callback')
+  async threadsCallback(
+    @Query() query: ConnectCallbackQueryDto,
+    @Res() res: Response,
+  ) {
+    const redirectUrl = await this.socialService.handleThreadsCallback(
+      query.code,
+      query.state,
+      query.error,
+      query.error_description || query.error_reason,
+    );
+    return res.redirect(redirectUrl);
+  }
+
+  @ApiOperation({ summary: 'Trigger manual sync for a Threads connected profile' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Post('threads/sync/:id')
+  @HttpCode(HttpStatus.OK)
+  async syncThreadsProfile(@Param('id') id: string) {
+    await this.socialService.syncThreadsAccountDetails(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Threads profile and posts synchronization triggered successfully.',
+    };
+  }
+
+
 
   @ApiOperation({ summary: 'Get list of connected social accounts for the user' })
   @ApiBearerAuth()

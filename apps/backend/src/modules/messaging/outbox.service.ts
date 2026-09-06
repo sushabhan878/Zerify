@@ -65,7 +65,12 @@ export class OutboxService {
         }
       }
     } catch (error: any) {
-      this.logger.error(`Outbox poll failed: ${error?.message}`);
+      const msg = error?.message || '';
+      if (msg.includes('Server has closed the connection') || msg.includes('Connection pool') || msg.includes('timed out')) {
+        this.logger.warn(`Outbox poller paused: transient database connection reset (${msg.split('\n')[0]}). Will retry automatically on next interval.`);
+      } else {
+        this.logger.error(`Outbox poll failed: ${msg}`);
+      }
     } finally {
       this.processing = false;
     }

@@ -91,6 +91,16 @@ const Social3DLogo = ({ id }: { id: string }) => {
           </div>
         </div>
       );
+    case 'threads':
+      return (
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-neutral-800 via-zinc-700 to-stone-600 p-[1.5px] shadow-[0_6px_16px_rgba(0,0,0,0.5)] transition-transform hover:scale-110 shrink-0">
+          <div className="w-full h-full rounded-[10px] bg-gradient-to-tr from-black via-zinc-950 to-neutral-900 flex items-center justify-center text-white border-t border-white/30 shadow-inner">
+            <svg className="w-4.5 h-4.5 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.001 2c-5.522 0-9.999 4.477-9.999 10 0 5.523 4.477 10 9.999 10 5.522 0 10-4.477 10-10 0-5.523-4.478-10-10-10zm4.563 11.232c-.088 1.94-1.205 3.328-3.084 3.328-1.576 0-2.616-.929-2.92-2.13-.049-.196-.062-.423-.062-.686 0-1.879 1.139-3.262 2.983-3.262 1.83 0 2.993 1.34 3.083 2.75zm-3.083-4.148c-2.607 0-4.57 1.954-4.57 4.67 0 2.87 2.052 4.717 4.57 4.717 1.583 0 2.812-.663 3.479-1.748l1.396 1.05c-.991 1.574-2.732 2.378-4.875 2.378-3.702 0-6.425-2.684-6.425-6.397 0-3.693 2.743-6.423 6.425-6.423 3.52 0 6.136 2.457 6.136 5.864 0 3.39-2.28 5.617-5.26 5.617-1.385 0-2.348-.606-2.825-1.531l-.22.657h-1.632l.704-2.095c-.092-.375-.138-.797-.138-1.258 0-1.796.883-3.208 2.21-3.784.582-.254 1.257-.384 1.986-.384.453 0 .895.053 1.312.155-.38-.857-1.254-1.39-2.316-1.39-.933 0-1.724.436-2.115 1.144l-1.417-.991c.712-1.248 2.046-1.993 3.532-1.993 2.146 0 3.844 1.284 4.195 3.197.027.147.04.305.04.475 0 2.474-1.613 4.133-3.774 4.133z" />
+            </svg>
+          </div>
+        </div>
+      );
     case 'facebook':
     default:
       return (
@@ -221,7 +231,7 @@ export default function SingleSocialAccountsCard({
     }
 
     // 2. Connect handling for Supported OAuth Platforms
-    const supportedOAuthPlatforms = ['meta', 'instagram', 'facebook', 'youtube', 'linkedin', 'x', 'twitter'];
+    const supportedOAuthPlatforms = ['meta', 'instagram', 'facebook', 'youtube', 'linkedin', 'x', 'twitter', 'threads'];
     if (supportedOAuthPlatforms.includes(platformId)) {
       setConnectingId(acc.id);
 
@@ -273,7 +283,10 @@ export default function SingleSocialAccountsCard({
           endpoint = `${apiUrl}/social/linkedin/login`;
         } else if (platformId === 'x' || platformId === 'twitter') {
           endpoint = `${apiUrl}/social/x/login`;
+        } else if (platformId === 'threads') {
+          endpoint = `${apiUrl}/social/threads/login`;
         }
+
 
         const res = await fetch(endpoint, { headers });
         const json = await res.json();

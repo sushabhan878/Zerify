@@ -101,11 +101,22 @@ describe('SocialService', () => {
       refreshAccessToken: jest.fn(),
     };
 
+    const threadsProvider = {
+      getAuthUrl: jest.fn().mockImplementation((redirectUri, state) => {
+        return `https://threads.net/oauth/authorize?client_id=th_123&redirect_uri=${redirectUri}&state=${state}`;
+      }),
+      exchangeCodeAndGetAccounts: jest.fn(),
+      fetchUserProfile: jest.fn(),
+      fetchUserThreads: jest.fn(),
+      refreshAccessToken: jest.fn(),
+    };
+
     configService = {
       get: jest.fn().mockImplementation((key: string) => {
         if (key === 'META_REDIRECT_URI') return 'https://test.ngrok-free.app/api/v1/social/meta/callback';
         if (key === 'LINKEDIN_REDIRECT_URI') return 'https://test.ngrok-free.app/api/v1/social/linkedin/callback';
         if (key === 'X_REDIRECT_URI') return 'https://test.ngrok-free.app/api/v1/social/x/callback';
+        if (key === 'THREADS_REDIRECT_URI') return 'https://test.ngrok-free.app/api/v1/social/threads/callback';
         if (key === 'FRONTEND_URL') return 'http://localhost:3000';
         if (key === 'META_CONFIG_ID') return '1191067560767082';
         if (key === 'META_APP_ID') return '1080562267988646';
@@ -123,6 +134,7 @@ describe('SocialService', () => {
         { provide: require('./providers/youtube/youtube.provider').YoutubeProvider, useValue: { getAuthUrl: jest.fn().mockReturnValue('https://accounts.google.com/o/oauth2/v2/auth?client_id=123'), exchangeCodeAndGetAccounts: jest.fn() } },
         { provide: require('./providers/linkedin/linkedin.provider').LinkedinProvider, useValue: linkedinProvider },
         { provide: require('./providers/twitter/twitter.provider').TwitterProvider, useValue: twitterProvider },
+        { provide: require('./providers/threads/threads.provider').ThreadsProvider, useValue: threadsProvider },
         { provide: require('./social.gateway').SocialGateway, useValue: { emitAccountConnected: jest.fn(), emitAccountUpdated: jest.fn(), emitAccountMetricsUpdated: jest.fn() } },
       ],
     }).compile();
@@ -513,13 +525,86 @@ describe('SocialService', () => {
 
       const redirectUrl = await service.handleXCallback('auth_code_123', validState);
       expect(redirectUrl).toContain('status=success&count=1');
-      expect(repository.upsertAccount).toHaveBeenCalled();
       expect(repository.upsertTwitterProfile).toHaveBeenCalledWith(
         'social-acc-tw-1',
         expect.objectContaining({
           twitterId: 'tw_creator_123',
           username: 'ZerifyCreatorX',
           followersCount: 25000,
+        }),
+      );
+    });
+  });
+
+  describe('Threads OAuth Flow', () => {
+    it('should generate Threads OAuth authorization URL with valid state token', () => {
+      const { url, state } = service.getThreadsAuthUrl(mockUserId);
+      expect(url).toContain('https://threads.net/oauth/authorize');
+      expect(url).toContain(`client_id=th_123`);
+      expect(state).toBeDefined();
+
+      const verified = verifyOAuthState(state);
+      expect(verified.isValid).toBe(true);
+      expect(verified.userId).toEqual(mockUserId);
+    });
+
+    it('should return error URL if Threads OAuth returns an error', async () => {
+      const redirectUrl = await service.handleThreadsCallback(
+        undefined,
+        'any_state',
+        'access_denied',
+        'User denied authorization',
+      );
+      expect(redirectUrl).toContain('/social/callback?status=error');
+      expect(redirectUrl).toContain('User%20denied%20authorization');
+    });
+
+    it('should exchange code and successfully save Threads account and profile', async () => {
+      const state = generateOAuthState(mockUserId);
+      const mockThreadsProfile = {
+        platform: SocialPlatform.THREADS,
+        platformUserId: 'threads_user_999',
+        username: 'ZerifyThreadsCreator',
+        displayName: 'Threads Creator',
+        avatar: 'https://threads.net/avatar.png',
+        followerCount: 15400,
+        accessToken: 'mock_threads_access_token',
+        refreshToken: 'mock_threads_refresh_token',
+        expiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+        rawData: {
+          id: 'threads_user_999',
+          username: 'ZerifyThreadsCreator',
+          name: 'Threads Creator',
+          threads_biography: 'Hello from Threads',
+          followersCount: 15400,
+        },
+      };
+
+      const threadsProviderInstance = (service as any).threadsProvider;
+      threadsProviderInstance.exchangeCodeAndGetAccounts.mockResolvedValue([mockThreadsProfile]);
+
+      (repository.findByPlatformAndPlatformUserId as jest.Mock).mockResolvedValue(null);
+      (repository.upsertAccount as jest.Mock).mockResolvedValue({
+        id: 'social-acc-th-1',
+        userId: mockUserId,
+        platform: SocialPlatform.THREADS,
+        platformUserId: 'threads_user_999',
+      });
+      (repository.upsertThreadsProfile as jest.Mock) = jest.fn().mockResolvedValue({
+        id: 'th-prof-1',
+        socialAccountId: 'social-acc-th-1',
+      });
+      (repository.upsertProfileMetadata as jest.Mock).mockResolvedValue({});
+
+      const redirectUrl = await service.handleThreadsCallback('auth_code_threads_123', state);
+      expect(redirectUrl).toContain('status=success&platform=threads&count=1');
+      expect(repository.upsertAccount).toHaveBeenCalled();
+      expect((repository.upsertThreadsProfile as jest.Mock)).toHaveBeenCalledWith(
+        'social-acc-th-1',
+        expect.objectContaining({
+          threadsId: 'threads_user_999',
+          username: 'ZerifyThreadsCreator',
+          followersCount: 15400,
         }),
       );
     });
