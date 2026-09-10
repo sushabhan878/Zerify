@@ -47,7 +47,7 @@ export class InstagramProvider implements ISocialProvider {
     return appSecret;
   }
 
-  getAuthUrl(redirectUri: string, state: string): string {
+  getAuthUrl(redirectUri: string, state: string, codeChallenge?: string, forceReauth: boolean = true): string {
     const appId = this.getAppId();
     const scopes =
       'instagram_business_basic,instagram_business_manage_insights,instagram_business_manage_comments,instagram_business_manage_messages,instagram_business_content_publish';
@@ -58,6 +58,11 @@ export class InstagramProvider implements ISocialProvider {
     url.searchParams.append('response_type', 'code');
     url.searchParams.append('scope', scopes);
     url.searchParams.append('state', state);
+
+    if (forceReauth) {
+      url.searchParams.append('force_authentication', '1');
+      url.searchParams.append('force_reauth', 'true');
+    }
 
     return url.toString();
   }
@@ -132,28 +137,34 @@ export class InstagramProvider implements ISocialProvider {
     const profileUrl = `${this.getGraphApiUrl()}/me?fields=id,username,name,profile_picture_url,followers_count&access_token=${accessToken}`;
     this.logger.log(`Testing Instagram Graph API endpoint: ${profileUrl.replace(accessToken, 'REDACTED')}`);
 
-
-    const profileRes = await fetch(profileUrl);
     let profileData: InstagramProfileResponse = { id: userId };
 
-    if (profileRes.ok) {
-      profileData = (await profileRes.json()) as InstagramProfileResponse;
-      this.logger.log(`Instagram API Profile response: ${JSON.stringify(profileData, null, 2)}`);
-    } else {
-      // Fallback without version prefix if needed
-      try {
-        const fallbackUrl = `https://graph.instagram.com/me?fields=id,username,name,profile_picture_url,followers_count&access_token=${accessToken}`;
-        const fallbackRes = await fetch(fallbackUrl);
-        if (fallbackRes.ok) {
-          profileData = (await fallbackRes.json()) as InstagramProfileResponse;
-          this.logger.log(`Instagram API Profile fallback response: ${JSON.stringify(profileData, null, 2)}`);
+    try {
+      const profileRes = await fetch(profileUrl);
+      if (profileRes.ok) {
+        profileData = (await profileRes.json()) as InstagramProfileResponse;
+        this.logger.log(`Instagram API Profile response: ${JSON.stringify(profileData, null, 2)}`);
+      } else {
+        const errText = await profileRes.text();
+        this.logger.warn(`Instagram Graph API request with followers_count returned status ${profileRes.status}: ${errText}`);
+        
+        // Fallback: Query basic fields without followers_count in case this is a non-business profile or permission issue
+        const basicUrl = `${this.getGraphApiUrl()}/me?fields=id,username,name,profile_picture_url&access_token=${accessToken}`;
+        const basicRes = await fetch(basicUrl);
+        if (basicRes.ok) {
+          profileData = (await basicRes.json()) as InstagramProfileResponse;
+          this.logger.log(`Instagram API basic profile fallback succeeded: ${JSON.stringify(profileData, null, 2)}`);
         } else {
-          const errText = await profileRes.text();
-          this.logger.warn(`Instagram Graph API request returned status ${profileRes.status}: ${errText}`);
+          // Additional fallback without version prefix
+          const legacyUrl = `https://graph.instagram.com/me?fields=id,username,name,profile_picture_url&access_token=${accessToken}`;
+          const legacyRes = await fetch(legacyUrl);
+          if (legacyRes.ok) {
+            profileData = (await legacyRes.json()) as InstagramProfileResponse;
+          }
         }
-      } catch (err) {
-        this.logger.warn('Error querying fallback Instagram Graph API:', err);
       }
+    } catch (fetchErr) {
+      this.logger.warn('Error querying Instagram Graph API:', fetchErr);
     }
 
     const platformUserId = profileData.id || userId;
@@ -173,4 +184,28 @@ export class InstagramProvider implements ISocialProvider {
       },
     ];
   }
+
+  async refreshLongLivedToken(
+    accessToken: string,
+  ): Promise<{ accessToken: string; expiresAt: Date }> {
+    const refreshUrl = `${this.getGraphApiUrl()}/refresh_access_token?grant_type=ig_refresh_token&access_token=${accessToken}`;
+    this.logger.log(`Refreshing long-lived Instagram access token...`);
+
+    const res = await fetch(refreshUrl);
+    const data = (await res.json()) as { access_token?: string; expires_in?: number; error?: any };
+
+    if (!res.ok || data.error || !data.access_token) {
+      this.logger.error('Failed to refresh Instagram long-lived access token:', data);
+      throw new Error(data.error?.message || 'Instagram long-lived token refresh failed');
+    }
+
+    const expiresInSeconds = data.expires_in || 60 * 24 * 60 * 60;
+    const expiresAt = new Date(Date.now() + expiresInSeconds * 1000);
+
+    return {
+      accessToken: data.access_token,
+      expiresAt,
+    };
+  }
 }
+

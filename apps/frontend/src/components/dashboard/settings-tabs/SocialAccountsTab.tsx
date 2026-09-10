@@ -86,49 +86,30 @@ const DEFAULT_ACCOUNTS: SocialAccountItem[] = [
   },
 ];
 
-function buildInitialAccountsFromCache(initialData?: any): SocialAccountItem[] {
-  let dbAccounts: any[] = [];
-  let profileAccounts: any[] = [];
+function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): SocialAccountItem[] {
+  // 1. Standard platforms except Facebook
+  const nonFbDefault = DEFAULT_ACCOUNTS.filter((a) => a.id !== 'facebook');
 
-  if (typeof window !== 'undefined') {
-    try {
-      const socialStored = localStorage.getItem('zerify_social_accounts_cache');
-      if (socialStored) dbAccounts = JSON.parse(socialStored);
-
-      const profileStored = initialData || (localStorage.getItem('zerify_influencer_profile_cache') ? JSON.parse(localStorage.getItem('zerify_influencer_profile_cache')!) : null);
-      if (profileStored) {
-        const userSocials = profileStored.user?.socialAccounts || profileStored.connectedAccounts;
-        if (Array.isArray(userSocials)) profileAccounts = userSocials;
-      }
-    } catch (e) {}
-  }
-
-  return DEFAULT_ACCOUNTS.map((acc) => {
+  const standardCards: SocialAccountItem[] = nonFbDefault.map((acc) => {
     let matched: any = null;
     if (acc.id === 'instagram') {
       matched = dbAccounts.find(
         (item: any) =>
           (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
-          ((item.platform || '').toUpperCase() === 'INSTAGRAM' || (item.platform || '').toLowerCase() === 'instagram')
-      );
-    } else if (acc.id === 'facebook') {
-      matched = dbAccounts.find(
-        (item: any) =>
-          (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
-          ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase())
+          ((item.platform || '').toUpperCase() === 'INSTAGRAM' || (item.platform || '').toLowerCase() === 'instagram'),
       );
     } else if (acc.id === 'x' || acc.id === 'twitter') {
       matched = dbAccounts.find(
         (item: any) =>
           (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
-          ['TWITTER', 'X'].includes((item.platform || '').toUpperCase())
+          ['TWITTER', 'X'].includes((item.platform || '').toUpperCase()),
       );
     } else {
       matched = dbAccounts.find(
         (item: any) =>
           (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
           ((item.platform || '').toLowerCase() === acc.id.toLowerCase() ||
-            (item.platform || '').toLowerCase() === acc.name.toLowerCase())
+            (item.platform || '').toLowerCase() === acc.name.toLowerCase()),
       );
     }
 
@@ -138,31 +119,41 @@ function buildInitialAccountsFromCache(initialData?: any): SocialAccountItem[] {
         (acc.id === 'x' || acc.id === 'twitter'
           ? ['TWITTER', 'X'].includes((dbAcc.platform || '').toUpperCase())
           : ((dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
-            (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase()))
+            (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase())),
     );
 
-
     if (matched || profileMatch) {
-      const rawHandle = matched?.handle || matched?.username || profileMatch?.handle || profileMatch?.username;
+      const personName = matched?.username || profileMatch?.username;
+      const rawHandle = matched?.handle || profileMatch?.handle;
       const handle = rawHandle
         ? rawHandle.startsWith('@')
           ? rawHandle
           : `@${rawHandle}`
-        : `@${acc.id}_user`;
+        : personName && !personName.includes(' ')
+          ? (personName.startsWith('@') ? personName : `@${personName}`)
+          : `@${acc.id}_user`;
 
       const platformUserId = matched?.platformUserId || profileMatch?.platformUserId || acc.platformUserId;
       const avatar = matched?.avatar || profileMatch?.avatar || acc.avatar;
-      const followers = matched?.followerCount
-        ? matched.followerCount.toLocaleString()
-        : profileMatch?.followerCount
-        ? profileMatch.followerCount.toLocaleString()
-        : acc.followers;
+      const followers =
+        matched?.followerCount !== null && matched?.followerCount !== undefined
+          ? matched.followerCount.toLocaleString()
+          : profileMatch?.followerCount !== null && profileMatch?.followerCount !== undefined
+            ? profileMatch.followerCount.toLocaleString()
+            : acc.followers;
       const dbId = matched?.id || profileMatch?.id;
+
+      const profileUrl = matched?.profileUrl || profileMatch?.profileUrl;
+      const rawEr = matched?.engagementRate ?? profileMatch?.engagementRate;
+      const engagementRate = rawEr !== null && rawEr !== undefined && rawEr > 0 ? String(rawEr) : acc.engagementRate;
 
       return {
         ...acc,
         connected: true,
         handle,
+        userName: personName && personName !== handle ? personName : undefined,
+        profileUrl: profileUrl || undefined,
+        engagementRate,
         platformUserId,
         avatar,
         followers,
@@ -170,8 +161,107 @@ function buildInitialAccountsFromCache(initialData?: any): SocialAccountItem[] {
       };
     }
 
-    return acc;
+    return {
+      ...acc,
+      connected: false,
+      handle: '',
+      userName: undefined,
+      profileUrl: undefined,
+      platformUserId: undefined,
+      followers: '',
+      dbId: undefined,
+    };
   });
+
+  // 2. Facebook Cards: find all connected Facebook Page accounts
+  const fbPageAccounts = dbAccounts.filter(
+    (item: any) =>
+      (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+      ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()) &&
+      item.accountType === 'PAGE',
+  );
+
+  let fbCards: SocialAccountItem[] = [];
+
+  if (fbPageAccounts.length > 0) {
+    fbCards = fbPageAccounts.map((page: any) => ({
+      id: page.id,
+      name: page.displayName || page.username || 'Facebook Page',
+      userName: page.username || page.displayName,
+      icon: Facebook,
+      gradientColor: 'from-blue-700 via-indigo-600 to-blue-400',
+      connected: true,
+      handle: page.handle || (page.username ? (page.username.startsWith('@') ? page.username : `@${page.username}`) : '@facebook_page'),
+      profileUrl: page.profileUrl || (page.platformUserId ? `https://facebook.com/${page.platformUserId}` : undefined),
+      platformUserId: page.platformUserId,
+      avatar: page.avatar,
+      followers:
+        page.followerCount !== null && page.followerCount !== undefined ? page.followerCount.toLocaleString() : '',
+      engagementRate:
+        page.engagementRate !== null && page.engagementRate !== undefined ? String(page.engagementRate) : undefined,
+      dbId: page.id,
+      accountType: 'PAGE',
+      subPlatforms: ['Facebook Page'],
+    }));
+  } else {
+    // If no pages connected yet, check if personal identity is connected
+    const anyFb = dbAccounts.find(
+      (item: any) =>
+        (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+        ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()),
+    );
+    fbCards = [
+      {
+        id: anyFb?.id || 'facebook',
+        name: 'Facebook',
+        userName: anyFb?.username,
+        icon: Facebook,
+        gradientColor: 'from-blue-700 via-indigo-600 to-blue-400',
+        connected: Boolean(anyFb),
+        handle: anyFb?.handle || (anyFb?.username ? (anyFb.username.startsWith('@') ? anyFb.username : `@${anyFb.username}`) : ''),
+        profileUrl: anyFb?.profileUrl || (anyFb?.platformUserId ? `https://facebook.com/${anyFb.platformUserId}` : undefined),
+        platformUserId: anyFb?.platformUserId,
+        avatar: anyFb?.avatar,
+        followers:
+          anyFb?.followerCount !== null && anyFb?.followerCount !== undefined
+            ? anyFb.followerCount.toLocaleString()
+            : '',
+        engagementRate:
+          anyFb?.engagementRate !== null && anyFb?.engagementRate !== undefined
+            ? String(anyFb.engagementRate)
+            : undefined,
+        dbId: anyFb?.id,
+        accountType: anyFb?.accountType || 'PERSONAL',
+        subPlatforms: anyFb ? ['Facebook'] : undefined,
+      },
+    ];
+  }
+
+  return [...standardCards, ...fbCards];
+}
+
+function buildInitialAccountsFromCache(initialData?: any): SocialAccountItem[] {
+  let dbAccounts: any[] = [];
+  let profileAccounts: any[] = [];
+
+  if (typeof window !== 'undefined') {
+    try {
+      const socialStored = localStorage.getItem('zerify_social_accounts_cache');
+      if (socialStored) dbAccounts = JSON.parse(socialStored);
+
+      const profileStored =
+        initialData ||
+        (localStorage.getItem('zerify_influencer_profile_cache')
+          ? JSON.parse(localStorage.getItem('zerify_influencer_profile_cache')!)
+          : null);
+      if (profileStored) {
+        const userSocials = profileStored.user?.socialAccounts || profileStored.connectedAccounts;
+        if (Array.isArray(userSocials)) profileAccounts = userSocials;
+      }
+    } catch (e) { }
+  }
+
+  return mapDbAccountsToCards(dbAccounts, profileAccounts);
 }
 
 export default function SocialAccountsTab({ initialData, onSaveSuccess }: SocialAccountsTabProps) {
@@ -212,88 +302,7 @@ export default function SocialAccountsTab({ initialData, onSaveSuccess }: Social
       }
 
       // Perform a single atomic state update to avoid React state race conditions
-      setAccounts((prev) =>
-        prev.map((acc) => {
-          // 1. Check social_accounts DB table match
-          let matched: any = null;
-
-          if (acc.id === 'instagram') {
-            matched = dbAccounts.find(
-              (item: any) =>
-                (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
-                ((item.platform || '').toUpperCase() === 'INSTAGRAM' ||
-                 (item.platform || '').toLowerCase() === 'instagram'),
-            );
-          } else if (acc.id === 'facebook') {
-            matched = dbAccounts.find(
-              (item: any) =>
-                (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
-                ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()),
-            );
-          } else if (acc.id === 'x' || acc.id === 'twitter') {
-            matched = dbAccounts.find(
-              (item: any) =>
-                (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
-                ['TWITTER', 'X'].includes((item.platform || '').toUpperCase()),
-            );
-          } else {
-            matched = dbAccounts.find(
-              (item: any) =>
-                (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
-                ((item.platform || '').toLowerCase() === acc.id.toLowerCase() ||
-                 (item.platform || '').toLowerCase() === acc.name.toLowerCase()),
-            );
-          }
-
-          // 2. Check profile connectedAccounts fallback match (only connected accounts)
-          const profileMatch = profileAccounts.find(
-            (dbAcc: any) =>
-              (dbAcc.status ? (dbAcc.status || '').toUpperCase() === 'CONNECTED' : true) &&
-              (acc.id === 'x' || acc.id === 'twitter'
-                ? ['TWITTER', 'X'].includes((dbAcc.platform || '').toUpperCase())
-                : ((dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
-                 (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase())),
-          );
-
-
-          if (matched || profileMatch) {
-            const rawHandle = matched?.handle || matched?.username || profileMatch?.handle || profileMatch?.username;
-            const handle = rawHandle
-              ? rawHandle.startsWith('@')
-                ? rawHandle
-                : `@${rawHandle}`
-              : `@${acc.id}_user`;
-
-            const platformUserId = matched?.platformUserId || profileMatch?.platformUserId || acc.platformUserId;
-            const avatar = matched?.avatar || profileMatch?.avatar || acc.avatar;
-            const followers = matched?.followerCount
-              ? matched.followerCount.toLocaleString()
-              : profileMatch?.followerCount
-              ? profileMatch.followerCount.toLocaleString()
-              : acc.followers;
-            const dbId = matched?.id || profileMatch?.id;
-
-            return {
-              ...acc,
-              connected: true,
-              handle,
-              platformUserId,
-              avatar,
-              followers,
-              dbId,
-            };
-          }
-
-          return {
-            ...acc,
-            connected: false,
-            handle: '',
-            platformUserId: undefined,
-            followers: '',
-            dbId: undefined,
-          };
-        }),
-      );
+      setAccounts(mapDbAccountsToCards(dbAccounts, profileAccounts));
     } catch (err) {
       console.warn('Could not load social accounts from DB:', err);
     }
@@ -327,7 +336,7 @@ export default function SocialAccountsTab({ initialData, onSaveSuccess }: Social
         try {
           localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(updatedData));
           window.dispatchEvent(new Event('zerify_influencer_profile_update'));
-        } catch (e) {}
+        } catch (e) { }
       }
 
       toastSuccess('Social accounts updated successfully!');

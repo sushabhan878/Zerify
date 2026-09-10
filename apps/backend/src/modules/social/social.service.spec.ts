@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { SocialPlatform, SocialAccountStatus } from '@prisma/client';
 import { SocialService } from './social.service';
 import { SocialRepository } from './social.repository';
@@ -54,6 +54,7 @@ describe('SocialService', () => {
   let service: SocialService;
   let repository: jest.Mocked<Partial<SocialRepository>>;
   let metaProvider: jest.Mocked<Partial<MetaProvider>>;
+  let instagramProvider: jest.Mocked<Partial<any>>;
   let linkedinProvider: jest.Mocked<Partial<any>>;
   let twitterProvider: jest.Mocked<Partial<any>>;
   let configService: jest.Mocked<Partial<ConfigService>>;
@@ -66,14 +67,29 @@ describe('SocialService', () => {
       findByUserId: jest.fn(),
       findById: jest.fn(),
       disconnectAccount: jest.fn(),
-      upsertYouTubeChannel: jest.fn(),
-      upsertLinkedInProfile: jest.fn(),
-      upsertTwitterProfile: jest.fn(),
-      upsertTwitterTweet: jest.fn(),
-      findTwitterProfile: jest.fn(),
       upsertProfileMetadata: jest.fn(),
+      updateAccountFollowerCount: jest.fn(),
+      updateAccountCustomData: jest.fn(),
+      recordAccountPerformance: jest.fn(),
+      upsertAudienceDemographic: jest.fn(),
+      upsertMediaWithPerformance: jest.fn(),
       updateSyncState: jest.fn(),
+      updateTokenLifecycle: jest.fn(),
       findByPlatformAndPlatformUserId: jest.fn(),
+      findByUserIdAndPlatform: jest.fn(),
+      findPagesByUserId: jest.fn().mockResolvedValue([]),
+      findIdentityByUserId: jest.fn(),
+      findAccountByUserAndPlatform: jest.fn().mockResolvedValue(null),
+      getAudienceDemographicsByAccountId: jest.fn().mockResolvedValue([]),
+      getUserAudienceDemographics: jest.fn().mockResolvedValue([]),
+      getAccountAnalytics: jest.fn(),
+      pruneOldMediaContent: jest.fn(),
+    };
+
+    instagramProvider = {
+      getAuthUrl: jest.fn(),
+      exchangeCodeAndGetAccounts: jest.fn(),
+      refreshLongLivedToken: jest.fn(),
     };
 
     metaProvider = {
@@ -81,6 +97,13 @@ describe('SocialService', () => {
         return `https://www.facebook.com/v19.0/dialog/oauth?client_id=123&redirect_uri=${redirectUri}&state=${state}`;
       }),
       exchangeCodeAndGetAccounts: jest.fn(),
+      exchangeCodeForTokens: jest.fn(),
+      getUserProfile: jest.fn(),
+      getManagedPages: jest.fn(),
+      getPageProfile: jest.fn(),
+      getPageInsights: jest.fn(),
+      getPageDemographics: jest.fn(),
+      getPagePosts: jest.fn(),
     };
 
     linkedinProvider = {
@@ -130,7 +153,7 @@ describe('SocialService', () => {
         { provide: SocialRepository, useValue: repository },
         { provide: MetaProvider, useValue: metaProvider },
         { provide: ConfigService, useValue: configService },
-        { provide: require('./providers/instagram/instagram.provider').InstagramProvider, useValue: { getAuthUrl: jest.fn(), exchangeCodeAndGetAccounts: jest.fn() } },
+        { provide: require('./providers/instagram/instagram.provider').InstagramProvider, useValue: instagramProvider },
         { provide: require('./providers/youtube/youtube.provider').YoutubeProvider, useValue: { getAuthUrl: jest.fn().mockReturnValue('https://accounts.google.com/o/oauth2/v2/auth?client_id=123'), exchangeCodeAndGetAccounts: jest.fn() } },
         { provide: require('./providers/linkedin/linkedin.provider').LinkedinProvider, useValue: linkedinProvider },
         { provide: require('./providers/twitter/twitter.provider').TwitterProvider, useValue: twitterProvider },
@@ -171,35 +194,41 @@ describe('SocialService', () => {
     expect(redirectUrl).toContain('Invalid%20or%20expired%20OAuth%20state');
   });
 
-  it('should handle successful Meta OAuth callback and encrypt access token', async () => {
+  it('should handle successful Meta OAuth callback, persist user identity and redirect to page selection', async () => {
     const validState = generateOAuthState(mockUserId);
-    const mockAccounts = [
-      {
-        platform: SocialPlatform.INSTAGRAM,
-        platformUserId: 'ig-101',
-        username: 'zerify_creator',
-        displayName: 'Zerify Creator',
-        avatar: 'https://cdn.example.com/avatar.jpg',
-        accessToken: 'raw-meta-token-xyz',
-        expiresAt: new Date(Date.now() + 60 * 86400 * 1000),
-      },
-    ];
+    const mockExpiresAt = new Date(Date.now() + 60 * 86400 * 1000);
 
-    (metaProvider.exchangeCodeAndGetAccounts as jest.Mock).mockResolvedValue(mockAccounts);
-    (repository.upsertAccount as jest.Mock).mockResolvedValue({
-      id: 'acc-1',
-      userId: mockUserId,
-      platform: SocialPlatform.INSTAGRAM,
-      platformUserId: 'ig-101',
-      username: 'zerify_creator',
-      displayName: 'Zerify Creator',
+    metaProvider.exchangeCodeForTokens.mockResolvedValue({
+      userAccessToken: 'raw-meta-token-xyz',
+      expiresInSeconds: 5184000,
+      expiresAt: mockExpiresAt,
+    });
+    metaProvider.getUserProfile.mockResolvedValue({
+      id: 'fb-user-123',
+      name: 'Zerify Founder',
       avatar: 'https://cdn.example.com/avatar.jpg',
+      email: 'founder@zerify.io',
+    });
+    metaProvider.getManagedPages.mockResolvedValue([
+      {
+        id: 'page-101',
+        name: 'Zerify Official',
+        category: 'Tech Company',
+        accessToken: 'page-token-101',
+        followerCount: 15200,
+        isVerified: true,
+      },
+    ]);
+
+    (repository.upsertAccount as jest.Mock).mockResolvedValue({
+      id: 'acc-user-fb-1',
+      userId: mockUserId,
+      platform: SocialPlatform.FACEBOOK,
+      platformUserId: 'fb-user-123',
+      accountType: 'PERSONAL',
+      username: 'Zerify Founder',
       accessToken: 'encrypted-token',
-      refreshToken: null,
-      expiresAt: mockAccounts[0].expiresAt,
       status: SocialAccountStatus.CONNECTED,
-      connectedAt: new Date(),
-      updatedAt: new Date(),
     });
 
     const redirectUrl = await service.handleMetaCallback('sample_code', validState);
@@ -207,10 +236,13 @@ describe('SocialService', () => {
     expect(repository.upsertAccount).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: mockUserId,
-        platform: SocialPlatform.INSTAGRAM,
-        platformUserId: 'ig-101',
+        platform: SocialPlatform.FACEBOOK,
+        platformUserId: 'fb-user-123',
+        accountType: 'PERSONAL',
       }),
     );
+    expect(redirectUrl).toContain('http://localhost:3000/social/callback?status=select_pages');
+    expect(redirectUrl).toContain('platform=facebook');
   });
 
   it('should generate YouTube OAuth auth URL with valid signed state', () => {
@@ -255,7 +287,7 @@ describe('SocialService', () => {
       refreshToken: null,
       status: SocialAccountStatus.CONNECTED,
     });
-    repository.upsertYouTubeChannel = jest.fn().mockResolvedValue({} as any);
+    repository.upsertProfileMetadata = jest.fn().mockResolvedValue({} as any);
 
     const redirectUrl = await service.handleYouTubeCallback('sample_yt_code', validState);
     expect(redirectUrl).toEqual('http://localhost:3000/social/callback?status=success&count=1');
@@ -266,11 +298,10 @@ describe('SocialService', () => {
         platformUserId: 'UC_test_123',
       }),
     );
-    expect(repository.upsertYouTubeChannel).toHaveBeenCalledWith(
+    expect(repository.upsertProfileMetadata).toHaveBeenCalledWith(
       'yt-acc-1',
       expect.objectContaining({
-        channelId: 'UC_test_123',
-        channelTitle: 'Test Channel',
+        displayName: 'Test Channel',
       }),
     );
   });
@@ -383,14 +414,10 @@ describe('SocialService', () => {
         username: 'Jane Doe',
       }),
     );
-    expect(repository.upsertLinkedInProfile).toHaveBeenCalledWith(
+    expect(repository.upsertProfileMetadata).toHaveBeenCalledWith(
       'li-acc-999',
       expect.objectContaining({
-        linkedinId: 'li_unique_999',
-        localizedFirstName: 'Jane',
-        localizedLastName: 'Doe',
         email: 'jane@example.com',
-        emailVerified: true,
       }),
     );
   });
@@ -517,20 +544,15 @@ describe('SocialService', () => {
         platform: SocialPlatform.TWITTER,
         platformUserId: 'tw_creator_123',
       });
-      (repository.upsertTwitterProfile as jest.Mock).mockResolvedValue({
-        id: 'tw-prof-1',
-        socialAccountId: 'social-acc-tw-1',
-      });
       (repository.upsertProfileMetadata as jest.Mock).mockResolvedValue({});
 
       const redirectUrl = await service.handleXCallback('auth_code_123', validState);
       expect(redirectUrl).toContain('status=success&count=1');
-      expect(repository.upsertTwitterProfile).toHaveBeenCalledWith(
+      expect(repository.upsertProfileMetadata).toHaveBeenCalledWith(
         'social-acc-tw-1',
         expect.objectContaining({
-          twitterId: 'tw_creator_123',
           username: 'ZerifyCreatorX',
-          followersCount: 25000,
+          followerCount: 25000,
         }),
       );
     });
@@ -590,26 +612,449 @@ describe('SocialService', () => {
         platform: SocialPlatform.THREADS,
         platformUserId: 'threads_user_999',
       });
-      (repository.upsertThreadsProfile as jest.Mock) = jest.fn().mockResolvedValue({
-        id: 'th-prof-1',
-        socialAccountId: 'social-acc-th-1',
-      });
       (repository.upsertProfileMetadata as jest.Mock).mockResolvedValue({});
 
       const redirectUrl = await service.handleThreadsCallback('auth_code_threads_123', state);
       expect(redirectUrl).toContain('status=success&platform=threads&count=1');
       expect(repository.upsertAccount).toHaveBeenCalled();
-      expect((repository.upsertThreadsProfile as jest.Mock)).toHaveBeenCalledWith(
+      expect(repository.upsertProfileMetadata).toHaveBeenCalledWith(
         'social-acc-th-1',
         expect.objectContaining({
-          threadsId: 'threads_user_999',
           username: 'ZerifyThreadsCreator',
-          followersCount: 15400,
+          followerCount: 15400,
         }),
       );
     });
   });
-});
+
+  describe('Instagram Token Lifecycle & Spec Compliance', () => {
+      it('should refresh Instagram long-lived token and update lifecycle fields', async () => {
+        const mockExpiresAt = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
+        const encryptedExistingToken = encryptToken('old-raw-token');
+
+        (repository.findById as jest.Mock).mockResolvedValue({
+          id: 'acc-ig-123',
+          platform: SocialPlatform.INSTAGRAM,
+          accessToken: encryptedExistingToken,
+          tokenStatus: 'ACTIVE',
+        });
+
+        instagramProvider.refreshLongLivedToken.mockResolvedValue({
+          accessToken: 'new-refreshed-token',
+          expiresAt: mockExpiresAt,
+        });
+
+        const result = await service.refreshInstagramToken('acc-ig-123');
+
+        expect(result.success).toBe(true);
+        expect(result.expiresAt).toEqual(mockExpiresAt);
+        expect(instagramProvider.refreshLongLivedToken).toHaveBeenCalledWith('old-raw-token');
+        expect(repository.updateTokenLifecycle).toHaveBeenCalledWith(
+          'acc-ig-123',
+          expect.objectContaining({
+            tokenStatus: 'ACTIVE',
+            expiresAt: mockExpiresAt,
+            lastTokenError: null,
+          }),
+        );
+      });
+
+      it('should flag REAUTHORIZATION_REQUIRED when token refresh encounters code 190 / expired session', async () => {
+        const encryptedExistingToken = encryptToken('expired-raw-token');
+
+        (repository.findById as jest.Mock).mockResolvedValue({
+          id: 'acc-ig-456',
+          platform: SocialPlatform.INSTAGRAM,
+          accessToken: encryptedExistingToken,
+          tokenStatus: 'ACTIVE',
+        });
+
+        const oauthError: any = new Error('Error validating access token: Session has expired.');
+        oauthError.code = 190;
+        instagramProvider.refreshLongLivedToken.mockRejectedValue(oauthError);
+
+        const result = await service.refreshInstagramToken('acc-ig-456');
+
+        expect(result.success).toBe(false);
+        expect(repository.updateTokenLifecycle).toHaveBeenCalledWith(
+          'acc-ig-456',
+          expect.objectContaining({
+            tokenStatus: 'REAUTHORIZATION_REQUIRED',
+          }),
+        );
+        expect(repository.updateSyncState).toHaveBeenCalledWith(
+          'acc-ig-456',
+          'PROFILE_METADATA',
+          'REAUTHORIZATION_REQUIRED',
+          expect.objectContaining({
+            lastErrorCode: 'TOKEN_EXPIRED',
+          }),
+        );
+      });
+
+      it('should return empty demographics when no genuine API demographics exist without synthetic fabrication', async () => {
+        (repository.findByUserId as jest.Mock).mockResolvedValue([
+          { id: 'acc-ig-789', platform: SocialPlatform.INSTAGRAM, userId: mockUserId },
+        ]);
+        (repository.getAudienceDemographicsByAccountId as jest.Mock).mockResolvedValue([]);
+
+        const demographics = await service.getUserAudienceDemographics(mockUserId);
+        expect(demographics).toEqual([]);
+        expect(repository.upsertAudienceDemographic).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('Facebook Multi-Page & Spec Compliance', () => {
+      it('should reject unauthorized page IDs during selection with ForbiddenException (Section 44)', async () => {
+        const encryptedUserToken = encryptToken('valid-user-fb-token');
+        (repository.findIdentityByUserId as jest.Mock).mockResolvedValue({
+          id: 'acc-fb-user-1',
+          platform: SocialPlatform.FACEBOOK,
+          accountType: 'PERSONAL',
+          accessToken: encryptedUserToken,
+        });
+
+        // Meta only authorized page-1 and page-2
+        metaProvider.getManagedPages.mockResolvedValue([
+          { id: 'page-1', name: 'Authorized Page 1', accessToken: 'token-1' },
+          { id: 'page-2', name: 'Authorized Page 2', accessToken: 'token-2' },
+        ]);
+
+        // Attacker or unauthorized request submits page-999
+        await expect(
+          service.selectFacebookPages(mockUserId, ['page-1', 'page-999']),
+        ).rejects.toThrow(ForbiddenException);
+      });
+
+      it('should connect multiple authorized Facebook pages as separate SocialAccount records with accountType PAGE', async () => {
+        const encryptedUserToken = encryptToken('valid-user-fb-token');
+        (repository.findIdentityByUserId as jest.Mock).mockResolvedValue({
+          id: 'acc-fb-user-1',
+          platform: SocialPlatform.FACEBOOK,
+          accountType: 'PERSONAL',
+          accessToken: encryptedUserToken,
+        });
+
+        metaProvider.getManagedPages.mockResolvedValue([
+          {
+            id: 'page-1',
+            name: 'Zerify Official',
+            category: 'Tech',
+            accessToken: 'token-page-1',
+            followerCount: 25000,
+            isVerified: true,
+            link: 'https://facebook.com/zerify',
+            pictureUrl: 'https://zerify.io/pic1.jpg',
+          },
+          {
+            id: 'page-2',
+            name: 'Cheri Fashion',
+            category: 'Retail',
+            accessToken: 'token-page-2',
+            followerCount: 4800,
+            isVerified: null,
+            link: 'https://facebook.com/cheri',
+            pictureUrl: 'https://zerify.io/pic2.jpg',
+          },
+        ]);
+
+        (repository.upsertAccount as jest.Mock).mockImplementation((data) => {
+          return Promise.resolve({
+            id: `acc-${data.platformUserId}`,
+            userId: data.userId,
+            platform: data.platform,
+            platformUserId: data.platformUserId,
+            accountType: data.accountType,
+            username: data.username,
+            avatar: data.avatar,
+            accessToken: data.accessToken,
+            status: SocialAccountStatus.CONNECTED,
+          });
+        });
+
+        const res = await service.selectFacebookPages(mockUserId, ['page-1', 'page-2']);
+
+        expect(res.success).toBe(true);
+        expect(res.count).toBe(2);
+
+        // Verify Page 1 upsert
+        expect(repository.upsertAccount).toHaveBeenCalledWith(
+          expect.objectContaining({
+            userId: mockUserId,
+            platform: SocialPlatform.FACEBOOK,
+            platformUserId: 'page-1',
+            accountType: 'PAGE',
+            isVerified: true,
+            followerCount: 25000,
+          }),
+        );
+
+        // Verify Page 2 upsert
+        expect(repository.upsertAccount).toHaveBeenCalledWith(
+          expect.objectContaining({
+            userId: mockUserId,
+            platform: SocialPlatform.FACEBOOK,
+            platformUserId: 'page-2',
+            accountType: 'PAGE',
+            isVerified: null,
+            followerCount: 4800,
+          }),
+        );
+      });
+
+      it('should calculate safe engagement rate and enforce metric nullability during syncFacebookPage', async () => {
+        const encryptedPageToken = encryptToken('raw-page-token');
+        (repository.findById as jest.Mock).mockResolvedValue({
+          id: 'acc-page-1',
+          platform: SocialPlatform.FACEBOOK,
+          platformUserId: 'page-1',
+          accountType: 'PAGE',
+          username: 'Zerify Official',
+          accessToken: encryptedPageToken,
+          followerCount: 25000,
+        });
+
+        metaProvider.getPageProfile.mockResolvedValue({
+          name: 'Zerify Official',
+          followers_count: 25000,
+          is_verified: true,
+          link: 'https://facebook.com/zerify',
+        });
+
+        metaProvider.getPageInsights.mockResolvedValue({
+          reach: 10000,
+          impressions: 15000,
+          totalInteractions: 500,
+          engagedUsers: 500,
+          views: 3000,
+          likes: 400,
+          comments: 80,
+          shares: 20,
+          clicks: null,
+          mediaViews: null,
+          rawMetrics: {},
+        });
+
+        metaProvider.getPageDemographics.mockResolvedValue([]);
+        metaProvider.getPagePosts.mockResolvedValue([]);
+
+        await service.syncFacebookPage('acc-page-1');
+
+        // Safe engagement rate: (500 / 10000) * 100 = 5.0
+        expect(repository.recordAccountPerformance).toHaveBeenCalledWith(
+          'acc-page-1',
+          expect.objectContaining({
+            reach: 10000,
+            impressions: 15000,
+            totalInteractions: 500,
+            engagementRate: 5,
+            source: 'FACEBOOK_GRAPH_API',
+          }),
+        );
+
+        // Operational sync status updated to SUCCESS with 6h nextSyncAt
+        expect(repository.updateSyncState).toHaveBeenCalledWith(
+          'acc-page-1',
+          'PROFILE_METADATA',
+          'SUCCESS',
+          expect.objectContaining({
+            retryCount: 0,
+            nextSyncAt: expect.any(Date),
+          }),
+        );
+      });
+    });
+
+    describe('YouTube Integration & Spec Compliance', () => {
+      it('should preserve existing refresh token when Google OAuth callback omits refresh token (Section 6 & 46)', async () => {
+        const validState = generateOAuthState(mockUserId);
+        const mockYtAccounts = [
+          {
+            platform: SocialPlatform.YOUTUBE,
+            platformUserId: 'UC_test_reauth',
+            username: 'Reauth Channel',
+            displayName: 'Reauth Channel',
+            accessToken: 'new-access-token',
+            refreshToken: undefined, // Google did not return a new refresh token
+            expiresAt: new Date(Date.now() + 3600 * 1000),
+            rawData: {
+              channelId: 'UC_test_reauth',
+              channelTitle: 'Reauth Channel',
+              subscriberCount: 85000,
+            },
+          },
+        ];
+
+        const youtubeProvider = (service as any).youtubeProvider;
+        youtubeProvider.exchangeCodeAndGetAccounts = jest.fn().mockResolvedValue(mockYtAccounts);
+        const existingRefreshToken = encryptToken('existing_valid_google_refresh_token');
+
+        repository.findAccountByUserAndPlatform = jest.fn().mockResolvedValue({
+          id: 'existing-yt-acc',
+          userId: mockUserId,
+          platform: SocialPlatform.YOUTUBE,
+          platformUserId: 'UC_test_reauth',
+          refreshToken: existingRefreshToken,
+        } as any);
+
+        (repository.upsertAccount as jest.Mock).mockResolvedValue({
+          id: 'existing-yt-acc',
+          userId: mockUserId,
+          platform: SocialPlatform.YOUTUBE,
+          platformUserId: 'UC_test_reauth',
+          username: 'Reauth Channel',
+          status: SocialAccountStatus.CONNECTED,
+        });
+
+        await service.handleYouTubeCallback('google_auth_code', validState);
+
+        expect(repository.upsertAccount).toHaveBeenCalledWith(
+          expect.objectContaining({
+            userId: mockUserId,
+            platform: SocialPlatform.YOUTUBE,
+            platformUserId: 'UC_test_reauth',
+            accountType: 'CHANNEL',
+            refreshToken: existingRefreshToken, // Preserved!
+            tokenType: 'BEARER',
+            refreshMethod: 'OAUTH_REFRESH_TOKEN',
+          }),
+        );
+      });
+
+      it('should calculate safe engagement rate and set reach/impressions to null during syncYouTubeChannelDetails (Section 18 & 21)', async () => {
+        const youtubeProvider = (service as any).youtubeProvider;
+        youtubeProvider.fetchChannelVideos = jest.fn().mockResolvedValue([
+          {
+            videoId: 'vid-yt-1',
+            title: 'Sample Tech Review',
+            description: 'Tech review caption',
+            viewCount: BigInt(25000),
+            likeCount: 1200,
+            commentCount: 150,
+            durationSeconds: 742,
+          },
+        ]);
+        youtubeProvider.fetchChannelAnalytics = jest.fn().mockResolvedValue([
+          {
+            date: new Date('2026-09-08'),
+            views: BigInt(10000),
+            likes: 400,
+            comments: 50,
+            shares: 50,
+            subscribersGained: 20,
+            subscribersLost: 2,
+            estimatedMinutesWatched: BigInt(45000),
+            averageViewDuration: 4.5,
+          },
+        ]);
+        youtubeProvider.fetchChannelDemographics = jest.fn().mockResolvedValue([]);
+
+        repository.findById = jest.fn().mockResolvedValue({
+          id: 'yt-acc-sync-1',
+          userId: mockUserId,
+          platform: SocialPlatform.YOUTUBE,
+          platformUserId: 'UC_sync_1',
+          accessToken: encryptToken('valid-yt-token'),
+          expiresAt: new Date(Date.now() + 3600000),
+          followerCount: 50000,
+        } as any);
+
+        repository.upsertMediaWithPerformance = jest.fn().mockResolvedValue({} as any);
+        repository.recordAccountPerformance = jest.fn().mockResolvedValue({} as any);
+        repository.updateAccountFollowerCount = jest.fn().mockResolvedValue({} as any);
+        repository.updateSyncState = jest.fn().mockResolvedValue({} as any);
+        repository.getAccountAnalytics = jest.fn().mockResolvedValue({} as any);
+
+        await service.syncYouTubeChannelDetails('yt-acc-sync-1');
+
+        // Verify video reach and impressions are null (not coerced from views)
+        expect(repository.upsertMediaWithPerformance).toHaveBeenCalledWith(
+          'yt-acc-sync-1',
+          expect.objectContaining({
+            platformMediaId: 'vid-yt-1',
+            duration: 742,
+          }),
+          expect.objectContaining({
+            playCount: 25000,
+            reach: null,
+            impressions: null,
+          }),
+        );
+
+        // Verify daily snapshot engagement rate: (500 interactions / 10000 views) * 100 = 5.0%
+        expect(repository.recordAccountPerformance).toHaveBeenCalledWith(
+          'yt-acc-sync-1',
+          expect.objectContaining({
+            views: 10000,
+            reach: null,
+            impressions: null,
+            totalInteractions: 500,
+            engagementRate: 5,
+            source: 'YOUTUBE_ANALYTICS_API',
+          }),
+        );
+
+        // Verify operational sync state success with 6-hour window
+        expect(repository.updateSyncState).toHaveBeenCalledWith(
+          'yt-acc-sync-1',
+          'MEDIA_CONTENT',
+          'SUCCESS',
+          expect.objectContaining({
+            retryCount: 0,
+            nextSyncAt: expect.any(Date),
+          }),
+          expect.any(Date),
+        );
+      });
+
+      it('should proactively refresh YouTube token and mark REAUTHORIZATION_REQUIRED on invalid grant', async () => {
+        const youtubeProvider = (service as any).youtubeProvider;
+        youtubeProvider.refreshAccessToken = jest.fn().mockRejectedValue(new BadRequestException('invalid_grant: Token has been revoked'));
+
+        repository.findById = jest.fn().mockResolvedValue({
+          id: 'yt-acc-expired-1',
+          userId: mockUserId,
+          platform: SocialPlatform.YOUTUBE,
+          platformUserId: 'UC_revoked_1',
+          refreshToken: encryptToken('revoked-google-refresh-token'),
+        } as any);
+
+        repository.updateTokenLifecycle = jest.fn().mockResolvedValue({} as any);
+        repository.updateSyncState = jest.fn().mockResolvedValue({} as any);
+
+        await expect(service.refreshYouTubeToken('yt-acc-expired-1')).rejects.toThrow();
+
+        expect(repository.updateTokenLifecycle).toHaveBeenCalledWith(
+          'yt-acc-expired-1',
+          expect.objectContaining({
+            tokenStatus: 'REAUTHORIZATION_REQUIRED',
+          }),
+        );
+      });
+    });
+
+    describe('Engagement Rate Calculation & Persistence', () => {
+      it('should calculate normalized engagement rate from stored media content and update SocialAccount', async () => {
+        repository.findById = jest.fn().mockResolvedValue({
+          id: 'acc-er-test',
+          followerCount: 1000,
+          engagementRate: 0,
+        } as any);
+
+        repository.getMediaContentsByAccountId = jest.fn().mockResolvedValue([
+          { likeCount: 40, commentCount: 5, shareCount: 3, saveCount: 2 },
+          { likeCount: 25, commentCount: 3, shareCount: 1, saveCount: 1 },
+        ] as any);
+
+        repository.updateAccountFollowerCount = jest.fn().mockResolvedValue({} as any);
+
+        const er = await service.recalculateAccountEngagementRate('acc-er-test');
+
+        expect(er).toBe(4.0);
+        expect(repository.updateAccountFollowerCount).toHaveBeenCalledWith('acc-er-test', 1000, 4.0);
+      });
+    });
+  });
 
 
 describe('MetaProvider Unit Tests', () => {

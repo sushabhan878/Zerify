@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 
 import ThemeToggle from '../subcomponents/ThemeToggle';
+import { useMessagingUnread } from '@/context/MessagingContext';
 
 export interface BrandNavItem {
   id: string;
@@ -46,6 +47,8 @@ export default function BrandNavMenu({
   isCollapsed = false,
 }: BrandNavMenuProps) {
   const [activeSubTab, setActiveSubTab] = useState('statistic');
+  // Live unread total from the messaging socket.
+  const totalUnread = useMessagingUnread();
 
   const mainRoutes: BrandNavItem[] = [
     {
@@ -101,7 +104,7 @@ export default function BrandNavMenu({
       id: 'brand-messages',
       label: 'Messages',
       icon: MessageSquare,
-      badge: '4',
+      badge: totalUnread > 0 ? (totalUnread > 99 ? '99+' : `${totalUnread}`) : undefined,
       badgeColor: 'bg-pink-500/20 text-pink-300 border border-pink-500/30',
       section: 'SETTINGS',
     },

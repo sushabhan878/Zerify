@@ -3,23 +3,27 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import FacebookPageSelectorModal from '@/components/social/FacebookPageSelectorModal';
 
 function SocialCallbackContent() {
   const searchParams = useSearchParams();
   const status = searchParams.get('status');
   const message = searchParams.get('message');
   const count = searchParams.get('count');
+  const userId = searchParams.get('userId');
 
-  useEffect(() => {
+  const [isSuccess, setIsSuccess] = useState(status === 'success');
+  const [successCount, setSuccessCount] = useState<string | number | null>(count);
+
+  const broadcastAndClose = (customStatus: string, customMessage?: string | null, customCount?: string | number | null) => {
     const payload = {
       type: 'ZERIFY_SOCIAL_CONNECTED',
-      status,
-      message,
-      count,
+      status: customStatus,
+      message: customMessage,
+      count: customCount,
       timestamp: Date.now(),
     };
 
-    // 1. Notify the parent opener window if available
     if (typeof window !== 'undefined' && window.opener) {
       try {
         window.opener.postMessage(payload, '*');
@@ -28,7 +32,6 @@ function SocialCallbackContent() {
       }
     }
 
-    // 2. Broadcast via BroadcastChannel (works even if cross-origin navigation severed window.opener)
     try {
       if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
         const bc = new BroadcastChannel('zerify_social_oauth');
@@ -39,7 +42,6 @@ function SocialCallbackContent() {
       console.error('BroadcastChannel error:', bcErr);
     }
 
-    // 3. Set localStorage event to wake up opener tab via storage event
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
         localStorage.setItem('zerify_social_connected_event', JSON.stringify(payload));
@@ -48,7 +50,6 @@ function SocialCallbackContent() {
       console.error('localStorage event error:', lsErr);
     }
 
-    // 4. Automatically close the popup window
     const timer = setTimeout(() => {
       try {
         window.close();
@@ -58,13 +59,48 @@ function SocialCallbackContent() {
     }, 1500);
 
     return () => clearTimeout(timer);
+  };
+
+  useEffect(() => {
+    // If we're waiting for page selection, do not auto-close
+    if (status === 'select_pages') {
+      return;
+    }
+
+    broadcastAndClose(status || 'unknown', message, count);
   }, [status, message, count]);
 
+  const handlePagesSelected = (connectedCount: number) => {
+    setIsSuccess(true);
+    setSuccessCount(connectedCount);
+    broadcastAndClose('success', `${connectedCount} Facebook Page(s) linked`, connectedCount);
+  };
+
+  const handleCloseSelection = () => {
+    try {
+      window.close();
+    } catch (e) {
+      console.warn('Could not close window:', e);
+    }
+  };
+
+  if (status === 'select_pages' && !isSuccess) {
+    return (
+      <div className="min-h-screen bg-[#07090E] text-white flex items-center justify-center p-4">
+        <FacebookPageSelectorModal
+          isOpen={true}
+          userId={userId || undefined}
+          onClose={handleCloseSelection}
+          onSuccess={handlePagesSelected}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#07090E] text-white flex flex-col items-center justify-center p-6 text-center">
       <div className="w-full max-w-md p-8 rounded-2xl bg-slate-950/80 border border-purple-500/30 backdrop-blur-xl shadow-2xl space-y-5">
-        {status === 'success' ? (
+        {isSuccess ? (
           <>
             <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 mx-auto animate-bounce">
               <CheckCircle2 className="w-9 h-9" />
@@ -72,7 +108,7 @@ function SocialCallbackContent() {
             <div>
               <h2 className="text-xl font-bold text-white">Social Account Connected!</h2>
               <p className="text-xs text-slate-300 mt-1">
-                {count ? `${count} account(s) successfully linked.` : 'Your social account has been authenticated.'}
+                {successCount ? `${successCount} account(s) successfully linked.` : 'Your social account has been authenticated.'}
               </p>
             </div>
           </>

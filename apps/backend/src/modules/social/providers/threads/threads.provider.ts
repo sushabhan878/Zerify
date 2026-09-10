@@ -192,8 +192,9 @@ export class ThreadsProvider implements ISocialProvider {
 
       const expiresAt = new Date(Date.now() + expiresIn * 1000);
 
-      // Step 3: Fetch User Profile (/me)
+      // Step 3: Fetch User Profile (/me) and follower count via Threads Insights
       const profile = await this.fetchUserProfile(accessToken, threadsUserId);
+      const followerCount = await this.fetchFollowerCount(accessToken);
 
       return [
         {
@@ -202,12 +203,15 @@ export class ThreadsProvider implements ISocialProvider {
           username: profile.username || 'threads_user',
           displayName: profile.name || profile.username || 'Threads User',
           avatar: profile.threads_profile_picture_url,
-          followerCount: 0,
+          followerCount,
           profileUrl: profile.username ? `https://threads.net/@${profile.username}` : undefined,
           accessToken,
           refreshToken: accessToken, // Threads uses the long-lived token itself for refresh
           expiresAt,
-          rawData: profile,
+          rawData: {
+            ...profile,
+            followerCount,
+          },
         },
       ];
     } catch (err: any) {
@@ -215,6 +219,26 @@ export class ThreadsProvider implements ISocialProvider {
       this.logger.error('Error in Threads exchangeCodeAndGetAccounts:', err?.stack || err);
       throw new InternalServerErrorException(err?.message || 'Failed to exchange authorization code with Threads');
     }
+  }
+
+  /**
+   * Fetches the user's follower count from Threads Insights API.
+   */
+  async fetchFollowerCount(accessToken: string): Promise<number> {
+    try {
+      const endpoint = `${this.getApiBaseUrl()}/v1.0/me/threads_insights?metric=followers_count&access_token=${encodeURIComponent(accessToken)}`;
+      const res = await fetch(endpoint, { method: 'GET' });
+      if (res.ok) {
+        const data = await res.json();
+        const count = data?.data?.[0]?.values?.[0]?.value;
+        if (typeof count === 'number') {
+          return count;
+        }
+      }
+    } catch (e) {
+      this.logger.warn('Could not fetch Threads followers count from insights endpoint:', e);
+    }
+    return 0;
   }
 
   /**

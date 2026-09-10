@@ -167,16 +167,21 @@ export class InfluencerRepository {
   async syncConnectedAccounts(influencerId: string, accounts: any[]) {
     const influencer = await this.prisma.influencerProfile.findUnique({
       where: { id: influencerId },
-      select: { userId: true },
+      select: { userId: true, user: { select: { name: true } } },
     });
 
     if (influencer) {
       const userId = influencer.userId;
+      const personName = influencer.user?.name || null;
 
       for (const acc of accounts) {
         if (acc.connected || acc.handle) {
-          const followerCount = acc.followers ? parseInt(String(acc.followers).replace(/,/g, ''), 10) : 0;
-          const engagementRate = acc.engagementRate ? parseFloat(String(acc.engagementRate).replace(/%/g, '')) : 0;
+          const hasFollowerInput = acc.followers !== undefined && acc.followers !== null && acc.followers !== '';
+          const parsedFollowers = hasFollowerInput ? parseInt(String(acc.followers).replace(/,/g, ''), 10) : NaN;
+
+          const hasEngagementInput = acc.engagementRate !== undefined && acc.engagementRate !== null && acc.engagementRate !== '';
+          const parsedEngagement = hasEngagementInput ? parseFloat(String(acc.engagementRate).replace(/%/g, '')) : NaN;
+
           const platformUpper = (acc.id || acc.platform || acc.name || 'INSTAGRAM').toUpperCase();
 
           let socialPlatform: SocialPlatform = SocialPlatform.INSTAGRAM;
@@ -186,6 +191,43 @@ export class InfluencerRepository {
             socialPlatform = SocialPlatform.FACEBOOK;
           }
 
+          const rawHandle = (acc.handle || acc.username || '').trim();
+          const cleanHandle = rawHandle.replace(/^@/, '');
+          const formattedHandle = cleanHandle ? `@${cleanHandle}` : `@${acc.id || 'creator'}`;
+
+          // Profile URL: use acc.profileUrl / acc.url if provided, else compute canonical URL
+          let profileUrl = acc.profileUrl || acc.url || null;
+          if (!profileUrl && cleanHandle) {
+            switch (socialPlatform) {
+              case SocialPlatform.INSTAGRAM:
+                profileUrl = `https://instagram.com/${cleanHandle}`;
+                break;
+              case SocialPlatform.TWITTER:
+                profileUrl = `https://x.com/${cleanHandle}`;
+                break;
+              case SocialPlatform.YOUTUBE:
+                profileUrl = `https://youtube.com/@${cleanHandle}`;
+                break;
+              case SocialPlatform.TIKTOK:
+                profileUrl = `https://tiktok.com/@${cleanHandle}`;
+                break;
+              case SocialPlatform.THREADS:
+                profileUrl = `https://threads.net/@${cleanHandle}`;
+                break;
+              case SocialPlatform.LINKEDIN:
+                profileUrl = `https://linkedin.com/in/${cleanHandle}`;
+                break;
+              case SocialPlatform.FACEBOOK:
+                profileUrl = `https://facebook.com/${cleanHandle}`;
+                break;
+            }
+          }
+
+          // User Name: Person's name (distinct from handle!)
+          const finalUsername = (acc.name && acc.name !== acc.handle && !acc.name.startsWith('@'))
+            ? acc.name
+            : (personName || cleanHandle);
+
           const existing = await this.prisma.socialAccount.findFirst({
             where: {
               userId,
@@ -194,12 +236,22 @@ export class InfluencerRepository {
           });
 
           if (existing) {
+            const finalFollowerCount = !isNaN(parsedFollowers) && parsedFollowers > 0
+              ? parsedFollowers
+              : existing.followerCount;
+
+            const finalEngagementRate = !isNaN(parsedEngagement) && parsedEngagement > 0
+              ? parsedEngagement
+              : existing.engagementRate;
+
             await this.prisma.socialAccount.update({
               where: { id: existing.id },
               data: {
-                handle: acc.handle || existing.handle,
-                followerCount: isNaN(followerCount) ? existing.followerCount : followerCount,
-                engagementRate: isNaN(engagementRate) ? existing.engagementRate : engagementRate,
+                username: finalUsername || existing.username,
+                handle: formattedHandle || existing.handle,
+                profileUrl: profileUrl || existing.profileUrl,
+                followerCount: finalFollowerCount,
+                engagementRate: finalEngagementRate,
                 status: SocialAccountStatus.CONNECTED,
               },
             });
@@ -209,10 +261,11 @@ export class InfluencerRepository {
                 userId,
                 platform: socialPlatform,
                 platformUserId: `user_${acc.id || 'acc'}_${Date.now()}`,
-                username: acc.handle ? acc.handle.replace(/^@/, '') : acc.id,
-                handle: acc.handle || `@${acc.id}`,
-                followerCount: isNaN(followerCount) ? 0 : followerCount,
-                engagementRate: isNaN(engagementRate) ? 0 : engagementRate,
+                username: finalUsername,
+                handle: formattedHandle,
+                profileUrl,
+                followerCount: !isNaN(parsedFollowers) && parsedFollowers >= 0 ? parsedFollowers : null,
+                engagementRate: !isNaN(parsedEngagement) && parsedEngagement > 0 ? parsedEngagement : null,
                 accessToken: 'manual_connected_account',
                 status: SocialAccountStatus.CONNECTED,
               },

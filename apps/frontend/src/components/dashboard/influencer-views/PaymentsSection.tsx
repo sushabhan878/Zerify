@@ -1,15 +1,69 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DollarSign, Search, Download } from 'lucide-react';
 import PaymentsKpiBar from './subcomponents/PaymentsKpiBar';
 import TransactionCardItem, { TransactionItem } from './subcomponents/TransactionCardItem';
 import { useCurrency } from '@/context/CurrencyContext';
+import LinkPayoutCredentialsModal from '../payment-views/LinkPayoutCredentialsModal';
+import ClaimPayoutModal from '../payment-views/ClaimPayoutModal';
+import RaiseDisputeModal from '../payment-views/RaiseDisputeModal';
+import DisputesListCard from '../payment-views/DisputesListCard';
 
 export default function PaymentsSection() {
   const { currency, format } = useCurrency();
-  const [activeTab, setActiveTab] = useState<'ALL' | 'COMPLETED' | 'PENDING_APPROVAL'>('ALL');
+  const [activeTab, setActiveTab] = useState<'ALL' | 'COMPLETED' | 'PENDING_APPROVAL' | 'DISPUTES'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Modals state
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
+  const [isDisputeModalOpen, setIsDisputeOpen] = useState(false);
+  const [selectedDisputePayment, setSelectedDisputePayment] = useState<{ id: string; title: string } | null>(null);
+
+  // Beneficiary credentials & balances state
+  const [beneficiary, setBeneficiary] = useState<any>(null);
+  const [availableBalance, setAvailableBalance] = useState(705575);
+  const [inEscrow, setInEscrow] = useState(1135600);
+  const [lifetimeEarnings, setLifetimeEarnings] = useState(4084000);
+
+  const fetchPayoutData = async () => {
+    try {
+      const token = localStorage.getItem('zerify_token');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
+      // 1. Fetch beneficiary account
+      const bRes = await fetch(`${apiUrl}/payout-accounts/me`, {
+        headers: { Authorization: token ? `Bearer ${token}` : '' },
+      });
+      if (bRes.ok) {
+        const bData = await bRes.json();
+        setBeneficiary(bData);
+      } else {
+        const cached = localStorage.getItem('zerify_beneficiary_details');
+        if (cached) setBeneficiary(JSON.parse(cached));
+      }
+
+      // 2. Fetch payable balance
+      const pRes = await fetch(`${apiUrl}/payouts/me/payable`, {
+        headers: { Authorization: token ? `Bearer ${token}` : '' },
+      });
+      if (pRes.ok) {
+        const pData = await pRes.json();
+        if (pData?.payableBalance !== undefined) {
+          setAvailableBalance(pData.payableBalance);
+        }
+      }
+    } catch (e) {
+      // Local storage fallback
+      const cached = localStorage.getItem('zerify_beneficiary_details');
+      if (cached) setBeneficiary(JSON.parse(cached));
+    }
+  };
+
+  useEffect(() => {
+    fetchPayoutData();
+  }, []);
 
   const rawTx = [
     {
@@ -64,16 +118,13 @@ export default function PaymentsSection() {
     status: t.status,
   }));
 
-  const availableBalanceStr = format(currency === 'INR' ? 705575 : 8450, { showDecimals: true });
-  const inEscrowStr = format(currency === 'INR' ? 1135600 : 13600, { showDecimals: true });
-  const lifetimeEarningsStr = format(currency === 'INR' ? 4084000 : 48910, { showDecimals: true });
+  const availableBalanceStr = format(currency === 'INR' ? availableBalance : availableBalance / 83.5, { showDecimals: true });
+  const inEscrowStr = format(currency === 'INR' ? inEscrow : inEscrow / 83.5, { showDecimals: true });
+  const lifetimeEarningsStr = format(currency === 'INR' ? lifetimeEarnings : lifetimeEarnings / 83.5, { showDecimals: true });
 
-  const handleWithdraw = () => {
-    alert(`Withdrawal request of ${availableBalanceStr} initiated to connected bank account! Funds will transfer within 24 hours.`);
-  };
-
-  const handleDownloadInvoice = (id: string) => {
-    alert(`Downloading PDF tax invoice & receipt for transaction ${id}...`);
+  const handleOpenDispute = (paymentId: string, campaignTitle: string) => {
+    setSelectedDisputePayment({ id: paymentId, title: campaignTitle });
+    setIsDisputeOpen(true);
   };
 
   const filteredTransactions = transactions.filter((tx) => {
@@ -94,16 +145,26 @@ export default function PaymentsSection() {
             <DollarSign className="w-5 h-5 text-purple-400" />
             <span>Earnings & Payment Escrow</span>
           </h2>
-          <p className="text-xs text-slate-400">Track balance, milestone escrow holds, tax receipts, and payout history</p>
+          <p className="text-xs text-slate-400">
+            Link payout credentials, claim available balances, and resolve escrow disputes
+          </p>
         </div>
 
-        <button
-          onClick={() => handleDownloadInvoice('ALL_TAX_2026')}
-          className="px-3.5 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-xs font-bold text-purple-300 flex items-center gap-1.5 transition-colors self-start sm:self-auto"
-        >
-          <Download className="w-3.5 h-3.5" />
-          <span>Download 1099/Tax Summary</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsLinkModalOpen(true)}
+            className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-xs font-bold text-slate-300 transition-colors"
+          >
+            {beneficiary ? 'Manage Payout Account' : 'Link Payout Account'}
+          </button>
+          <button
+            onClick={() => alert('Downloading tax summary...')}
+            className="px-3.5 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-xs font-bold text-purple-300 flex items-center gap-1.5 transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Tax Summary</span>
+          </button>
+        </div>
       </div>
 
       {/* 1. Financial KPI Overview Bar */}
@@ -111,7 +172,9 @@ export default function PaymentsSection() {
         availableBalance={availableBalanceStr}
         inEscrow={inEscrowStr}
         lifetimeEarnings={lifetimeEarningsStr}
-        onWithdraw={handleWithdraw}
+        beneficiaryAccount={beneficiary}
+        onWithdraw={() => setIsClaimModalOpen(true)}
+        onLinkCredentials={() => setIsLinkModalOpen(true)}
       />
 
       {/* 2. Transaction List Box */}
@@ -135,6 +198,7 @@ export default function PaymentsSection() {
               { id: 'ALL', label: 'All Transactions' },
               { id: 'COMPLETED', label: 'Completed Payouts' },
               { id: 'PENDING_APPROVAL', label: 'In Escrow' },
+              { id: 'DISPUTES', label: 'Disputes' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -151,21 +215,62 @@ export default function PaymentsSection() {
           </div>
         </div>
 
-        {/* Transaction Cards List */}
-        <div className="space-y-3">
-          {filteredTransactions.length > 0 ? (
-            filteredTransactions.map((tx) => (
-              <TransactionCardItem key={tx.id} tx={tx} onDownloadInvoice={handleDownloadInvoice} />
-            ))
-          ) : (
-            <div className="p-8 text-center space-y-2">
-              <DollarSign className="w-8 h-8 text-slate-500 mx-auto" />
-              <h3 className="text-sm font-bold text-white">No Transactions Found</h3>
-              <p className="text-xs text-slate-400">No payment records match your search criteria.</p>
-            </div>
-          )}
-        </div>
+        {activeTab === 'DISPUTES' ? (
+          <DisputesListCard
+            onRaiseNewDispute={() => handleOpenDispute(transactions[0]?.id || 'TX-88105', 'Campaign Escrow')}
+          />
+        ) : (
+          <div className="space-y-3">
+            {filteredTransactions.length > 0 ? (
+              filteredTransactions.map((tx) => (
+                <TransactionCardItem
+                  key={tx.id}
+                  tx={tx}
+                  onDownloadInvoice={(id) => alert(`Downloading invoice for ${id}...`)}
+                  onRaiseDispute={handleOpenDispute}
+                />
+              ))
+            ) : (
+              <div className="p-8 text-center space-y-2">
+                <DollarSign className="w-8 h-8 text-slate-500 mx-auto" />
+                <h3 className="text-sm font-bold text-white">No Transactions Found</h3>
+                <p className="text-xs text-slate-400">No payment records match your search criteria.</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Modals */}
+      <LinkPayoutCredentialsModal
+        isOpen={isLinkModalOpen}
+        onClose={() => setIsLinkModalOpen(false)}
+        onLinked={() => {
+          fetchPayoutData();
+        }}
+      />
+
+      <ClaimPayoutModal
+        isOpen={isClaimModalOpen}
+        onClose={() => setIsClaimModalOpen(false)}
+        availableAmount={availableBalance}
+        isCredentialsLinked={!!beneficiary}
+        onClaimSuccess={() => {
+          setAvailableBalance(0);
+          fetchPayoutData();
+        }}
+      />
+
+      <RaiseDisputeModal
+        isOpen={isDisputeModalOpen}
+        onClose={() => setIsDisputeOpen(false)}
+        paymentId={selectedDisputePayment?.id || 'TX-88105'}
+        campaignTitle={selectedDisputePayment?.title}
+        onDisputed={() => {
+          setActiveTab('DISPUTES');
+          fetchPayoutData();
+        }}
+      />
     </div>
   );
 }

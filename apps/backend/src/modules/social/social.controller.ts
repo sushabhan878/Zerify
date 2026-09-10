@@ -11,6 +11,7 @@ import {
   Res,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -19,6 +20,7 @@ import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { SocialService } from './social.service';
 import { ConnectCallbackQueryDto } from './dto/connect-callback-query.dto';
 import { SocialAccountResponseDto } from './dto/social-account-response.dto';
+import { SelectFacebookPagesDto } from './dto/select-facebook-pages.dto';
 
 interface RequestWithUser {
   user: {
@@ -38,9 +40,14 @@ export class SocialController {
   @ApiBearerAuth()
   @UseGuards(OptionalJwtAuthGuard)
   @Get('meta/login')
-  getMetaLoginUrl(@Req() req: RequestWithUser, @Query('userId') queryUserId?: string) {
+  getMetaLoginUrl(
+    @Req() req: RequestWithUser,
+    @Query('userId') queryUserId?: string,
+    @Query('force') force?: string,
+  ) {
     const userId = req.user?.id || queryUserId || 'default-user-id';
-    const result = this.socialService.getMetaAuthUrl(userId);
+    const forceReauth = force === 'true' || force === '1';
+    const result = this.socialService.getMetaAuthUrl(userId, forceReauth);
     return {
       statusCode: HttpStatus.OK,
       data: result,
@@ -62,13 +69,56 @@ export class SocialController {
     return res.redirect(redirectUrl);
   }
 
+  @ApiOperation({ summary: 'Get available Facebook Pages for the authenticated user' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('facebook/pages')
+  async getFacebookPages(
+    @Req() req: RequestWithUser,
+    @Query('userId') queryUserId?: string,
+  ) {
+    const userId = req.user?.id || queryUserId;
+    if (!userId) {
+      throw new BadRequestException('User ID is required');
+    }
+    const data = await this.socialService.getAvailableFacebookPages(userId);
+    return {
+      statusCode: HttpStatus.OK,
+      data,
+    };
+  }
+
+  @ApiOperation({ summary: 'Select and connect specific Facebook Pages' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Post('facebook/pages/select')
+  async selectFacebookPages(
+    @Req() req: RequestWithUser,
+    @Body() body: SelectFacebookPagesDto,
+  ) {
+    const userId = req.user?.id || body.userId;
+    if (!userId) {
+      throw new BadRequestException('User ID is required');
+    }
+    const data = await this.socialService.selectFacebookPages(userId, body.pageIds);
+    return {
+      statusCode: HttpStatus.OK,
+      data,
+    };
+  }
+
   @ApiOperation({ summary: 'Generate Direct Instagram OAuth Login URL' })
   @ApiBearerAuth()
   @UseGuards(OptionalJwtAuthGuard)
   @Get('instagram/login')
-  getInstagramLoginUrl(@Req() req: RequestWithUser, @Query('userId') queryUserId?: string) {
+  getInstagramLoginUrl(
+    @Req() req: RequestWithUser,
+    @Query('userId') queryUserId?: string,
+    @Query('force') force?: string,
+  ) {
     const userId = req.user?.id || queryUserId || 'default-user-id';
-    const result = this.socialService.getInstagramAuthUrl(userId);
+    const forceReauth = force !== 'false';
+    const result = this.socialService.getInstagramAuthUrl(userId, forceReauth);
     return {
       statusCode: HttpStatus.OK,
       data: result,
@@ -385,6 +435,19 @@ export class SocialController {
   @HttpCode(HttpStatus.OK)
   async handleWebhookEvent(@Body() body: any) {
     return this.socialService.handleMetaWebhookEvent(body);
+  }
+
+  @ApiOperation({ summary: 'Get aggregated audience demographics for all connected accounts of the user' })
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('user/demographics')
+  async getUserAudienceDemographics(@Req() req: RequestWithUser, @Query('userId') queryUserId?: string) {
+    const userId = req.user?.id || queryUserId || 'default-user-id';
+    const data = await this.socialService.getUserAudienceDemographics(userId);
+    return {
+      statusCode: HttpStatus.OK,
+      data,
+    };
   }
 
   @ApiOperation({ summary: 'Get modular analytics, demographics, media performance, and sync status for an account' })

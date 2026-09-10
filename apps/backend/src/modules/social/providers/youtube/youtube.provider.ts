@@ -11,6 +11,7 @@ export interface YouTubeVideoData {
   thumbnailUrl?: string;
   publishedAt?: Date;
   duration?: string;
+  durationSeconds?: number;
   viewCount: bigint;
   likeCount: number;
   commentCount: number;
@@ -30,6 +31,14 @@ export interface YouTubeAnalyticsSnapshot {
   averageViewDuration: number;
 }
 
+export interface YouTubeDemographicItem {
+  type: 'AGE_GENDER' | 'COUNTRY' | 'CITY' | 'LOCALE';
+  key: string;
+  label?: string;
+  value: number;
+  percentage?: number;
+}
+
 interface GoogleTokenResponse {
   access_token: string;
   refresh_token?: string;
@@ -38,6 +47,16 @@ interface GoogleTokenResponse {
   token_type?: string;
   error?: string;
   error_description?: string;
+}
+
+export function parseIsoDuration(duration?: string): number {
+  if (!duration) return 0;
+  const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!match) return 0;
+  const hours = parseInt(match[1] || '0', 10);
+  const minutes = parseInt(match[2] || '0', 10);
+  const seconds = parseInt(match[3] || '0', 10);
+  return hours * 3600 + minutes * 60 + seconds;
 }
 
 @Injectable()
@@ -101,7 +120,6 @@ export class YoutubeProvider implements ISocialProvider {
     const clientId = this.getClientId();
     const clientSecret = this.getClientSecret();
 
-    // Fallback/Mock implementation when testing without live Google credentials
     if (!clientId || !clientSecret || code.startsWith('mock_')) {
       this.logger.log('Using mock YouTube channel data for local verification');
       return [
@@ -128,6 +146,7 @@ export class YoutubeProvider implements ISocialProvider {
             country: 'IN',
             publishedAt: new Date('2021-03-15'),
             uploadsPlaylistId: 'UU_mock_channel_789',
+            bannerUrl: undefined,
           },
         },
       ];
@@ -163,7 +182,7 @@ export class YoutubeProvider implements ISocialProvider {
 
     // 2. Fetch authenticated YouTube channel details
     const channelRes = await fetch(
-      'https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&mine=true',
+      'https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails,brandingSettings&mine=true',
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -193,12 +212,33 @@ export class YoutubeProvider implements ISocialProvider {
     const snippet = channel.snippet || {};
     const stats = channel.statistics || {};
     const contentDetails = channel.contentDetails || {};
+    const branding = channel.brandingSettings || {};
 
-    const subscriberCount = parseInt(stats.subscriberCount || '0', 10);
-    const videoCount = parseInt(stats.videoCount || '0', 10);
-    const viewCount = BigInt(stats.viewCount || '0');
-    const avatarUrl = snippet.thumbnails?.high?.url || snippet.thumbnails?.default?.url;
+    // Section 9: Follower count is subscriberCount. If hidden, null.
+    const subscriberCount =
+      stats.hiddenSubscriberCount === true || stats.subscriberCount === undefined || stats.subscriberCount === null
+        ? null
+        : parseInt(stats.subscriberCount, 10);
+
+    // Section 10: Video count
+    const videoCount =
+      stats.videoCount !== undefined && stats.videoCount !== null ? parseInt(stats.videoCount, 10) : null;
+
+    // Section 11: Total channel view count
+    const viewCount = stats.viewCount ? BigInt(stats.viewCount) : null;
+
+    const avatarUrl =
+      snippet.thumbnails?.high?.url ||
+      snippet.thumbnails?.medium?.url ||
+      snippet.thumbnails?.default?.url;
+
+    const bannerUrl = branding.image?.bannerExternalUrl;
     const uploadsPlaylistId = contentDetails.relatedPlaylists?.uploads;
+
+    // Section 13: Canonical profile URL
+    const canonicalProfileUrl = snippet.customUrl
+      ? `https://www.youtube.com/${snippet.customUrl}`
+      : `https://www.youtube.com/channel/${channelId}`;
 
     return [
       {
@@ -206,9 +246,9 @@ export class YoutubeProvider implements ISocialProvider {
         platformUserId: channelId,
         username: snippet.customUrl || snippet.title,
         displayName: snippet.title,
-        profileUrl: snippet.customUrl ? `https://youtube.com/${snippet.customUrl}` : `https://youtube.com/channel/${channelId}`,
+        profileUrl: canonicalProfileUrl,
         avatar: avatarUrl,
-        followerCount: subscriberCount,
+        followerCount: subscriberCount ?? undefined,
         accessToken,
         refreshToken,
         expiresAt,
@@ -218,6 +258,7 @@ export class YoutubeProvider implements ISocialProvider {
           channelDescription: snippet.description,
           customUrl: snippet.customUrl,
           thumbnailUrl: avatarUrl,
+          bannerUrl,
           subscriberCount,
           videoCount,
           viewCount,
@@ -231,8 +272,11 @@ export class YoutubeProvider implements ISocialProvider {
 
   /**
    * Refreshes an expired Google access token using the stored refresh token.
+   * Conforms to TRD Section 6 & 45.
    */
-  async refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; expiresAt: Date }> {
+  async refreshAccessToken(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken?: string; expiresAt: Date }> {
     const clientId = this.getClientId();
     const clientSecret = this.getClientSecret();
 
@@ -257,80 +301,120 @@ export class YoutubeProvider implements ISocialProvider {
     const data = (await res.json()) as GoogleTokenResponse;
     if (!res.ok || data.error) {
       this.logger.error('Google token refresh failed:', data);
-      throw new BadRequestException('Failed to refresh YouTube access token. Reauthorization required.');
+      throw new BadRequestException(
+        data.error_description || data.error || 'Failed to refresh YouTube access token. Reauthorization required.',
+      );
     }
 
     return {
       accessToken: data.access_token,
+      refreshToken: data.refresh_token, // May be rotated
       expiresAt: new Date(Date.now() + (data.expires_in || 3600) * 1000),
     };
   }
 
   /**
    * Discovers and retrieves video metadata and metrics using the channel's Uploads Playlist.
-   * Conforms to TRD Section 11 (Video Discovery).
+   * Traverses pagination tokens and retrieves statistics in chunks.
+   * Conforms to TRD Section 11 & Fix Spec Section 34-36.
    */
   async fetchChannelVideos(
     accessToken: string,
     uploadsPlaylistId?: string,
-    maxResults = 25,
+    maxResults = 50,
   ): Promise<YouTubeVideoData[]> {
     if (!uploadsPlaylistId || uploadsPlaylistId.startsWith('UU_mock')) {
-      return this.getMockVideos();
+      return [];
     }
 
     try {
-      // 1. Fetch playlist items from Uploads playlist
-      const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${uploadsPlaylistId}&maxResults=${maxResults}`;
-      const playlistRes = await fetch(playlistUrl, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const allVideoIds: string[] = [];
+      let nextPageToken: string | undefined = undefined;
 
-      const playlistData = await playlistRes.json();
-      if (!playlistRes.ok || !playlistData.items || playlistData.items.length === 0) {
-        return [];
+      // 1. Fetch playlist items from Uploads playlist using cursor pagination
+      while (allVideoIds.length < maxResults) {
+        const pageSize = Math.min(50, maxResults - allVideoIds.length);
+        const pageTokenParam = nextPageToken ? `&pageToken=${encodeURIComponent(nextPageToken)}` : '';
+        const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${encodeURIComponent(uploadsPlaylistId)}&maxResults=${pageSize}${pageTokenParam}`;
+
+        const playlistRes = await fetch(playlistUrl, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (!playlistRes.ok) {
+          const errJson = await playlistRes.json().catch(() => ({}));
+          this.logger.warn('Error querying YouTube playlistItems:', errJson);
+          break;
+        }
+
+        const playlistData = await playlistRes.json();
+        const items = playlistData.items || [];
+        if (items.length === 0) break;
+
+        for (const item of items) {
+          const vidId = item.contentDetails?.videoId;
+          if (vidId) {
+            allVideoIds.push(vidId);
+          }
+        }
+
+        nextPageToken = playlistData.nextPageToken;
+        if (!nextPageToken) break;
       }
 
-      const videoIds = playlistData.items
-        .map((item: any) => item.contentDetails?.videoId)
-        .filter(Boolean);
+      if (allVideoIds.length === 0) return [];
 
-      if (videoIds.length === 0) return [];
+      // 2. Fetch full video statistics and content details in batches of 50
+      const videos: YouTubeVideoData[] = [];
+      const batchSize = 50;
 
-      // 2. Fetch full video statistics and content details
-      const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails,status&id=${videoIds.join(',')}`;
-      const videosRes = await fetch(videosUrl, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      for (let i = 0; i < allVideoIds.length; i += batchSize) {
+        const batchIds = allVideoIds.slice(i, i + batchSize);
+        const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails,status&id=${batchIds.join(',')}`;
 
-      const videosData = await videosRes.json();
-      if (!videosRes.ok || !videosData.items) {
-        return [];
+        const videosRes = await fetch(videosUrl, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (!videosRes.ok) {
+          const errJson = await videosRes.json().catch(() => ({}));
+          this.logger.warn('Error fetching YouTube videos batch:', errJson);
+          continue;
+        }
+
+        const videosData = await videosRes.json();
+        if (!videosData.items) continue;
+
+        for (const vid of videosData.items) {
+          const snippet = vid.snippet || {};
+          const stats = vid.statistics || {};
+          const contentDetails = vid.contentDetails || {};
+          const status = vid.status || {};
+
+          const durationIso = contentDetails.duration;
+          const durationSeconds = parseIsoDuration(durationIso);
+
+          videos.push({
+            videoId: vid.id,
+            title: snippet.title || 'Untitled Video',
+            description: snippet.description,
+            thumbnailUrl:
+              snippet.thumbnails?.high?.url ||
+              snippet.thumbnails?.medium?.url ||
+              snippet.thumbnails?.default?.url,
+            publishedAt: snippet.publishedAt ? new Date(snippet.publishedAt) : undefined,
+            duration: durationIso,
+            durationSeconds,
+            viewCount: stats.viewCount ? BigInt(stats.viewCount) : BigInt(0),
+            likeCount: stats.likeCount ? parseInt(stats.likeCount, 10) : 0,
+            commentCount: stats.commentCount ? parseInt(stats.commentCount, 10) : 0,
+            privacyStatus: status.privacyStatus || 'public',
+            liveBroadcastContent: snippet.liveBroadcastContent || 'none',
+          });
+        }
       }
 
-      return videosData.items.map((vid: any) => {
-        const snippet = vid.snippet || {};
-        const stats = vid.statistics || {};
-        const contentDetails = vid.contentDetails || {};
-        const status = vid.status || {};
-
-        return {
-          videoId: vid.id,
-          title: snippet.title || 'Untitled Video',
-          description: snippet.description,
-          thumbnailUrl:
-            snippet.thumbnails?.high?.url ||
-            snippet.thumbnails?.medium?.url ||
-            snippet.thumbnails?.default?.url,
-          publishedAt: snippet.publishedAt ? new Date(snippet.publishedAt) : undefined,
-          duration: contentDetails.duration, // ISO 8601 string e.g. PT12M30S
-          viewCount: BigInt(stats.viewCount || '0'),
-          likeCount: parseInt(stats.likeCount || '0', 10),
-          commentCount: parseInt(stats.commentCount || '0', 10),
-          privacyStatus: status.privacyStatus || 'public',
-          liveBroadcastContent: snippet.liveBroadcastContent || 'none',
-        };
-      });
+      return videos;
     } catch (err) {
       this.logger.error('Failed to fetch YouTube channel videos:', err);
       return [];
@@ -339,7 +423,7 @@ export class YoutubeProvider implements ISocialProvider {
 
   /**
    * Retrieves authorized YouTube Analytics daily performance report.
-   * Conforms to TRD Section 14 (YouTube Analytics API).
+   * Conforms to TRD Section 14 & Fix Spec Section 20-25.
    */
   async fetchChannelAnalytics(
     accessToken: string,
@@ -347,7 +431,7 @@ export class YoutubeProvider implements ISocialProvider {
     endDate?: string,
   ): Promise<YouTubeAnalyticsSnapshot[]> {
     if (accessToken.startsWith('mock_')) {
-      return this.getMockAnalytics();
+      return [];
     }
 
     try {
@@ -368,7 +452,7 @@ export class YoutubeProvider implements ISocialProvider {
         'averageViewDuration',
       ].join(',');
 
-      const analyticsUrl = `https://youtubeanalytics.googleapis.com/v2/reports?ids=channel==MINE&startDate=${start}&endDate=${end}&metrics=${metrics}&dimensions=day`;
+      const analyticsUrl = `https://youtubeanalytics.googleapis.com/v2/reports?ids=channel==MINE&startDate=${start}&endDate=${end}&metrics=${metrics}&dimensions=day&sort=day`;
       const res = await fetch(analyticsUrl, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
@@ -396,66 +480,85 @@ export class YoutubeProvider implements ISocialProvider {
     }
   }
 
-  private getMockVideos(): YouTubeVideoData[] {
-    return [
-      {
-        videoId: 'vid_yt_mock_1',
-        title: 'Complete Creator Sponsorship Workflow & Campaign Walkthrough',
-        description: 'An in-depth breakdown of connecting brands with high-engagement tech creators.',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
-        publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-        duration: 'PT14M22S',
-        viewCount: BigInt(184200),
-        likeCount: 9420,
-        commentCount: 420,
-        privacyStatus: 'public',
-        liveBroadcastContent: 'none',
-      },
-      {
-        videoId: 'vid_yt_mock_2',
-        title: 'Top AI Development Tools for Content Creators in 2026',
-        description: 'Reviewing modern automation, analytics, and collaboration toolkits.',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80',
-        publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-        duration: 'PT9M45S',
-        viewCount: BigInt(340100),
-        likeCount: 18200,
-        commentCount: 1120,
-        privacyStatus: 'public',
-        liveBroadcastContent: 'none',
-      },
-      {
-        videoId: 'vid_yt_mock_3',
-        title: 'Studio Desk Setup & 4K Recording Gear Tour',
-        description: 'Everything we use to shoot 4K HDR sponsored brand integration content.',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=600&q=80',
-        publishedAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000),
-        duration: 'PT18M10S',
-        viewCount: BigInt(95400),
-        likeCount: 5120,
-        commentCount: 380,
-        privacyStatus: 'public',
-        liveBroadcastContent: 'none',
-      },
-    ];
-  }
-
-  private getMockAnalytics(): YouTubeAnalyticsSnapshot[] {
-    const snapshots: YouTubeAnalyticsSnapshot[] = [];
-    const now = Date.now();
-    for (let i = 29; i >= 0; i--) {
-      snapshots.push({
-        date: new Date(now - i * 24 * 60 * 60 * 1000),
-        views: BigInt(Math.floor(12000 + Math.random() * 8000)),
-        likes: Math.floor(600 + Math.random() * 400),
-        comments: Math.floor(40 + Math.random() * 30),
-        shares: Math.floor(25 + Math.random() * 20),
-        subscribersGained: Math.floor(80 + Math.random() * 50),
-        subscribersLost: Math.floor(5 + Math.random() * 5),
-        estimatedMinutesWatched: BigInt(Math.floor(45000 + Math.random() * 20000)),
-        averageViewDuration: Number((3.5 + Math.random() * 1.5).toFixed(2)),
-      });
+  /**
+   * Retrieves authorized audience demographics from YouTube Analytics.
+   * Real data only; zero synthetic generation (conforms to Fix Spec Section 27-31).
+   */
+  async fetchChannelDemographics(
+    accessToken: string,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<YouTubeDemographicItem[]> {
+    if (accessToken.startsWith('mock_')) {
+      return [];
     }
-    return snapshots;
+
+    const demographics: YouTubeDemographicItem[] = [];
+    const now = new Date();
+    const end = endDate || now.toISOString().split('T')[0];
+    const start =
+      startDate ||
+      new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    try {
+      // 1. Age & Gender breakdown from YouTube Analytics
+      const ageGenderUrl = `https://youtubeanalytics.googleapis.com/v2/reports?ids=channel==MINE&startDate=${start}&endDate=${end}&metrics=viewerPercentage&dimensions=ageGroup,gender&sort=gender,ageGroup`;
+      const ageRes = await fetch(ageGenderUrl, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (ageRes.ok) {
+        const ageData = await ageRes.json();
+        if (Array.isArray(ageData.rows)) {
+          for (const row of ageData.rows) {
+            const ageGroup = String(row[0] || ''); // e.g. "age18-24", "age25-34"
+            const gender = String(row[1] || ''); // "female", "male", "genderOther"
+            const pct = Number(row[2] || 0);
+
+            const cleanAge = ageGroup.replace(/^age/, '');
+            const cleanGender = gender === 'female' ? 'F' : gender === 'male' ? 'M' : 'Other';
+            const key = `${cleanAge}.${cleanGender}`;
+            const label = `${cleanGender === 'F' ? 'Female' : cleanGender === 'M' ? 'Male' : 'Other'} (${cleanAge})`;
+
+            demographics.push({
+              type: 'AGE_GENDER',
+              key,
+              label,
+              value: pct,
+              percentage: pct,
+            });
+          }
+        }
+      }
+
+      // 2. Geography / Country breakdown
+      const geoUrl = `https://youtubeanalytics.googleapis.com/v2/reports?ids=channel==MINE&startDate=${start}&endDate=${end}&metrics=views&dimensions=country&sort=-views&maxResults=10`;
+      const geoRes = await fetch(geoUrl, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (geoRes.ok) {
+        const geoData = await geoRes.json();
+        if (Array.isArray(geoData.rows)) {
+          const totalViews = geoData.rows.reduce((sum: number, r: any[]) => sum + Number(r[1] || 0), 0) || 1;
+          for (const row of geoData.rows) {
+            const countryCode = String(row[0] || '');
+            const views = Number(row[1] || 0);
+            const pct = Math.round((views / totalViews) * 1000) / 10;
+            demographics.push({
+              type: 'COUNTRY',
+              key: countryCode,
+              label: countryCode,
+              value: views,
+              percentage: pct,
+            });
+          }
+        }
+      }
+    } catch (err) {
+      this.logger.warn('Error querying YouTube Analytics demographics:', err);
+    }
+
+    return demographics;
   }
 }

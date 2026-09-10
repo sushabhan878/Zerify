@@ -4,7 +4,7 @@ import { SocialAccountProfileDto } from '../dto/social-account-profile.dto';
 export interface ISocialProvider {
   getPlatform(): SocialPlatform;
 
-  getAuthUrl(redirectUri: string, state: string, codeChallenge?: string): string;
+  getAuthUrl(redirectUri: string, state: string, codeChallenge?: string, forceReauth?: boolean): string;
 
   exchangeCodeAndGetAccounts(
     code: string,

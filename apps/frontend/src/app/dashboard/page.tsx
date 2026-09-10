@@ -10,6 +10,7 @@ import LottieLoader from '@/components/ui/LottieLoader';
 import { Menu, X } from 'lucide-react';
 
 import { ThemeProvider } from '@/context/ThemeContext';
+import { MessagingProvider } from '@/context/MessagingContext';
 
 function DashboardContent() {
   const router = useRouter();
@@ -239,6 +240,7 @@ function DashboardContent() {
 
   return (
     <ThemeProvider>
+      <MessagingProvider>
       <div
         className={`h-screen w-screen bg-[#07090E] text-slate-100 flex flex-col md:flex-row overflow-hidden selection:bg-purple-500 selection:text-white ${
           isResizing ? 'select-none cursor-col-resize' : ''
@@ -350,6 +352,7 @@ function DashboardContent() {
           </main>
         </div>
       </div>
+      </MessagingProvider>
     </ThemeProvider>
   );
 }

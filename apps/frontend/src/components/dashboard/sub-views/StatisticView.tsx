@@ -10,6 +10,72 @@ import AudienceDemographicsCard from './statistic-subcomponents/AudienceDemograp
 export default function StatisticView() {
   const [selectedPlatform, setSelectedPlatform] = useState('all');
   const [selectedTimeframe, setSelectedTimeframe] = useState('30d');
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [demographics, setDemographics] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const token = localStorage.getItem('zerify_token');
+        const headers: Record<string, string> = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
+        const [accRes, demoRes] = await Promise.allSettled([
+          fetch(`${apiUrl}/social/accounts`, { headers }),
+          fetch(`${apiUrl}/social/user/demographics`, { headers }),
+        ]);
+
+        if (accRes.status === 'fulfilled' && accRes.value.ok) {
+          const json = await accRes.value.json();
+          if (Array.isArray(json.data)) {
+            setAccounts(json.data);
+          }
+        }
+
+        if (demoRes.status === 'fulfilled' && demoRes.value.ok) {
+          const json = await demoRes.value.json();
+          if (Array.isArray(json.data?.demographics)) {
+            setDemographics(json.data.demographics);
+          }
+        }
+      } catch (err) {
+        console.warn('Could not fetch social analytics:', err);
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
+
+  // Filter accounts based on platform selector
+  const filteredAccounts = selectedPlatform === 'all'
+    ? accounts
+    : accounts.filter((a) => (a.platform || '').toLowerCase() === selectedPlatform.toLowerCase());
+
+  const totalFollowers = filteredAccounts.reduce(
+    (sum, a) => sum + (typeof a.followerCount === 'number' ? a.followerCount : 0),
+    0,
+  );
+
+  const avgEngagement = filteredAccounts.length > 0
+    ? Number(
+        (
+          filteredAccounts.reduce(
+            (sum, a) => sum + (typeof a.engagementRate === 'number' ? a.engagementRate : 0),
+            0,
+          ) / filteredAccounts.length
+        ).toFixed(1),
+      )
+    : undefined;
+
+  // Filter demographics for selected platform if applicable
+  const filteredDemographics = selectedPlatform === 'all'
+    ? demographics
+    : demographics.filter((d) => {
+        const acc = accounts.find((a) => a.id === d.socialAccountId);
+        return acc && (acc.platform || '').toLowerCase() === selectedPlatform.toLowerCase();
+      });
 
   return (
     <div className="space-y-6">
@@ -26,7 +92,7 @@ export default function StatisticView() {
         <div className="flex items-center gap-3 flex-wrap">
           {/* Platform filter pills */}
           <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-950/60 border border-white/10 backdrop-blur-xl">
-            {['all', 'instagram', 'youtube', 'tiktok'].map((plat) => (
+            {['all', 'instagram', 'youtube', 'tiktok', 'twitter', 'threads', 'linkedin'].map((plat) => (
               <button
                 key={plat}
                 onClick={() => setSelectedPlatform(plat)}
@@ -36,7 +102,7 @@ export default function StatisticView() {
                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                 }`}
               >
-                {plat}
+                {plat === 'twitter' ? 'X (Twitter)' : plat}
               </button>
             ))}
           </div>
@@ -60,7 +126,10 @@ export default function StatisticView() {
       </div>
 
       {/* 1. Overview KPIs */}
-      <StatisticKpiCards />
+      <StatisticKpiCards
+        totalFollowers={totalFollowers > 0 ? totalFollowers : undefined}
+        avgEngagement={avgEngagement}
+      />
 
       {/* 2. Audience Growth & AI Forecast */}
       <AudienceGrowthChart />
@@ -68,7 +137,9 @@ export default function StatisticView() {
       {/* 3. Engagement & Demographics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <EngagementAnalyticsCard />
-        <AudienceDemographicsCard />
+        <AudienceDemographicsCard
+          demographics={filteredDemographics.length > 0 ? filteredDemographics : demographics}
+        />
       </div>
 
       {/* 4. AI Performance Takeaways Card */}

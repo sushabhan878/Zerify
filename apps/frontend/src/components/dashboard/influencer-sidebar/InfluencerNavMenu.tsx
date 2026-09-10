@@ -20,6 +20,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { OfferService } from '@/services/offer.service';
+import { useMessagingUnread } from '@/context/MessagingContext';
 
 import ThemeToggle from '../subcomponents/ThemeToggle';
 
@@ -47,6 +48,8 @@ export default function InfluencerNavMenu({
 }: InfluencerNavMenuProps) {
   const [activeSubTab, setActiveSubTab] = useState('statistic');
   const [pendingOffersCount, setPendingOffersCount] = useState<number>(0);
+  // Live unread total from the messaging socket.
+  const totalUnread = useMessagingUnread();
 
   useEffect(() => {
     const fetchPendingOffers = async () => {
@@ -103,7 +106,7 @@ export default function InfluencerNavMenu({
       id: 'messages',
       label: 'Messages',
       icon: MessageSquare,
-      badge: '2',
+      badge: totalUnread > 0 ? (totalUnread > 99 ? '99+' : `${totalUnread}`) : undefined,
       badgeColor: 'bg-pink-500/20 text-pink-300 border border-pink-500/30',
       section: 'SETTINGS',
     },

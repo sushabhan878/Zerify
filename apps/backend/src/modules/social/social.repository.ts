@@ -16,14 +16,64 @@ export class SocialRepository {
     platformUserId: string;
     username: string;
     displayName?: string;
+    handle?: string;
     avatar?: string;
-    followerCount?: number;
+    accountType?: string | null;
+    followerCount?: number | null;
     engagementRate?: number | null;
+    profileUrl?: string | null;
+    isVerified?: boolean | null;
     accessToken: string;
     refreshToken?: string | null;
     expiresAt?: Date | null;
+    tokenType?: string | null;
+    issuedAt?: Date | null;
+    lastRefreshedAt?: Date | null;
+    nextRefreshAt?: Date | null;
+    refreshMethod?: string | null;
+    tokenStatus?: string | null;
+    scopes?: string[];
+    lastTokenError?: string | null;
   }): Promise<SocialAccount> {
-    const handle = `@${data.username.replace(/^@/, '')}`;
+    // 1. Resolve Handle (always formatted with leading @)
+    let handle = data.handle?.trim();
+    if (!handle) {
+      handle = `@${data.username.replace(/^@/, '')}`;
+    } else if (!handle.startsWith('@')) {
+      handle = `@${handle}`;
+    }
+
+    // 2. Resolve Person's Name (User Name)
+    let personName = (data.displayName?.trim() || data.username?.trim() || '').replace(/^@/, '');
+
+    // 3. Resolve Canonical Profile URL
+    let profileUrl = data.profileUrl?.trim() || null;
+    if (!profileUrl && handle) {
+      const cleanHandle = handle.replace(/^@/, '');
+      switch (data.platform) {
+        case SocialPlatform.INSTAGRAM:
+          profileUrl = `https://instagram.com/${cleanHandle}`;
+          break;
+        case SocialPlatform.TWITTER:
+          profileUrl = `https://x.com/${cleanHandle}`;
+          break;
+        case SocialPlatform.YOUTUBE:
+          profileUrl = `https://youtube.com/@${cleanHandle}`;
+          break;
+        case SocialPlatform.TIKTOK:
+          profileUrl = `https://tiktok.com/@${cleanHandle}`;
+          break;
+        case SocialPlatform.THREADS:
+          profileUrl = `https://threads.net/@${cleanHandle}`;
+          break;
+        case SocialPlatform.LINKEDIN:
+          profileUrl = `https://linkedin.com/in/${cleanHandle}`;
+          break;
+        case SocialPlatform.FACEBOOK:
+          profileUrl = `https://facebook.com/${data.platformUserId || cleanHandle}`;
+          break;
+      }
+    }
 
     const account = await this.prisma.socialAccount.upsert({
       where: {
@@ -37,33 +87,186 @@ export class SocialRepository {
         userId: data.userId,
         platform: data.platform,
         platformUserId: data.platformUserId,
-        username: data.username,
+        accountType: data.accountType || 'PERSONAL',
+        username: personName,
         handle,
         avatar: data.avatar,
-        followerCount: data.followerCount || 0,
-        engagementRate: data.engagementRate,
+        followerCount: data.followerCount ?? null,
+        engagementRate: data.engagementRate ?? null,
+        profileUrl,
+        isVerified: data.isVerified ?? null,
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
         expiresAt: data.expiresAt,
+        tokenType: data.tokenType || 'BEARER',
+        issuedAt: data.issuedAt || new Date(),
+        lastRefreshedAt: data.lastRefreshedAt,
+        nextRefreshAt: data.nextRefreshAt,
+        refreshMethod: data.refreshMethod,
+        tokenStatus: data.tokenStatus || 'ACTIVE',
+        scopes: data.scopes || [],
+        lastTokenError: data.lastTokenError,
         status: SocialAccountStatus.CONNECTED,
         connectedAt: new Date(),
       },
       update: {
-        username: data.username,
+        username: personName,
         handle,
         avatar: data.avatar,
-        followerCount: data.followerCount || 0,
+        ...(data.accountType !== undefined ? { accountType: data.accountType } : {}),
+        ...(data.followerCount !== undefined ? { followerCount: data.followerCount } : {}),
         ...(data.engagementRate !== undefined ? { engagementRate: data.engagementRate } : {}),
+        ...(profileUrl ? { profileUrl } : {}),
+        ...(data.isVerified !== undefined ? { isVerified: data.isVerified } : {}),
         accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
+        ...(data.refreshToken !== undefined ? { refreshToken: data.refreshToken } : {}),
         expiresAt: data.expiresAt,
+        ...(data.tokenType !== undefined ? { tokenType: data.tokenType } : {}),
+        ...(data.lastRefreshedAt !== undefined ? { lastRefreshedAt: data.lastRefreshedAt } : {}),
+        ...(data.nextRefreshAt !== undefined ? { nextRefreshAt: data.nextRefreshAt } : {}),
+        ...(data.refreshMethod !== undefined ? { refreshMethod: data.refreshMethod } : {}),
+        ...(data.tokenStatus !== undefined ? { tokenStatus: data.tokenStatus } : {}),
+        ...(data.scopes !== undefined ? { scopes: data.scopes } : {}),
+        ...(data.lastTokenError !== undefined ? { lastTokenError: data.lastTokenError } : {}),
         status: SocialAccountStatus.CONNECTED,
         updatedAt: new Date(),
       },
     });
 
-
     return account;
+  }
+
+  async findAccountByUserAndPlatform(
+    userId: string,
+    platform: SocialPlatform,
+    platformUserId: string,
+  ): Promise<SocialAccount | null> {
+    return this.prisma.socialAccount.findUnique({
+      where: {
+        userId_platform_platformUserId: {
+          userId,
+          platform,
+          platformUserId,
+        },
+      },
+      include: {
+        metadata: true,
+        syncStates: true,
+      },
+    });
+  }
+
+  async findPagesByUserId(userId: string, platform = SocialPlatform.FACEBOOK): Promise<SocialAccount[]> {
+    return this.prisma.socialAccount.findMany({
+      where: {
+        userId,
+        platform,
+        accountType: 'PAGE',
+        status: SocialAccountStatus.CONNECTED,
+      },
+      include: {
+        metadata: true,
+        syncStates: true,
+      },
+    });
+  }
+
+  async findIdentityByUserId(userId: string, platform = SocialPlatform.FACEBOOK): Promise<SocialAccount | null> {
+    return this.prisma.socialAccount.findFirst({
+      where: {
+        userId,
+        platform,
+        accountType: 'PERSONAL',
+        status: SocialAccountStatus.CONNECTED,
+      },
+    });
+  }
+
+  async updateAccountFollowerCount(
+    socialAccountId: string,
+    followerCount: number,
+    engagementRate?: number | null,
+  ): Promise<SocialAccount> {
+    return this.prisma.socialAccount.update({
+      where: { id: socialAccountId },
+      data: {
+        followerCount,
+        ...(engagementRate !== undefined ? { engagementRate } : {}),
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async updateAccountEngagementRate(
+    socialAccountId: string,
+    engagementRate: number | null,
+  ): Promise<SocialAccount> {
+    return this.prisma.socialAccount.update({
+      where: { id: socialAccountId },
+      data: {
+        engagementRate,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async updateAccountProfile(
+    socialAccountId: string,
+    data: {
+      username?: string;
+      handle?: string;
+      profileUrl?: string | null;
+      avatar?: string | null;
+      isVerified?: boolean | null;
+    },
+  ): Promise<SocialAccount> {
+    return this.prisma.socialAccount.update({
+      where: { id: socialAccountId },
+      data: {
+        ...(data.username !== undefined ? { username: data.username } : {}),
+        ...(data.handle !== undefined ? { handle: data.handle } : {}),
+        ...(data.profileUrl !== undefined ? { profileUrl: data.profileUrl } : {}),
+        ...(data.avatar !== undefined ? { avatar: data.avatar } : {}),
+        ...(data.isVerified !== undefined ? { isVerified: data.isVerified } : {}),
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async getMediaContentsByAccountId(socialAccountId: string) {
+    return this.prisma.socialMediaContent.findMany({
+      where: { socialAccountId },
+      select: {
+        likeCount: true,
+        commentCount: true,
+        shareCount: true,
+        saveCount: true,
+      },
+    });
+  }
+
+  async getAudienceDemographicsByAccountId(socialAccountId: string) {
+    return this.prisma.socialAudienceDemographic.findMany({
+      where: { socialAccountId },
+      orderBy: { value: 'desc' },
+    });
+  }
+
+  async getUserAudienceDemographics(userId: string) {
+    const userAccounts = await this.prisma.socialAccount.findMany({
+      where: { userId, status: SocialAccountStatus.CONNECTED },
+      select: { id: true, platform: true, username: true, followerCount: true },
+    });
+
+    const accountIds = userAccounts.map((a) => a.id);
+    if (accountIds.length === 0) return { accounts: [], demographics: [] };
+
+    const demographics = await this.prisma.socialAudienceDemographic.findMany({
+      where: { socialAccountId: { in: accountIds } },
+      orderBy: { value: 'desc' },
+    });
+
+    return { accounts: userAccounts, demographics };
   }
 
   async findByUserId(userId: string): Promise<SocialAccount[]> {
@@ -90,6 +293,19 @@ export class SocialRepository {
       where: {
         platform,
         platformUserId,
+        status: SocialAccountStatus.CONNECTED,
+      },
+    });
+  }
+
+  async findByUserIdAndPlatform(
+    userId: string,
+    platform: SocialPlatform,
+  ): Promise<SocialAccount | null> {
+    return this.prisma.socialAccount.findFirst({
+      where: {
+        userId,
+        platform,
         status: SocialAccountStatus.CONNECTED,
       },
     });
@@ -169,11 +385,15 @@ export class SocialRepository {
       bio?: string | null;
       website?: string | null;
       profileUrl?: string | null;
-      isVerified?: boolean;
-      followerCount?: number;
-      followingCount?: number;
-      mediaCount?: number;
+      email?: string | null;
+      country?: string | null;
+      customUrl?: string | null;
+      isVerified?: boolean | null;
+      followerCount?: number | null;
+      followingCount?: number | null;
+      mediaCount?: number | null;
       category?: string | null;
+      extraMetrics?: any;
     },
   ) {
     return this.prisma.socialProfileMetadata.upsert({
@@ -193,14 +413,27 @@ export class SocialRepository {
     socialAccountId: string,
     data: {
       recordedAt: Date;
-      reach?: number;
-      impressions?: number;
-      profileViews?: number;
-      websiteClicks?: number;
-      accountsEngaged?: number;
-      totalInteractions?: number;
-      followerCount?: number;
-      engagementRate?: number;
+      period?: string | null;
+      source?: string | null;
+      reach?: number | null;
+      impressions?: number | null;
+      profileViews?: number | null;
+      websiteClicks?: number | null;
+      accountsEngaged?: number | null;
+      totalInteractions?: number | null;
+      views?: number | null;
+      likes?: number | null;
+      comments?: number | null;
+      shares?: number | null;
+      saves?: number | null;
+      replies?: number | null;
+      follows?: number | null;
+      unfollows?: number | null;
+      profileLinksTaps?: number | null;
+      followerCount?: number | null;
+      engagementRate?: number | null;
+      rawMetrics?: any;
+      extraMetrics?: any;
     },
   ) {
     return this.prisma.socialAccountPerformance.upsert({
@@ -226,6 +459,14 @@ export class SocialRepository {
     key: string,
     value: number,
     label?: string,
+    extra?: {
+      percentage?: number | null;
+      timeframe?: string | null;
+      source?: string | null;
+      sourceMetric?: string | null;
+      fetchedAt?: Date | null;
+      rawData?: any;
+    },
   ) {
     return this.prisma.socialAudienceDemographic.upsert({
       where: {
@@ -241,10 +482,22 @@ export class SocialRepository {
         key,
         value,
         label,
+        percentage: extra?.percentage,
+        timeframe: extra?.timeframe || 'last_30_days',
+        source: extra?.source || 'instagram_graph_api',
+        sourceMetric: extra?.sourceMetric || 'follower_demographics',
+        fetchedAt: extra?.fetchedAt || new Date(),
+        rawData: extra?.rawData,
       },
       update: {
         value,
         label,
+        ...(extra?.percentage !== undefined ? { percentage: extra.percentage } : {}),
+        ...(extra?.timeframe !== undefined ? { timeframe: extra.timeframe } : {}),
+        ...(extra?.source !== undefined ? { source: extra.source } : {}),
+        ...(extra?.sourceMetric !== undefined ? { sourceMetric: extra.sourceMetric } : {}),
+        ...(extra?.fetchedAt !== undefined ? { fetchedAt: extra.fetchedAt } : {}),
+        ...(extra?.rawData !== undefined ? { rawData: extra.rawData } : {}),
         updatedAt: new Date(),
       },
     });
@@ -255,21 +508,32 @@ export class SocialRepository {
     post: {
       platformMediaId: string;
       mediaType?: 'IMAGE' | 'VIDEO' | 'CAROUSEL' | 'REEL' | 'STORY';
+      mediaProductType?: string | null;
+      title?: string | null;
       caption?: string | null;
       permalink?: string | null;
+      shortcode?: string | null;
       thumbnailUrl?: string | null;
+      mediaUrl?: string | null;
+      duration?: number | null;
       publishedAt?: Date | null;
+      isCommentEnabled?: boolean | null;
+      isSharedToFeed?: boolean | null;
+      altText?: string | null;
+      rawPayload?: any;
+      extraMetrics?: any;
     },
     metrics: {
-      likeCount?: number;
-      commentCount?: number;
-      shareCount?: number;
-      saveCount?: number;
-      playCount?: number;
-      reach?: number;
-      impressions?: number;
+      likeCount?: number | null;
+      commentCount?: number | null;
+      shareCount?: number | null;
+      saveCount?: number | null;
+      playCount?: number | null;
+      reach?: number | null;
+      impressions?: number | null;
       videoViewTotalTime?: number | null;
       avgWatchTime?: number | null;
+      extraMetrics?: any;
     },
   ) {
     return this.prisma.socialMediaContent.upsert({
@@ -292,13 +556,86 @@ export class SocialRepository {
     });
   }
 
+  async updateAccountCustomData(socialAccountId: string, customData: any): Promise<SocialAccount> {
+    const existing = await this.prisma.socialAccount.findUnique({
+      where: { id: socialAccountId },
+      select: { customData: true },
+    });
+
+    const mergedData = {
+      ...(typeof existing?.customData === 'object' && existing.customData !== null ? existing.customData : {}),
+      ...(typeof customData === 'object' && customData !== null ? customData : {}),
+    };
+
+    return this.prisma.socialAccount.update({
+      where: { id: socialAccountId },
+      data: {
+        customData: mergedData,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async updateTokenLifecycle(
+    socialAccountId: string,
+    data: {
+      accessToken?: string;
+      refreshToken?: string | null;
+      expiresAt?: Date | null;
+      lastRefreshedAt?: Date | null;
+      nextRefreshAt?: Date | null;
+      refreshMethod?: string | null;
+      tokenStatus?: string | null;
+      scopes?: string[];
+      lastTokenError?: string | null;
+    },
+  ): Promise<SocialAccount> {
+    return this.prisma.socialAccount.update({
+      where: { id: socialAccountId },
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
   async updateSyncState(
     socialAccountId: string,
     target: 'PROFILE_METADATA' | 'AUDIENCE_DEMOGRAPHICS' | 'ACCOUNT_PERFORMANCE' | 'MEDIA_CONTENT',
-    status: 'IDLE' | 'SYNCING' | 'SUCCESS' | 'FAILED' | 'RATE_LIMITED',
-    lastError?: string,
+    status:
+      | 'IDLE'
+      | 'QUEUED'
+      | 'SYNCING'
+      | 'RUNNING'
+      | 'SUCCESS'
+      | 'PARTIAL_SUCCESS'
+      | 'FAILED'
+      | 'PAUSED'
+      | 'RATE_LIMITED'
+      | 'REAUTHORIZATION_REQUIRED',
+    detailsOrError?:
+      | string
+      | {
+          lastError?: string | null;
+          lastErrorCode?: string | null;
+          lastErrorAt?: Date | null;
+          lastStartedAt?: Date | null;
+          lastCompletedAt?: Date | null;
+          lastSuccessAt?: Date | null;
+          nextSyncAt?: Date | null;
+          retryCount?: number;
+          nextRetryAt?: Date | null;
+          recordsSynced?: number | null;
+          syncWindowStart?: Date | null;
+          syncWindowEnd?: Date | null;
+        },
     nextSyncDueAt?: Date,
   ) {
+    const details =
+      typeof detailsOrError === 'string'
+        ? { lastError: detailsOrError }
+        : detailsOrError || {};
+
     return this.prisma.socialSyncState.upsert({
       where: {
         socialAccountId_target: {
@@ -309,16 +646,41 @@ export class SocialRepository {
       create: {
         socialAccountId,
         target,
-        syncStatus: status,
+        syncStatus: status as any,
         lastSyncedAt: new Date(),
-        nextSyncDueAt,
-        lastError,
+        nextSyncAt: details.nextSyncAt || nextSyncDueAt,
+        nextSyncDueAt: details.nextSyncAt || nextSyncDueAt,
+        lastError: details.lastError,
+        lastErrorCode: details.lastErrorCode,
+        lastErrorAt: details.lastErrorAt || (details.lastError ? new Date() : null),
+        lastStartedAt: details.lastStartedAt,
+        lastCompletedAt: details.lastCompletedAt,
+        lastSuccessAt: details.lastSuccessAt || (status === 'SUCCESS' ? new Date() : null),
+        retryCount: details.retryCount || 0,
+        nextRetryAt: details.nextRetryAt,
+        recordsSynced: details.recordsSynced,
+        syncWindowStart: details.syncWindowStart,
+        syncWindowEnd: details.syncWindowEnd,
       },
       update: {
-        syncStatus: status,
+        syncStatus: status as any,
         lastSyncedAt: new Date(),
-        nextSyncDueAt,
-        lastError,
+        ...(details.nextSyncAt !== undefined || nextSyncDueAt !== undefined
+          ? { nextSyncAt: details.nextSyncAt || nextSyncDueAt, nextSyncDueAt: details.nextSyncAt || nextSyncDueAt }
+          : {}),
+        ...(details.lastError !== undefined ? { lastError: details.lastError } : {}),
+        ...(details.lastErrorCode !== undefined ? { lastErrorCode: details.lastErrorCode } : {}),
+        ...(details.lastErrorAt !== undefined ? { lastErrorAt: details.lastErrorAt } : {}),
+        ...(details.lastStartedAt !== undefined ? { lastStartedAt: details.lastStartedAt } : {}),
+        ...(details.lastCompletedAt !== undefined ? { lastCompletedAt: details.lastCompletedAt } : {}),
+        ...(details.lastSuccessAt !== undefined ? { lastSuccessAt: details.lastSuccessAt } : {}),
+        ...(status === 'SUCCESS' ? { lastSuccessAt: new Date(), lastError: null, lastErrorCode: null, retryCount: 0 } : {}),
+        ...(details.retryCount !== undefined ? { retryCount: details.retryCount } : {}),
+        ...(details.nextRetryAt !== undefined ? { nextRetryAt: details.nextRetryAt } : {}),
+        ...(details.recordsSynced !== undefined ? { recordsSynced: details.recordsSynced } : {}),
+        ...(details.syncWindowStart !== undefined ? { syncWindowStart: details.syncWindowStart } : {}),
+        ...(details.syncWindowEnd !== undefined ? { syncWindowEnd: details.syncWindowEnd } : {}),
+        updatedAt: new Date(),
       },
     });
   }
@@ -358,11 +720,13 @@ export class SocialRepository {
   }
 
   async getAccountAnalytics(socialAccountId: string) {
-    const account = await this.prisma.socialAccount.findUnique({
+    return this.prisma.socialAccount.findUnique({
       where: { id: socialAccountId },
       include: {
         metadata: true,
-        demographics: true,
+        demographics: {
+          orderBy: { value: 'desc' },
+        },
         performance: {
           orderBy: { recordedAt: 'desc' },
           take: 30,
@@ -372,420 +736,7 @@ export class SocialRepository {
           take: 25,
         },
         syncStates: true,
-        instagramProfile: {
-          include: {
-            media: { orderBy: { publishedAt: 'desc' }, take: 25 },
-            insights: { orderBy: { date: 'desc' }, take: 30 },
-          },
-        },
-        facebookProfile: true,
-        facebookPages: {
-          include: {
-            posts: { orderBy: { createdTime: 'desc' }, take: 25 },
-            insights: { orderBy: { date: 'desc' }, take: 30 },
-          },
-        },
-        youtubeChannel: {
-          include: {
-            videos: { orderBy: { publishedAt: 'desc' }, take: 25 },
-            channelAnalytics: { orderBy: { date: 'desc' }, take: 30 },
-          },
-        },
-        linkedInProfile: {
-          include: {
-            posts: { orderBy: { publishedAt: 'desc' }, take: 25 },
-            analytics: { orderBy: { date: 'desc' }, take: 30 },
-          },
-        },
-        twitterProfile: {
-          include: {
-            tweets: { orderBy: { publishedAt: 'desc' }, take: 25 },
-            analytics: { orderBy: { date: 'desc' }, take: 30 },
-          },
-        },
-        tiktokProfile: {
-          include: {
-            videos: { orderBy: { publishedAt: 'desc' }, take: 25 },
-            analytics: { orderBy: { date: 'desc' }, take: 30 },
-          },
-        },
-      },
-    });
-
-    return account;
-  }
-
-  // ==========================================
-  // Dedicated Platform-Specific Helper Methods
-  // ==========================================
-
-  // --- Instagram ---
-  async upsertInstagramProfile(
-    socialAccountId: string,
-    data: {
-      igUserId: string;
-      username: string;
-      displayName?: string;
-      biography?: string;
-      profilePictureUrl?: string;
-      website?: string;
-      followerCount?: number;
-      followingCount?: number;
-      mediaCount?: number;
-      isBusinessAccount?: boolean;
-      isVerified?: boolean;
-    },
-  ) {
-    return this.prisma.instagramProfile.upsert({
-      where: { socialAccountId },
-      create: { socialAccountId, ...data },
-      update: { ...data, updatedAt: new Date() },
-    });
-  }
-
-  async upsertInstagramMedia(
-    instagramProfileId: string,
-    media: {
-      mediaId: string;
-      mediaType?: string;
-      caption?: string;
-      permalink?: string;
-      thumbnailUrl?: string;
-      mediaUrl?: string;
-      publishedAt?: Date;
-      likeCount?: number;
-      commentCount?: number;
-      saveCount?: number;
-      shareCount?: number;
-      reach?: number;
-      impressions?: number;
-      videoViews?: number;
-    },
-  ) {
-    return this.prisma.instagramMedia.upsert({
-      where: { mediaId: media.mediaId },
-      create: { instagramProfileId, ...media },
-      update: { ...media, updatedAt: new Date() },
-    });
-  }
-
-  // --- Facebook & Pages ---
-  async upsertFacebookProfile(
-    socialAccountId: string,
-    data: {
-      facebookUserId: string;
-      name: string;
-      email?: string;
-      avatarUrl?: string;
-      profileUrl?: string;
-    },
-  ) {
-    return this.prisma.facebookProfile.upsert({
-      where: { socialAccountId },
-      create: { socialAccountId, ...data },
-      update: { ...data, updatedAt: new Date() },
-    });
-  }
-
-  async upsertFacebookPage(
-    socialAccountId: string,
-    page: {
-      pageId: string;
-      name: string;
-      category?: string;
-      tasks?: string[];
-      pageAccessToken?: string;
-      pictureUrl?: string;
-      fanCount?: number;
-      followersCount?: number;
-      website?: string;
-      about?: string;
-    },
-  ) {
-    return this.prisma.facebookPage.upsert({
-      where: { pageId: page.pageId },
-      create: { socialAccountId, ...page },
-      update: { ...page, updatedAt: new Date() },
-    });
-  }
-
-  // --- YouTube ---
-  async upsertYouTubeChannel(
-    socialAccountId: string,
-    data: {
-      channelId: string;
-      channelTitle: string;
-      channelDescription?: string;
-      customUrl?: string;
-      thumbnailUrl?: string;
-      subscriberCount?: number;
-      videoCount?: number;
-      viewCount?: bigint;
-      publishedAt?: Date;
-      country?: string;
-    },
-  ) {
-    return this.prisma.youTubeChannel.upsert({
-      where: { socialAccountId },
-      create: { socialAccountId, ...data },
-      update: { ...data, lastSyncedAt: new Date(), updatedAt: new Date() },
-    });
-  }
-
-  async upsertYouTubeVideo(
-    youtubeChannelId: string,
-    video: {
-      videoId: string;
-      title: string;
-      description?: string;
-      thumbnailUrl?: string;
-      publishedAt?: Date;
-      duration?: string;
-      viewCount?: bigint;
-      likeCount?: number;
-      commentCount?: number;
-      privacyStatus?: string;
-      liveBroadcastContent?: string;
-    },
-  ) {
-    return this.prisma.youTubeVideo.upsert({
-      where: { videoId: video.videoId },
-      create: { youtubeChannelId, ...video },
-      update: { ...video, lastSyncedAt: new Date(), updatedAt: new Date() },
-    });
-  }
-
-  async findYouTubeChannelBySocialAccountId(socialAccountId: string) {
-    return this.prisma.youTubeChannel.findUnique({
-      where: { socialAccountId },
-      include: {
-        videos: {
-          orderBy: { publishedAt: 'desc' },
-          take: 25,
-        },
-        channelAnalytics: {
-          orderBy: { date: 'desc' },
-          take: 30,
-        },
-      },
-    });
-  }
-
-  async upsertYouTubeChannelAnalytics(
-    youtubeChannelId: string,
-    snapshot: {
-      date: Date;
-      views: bigint;
-      likes: number;
-      comments: number;
-      shares: number;
-      subscribersGained: number;
-      subscribersLost: number;
-      estimatedMinutesWatched: bigint;
-      averageViewDuration: number;
-    },
-  ) {
-    return this.prisma.youTubeChannelAnalytics.upsert({
-      where: {
-        youtubeChannelId_date: {
-          youtubeChannelId,
-          date: snapshot.date,
-        },
-      },
-      create: {
-        youtubeChannelId,
-        ...snapshot,
-      },
-      update: {
-        ...snapshot,
-      },
-    });
-  }
-
-  // --- LinkedIn ---
-  async upsertLinkedInProfile(
-    socialAccountId: string,
-    data: {
-      linkedinId: string;
-      localizedFirstName?: string;
-      localizedLastName?: string;
-      vanityName?: string;
-      headline?: string;
-      profilePictureUrl?: string;
-      connectionsCount?: number;
-      followersCount?: number;
-      email?: string;
-      emailVerified?: boolean;
-      locale?: string;
-    },
-  ) {
-    return (this.prisma as any).linkedInProfile.upsert({
-      where: { socialAccountId },
-      create: { socialAccountId, ...data },
-      update: { ...data, updatedAt: new Date() },
-    });
-  }
-
-  // --- Twitter / X ---
-  async upsertTwitterProfile(
-    socialAccountId: string,
-    data: {
-      twitterId: string;
-      username: string;
-      name: string;
-      description?: string;
-      profileImageUrl?: string;
-      followersCount?: number;
-      followingCount?: number;
-      tweetCount?: number;
-      verifiedType?: string;
-    },
-  ) {
-    return this.prisma.twitterProfile.upsert({
-      where: { socialAccountId },
-      create: { socialAccountId, ...data },
-      update: { ...data, updatedAt: new Date() },
-    });
-  }
-
-  async upsertTwitterTweet(
-    twitterProfileId: string,
-    data: {
-      tweetId: string;
-      text: string;
-      publishedAt?: Date | null;
-      retweetCount?: number;
-      replyCount?: number;
-      likeCount?: number;
-      quoteCount?: number;
-      bookmarkCount?: number;
-      impressionCount?: number;
-    },
-  ) {
-    return this.prisma.twitterTweet.upsert({
-      where: { tweetId: data.tweetId },
-      create: { twitterProfileId, ...data },
-      update: { ...data, updatedAt: new Date() },
-    });
-  }
-
-  async findTwitterProfile(socialAccountId: string) {
-    return this.prisma.twitterProfile.findUnique({
-      where: { socialAccountId },
-      include: {
-        tweets: {
-          orderBy: { publishedAt: 'desc' },
-          take: 20,
-        },
-      },
-    });
-  }
-
-
-  // --- TikTok ---
-  async upsertTikTokProfile(
-    socialAccountId: string,
-    data: {
-      openId: string;
-      unionId?: string;
-      displayName: string;
-      avatarUrl?: string;
-      bioDescription?: string;
-      followerCount?: number;
-      followingCount?: number;
-      likesCount?: number;
-      videoCount?: number;
-      isVerified?: boolean;
-    },
-  ) {
-    return this.prisma.tikTokProfile.upsert({
-      where: { socialAccountId },
-      create: { socialAccountId, ...data },
-      update: { ...data, updatedAt: new Date() },
-    });
-  }
-
-  // --- Threads ---
-  async upsertThreadsProfile(
-    socialAccountId: string,
-    data: {
-      threadsId: string;
-      username: string;
-      name?: string | null;
-      biography?: string | null;
-      profilePictureUrl?: string | null;
-      followersCount?: number;
-      followingCount?: number;
-      postCount?: number;
-      isVerified?: boolean;
-    },
-  ) {
-    return (this.prisma as any).threadsProfile.upsert({
-      where: { socialAccountId },
-      create: { socialAccountId, ...data },
-      update: { ...data, updatedAt: new Date() },
-    });
-  }
-
-  async upsertThreadsPost(
-    threadsProfileId: string,
-    data: {
-      threadsPostId: string;
-      text?: string | null;
-      mediaType?: string | null;
-      permalink?: string | null;
-      publishedAt?: Date | null;
-      likeCount?: number;
-      replyCount?: number;
-      repostCount?: number;
-      quoteCount?: number;
-      viewsCount?: number;
-      hasReplies?: boolean;
-      isQuotePost?: boolean;
-    },
-  ) {
-    return (this.prisma as any).threadsPost.upsert({
-      where: { threadsPostId: data.threadsPostId },
-      create: { threadsProfileId, ...data },
-      update: { ...data, updatedAt: new Date() },
-    });
-  }
-
-  async upsertThreadsAnalytics(
-    threadsProfileId: string,
-    data: {
-      date: Date;
-      views?: number;
-      likes?: number;
-      replies?: number;
-      reposts?: number;
-      quotes?: number;
-      followersNetChange?: number;
-    },
-  ) {
-    return (this.prisma as any).threadsAnalytics.upsert({
-      where: {
-        threadsProfileId_date: {
-          threadsProfileId,
-          date: data.date,
-        },
-      },
-      create: { threadsProfileId, ...data },
-      update: { ...data },
-    });
-  }
-
-  async findThreadsProfile(socialAccountId: string) {
-    return (this.prisma as any).threadsProfile.findUnique({
-      where: { socialAccountId },
-      include: {
-        posts: {
-          orderBy: { publishedAt: 'desc' },
-          take: 20,
-        },
       },
     });
   }
 }
-
-

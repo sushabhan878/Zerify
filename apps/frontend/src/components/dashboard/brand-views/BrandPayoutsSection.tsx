@@ -1,77 +1,198 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { DollarSign, Wallet, ShieldCheck, Download, Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { DollarSign, Download, Plus, ArrowDownLeft } from 'lucide-react';
 import { useCurrency } from '@/context/CurrencyContext';
+import BrandEscrowKpiBar from '../payment-views/BrandEscrowKpiBar';
+import BrandEscrowTransactionList, { BrandEscrowTransaction } from '../payment-views/BrandEscrowTransactionList';
+import BrandDepositFundsModal from '../payment-views/BrandDepositFundsModal';
+import BrandWithdrawFundsModal from '../payment-views/BrandWithdrawFundsModal';
+import BrandBillingDetailsModal from '../payment-views/BrandBillingDetailsModal';
+import RaiseDisputeModal from '../payment-views/RaiseDisputeModal';
 
 export default function BrandPayoutsSection() {
-  const { formatBudget, format } = useCurrency();
-  const transactions = [
-    { id: 'PAY-4012', creator: 'Sarah Jenkins', description: 'YouTube Video Integration Release', amount: `-${formatBudget('$3,500')}`, date: 'Jul 22, 2026', status: 'PAID' },
-    { id: 'ESC-3910', creator: 'Marcus Vance', description: 'Desk Showcase Escrow Hold', amount: formatBudget('$2,200'), date: 'Jul 18, 2026', status: 'IN ESCROW' },
-    { id: 'DEP-1002', creator: 'Stripe Deposit', description: 'Campaign Fund Top-up', amount: `+${formatBudget('$25,000')}`, date: 'Jul 10, 2026', status: 'COMPLETED' },
-  ];
+  const { format } = useCurrency();
+
+  // Modals state
+  const [isDepositOpen, setIsDepositOpen] = useState(false);
+  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
+  const [isBillingOpen, setIsBillingOpen] = useState(false);
+  const [isDisputeOpen, setIsDisputeOpen] = useState(false);
+  const [selectedTxForAction, setSelectedTxForAction] = useState<{ id: string; campaign: string; amount: string } | null>(null);
+
+  // Brand data state
+  const [availableBalance, setAvailableBalance] = useState(1845000); // in paise/cents or INR standard
+  const [inEscrow, setInEscrow] = useState(570000);
+  const [totalSettled, setTotalSettled] = useState(6420000);
+  const [hasBillingDetails, setHasBillingDetails] = useState(false);
+
+  // Check cached brand billing details on mount
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem('zerify_brand_billing_details') || localStorage.getItem('zerify_brand_profile_cache');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed?.taxId || parsed?.escrowSetup?.taxId || parsed?.billingEmail) {
+          setHasBillingDetails(true);
+        }
+      }
+    } catch (e) {}
+  }, []);
+
+  const [transactions, setTransactions] = useState<BrandEscrowTransaction[]>([
+    {
+      id: 'ESC-4012',
+      creator: 'Sarah Jenkins',
+      campaign: 'YouTube Video Integration & Product Unboxing',
+      amount: format(35000, { showDecimals: true }),
+      date: 'Jul 22, 2026',
+      status: 'IN_ESCROW',
+    },
+    {
+      id: 'ESC-3910',
+      creator: 'Marcus Vance',
+      campaign: 'Desk Showcase & Reel Promotion',
+      amount: format(22000, { showDecimals: true }),
+      date: 'Jul 18, 2026',
+      status: 'IN_ESCROW',
+    },
+    {
+      id: 'SET-1002',
+      creator: 'Priya Sharma',
+      campaign: 'Instagram Carousel Feature Launch',
+      amount: format(45000, { showDecimals: true }),
+      date: 'Jul 10, 2026',
+      status: 'COMPLETED',
+    },
+    {
+      id: 'SET-0941',
+      creator: 'Alex Rivera',
+      campaign: 'Tech Podcast Audio Sponsorship Integration',
+      amount: format(28000, { showDecimals: true }),
+      date: 'Jun 28, 2026',
+      status: 'COMPLETED',
+    },
+  ]);
+
+  const handleApproveRelease = (txId: string) => {
+    const target = transactions.find((t) => t.id === txId);
+    if (!target) return;
+    if (confirm(`Approve deliverable and release ${target.amount} from Escrow to ${target.creator}? This action triggers immediate payout.`)) {
+      setTransactions((prev) =>
+        prev.map((t) => (t.id === txId ? { ...t, status: 'COMPLETED' as const } : t))
+      );
+      setInEscrow((prev) => Math.max(0, prev - 30000));
+      setTotalSettled((prev) => prev + 30000);
+    }
+  };
+
+  const handleOpenDispute = (txId: string, campaign: string) => {
+    setSelectedTxForAction({ id: txId, campaign, amount: '' });
+    setIsDisputeOpen(true);
+  };
+
+  const handleOpenWithdraw = (txId: string, amount: string) => {
+    setSelectedTxForAction({ id: txId, campaign: 'Escrow Refund', amount });
+    setIsWithdrawOpen(true);
+  };
 
   return (
     <div className="space-y-6">
-      {/* Financial Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 rounded-2xl bg-gradient-to-tr from-purple-900/40 to-slate-900 border border-purple-500/30 backdrop-blur-xl">
-          <span className="text-xs font-semibold text-slate-400 block mb-1">Available Campaign Balance</span>
-          <div className="text-2xl font-black text-white mb-2">{format(18450, { showDecimals: true })}</div>
-          <button className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-md">
-            <Plus className="w-3.5 h-3.5" />
-            <span>Deposit Campaign Funds</span>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
+            <DollarSign className="w-5 h-5 text-purple-400" />
+            <span>Campaign Escrow & Creator Payments</span>
+          </h2>
+          <p className="text-xs text-slate-400">
+            Deposit funds upfront before hiring creators. Withdraw unspent balances anytime.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsBillingOpen(true)}
+            className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-xs font-bold text-slate-300 transition-colors"
+          >
+            Billing Profile (Optional)
           </button>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl">
-          <span className="text-xs font-semibold text-slate-400 block mb-1">Funds in Active Escrow</span>
-          <div className="text-2xl font-black text-amber-400 mb-2">{format(5700, { showDecimals: true })}</div>
-          <span className="text-[11px] text-slate-500 flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Protected by Zerify Smart Contracts</span>
-          </span>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl">
-          <span className="text-xs font-semibold text-slate-400 block mb-1">Total Creator Payouts</span>
-          <div className="text-2xl font-black text-emerald-400 mb-2">{format(64200, { showDecimals: true })}</div>
-          <span className="text-[11px] text-emerald-400 font-bold">48 Creator Contracts Settled</span>
-        </div>
-      </div>
-
-      {/* History */}
-      <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-purple-400" />
-            <span>Billing & Escrow Activity</span>
-          </h3>
-
-          <button className="text-xs text-purple-400 hover:underline flex items-center gap-1 font-bold">
+          <button
+            onClick={() => alert('Exporting tax invoices & GST receipts...')}
+            className="px-3.5 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-xs font-bold text-purple-300 flex items-center gap-1.5 transition-colors"
+          >
             <Download className="w-3.5 h-3.5" />
             <span>Export Invoices</span>
           </button>
         </div>
-
-        <div className="space-y-2">
-          {transactions.map((tx) => (
-            <div key={tx.id} className="p-3.5 rounded-xl bg-slate-950/60 border border-white/5 flex items-center justify-between">
-              <div>
-                <h4 className="text-xs font-bold text-white">{tx.creator} - {tx.description}</h4>
-                <span className="text-[10px] text-slate-500">{tx.id} • {tx.date}</span>
-              </div>
-
-              <div className="text-right">
-                <span className={`text-sm font-black ${tx.status === 'PAID' ? 'text-white' : tx.status === 'IN ESCROW' ? 'text-amber-400' : 'text-emerald-400'}`}>{tx.amount}</span>
-                <span className="text-[10px] text-slate-500 block uppercase font-bold">{tx.status}</span>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
+
+      {/* KPI Bar */}
+      <BrandEscrowKpiBar
+        availableBalanceStr={format(availableBalance, { showDecimals: true })}
+        inEscrowStr={format(inEscrow, { showDecimals: true })}
+        totalSettledStr={format(totalSettled, { showDecimals: true })}
+        contractsCount={transactions.filter((t) => t.status === 'COMPLETED').length}
+        hasBillingDetails={hasBillingDetails}
+        onDeposit={() => setIsDepositOpen(true)}
+        onWithdraw={() => {
+          setSelectedTxForAction({ id: 'GENERAL_WITHDRAW', campaign: 'Unallocated Escrow', amount: format(availableBalance) });
+          setIsWithdrawOpen(true);
+        }}
+        onManageBilling={() => setIsBillingOpen(true)}
+      />
+
+      {/* Escrow Activity List */}
+      <BrandEscrowTransactionList
+        transactions={transactions}
+        onApproveRelease={handleApproveRelease}
+        onRaiseDispute={handleOpenDispute}
+        onWithdrawRefund={handleOpenWithdraw}
+        onExportInvoices={() => alert('Downloading tax invoice...')}
+      />
+
+      {/* Modals */}
+      <BrandDepositFundsModal
+        isOpen={isDepositOpen}
+        onClose={() => setIsDepositOpen(false)}
+        onSuccess={(depositedAmount) => {
+          if (depositedAmount) {
+            setAvailableBalance((prev) => prev + depositedAmount);
+          }
+        }}
+      />
+
+      <BrandWithdrawFundsModal
+        isOpen={isWithdrawOpen}
+        onClose={() => setIsWithdrawOpen(false)}
+        availableBalance={availableBalance}
+        paymentId={selectedTxForAction?.id}
+        onSuccess={(amount) => {
+          if (amount) {
+            setAvailableBalance((prev) => Math.max(0, prev - amount));
+          }
+        }}
+      />
+
+      <BrandBillingDetailsModal
+        isOpen={isBillingOpen}
+        onClose={() => setIsBillingOpen(false)}
+        onSaved={() => setHasBillingDetails(true)}
+      />
+
+      <RaiseDisputeModal
+        isOpen={isDisputeOpen}
+        onClose={() => setIsDisputeOpen(false)}
+        paymentId={selectedTxForAction?.id || 'PAY-GENERAL'}
+        campaignTitle={selectedTxForAction?.campaign}
+        onDisputed={() => {
+          if (selectedTxForAction?.id) {
+            setTransactions((prev) =>
+              prev.map((t) => (t.id === selectedTxForAction.id ? { ...t, status: 'DISPUTED' as const } : t))
+            );
+          }
+        }}
+      />
     </div>
   );
 }

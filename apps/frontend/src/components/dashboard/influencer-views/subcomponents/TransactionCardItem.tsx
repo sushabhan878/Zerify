@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowDownRight, ArrowUpRight, Download, Lock, CheckCircle2, Building2, FileText } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Download, Lock, CheckCircle2, Building2, FileText, AlertTriangle } from 'lucide-react';
 
 export interface TransactionItem {
   id: string;
@@ -17,9 +17,10 @@ export interface TransactionItem {
 interface TransactionCardItemProps {
   tx: TransactionItem;
   onDownloadInvoice: (id: string) => void;
+  onRaiseDispute?: (id: string, campaign: string) => void;
 }
 
-export default function TransactionCardItem({ tx, onDownloadInvoice }: TransactionCardItemProps) {
+export default function TransactionCardItem({ tx, onDownloadInvoice, onRaiseDispute }: TransactionCardItemProps) {
   const getStatusBadge = (status: TransactionItem['status']) => {
     switch (status) {
       case 'COMPLETED':
@@ -63,13 +64,24 @@ export default function TransactionCardItem({ tx, onDownloadInvoice }: Transacti
         </div>
       </div>
 
-      <div className="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5">
-        <div className="text-right">
+      <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5">
+        <div className="text-right mr-1">
           <span className={`text-base font-black ${tx.status === 'COMPLETED' ? 'text-emerald-400' : 'text-amber-400'}`}>
             {tx.amount}
           </span>
-          <span className="text-[10px] text-slate-500 block uppercase font-bold">USD Currency</span>
+          <span className="text-[10px] text-slate-500 block uppercase font-bold">INR / USD</span>
         </div>
+
+        {onRaiseDispute && (
+          <button
+            onClick={() => onRaiseDispute(tx.id, tx.campaign)}
+            className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-colors flex items-center gap-1 text-xs font-bold"
+            title="Raise a Dispute for this payment"
+          >
+            <AlertTriangle className="w-4 h-4" />
+            <span className="hidden md:inline">Dispute</span>
+          </button>
+        )}
 
         <button
           onClick={() => onDownloadInvoice(tx.id)}
