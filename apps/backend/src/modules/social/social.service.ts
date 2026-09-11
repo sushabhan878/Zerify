@@ -217,114 +217,22 @@ export class SocialService implements OnModuleInit {
         profileUrl: `https://facebook.com/${userProfile.id}`,
       });
 
-      // 2. Discover all managed Pages with pagination
-      const discoveredPages = await this.metaProvider.getManagedPages(userAccessToken);
-
-      // Cache discovered pages on identity customData
-      await this.socialRepository.updateAccountCustomData(identityAccount.id, {
-        discoveredPages: discoveredPages.map((p) => ({
-          id: p.id,
-          name: p.name,
-          category: p.category,
-          fanCount: p.fanCount,
-          followerCount: p.followerCount,
-          pictureUrl: p.pictureUrl,
-          link: p.link,
-          isVerified: p.isVerified,
-          tasks: p.tasks,
-          hasInstagram: !!p.instagramBusinessAccount,
-        })),
-        discoveredAt: new Date(),
-      });
-
-      // 3. Automatically link all discovered Facebook Pages so they appear immediately in Zerify with live tokens
-      let connectedCount = 1;
-      for (const page of discoveredPages) {
-        try {
-          const encryptedPageToken = encryptToken(page.accessToken);
-          const pageExpiresAt = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
-          const pageNextRefreshAt = new Date(pageExpiresAt.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-          const savedPage = await this.socialRepository.upsertAccount({
-            userId,
-            platform: SocialPlatform.FACEBOOK,
-            platformUserId: page.id,
-            accountType: 'PAGE',
-            username: page.name,
-            displayName: page.name,
-            avatar: page.pictureUrl,
-            followerCount: page.followerCount ?? page.fanCount ?? 0,
-            engagementRate: 0.0,
-            isVerified: page.isVerified ?? null,
-            profileUrl: page.link || `https://facebook.com/${page.id}`,
-            accessToken: encryptedPageToken,
-            expiresAt: pageExpiresAt,
-            tokenType: 'BEARER_PAGE',
-            issuedAt: new Date(),
-            lastRefreshedAt: new Date(),
-            nextRefreshAt: pageNextRefreshAt,
-            refreshMethod: 'PAGE_ACCESS_TOKEN',
-            tokenStatus: 'ACTIVE',
-          });
-
-          await this.socialRepository.upsertProfileMetadata(savedPage.id, {
-            username: page.name,
-            displayName: page.name,
-            avatarUrl: page.pictureUrl,
-            category: page.category,
-            followerCount: page.followerCount ?? page.fanCount ?? 0,
-            isVerified: page.isVerified ?? null,
-            profileUrl: page.link || `https://facebook.com/${page.id}`,
-          });
-
-          await this.socialRepository.updateAccountCustomData(savedPage.id, {
-            pageId: page.id,
-            tasks: page.tasks,
-            category: page.category,
-          });
-
-          // Trigger background sync for page metrics, posts, and engagement
-          this.syncFacebookPage(savedPage.id).catch((err) => {
-            this.logger.warn(`Background syncFacebookPage failed for ${savedPage.id}:`, err);
-          });
-
-          connectedCount++;
-
-          // If the page has an attached Instagram business account, auto-link that too
-          if (page.instagramBusinessAccount) {
-            const ig = page.instagramBusinessAccount;
-            const igEncryptedToken = encryptToken(page.accessToken);
-            const cleanIg = (ig.username || '').replace(/^@/, '');
-            const savedIg = await this.socialRepository.upsertAccount({
-              userId,
-              platform: SocialPlatform.INSTAGRAM,
-              platformUserId: ig.id,
-              username: (ig.name || cleanIg || 'Instagram Creator').replace(/^@/, ''),
-              displayName: ig.name || cleanIg,
-              handle: cleanIg ? `@${cleanIg}` : `@ig_${ig.id}`,
-              profileUrl: cleanIg ? `https://instagram.com/${cleanIg}` : null,
-              avatar: ig.profilePictureUrl,
-              followerCount: ig.followersCount ?? 0,
-              accessToken: igEncryptedToken,
-              expiresAt: pageExpiresAt,
-              tokenType: 'BEARER_PAGE',
-              issuedAt: new Date(),
-              lastRefreshedAt: new Date(),
-              nextRefreshAt: pageNextRefreshAt,
-              refreshMethod: 'PAGE_ACCESS_TOKEN',
-              tokenStatus: 'ACTIVE',
-            });
-
-            this.syncAccountDetails(savedIg.id).catch((err) => {
-              this.logger.warn(`Background syncAccountDetails for IG ${savedIg.id} failed:`, err);
-            });
-          }
-        } catch (pageSaveErr) {
-          this.logger.error(`Failed to auto-link page ${page.id}:`, pageSaveErr);
+      // 2. Ensure any legacy Facebook Page accounts are disconnected so only the personal profile is active
+      try {
+        const existingPages = await this.socialRepository.findPagesByUserId(userId, SocialPlatform.FACEBOOK);
+        for (const oldPage of existingPages) {
+          await this.socialRepository.disconnectAccount(oldPage.id);
         }
+      } catch (cleanErr) {
+        this.logger.warn('Could not clean up legacy Facebook page accounts:', cleanErr);
       }
 
-      return `${frontendUrl}/social/callback?status=success&platform=facebook&count=${connectedCount}`;
+      // 3. Trigger initial profile sync for personal Facebook account
+      this.syncAccountDetails(identityAccount.id).catch((err) => {
+        this.logger.warn(`Background syncAccountDetails for Facebook personal account ${identityAccount.id} failed:`, err);
+      });
+
+      return `${frontendUrl}/social/callback?status=success&platform=facebook&count=1`;
     } catch (err: any) {
       this.logger.error('Error during Meta OAuth callback processing:', err?.stack || err);
       const message = encodeURIComponent(err?.message || 'Failed to connect Meta account');
@@ -1460,6 +1368,7 @@ export class SocialService implements OnModuleInit {
           userId: acc.userId,
           platform: acc.platform,
           platformUserId: acc.platformUserId,
+          accountType: acc.accountType,
           username: acc.username,
           handle: acc.handle,
           avatar: acc.avatar,

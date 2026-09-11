@@ -224,8 +224,12 @@ export class MetaProvider implements ISocialProvider {
   } | null> {
     const graphUrl = this.getGraphApiUrl();
     try {
-      const userMeUrl = `${graphUrl}/me?fields=id,name,email,picture{url}&access_token=${userAccessToken}`;
-      const res = await fetch(userMeUrl);
+      const userMeUrl = `${graphUrl}/me?fields=id,name,email,picture.width(480).height(480){url}&access_token=${userAccessToken}`;
+      let res = await fetch(userMeUrl);
+      if (!res.ok) {
+        // Fallback to standard picture field if custom dimensions are unsupported
+        res = await fetch(`${graphUrl}/me?fields=id,name,email,picture{url}&access_token=${userAccessToken}`);
+      }
       if (!res.ok) return null;
       const data = (await res.json()) as { id: string; name: string; email?: string; picture?: { data?: { url?: string } } };
       return {

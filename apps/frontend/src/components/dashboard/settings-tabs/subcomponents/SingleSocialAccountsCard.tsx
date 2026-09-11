@@ -15,7 +15,6 @@ import {
   TrendingUp,
   Users,
   ExternalLink,
-  Plus,
   X,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,7 +39,6 @@ export interface SocialAccountItem {
   platform?: string;
 }
 
-import FacebookPageSelectorModal from '@/components/social/FacebookPageSelectorModal';
 
 interface SingleSocialAccountsCardProps {
   accounts: SocialAccountItem[];
@@ -144,7 +142,6 @@ export default function SingleSocialAccountsCard({
   const [connectingId, setConnectingId] = useState<string | null>(null);
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [isPageSelectorOpen, setIsPageSelectorOpen] = useState(false);
   const [expandedCardIds, setExpandedCardIds] = useState<Record<string, boolean>>({});
 
   const toggleExpand = (id: string) => {
@@ -413,39 +410,12 @@ export default function SingleSocialAccountsCard({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          {/* Option to add another Instagram account */}
-          {accounts.some((a) => (a.platform === 'instagram' || a.id === 'instagram') && a.connected) && (
-            <button
-              type="button"
-              disabled={connectingId === 'instagram'}
-              onClick={() => handleConnectPlatform('instagram', 'Instagram')}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-pink-600/20 to-purple-600/20 hover:from-pink-600/30 hover:to-purple-600/30 text-pink-300 border border-pink-500/30 transition-all flex items-center gap-1.5 shadow-sm"
-              title="Connect another Instagram account or switch profile"
-            >
-              <Plus className="w-3.5 h-3.5 text-pink-400" />
-              <span>+ Add Instagram</span>
-            </button>
-          )}
 
-          {accounts.some((a) => a.id === 'facebook' || a.accountType === 'PAGE' || (a.id && a.id.startsWith('facebook-'))) && (
-            <button
-              type="button"
-              onClick={() => setIsPageSelectorOpen(true)}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 transition-all flex items-center gap-1.5 shadow-sm"
-              title="Manage and select Facebook Pages"
-            >
-              <Facebook className="w-3.5 h-3.5 text-blue-400" />
-              <span>Manage Facebook Pages</span>
-            </button>
-          )}
-
-          <div className="hidden sm:flex items-center gap-1.5 bg-purple-500/10 px-3 py-1.5 rounded-lg border border-purple-500/20 shrink-0">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="text-xs font-bold text-purple-200">
-              {connectedCount} of {accounts.length} Connected
-            </span>
-          </div>
+        <div className="hidden sm:flex items-center gap-1.5 bg-purple-500/10 px-3 py-1.5 rounded-lg border border-purple-500/20 shrink-0">
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          <span className="text-xs font-bold text-purple-200">
+            {connectedCount} of {accounts.length} Connected
+          </span>
         </div>
       </div>
 
@@ -552,41 +522,29 @@ export default function SingleSocialAccountsCard({
                       </span>
                     )}
 
-                    {acc.subPlatforms && acc.subPlatforms.length > 0 && (
-                      <div className="flex items-center gap-1 mt-1 flex-wrap">
-                        {acc.subPlatforms.map((sp) => (
-                          <span
-                            key={sp}
-                            className="px-1.5 py-0.5 text-[9px] font-medium rounded bg-white/10 text-slate-300 border border-white/10 flex items-center gap-1"
-                          >
-                            {sp === 'Facebook' && <Facebook className="w-2.5 h-2.5 text-blue-400" />}
-                            {sp === 'Instagram' && <Instagram className="w-2.5 h-2.5 text-pink-400" />}
-                            {sp === 'Threads' && <span className="font-bold text-slate-200 text-[9px]">@</span>}
-                            <span>{sp}</span>
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                    {acc.subPlatforms &&
+                      acc.subPlatforms.filter((sp) => sp !== 'Facebook' && sp !== 'Facebook Page').length > 0 && (
+                        <div className="flex items-center gap-1 mt-1 flex-wrap">
+                          {acc.subPlatforms
+                            .filter((sp) => sp !== 'Facebook' && sp !== 'Facebook Page')
+                            .map((sp) => (
+                              <span
+                                key={sp}
+                                className="px-1.5 py-0.5 text-[9px] font-medium rounded bg-white/10 text-slate-300 border border-white/10 flex items-center gap-1"
+                              >
+                                {sp === 'Instagram' && <Instagram className="w-2.5 h-2.5 text-pink-400" />}
+                                {sp === 'Threads' && <span className="font-bold text-slate-200 text-[9px]">@</span>}
+                                <span>{sp}</span>
+                              </span>
+                            ))}
+                        </div>
+                      )}
                   </div>
                 </div>
 
                 {/* Right: Actions */}
                 {acc.connected ? (
                   <div className="flex items-center gap-1.5 shrink-0">
-                    {(acc.id === 'facebook' || acc.accountType === 'PAGE' || acc.id?.startsWith('facebook-')) && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsPageSelectorOpen(true);
-                        }}
-                        className="w-8 h-8 rounded-lg text-blue-300 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 transition-all flex items-center justify-center shadow-sm"
-                        title="Manage connected Facebook Pages"
-                        aria-label="Manage Facebook Pages"
-                      >
-                        <Facebook className="w-3.5 h-3.5 text-blue-400" />
-                      </button>
-                    )}
 
                     <button
                       type="button"
@@ -688,14 +646,6 @@ export default function SingleSocialAccountsCard({
         })}
       </div>
 
-      <FacebookPageSelectorModal
-        isOpen={isPageSelectorOpen}
-        onClose={() => setIsPageSelectorOpen(false)}
-        onSuccess={() => {
-          setIsPageSelectorOpen(false);
-          if (onRefreshAccounts) onRefreshAccounts();
-        }}
-      />
     </div>
   );
 }

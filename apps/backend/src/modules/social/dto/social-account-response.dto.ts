@@ -5,6 +5,7 @@ export class SocialAccountResponseDto {
   userId: string;
   platform: SocialPlatform;
   platformUserId: string;
+  accountType?: string | null;
   username?: string | null;
   handle?: string | null;
   avatar?: string | null;

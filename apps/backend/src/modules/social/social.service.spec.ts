@@ -241,8 +241,9 @@ describe('SocialService', () => {
         accountType: 'PERSONAL',
       }),
     );
-    expect(redirectUrl).toContain('http://localhost:3000/social/callback?status=select_pages');
+    expect(redirectUrl).toContain('http://localhost:3000/social/callback?status=success');
     expect(redirectUrl).toContain('platform=facebook');
+    expect(redirectUrl).toContain('count=1');
   });
 
   it('should generate YouTube OAuth auth URL with valid signed state', () => {

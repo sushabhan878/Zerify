@@ -87,10 +87,7 @@ const DEFAULT_ACCOUNTS: SocialAccountItem[] = [
 ];
 
 function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): SocialAccountItem[] {
-  // 1. Standard platforms except Facebook
-  const nonFbDefault = DEFAULT_ACCOUNTS.filter((a) => a.id !== 'facebook');
-
-  const standardCards: SocialAccountItem[] = nonFbDefault.map((acc) => {
+  return DEFAULT_ACCOUNTS.map((acc) => {
     let matched: any = null;
     if (acc.id === 'instagram') {
       matched = dbAccounts.find(
@@ -104,6 +101,26 @@ function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): Social
           (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
           ['TWITTER', 'X'].includes((item.platform || '').toUpperCase()),
       );
+    } else if (acc.id === 'facebook') {
+      // Prioritize personal Facebook profile
+      matched =
+        dbAccounts.find(
+          (item: any) =>
+            (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+            ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()) &&
+            item.accountType === 'PERSONAL',
+        ) ||
+        dbAccounts.find(
+          (item: any) =>
+            (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+            ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()) &&
+            item.accountType !== 'PAGE',
+        ) ||
+        dbAccounts.find(
+          (item: any) =>
+            (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+            ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()),
+        );
     } else {
       matched = dbAccounts.find(
         (item: any) =>
@@ -118,8 +135,10 @@ function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): Social
         (dbAcc.status ? (dbAcc.status || '').toUpperCase() === 'CONNECTED' : true) &&
         (acc.id === 'x' || acc.id === 'twitter'
           ? ['TWITTER', 'X'].includes((dbAcc.platform || '').toUpperCase())
-          : ((dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
-            (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase())),
+          : acc.id === 'facebook'
+            ? ['FACEBOOK', 'META'].includes((dbAcc.platform || '').toUpperCase()) && dbAcc.accountType !== 'PAGE'
+            : ((dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
+              (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase())),
     );
 
     if (matched || profileMatch) {
@@ -143,7 +162,10 @@ function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): Social
             : acc.followers;
       const dbId = matched?.id || profileMatch?.id;
 
-      const profileUrl = matched?.profileUrl || profileMatch?.profileUrl;
+      const profileUrl =
+        matched?.profileUrl ||
+        profileMatch?.profileUrl ||
+        (acc.id === 'facebook' && platformUserId ? `https://facebook.com/${platformUserId}` : undefined);
       const rawEr = matched?.engagementRate ?? profileMatch?.engagementRate;
       const engagementRate = rawEr !== null && rawEr !== undefined && rawEr > 0 ? String(rawEr) : acc.engagementRate;
 
@@ -158,6 +180,7 @@ function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): Social
         avatar,
         followers,
         dbId,
+        accountType: matched?.accountType || profileMatch?.accountType || 'PERSONAL',
       };
     }
 
@@ -172,72 +195,6 @@ function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): Social
       dbId: undefined,
     };
   });
-
-  // 2. Facebook Cards: find all connected Facebook Page accounts
-  const fbPageAccounts = dbAccounts.filter(
-    (item: any) =>
-      (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
-      ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()) &&
-      item.accountType === 'PAGE',
-  );
-
-  let fbCards: SocialAccountItem[] = [];
-
-  if (fbPageAccounts.length > 0) {
-    fbCards = fbPageAccounts.map((page: any) => ({
-      id: page.id,
-      name: page.displayName || page.username || 'Facebook Page',
-      userName: page.username || page.displayName,
-      icon: Facebook,
-      gradientColor: 'from-blue-700 via-indigo-600 to-blue-400',
-      connected: true,
-      handle: page.handle || (page.username ? (page.username.startsWith('@') ? page.username : `@${page.username}`) : '@facebook_page'),
-      profileUrl: page.profileUrl || (page.platformUserId ? `https://facebook.com/${page.platformUserId}` : undefined),
-      platformUserId: page.platformUserId,
-      avatar: page.avatar,
-      followers:
-        page.followerCount !== null && page.followerCount !== undefined ? page.followerCount.toLocaleString() : '',
-      engagementRate:
-        page.engagementRate !== null && page.engagementRate !== undefined ? String(page.engagementRate) : undefined,
-      dbId: page.id,
-      accountType: 'PAGE',
-      subPlatforms: ['Facebook Page'],
-    }));
-  } else {
-    // If no pages connected yet, check if personal identity is connected
-    const anyFb = dbAccounts.find(
-      (item: any) =>
-        (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
-        ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()),
-    );
-    fbCards = [
-      {
-        id: anyFb?.id || 'facebook',
-        name: 'Facebook',
-        userName: anyFb?.username,
-        icon: Facebook,
-        gradientColor: 'from-blue-700 via-indigo-600 to-blue-400',
-        connected: Boolean(anyFb),
-        handle: anyFb?.handle || (anyFb?.username ? (anyFb.username.startsWith('@') ? anyFb.username : `@${anyFb.username}`) : ''),
-        profileUrl: anyFb?.profileUrl || (anyFb?.platformUserId ? `https://facebook.com/${anyFb.platformUserId}` : undefined),
-        platformUserId: anyFb?.platformUserId,
-        avatar: anyFb?.avatar,
-        followers:
-          anyFb?.followerCount !== null && anyFb?.followerCount !== undefined
-            ? anyFb.followerCount.toLocaleString()
-            : '',
-        engagementRate:
-          anyFb?.engagementRate !== null && anyFb?.engagementRate !== undefined
-            ? String(anyFb.engagementRate)
-            : undefined,
-        dbId: anyFb?.id,
-        accountType: anyFb?.accountType || 'PERSONAL',
-        subPlatforms: anyFb ? ['Facebook'] : undefined,
-      },
-    ];
-  }
-
-  return [...standardCards, ...fbCards];
 }
 
 function buildInitialAccountsFromCache(initialData?: any): SocialAccountItem[] {
