@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { CreditCard, PlusCircle, Loader2 } from 'lucide-react';
 import LinkedPaymentAccountCard from './subcomponents/LinkedPaymentAccountCard';
 import NoPaymentAccountsCard from './subcomponents/NoPaymentAccountsCard';
+import SupportedPayoutMethodsCard from './subcomponents/SupportedPayoutMethodsCard';
 import CashfreeNoticeBanner from './subcomponents/CashfreeNoticeBanner';
 
 interface PaymentSettingsTabProps {
@@ -150,7 +151,12 @@ export default function PaymentSettingsTab({
   }
 
   if (linkedAccounts.length === 0) {
-    return <NoPaymentAccountsCard onAddAccount={handleRedirectToPayments} />;
+    return (
+      <div className="space-y-6">
+        <NoPaymentAccountsCard onAddAccount={handleRedirectToPayments} />
+        <SupportedPayoutMethodsCard />
+      </div>
+    );
   }
 
   return (

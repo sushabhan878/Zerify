@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { CreditCard, Plus, ArrowRight, ArrowDown, Building2, Smartphone, Lock } from 'lucide-react';
+import { CreditCard, Plus, ArrowRight, ArrowDown, Lock } from 'lucide-react';
 
 interface NoPaymentAccountsCardProps {
   onAddAccount: () => void;
@@ -11,19 +11,6 @@ const STEPS = [
   'Choose a payout method',
   'Verify your details',
   'Receive your payouts',
-];
-
-const SUPPORTED_METHODS = [
-  {
-    icon: Building2,
-    title: 'Bank Account',
-    description: 'Direct bank transfers to your verified account.',
-  },
-  {
-    icon: Smartphone,
-    title: 'UPI ID',
-    description: 'Receive eligible payouts directly through your UPI ID.',
-  },
 ];
 
 export default function NoPaymentAccountsCard({ onAddAccount }: NoPaymentAccountsCardProps) {
@@ -80,33 +67,7 @@ export default function NoPaymentAccountsCard({ onAddAccount }: NoPaymentAccount
         </div>
       </div>
 
-      {/* 5. Supported Methods */}
-      <div className="w-full space-y-3">
-        <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider text-center">
-          Supported payout methods
-        </h4>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-          {SUPPORTED_METHODS.map((method) => {
-            const Icon = method.icon;
-            return (
-              <div
-                key={method.title}
-                className="p-3.5 rounded-xl bg-slate-900/30 border border-white/5 flex items-start gap-3 text-left"
-              >
-                <div className="w-8 h-8 rounded-lg bg-slate-800/60 border border-white/5 flex items-center justify-center shrink-0 text-purple-400">
-                  <Icon className="w-4 h-4" />
-                </div>
-                <div className="space-y-0.5">
-                  <h5 className="text-xs font-semibold text-slate-200">{method.title}</h5>
-                  <p className="text-[11px] text-slate-400 leading-relaxed">{method.description}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 6. Security / Trust Message */}
+      {/* 5. Security / Trust Message */}
       <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 pt-1">
         <Lock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
         <span>Your payout details are encrypted and securely stored.</span>
