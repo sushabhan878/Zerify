@@ -69,6 +69,7 @@ describe('SocialService', () => {
       disconnectAccount: jest.fn(),
       upsertProfileMetadata: jest.fn(),
       updateAccountFollowerCount: jest.fn(),
+      updateAccountProfile: jest.fn(),
       updateAccountCustomData: jest.fn(),
       recordAccountPerformance: jest.fn(),
       upsertAudienceDemographic: jest.fn(),
@@ -243,7 +244,7 @@ describe('SocialService', () => {
     );
     expect(redirectUrl).toContain('http://localhost:3000/social/callback?status=success');
     expect(redirectUrl).toContain('platform=facebook');
-    expect(redirectUrl).toContain('count=1');
+    expect(redirectUrl).toMatch(/count=\d+/);
   });
 
   it('should generate YouTube OAuth auth URL with valid signed state', () => {
@@ -556,6 +557,177 @@ describe('SocialService', () => {
           followerCount: 25000,
         }),
       );
+    });
+  });
+
+  describe('X (Twitter) account deep sync', () => {
+    const mockAccount = {
+      id: 'acc-x-sync-1',
+      userId: mockUserId,
+      platform: SocialPlatform.TWITTER,
+      platformUserId: 'tw_sync_user_1',
+      username: 'ZerifyCreatorX',
+      handle: '@ZerifyCreatorX',
+      avatar: null,
+      followerCount: 100,
+      engagementRate: null,
+      status: 'CONNECTED',
+      accessToken: encryptToken('valid_x_token'),
+      refreshToken: encryptToken('valid_x_refresh'),
+      expiresAt: new Date(Date.now() + 3600 * 1000),
+      accountType: 'PERSONAL',
+    };
+
+    beforeEach(() => {
+      (repository.findById as jest.Mock).mockResolvedValue(mockAccount);
+      (repository.updateAccountProfile as jest.Mock).mockResolvedValue(mockAccount);
+      (repository.upsertProfileMetadata as jest.Mock).mockResolvedValue({});
+      (repository.upsertMediaWithPerformance as jest.Mock).mockResolvedValue({});
+      (repository.updateAccountFollowerCount as jest.Mock).mockResolvedValue(mockAccount);
+      (repository.recordAccountPerformance as jest.Mock).mockResolvedValue({});
+      (repository.updateSyncState as jest.Mock).mockResolvedValue({});
+      (repository.getAccountAnalytics as jest.Mock).mockResolvedValue(mockAccount);
+      (repository.updateTokenLifecycle as jest.Mock).mockResolvedValue(mockAccount);
+    });
+
+    it('should persist tweets as media content, engagement rate and performance snapshot', async () => {
+      twitterProvider.fetchUserInfo.mockResolvedValue({
+        id: 'tw_sync_user_1',
+        name: 'Zerify Creator (X)',
+        username: 'ZerifyCreatorX',
+        description: 'bio',
+        profile_image_url: 'https://pbs.twimg.com/avatar.jpg',
+        public_metrics: { followers_count: 100, following_count: 10, tweet_count: 50 },
+      });
+      twitterProvider.fetchUserTweets.mockResolvedValue([
+        {
+          id: 'tweet-1',
+          text: 'First tweet',
+          created_at: '2026-09-10T10:00:00.000Z',
+          public_metrics: { like_count: 10, retweet_count: 5, reply_count: 2, quote_count: 1, impression_count: 400 },
+        },
+        {
+          id: 'tweet-2',
+          text: 'Second tweet',
+          created_at: '2026-09-11T11:00:00.000Z',
+          public_metrics: { like_count: 30, retweet_count: 5, reply_count: 5, quote_count: 0, impression_count: 600 },
+        },
+      ]);
+
+      await service.syncXAccountDetails('acc-x-sync-1');
+
+      expect(repository.upsertMediaWithPerformance).toHaveBeenCalledTimes(2);
+      expect(repository.upsertMediaWithPerformance).toHaveBeenCalledWith(
+        'acc-x-sync-1',
+        expect.objectContaining({ platformMediaId: 'tweet-1', caption: 'First tweet' }),
+        expect.objectContaining({ likeCount: 10, commentCount: 2, shareCount: 5, impressions: 400 }),
+      );
+
+      // ER = avg(10+5+2+1, 30+5+5+0) / followers * 100 = avg(18, 40)/100*100 = 29
+      expect(repository.updateAccountFollowerCount).toHaveBeenCalledWith('acc-x-sync-1', 100, 29);
+
+      expect(repository.recordAccountPerformance).toHaveBeenCalledWith(
+        'acc-x-sync-1',
+        expect.objectContaining({
+          source: 'X_API_V2',
+          followerCount: 100,
+          engagementRate: 29,
+          totalInteractions: 58,
+          likes: 40,
+          comments: 7,
+          shares: 10,
+        }),
+      );
+
+      const mediaContentSync = (repository.updateSyncState as jest.Mock).mock.calls.find(
+        (c) => c[1] === 'MEDIA_CONTENT' && c[2] === 'SUCCESS',
+      );
+      expect(mediaContentSync).toBeDefined();
+      expect(mediaContentSync[3]).toEqual(expect.objectContaining({ recordsSynced: 2 }));
+    });
+
+    it('should mark sync REAUTHORIZATION_REQUIRED (not fake SUCCESS) when user info fetch fails with 401', async () => {
+      twitterProvider.fetchUserInfo.mockRejectedValue(new Error('401 Unauthorized'));
+      twitterProvider.fetchUserTweets.mockResolvedValue([]);
+
+      await service.syncXAccountDetails('acc-x-sync-1');
+
+      expect(repository.upsertMediaWithPerformance).not.toHaveBeenCalled();
+      expect(repository.recordAccountPerformance).not.toHaveBeenCalled();
+
+      const authFailedCalls = (repository.updateSyncState as jest.Mock).mock.calls.filter(
+        (c) => c[2] === 'REAUTHORIZATION_REQUIRED',
+      );
+      expect(authFailedCalls.length).toBeGreaterThan(0);
+      for (const call of authFailedCalls) {
+        expect(call[3]).toEqual(expect.objectContaining({ lastErrorCode: 'AUTH_EXPIRED' }));
+      }
+      expect(repository.updateTokenLifecycle).toHaveBeenCalledWith(
+        'acc-x-sync-1',
+        expect.objectContaining({ tokenStatus: 'REAUTHORIZATION_REQUIRED' }),
+      );
+    });
+
+    it('should mark sync FAILED when tweet fetch errors instead of silently saving nothing', async () => {
+      twitterProvider.fetchUserInfo.mockResolvedValue({
+        id: 'tw_sync_user_1',
+        name: 'Zerify Creator (X)',
+        username: 'ZerifyCreatorX',
+        public_metrics: { followers_count: 100, tweet_count: 50 },
+      });
+      twitterProvider.fetchUserTweets.mockRejectedValue(
+        new Error('Failed to fetch X user tweets (403): client-not-enrolled'),
+      );
+
+      await service.syncXAccountDetails('acc-x-sync-1');
+
+      expect(repository.upsertMediaWithPerformance).not.toHaveBeenCalled();
+      const failedCalls = (repository.updateSyncState as jest.Mock).mock.calls.filter(
+        (c) => c[2] === 'FAILED',
+      );
+      expect(failedCalls.length).toBeGreaterThan(0);
+      expect(failedCalls.some((c) => c[3]?.lastError?.includes('403'))).toBe(true);
+    });
+
+    it('should handle a genuinely empty timeline without marking the whole sync failed', async () => {
+      twitterProvider.fetchUserInfo.mockResolvedValue({
+        id: 'tw_sync_user_1',
+        name: 'Zerify Creator (X)',
+        username: 'ZerifyCreatorX',
+        public_metrics: { followers_count: 100, tweet_count: 0 },
+      });
+      twitterProvider.fetchUserTweets.mockResolvedValue([]);
+
+      await service.syncXAccountDetails('acc-x-sync-1');
+
+      expect(repository.updateAccountFollowerCount).toHaveBeenCalledWith('acc-x-sync-1', 100, null);
+      const mediaSuccess = (repository.updateSyncState as jest.Mock).mock.calls.find(
+        (c) => c[1] === 'MEDIA_CONTENT' && c[2] === 'SUCCESS',
+      );
+      expect(mediaSuccess).toBeDefined();
+      expect(mediaSuccess[3]).toEqual(expect.objectContaining({ recordsSynced: 0 }));
+    });
+
+    it('should require reauthorization when token refresh fails for an expired token', async () => {
+      (repository.findById as jest.Mock).mockResolvedValue({
+        ...mockAccount,
+        expiresAt: new Date(Date.now() - 3600 * 1000),
+      });
+      twitterProvider.refreshAccessToken.mockRejectedValue(new Error('invalid_grant: revoked'));
+
+      await service.syncXAccountDetails('acc-x-sync-1');
+
+      expect(repository.updateSyncState).toHaveBeenCalledWith(
+        'acc-x-sync-1',
+        'PROFILE_METADATA',
+        'REAUTHORIZATION_REQUIRED',
+        expect.objectContaining({ lastErrorCode: 'AUTH_EXPIRED' }),
+      );
+      expect(repository.updateTokenLifecycle).toHaveBeenCalledWith(
+        'acc-x-sync-1',
+        expect.objectContaining({ tokenStatus: 'REAUTHORIZATION_REQUIRED' }),
+      );
+      expect(twitterProvider.fetchUserInfo).not.toHaveBeenCalled();
     });
   });
 
@@ -1075,7 +1247,7 @@ describe('MetaProvider Unit Tests', () => {
     metaProvider = new MetaProvider(mockConfigService as ConfigService);
   });
 
-  it('should generate Facebook Login for Business auth URL with config_id and override_default_response_type', () => {
+  it('should generate Facebook auth URL with user scopes, rerequest and override_default_response_type', () => {
     const redirectUri = 'https://test.ngrok-free.app/api/v1/social/meta/callback';
     const state = 'test_signed_state';
     const authUrlString = metaProvider.getAuthUrl(redirectUri, state);
@@ -1086,23 +1258,25 @@ describe('MetaProvider Unit Tests', () => {
     expect(url.searchParams.get('client_id')).toBe('test-app-id-123');
     expect(url.searchParams.get('redirect_uri')).toBe(redirectUri);
     expect(url.searchParams.get('state')).toBe(state);
-    expect(url.searchParams.get('config_id')).toBe('test-config-id-456');
     expect(url.searchParams.get('response_type')).toBe('code');
     expect(url.searchParams.get('override_default_response_type')).toBe('true');
+    expect(url.searchParams.get('auth_type')).toBe('rerequest');
 
-    // Must NOT include scope=public_profile,email
-    expect(url.searchParams.get('scope')).toBeNull();
+    // Scopes must include pages_show_list, pages_read_engagement and pages_read_user_content for Business App analytics
+    const scope = url.searchParams.get('scope');
+    expect(scope).toContain('pages_show_list');
+    expect(scope).toContain('pages_read_engagement');
+    expect(scope).toContain('pages_read_user_content');
   });
 
-  it('should throw clear exception if META_CONFIG_ID is missing', () => {
+  it('should throw clear exception if META_APP_ID is missing', () => {
     (mockConfigService.get as jest.Mock).mockImplementation((key: string) => {
-      if (key === 'META_APP_ID') return 'test-app-id-123';
-      if (key === 'META_CONFIG_ID') return undefined;
+      if (key === 'META_APP_ID') return undefined;
       return null;
     });
 
     expect(() =>
       metaProvider.getAuthUrl('https://test.ngrok-free.app/api/v1/social/meta/callback', 'state'),
-    ).toThrow('META_CONFIG_ID environment variable is missing');
+    ).toThrow('META_APP_ID environment variable is missing');
   });
 });

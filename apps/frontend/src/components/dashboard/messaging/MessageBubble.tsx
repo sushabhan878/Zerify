@@ -47,8 +47,14 @@ export default function MessageBubble({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.18 }}
-      className={`flex ${own ? 'justify-end' : 'justify-start'} ${grouped ? 'mt-0.5' : 'mt-2'}`}
+      className={`flex flex-col ${own ? 'items-end' : 'items-start'} ${grouped ? 'mt-0.5' : 'mt-2.5'}`}
     >
+      {!own && !grouped && message.sender?.name && (
+        <span className="text-[11px] font-bold text-purple-300/90 mb-1 ml-1 select-none">
+          {message.sender.name}
+        </span>
+      )}
+
       <div
         className={`max-w-[85%] sm:max-w-md px-3.5 py-2.5 text-xs space-y-1.5 ${corner} ${
           own
@@ -56,12 +62,6 @@ export default function MessageBubble({
             : 'bg-slate-900/90 border border-white/10 text-slate-100 shadow-md'
         } ${failed ? 'ring-1 ring-rose-500/60' : ''}`}
       >
-        {!own && !grouped && message.sender?.name && (
-          <span className="block text-[10px] font-black text-purple-300">
-            {message.sender.name}
-          </span>
-        )}
-
         {message.content && (
           <p className="leading-relaxed break-words whitespace-pre-wrap">{message.content}</p>
         )}

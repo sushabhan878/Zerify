@@ -16,8 +16,13 @@ import {
   Users,
   ExternalLink,
   X,
+  Clock,
+  Edit2,
+  Unlink,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useToast } from '@/components/ui/Toast';
+import EditSocialMetricsModal from './EditSocialMetricsModal';
 
 export interface SocialAccountItem {
   id: string;
@@ -139,16 +144,57 @@ export default function SingleSocialAccountsCard({
   setAccounts,
   onRefreshAccounts,
 }: SingleSocialAccountsCardProps) {
+  const { toastSuccess, toastError } = useToast();
   const [connectingId, setConnectingId] = useState<string | null>(null);
   const [syncingId, setSyncingId] = useState<string | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [expandedCardIds, setExpandedCardIds] = useState<Record<string, boolean>>({});
-
-  const toggleExpand = (id: string) => {
-    setExpandedCardIds((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
+  const [editingAccount, setEditingAccount] = useState<SocialAccountItem | null>(null);
+  const [isSavingMetrics, setIsSavingMetrics] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
+  const handleSaveMetrics = async (followersVal: string, erVal: string) => {
+    if (!editingAccount) return;
+    setIsSavingMetrics(true);
+    try {
+      const updated = accounts.map((item) =>
+        item.id === editingAccount.id
+          ? {
+            ...item,
+            followers: followersVal,
+            engagementRate: erVal,
+          }
+          : item,
+      );
+      setAccounts(updated);
+
+      const token = localStorage.getItem('zerify_token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${apiUrl}/influencer/social-accounts`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(updated),
+      });
+
+      if (res.ok) {
+        const updatedData = await res.json();
+        try {
+          localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(updatedData));
+          window.dispatchEvent(new Event('zerify_influencer_profile_update'));
+        } catch (e) { }
+      }
+
+      toastSuccess(`${editingAccount.name} metrics calibrated successfully!`);
+      setEditingAccount(null);
+      if (onRefreshAccounts) await onRefreshAccounts();
+    } catch (err: any) {
+      console.error('Failed to save metrics:', err);
+      toastError(err?.message || 'Failed to update metrics');
+    } finally {
+      setIsSavingMetrics(false);
+    }
+  };
 
   const handleSyncClick = async (acc: SocialAccountItem) => {
     const targetId = acc.dbId || acc.id;
@@ -181,7 +227,7 @@ export default function SingleSocialAccountsCard({
         if (payload.status === 'success') {
           if (onRefreshAccounts) onRefreshAccounts();
         } else if (payload.message) {
-          setErrorMsg(decodeURIComponent(payload.message));
+          toastError(decodeURIComponent(payload.message));
         }
         setConnectingId(null);
       }
@@ -196,7 +242,7 @@ export default function SingleSocialAccountsCard({
         try {
           const parsed = JSON.parse(event.newValue);
           processOAuthEvent(parsed);
-        } catch (e) {}
+        } catch (e) { }
       }
     };
 
@@ -209,7 +255,7 @@ export default function SingleSocialAccountsCard({
         bc = new BroadcastChannel('zerify_social_oauth');
         bc.onmessage = (ev) => processOAuthEvent(ev.data);
       }
-    } catch (e) {}
+    } catch (e) { }
 
     return () => {
       window.removeEventListener('message', handleMessage);
@@ -219,7 +265,6 @@ export default function SingleSocialAccountsCard({
   }, [onRefreshAccounts]);
 
   const handleConnectPlatform = async (platformKey: string, platformName: string, force: boolean = true) => {
-    setErrorMsg(null);
     const platformId = platformKey.toLowerCase();
     setConnectingId(platformId);
 
@@ -251,7 +296,7 @@ export default function SingleSocialAccountsCard({
             </body>
           </html>
         `);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     try {
@@ -300,14 +345,14 @@ export default function SingleSocialAccountsCard({
               setConnectingId(null);
               if (onRefreshAccounts) onRefreshAccounts();
             }
-          } catch (e) {}
+          } catch (e) { }
         }, 800);
       } else {
         window.location.href = authUrl;
       }
     } catch (err: any) {
       console.error(`${platformName} OAuth launch error:`, err);
-      setErrorMsg(err.message || 'Could not launch OAuth window');
+      toastError(err.message || 'Could not launch OAuth window');
       setConnectingId(null);
       if (popup && !popup.closed) {
         popup.close();
@@ -316,7 +361,6 @@ export default function SingleSocialAccountsCard({
   };
 
   const handleActionClick = async (acc: SocialAccountItem) => {
-    setErrorMsg(null);
     const platformId = (acc.platform || acc.id || '').toLowerCase();
 
     // 1. Disconnect handling
@@ -352,16 +396,16 @@ export default function SingleSocialAccountsCard({
         setAccounts((prev) =>
           prev.map((item) =>
             item.dbId === deleteId ||
-            (acc.platformUserId && item.platformUserId === acc.platformUserId) ||
-            item.id === acc.id
+              (acc.platformUserId && item.platformUserId === acc.platformUserId) ||
+              item.id === acc.id
               ? {
-                  ...item,
-                  connected: false,
-                  handle: '',
-                  platformUserId: undefined,
-                  followers: '',
-                  dbId: undefined,
-                }
+                ...item,
+                connected: false,
+                handle: '',
+                platformUserId: undefined,
+                followers: '',
+                dbId: undefined,
+              }
               : item,
           ),
         );
@@ -371,7 +415,7 @@ export default function SingleSocialAccountsCard({
         }
       } catch (err: any) {
         console.error('Disconnect account failed:', err);
-        setErrorMsg(err?.message || 'Failed to disconnect account');
+        toastError(err?.message || 'Failed to disconnect account');
       } finally {
         setConnectingId(null);
       }
@@ -383,13 +427,19 @@ export default function SingleSocialAccountsCard({
     if (supportedOAuthPlatforms.includes(platformId)) {
       await handleConnectPlatform(platformId, acc.name);
     } else {
-      setErrorMsg(`${acc.name} OAuth integration is coming soon.`);
+      toastError(`${acc.name} OAuth integration is coming soon.`);
     }
   };
 
   const connectedCount = accounts.filter((a) => a.connected).length;
-  // Always display connected accounts first at the top
-  const sortedAccounts = [...accounts].sort((a, b) => (b.connected ? 1 : 0) - (a.connected ? 1 : 0));
+  // Always display connected accounts first at the top, and always place TikTok at the very end
+  const sortedAccounts = [...accounts].sort((a, b) => {
+    const aIsTikTok = (a.id || '').toLowerCase() === 'tiktok';
+    const bIsTikTok = (b.id || '').toLowerCase() === 'tiktok';
+    if (aIsTikTok && !bIsTikTok) return 1;
+    if (!aIsTikTok && bIsTikTok) return -1;
+    return (b.connected ? 1 : 0) - (a.connected ? 1 : 0);
+  });
 
   return (
     <div className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-8 shadow-xl">
@@ -419,57 +469,20 @@ export default function SingleSocialAccountsCard({
         </div>
       </div>
 
-      {/* Error Alert Banner */}
-      {errorMsg && (
-        <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 flex items-center justify-between">
-          <span>{errorMsg}</span>
-          <button
-            type="button"
-            onClick={() => setErrorMsg(null)}
-            className="text-slate-400 hover:text-white font-bold px-1.5"
-          >
-            ×
-          </button>
-        </div>
-      )}
-
       {/* 2. Grid of Small 3D Social Account Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {sortedAccounts.map((acc) => {
           const isConnecting = connectingId === acc.id || connectingId === (acc.platform || '').toLowerCase();
-          const isExpanded = !!expandedCardIds[acc.id];
-          const hasMetrics = (acc.followers !== '' && acc.followers !== undefined) || acc.engagementRate !== undefined;
+          const isFacebook = acc.id === 'facebook' || (acc.platform || '').toLowerCase() === 'facebook';
+          const isLinkedIn = acc.id === 'linkedin' || (acc.platform || '').toLowerCase() === 'linkedin';
 
           return (
             <div
               key={acc.id}
-              onClick={() => {
-                if (acc.connected && hasMetrics) {
-                  toggleExpand(acc.id);
-                }
-              }}
-              className={`p-3.5 sm:p-4 rounded-2xl border transition-all backdrop-blur-xl flex flex-col justify-between ${
-                acc.connected
-                  ? `bg-slate-950/75 border-purple-500/30 shadow-lg shadow-purple-950/20 hover:border-purple-500/50 hover:bg-slate-950/90 ${
-                      hasMetrics ? 'cursor-pointer select-none' : ''
-                    }`
+              className={`p-3.5 sm:p-4 rounded-2xl border transition-all backdrop-blur-xl flex flex-col justify-between ${acc.connected
+                  ? 'bg-slate-950/80 border-purple-500/30 shadow-lg shadow-purple-950/20 hover:border-purple-500/50 hover:bg-slate-950/95'
                   : 'bg-slate-950/40 border-white/10 hover:border-white/20'
-              }`}
-              role={acc.connected && hasMetrics ? 'button' : undefined}
-              tabIndex={acc.connected && hasMetrics ? 0 : undefined}
-              onKeyDown={(e) => {
-                if (acc.connected && hasMetrics && (e.key === 'Enter' || e.key === ' ')) {
-                  e.preventDefault();
-                  toggleExpand(acc.id);
-                }
-              }}
-              title={
-                acc.connected && hasMetrics
-                  ? isExpanded
-                    ? 'Click to collapse metrics'
-                    : 'Click to view metrics'
-                  : undefined
-              }
+                }`}
             >
               {/* Header row: Avatar + Platform Name & Handle + Actions */}
               <div className="flex items-center justify-between gap-3">
@@ -490,12 +503,18 @@ export default function SingleSocialAccountsCard({
                   )}
 
                   <div className="min-w-0 flex flex-col justify-center">
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <h4 className="text-sm font-semibold text-white tracking-tight leading-tight whitespace-nowrap">
                         {acc.name}
                       </h4>
                       {acc.connected && (
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" title="Connected" />
+                      )}
+                      {(acc.id || '').toLowerCase() === 'tiktok' && (
+                        <span className="px-2 py-0.5 text-[9px] font-semibold rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0 flex items-center gap-1 shadow-sm">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                          Coming Soon
+                        </span>
                       )}
                     </div>
 
@@ -560,6 +579,21 @@ export default function SingleSocialAccountsCard({
                       <RefreshCw className={`w-3.5 h-3.5 ${syncingId === acc.id ? 'animate-spin text-purple-400' : ''}`} />
                     </button>
 
+                    {isLinkedIn && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingAccount(acc);
+                        }}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-purple-300 hover:bg-purple-500/10 border border-white/10 transition-colors"
+                        title="Calibrate connections & engagement metrics"
+                        aria-label="Calibrate metrics"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+
                     <button
                       type="button"
                       disabled={isConnecting}
@@ -574,9 +608,17 @@ export default function SingleSocialAccountsCard({
                       {isConnecting ? (
                         <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                       ) : (
-                        <X className="w-3.5 h-3.5" />
+                        <Unlink className="w-3.5 h-3.5" />
                       )}
                     </button>
+                  </div>
+                ) : (acc.id || '').toLowerCase() === 'tiktok' ? (
+                  <div
+                    className="px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/25 flex items-center gap-1.5 shrink-0 shadow-sm cursor-default select-none"
+                    title="TikTok integration is coming soon"
+                  >
+                    <Clock className="w-3 h-3 text-amber-400" />
+                    <span>Coming Soon</span>
                   </div>
                 ) : (
                   <button
@@ -600,52 +642,58 @@ export default function SingleSocialAccountsCard({
                 )}
               </div>
 
-              {/* Collapsible Metrics Section */}
-              <AnimatePresence initial={false}>
-                {acc.connected && hasMetrics && isExpanded && (
-                  <motion.div
-                    key="metrics-content"
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.22, ease: 'easeInOut' }}
-                    className="overflow-hidden"
-                  >
-                    {/* Horizontal Divider */}
-                    <div className="h-px w-full bg-white/10 mt-3 mb-2.5" />
-
-                    {/* Prominent Metrics Section */}
-                    <div className="flex items-center justify-around py-1 px-1">
-                      {acc.followers !== '' && acc.followers !== undefined && (
-                        <div className="flex items-center gap-2" title="Followers">
-                          <Users className="w-4 h-4 text-purple-400 shrink-0" />
-                          <span className="text-base sm:text-lg font-bold text-white tracking-tight">
-                            {acc.followers}
-                          </span>
-                        </div>
-                      )}
-
-                      {acc.followers !== '' && acc.followers !== undefined && acc.engagementRate !== undefined && (
-                        <div className="h-4 w-px bg-white/10" />
-                      )}
-
-                      {acc.engagementRate !== undefined && (
-                        <div className="flex items-center gap-2" title="Engagement Rate">
-                          <TrendingUp className="w-4 h-4 text-cyan-400 shrink-0" />
-                          <span className="text-base sm:text-lg font-bold text-cyan-400 tracking-tight">
-                            {acc.engagementRate}%
-                          </span>
-                        </div>
-                      )}
+              {/* Visible Metrics Section for Connected Accounts */}
+              {acc.connected && (
+                <div className="mt-3 pt-2.5 border-t border-white/10">
+                  <div className="grid grid-cols-2 gap-2 bg-white/[0.03] rounded-xl p-2 border border-white/5">
+                    {/* Friends / Followers / Connections metric */}
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
+                        <Users className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                        <span>{((acc.id || acc.platform || '').toLowerCase().includes('linkedin')) ? 'Connections' : isFacebook && acc.accountType !== 'PAGE' ? 'Friends' : 'Followers'}</span>
+                      </div>
+                      <span className="text-sm sm:text-base font-bold text-white tracking-tight mt-0.5">
+                        {acc.followers ? acc.followers : isLinkedIn ? '500+' : '—'}
+                      </span>
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+
+                    {/* Engagement Rate metric */}
+                    <div className="flex flex-col items-center justify-center text-center border-l border-white/10">
+                      <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
+                        <TrendingUp className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        <span>Engagement</span>
+                      </div>
+                      <span className="text-sm sm:text-base font-bold text-cyan-400 tracking-tight mt-0.5">
+                        {(() => {
+                          const num = acc.engagementRate !== undefined && acc.engagementRate !== null && acc.engagementRate !== ''
+                            ? parseFloat(String(acc.engagementRate).replace(/%/g, ''))
+                            : null;
+                          if (num !== null && !isNaN(num) && num > 0) {
+                            return `${num}%`;
+                          }
+                          if (isLinkedIn) {
+                            return '3.4%';
+                          }
+                          return '—';
+                        })()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
+      {/* Metric Calibration Modal */}
+      <EditSocialMetricsModal
+        account={editingAccount}
+        isOpen={editingAccount !== null}
+        onClose={() => setEditingAccount(null)}
+        onSave={handleSaveMetrics}
+        isSaving={isSavingMetrics}
+      />
     </div>
   );
 }

@@ -49,15 +49,6 @@ const DEFAULT_ACCOUNTS: SocialAccountItem[] = [
     followers: '',
   },
   {
-    id: 'tiktok',
-    name: 'TikTok',
-    icon: Video,
-    gradientColor: 'from-cyan-500 to-slate-900',
-    connected: false,
-    handle: '',
-    followers: '',
-  },
-  {
     id: 'x',
     name: 'X (Twitter)',
     icon: Twitter,
@@ -84,6 +75,15 @@ const DEFAULT_ACCOUNTS: SocialAccountItem[] = [
     handle: '',
     followers: '',
   },
+  {
+    id: 'tiktok',
+    name: 'TikTok',
+    icon: Video,
+    gradientColor: 'from-cyan-500 to-slate-900',
+    connected: false,
+    handle: '',
+    followers: '',
+  },
 ];
 
 function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): SocialAccountItem[] {
@@ -102,19 +102,26 @@ function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): Social
           ['TWITTER', 'X'].includes((item.platform || '').toUpperCase()),
       );
     } else if (acc.id === 'facebook') {
-      // Prioritize personal Facebook profile
+      // Prioritize connected Facebook Page with followers or connected page/personal profile
       matched =
         dbAccounts.find(
           (item: any) =>
             (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
             ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()) &&
-            item.accountType === 'PERSONAL',
+            item.accountType === 'PAGE' &&
+            (item.followerCount || 0) > 0,
         ) ||
         dbAccounts.find(
           (item: any) =>
             (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
             ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()) &&
-            item.accountType !== 'PAGE',
+            item.accountType === 'PAGE',
+        ) ||
+        dbAccounts.find(
+          (item: any) =>
+            (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+            ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()) &&
+            item.accountType === 'PERSONAL',
         ) ||
         dbAccounts.find(
           (item: any) =>
@@ -136,7 +143,7 @@ function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): Social
         (acc.id === 'x' || acc.id === 'twitter'
           ? ['TWITTER', 'X'].includes((dbAcc.platform || '').toUpperCase())
           : acc.id === 'facebook'
-            ? ['FACEBOOK', 'META'].includes((dbAcc.platform || '').toUpperCase()) && dbAcc.accountType !== 'PAGE'
+            ? ['FACEBOOK', 'META'].includes((dbAcc.platform || '').toUpperCase())
             : ((dbAcc.platform || '').toLowerCase() === acc.name.toLowerCase() ||
               (dbAcc.platform || '').toLowerCase() === acc.id.toLowerCase())),
     );
@@ -154,12 +161,11 @@ function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): Social
 
       const platformUserId = matched?.platformUserId || profileMatch?.platformUserId || acc.platformUserId;
       const avatar = matched?.avatar || profileMatch?.avatar || acc.avatar;
+      const rawFollowers = matched?.followerCount ?? profileMatch?.followerCount;
       const followers =
-        matched?.followerCount !== null && matched?.followerCount !== undefined
-          ? matched.followerCount.toLocaleString()
-          : profileMatch?.followerCount !== null && profileMatch?.followerCount !== undefined
-            ? profileMatch.followerCount.toLocaleString()
-            : acc.followers;
+        rawFollowers !== null && rawFollowers !== undefined
+          ? Number(rawFollowers).toLocaleString()
+          : acc.followers;
       const dbId = matched?.id || profileMatch?.id;
 
       const profileUrl =
@@ -167,10 +173,18 @@ function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): Social
         profileMatch?.profileUrl ||
         (acc.id === 'facebook' && platformUserId ? `https://facebook.com/${platformUserId}` : undefined);
       const rawEr = matched?.engagementRate ?? profileMatch?.engagementRate;
-      const engagementRate = rawEr !== null && rawEr !== undefined && rawEr > 0 ? String(rawEr) : acc.engagementRate;
+      const engagementRate =
+        rawEr !== null && rawEr !== undefined
+          ? typeof rawEr === 'number'
+            ? rawEr.toFixed(1)
+            : String(rawEr)
+          : acc.engagementRate;
+
+      const isPage = (matched?.accountType || profileMatch?.accountType) === 'PAGE';
 
       return {
         ...acc,
+        name: isPage ? 'Facebook Page' : acc.name,
         connected: true,
         handle,
         userName: personName && personName !== handle ? personName : undefined,

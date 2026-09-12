@@ -7,6 +7,9 @@ import OfferReceivedCard from './applications/OfferReceivedCard';
 import OfferDetailModal from './applications/OfferDetailModal';
 import OfferConfirmationModal from './applications/OfferConfirmationModal';
 import { OfferService, CampaignOfferItem } from '@/services/offer.service';
+import { useMessaging } from '@/context/MessagingContext';
+import { MessagingService } from '@/services/messaging.service';
+import { useToast } from '@/components/ui/Toast';
 import LottieLoader from '@/components/ui/LottieLoader';
 
 interface CampaignInvitationsSectionProps {
@@ -14,6 +17,9 @@ interface CampaignInvitationsSectionProps {
 }
 
 export default function CampaignInvitationsSection({ onNavigate }: CampaignInvitationsSectionProps) {
+  const { setActiveConversationId, refreshConversations } = useMessaging();
+  const { toastSuccess, toastError } = useToast();
+
   const [activeTab, setActiveTab] = useState<'PENDING' | 'ALL' | 'ACCEPTED' | 'DECLINED'>('PENDING');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -85,20 +91,56 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
     }
   };
 
+  const handleMessageBrand = async (offer: CampaignOfferItem) => {
+    try {
+      const brandUserId = offer.application?.campaign?.brandProfile?.userId;
+      if (!brandUserId) {
+        onNavigate?.('messages');
+        return;
+      }
+      const res = await MessagingService.createConversation({
+        participantId: brandUserId,
+        campaignId: offer.campaignId,
+      });
+      if (res?.conversationId) {
+        setActiveConversationId(res.conversationId);
+      }
+      await refreshConversations();
+      onNavigate?.('messages');
+    } catch (err) {
+      console.error('Failed to open message conversation with brand:', err);
+      onNavigate?.('messages');
+    }
+  };
+
   const handleConfirmAction = async () => {
     if (!confirmModal.offer || !confirmModal.type) return;
     setIsProcessingAction(true);
     try {
       if (confirmModal.type === 'ACCEPT') {
-        await OfferService.acceptOffer(confirmModal.offer.id);
+        const acceptRes: any = await OfferService.acceptOffer(confirmModal.offer.id);
+        toastSuccess('Offer accepted! Starting your project workspace and opening messages...');
+        await loadData(true);
+        setSelectedOffer(null);
+        setConfirmModal({ isOpen: false, type: null, offer: null });
+
+        const convId = acceptRes?.conversationId;
+        if (convId) {
+          setActiveConversationId(convId);
+        }
+        await refreshConversations();
+        onNavigate?.('messages');
+        return;
       } else {
         await OfferService.declineOffer(confirmModal.offer.id);
+        toastSuccess('Offer declined.');
       }
       await loadData(true);
       setSelectedOffer(null);
       setConfirmModal({ isOpen: false, type: null, offer: null });
-    } catch (err) {
+    } catch (err: any) {
       console.error(`Failed to ${confirmModal.type.toLowerCase()} offer:`, err);
+      toastError(err?.message || `Failed to ${confirmModal.type.toLowerCase()} offer`);
     } finally {
       setIsProcessingAction(false);
     }
@@ -246,6 +288,7 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
               onAccept={requestAcceptOffer}
               onDecline={requestDeclineOffer}
               onViewDetails={(off) => setSelectedOffer(off)}
+              onMessageBrand={handleMessageBrand}
               isAccepting={isProcessingAction && confirmModal.offer?.id === offer.id}
             />
           ))}

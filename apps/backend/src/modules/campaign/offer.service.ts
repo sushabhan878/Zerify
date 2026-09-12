@@ -3,17 +3,24 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { CampaignRepository } from './campaign.repository';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { OfferStatus, ApplicationStatus } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
+import { ConversationService } from '../messaging/conversation.service';
+import { MessageService } from '../messaging/message.service';
 
 @Injectable()
 export class OfferService {
+  private readonly logger = new Logger(OfferService.name);
+
   constructor(
     private readonly repository: CampaignRepository,
     private readonly prisma: PrismaService,
+    private readonly conversationService: ConversationService,
+    private readonly messageService: MessageService,
   ) { }
 
   async sendOffer(userId: string, applicationId: string, dto: CreateOfferDto) {
@@ -103,7 +110,7 @@ export class OfferService {
       dueDate: d.dueDate || undefined,
     }));
 
-    return this.repository.acceptOfferAndCreateParticipant({
+    const participant = await this.repository.acceptOfferAndCreateParticipant({
       offerId,
       campaignId: offer.campaignId,
       influencerProfileId: offer.influencerProfileId,
@@ -114,6 +121,53 @@ export class OfferService {
       agreedPaymentModel: offer.compensationPaymentModel,
       deliverables: templateDeliverables,
     });
+
+    let conversationId: string | undefined;
+    try {
+      const brandUserId = offer.application.campaign.brandProfile?.userId;
+      const influencerUserId = offer.application.influencerProfile?.userId;
+
+      if (brandUserId && influencerUserId) {
+        const conversation = await this.conversationService.resolveCollaborationConversation({
+          applicationId: offer.applicationId,
+          campaignId: offer.campaignId,
+          brandUserId,
+          influencerUserId,
+        });
+
+        conversationId = conversation.id;
+
+        const influencerName =
+          offer.application.influencerProfile?.user?.name ||
+          offer.application.influencerProfile?.handle ||
+          'The creator';
+        const campaignTitle = offer.application.campaign?.title || 'the campaign';
+
+        await this.messageService.createSystemMessage({
+          conversationId: conversation.id,
+          text: `🎉 ${influencerName} accepted the offer for "${campaignTitle}" and started the project! The collaboration is now active.`,
+          systemEvent: 'COLLABORATION_OFFER_ACCEPTED',
+          metadata: {
+            offerId: offer.id,
+            campaignId: offer.campaignId,
+            applicationId: offer.applicationId,
+            systemEvent: 'COLLABORATION_OFFER_ACCEPTED',
+          },
+          clientMessageId: `offer_accepted:${offer.id}`,
+        });
+
+        this.logger.log(
+          `Created collaboration conversation ${conversationId} for offer ${offerId} between brand ${brandUserId} and influencer ${influencerUserId}`,
+        );
+      }
+    } catch (msgErr: any) {
+      this.logger.error('Failed to initialize conversation on offer accept:', msgErr?.stack || msgErr);
+    }
+
+    return {
+      ...participant,
+      conversationId,
+    };
   }
 
   async declineOffer(userId: string, offerId: string) {

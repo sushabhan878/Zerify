@@ -20,6 +20,7 @@ interface OfferReceivedCardProps {
   onAccept: (offerId: string) => void;
   onDecline: (offerId: string) => void;
   onViewDetails?: (offer: CampaignOfferItem) => void;
+  onMessageBrand?: (offer: CampaignOfferItem) => void;
   isAccepting?: boolean;
 }
 
@@ -27,6 +28,8 @@ export default function OfferReceivedCard({
   offer,
   onAccept,
   onDecline,
+  onViewDetails,
+  onMessageBrand,
   isAccepting,
 }: OfferReceivedCardProps) {
   const { format: formatUserCurrency } = useCurrency();
@@ -123,7 +126,14 @@ export default function OfferReceivedCard({
             Response Due: <strong className="text-white font-bold">{deadlineStr}</strong>
           </span>
           <span className="text-slate-700">|</span>
-          <button className="text-xs font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMessageBrand?.(offer);
+            }}
+            className="text-xs font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors"
+          >
             <MessageSquare className="w-3.5 h-3.5" />
             <span>Message Brand</span>
           </button>

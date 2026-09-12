@@ -16,18 +16,19 @@ export default function StatisticKpiCards({ totalFollowers, avgEngagement }: Sta
   const earningsChange = currency === 'INR' ? '+₹2.6L this mo' : '+$3.2K this mo';
 
   const formatFollowers = (count?: number) => {
-    if (!count || count <= 0) return '485.2K';
+    if (count === undefined || count === null) return '—';
+    if (count <= 0) return '0';
     if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
     if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
     return count.toLocaleString();
   };
 
   const followersDisplay = formatFollowers(totalFollowers);
-  const engagementDisplay = avgEngagement && avgEngagement > 0 ? `${avgEngagement}%` : '6.8%';
+  const engagementDisplay = avgEngagement && avgEngagement > 0 ? `${avgEngagement}%` : '—';
 
   const kpis = [
-    { label: 'Total Followers', val: followersDisplay, change: totalFollowers ? 'Live Verified' : '+4.2% this mo', icon: Users, color: 'text-purple-400' },
-    { label: 'Total Reach', val: totalFollowers && totalFollowers > 0 ? formatFollowers(Math.round(totalFollowers * 2.4)) : '1.28M', change: '+18.4%', icon: Eye, color: 'text-pink-400' },
+    { label: 'Total Followers', val: followersDisplay, change: totalFollowers ? 'Live Verified' : 'Sync your accounts', icon: Users, color: 'text-purple-400' },
+    { label: 'Total Reach', val: totalFollowers && totalFollowers > 0 ? formatFollowers(Math.round(totalFollowers * 2.4)) : '—', change: totalFollowers ? '+18.4%' : 'Sync pending', icon: Eye, color: 'text-pink-400' },
     { label: 'Avg Engagement Rate', val: engagementDisplay, change: '+1.2% benchmark', icon: TrendingUp, color: 'text-emerald-400' },
     { label: 'Collaboration Earnings', val: earningsVal, change: earningsChange, icon: DollarSign, color: 'text-indigo-400' },
     { label: 'Profile Visits', val: '42.8K', change: '+12.1%', icon: MousePointer, color: 'text-cyan-400' },

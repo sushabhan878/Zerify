@@ -138,15 +138,8 @@ export class MetaProvider implements ISocialProvider {
     return graphUrl.replace(/\/+$/, '');
   }
 
-  getAuthUrl(redirectUri: string, state: string, codeChallenge?: string, forceReauth: boolean = false): string {
+  getAuthUrl(redirectUri: string, state: string, codeChallenge?: string, forceReauth: boolean = true): string {
     const appId = this.getAppId();
-
-    const configId = this.configService.get<string>('META_CONFIG_ID');
-    if (!configId) {
-      throw new InternalServerErrorException(
-        'META_CONFIG_ID environment variable is missing',
-      );
-    }
 
     const apiVersion = this.configService.get<string>('META_API_VERSION') || 'v26.0';
     const dialogUrl =
@@ -160,21 +153,27 @@ export class MetaProvider implements ISocialProvider {
     url.searchParams.append('state', state);
     url.searchParams.append('response_type', 'code');
     url.searchParams.append('override_default_response_type', 'true');
-    if (configId) {
+
+    // For personal Facebook Profile connection, standard OAuth requires scopes: public_profile, email, user_friends, user_posts.
+    // When config_id is provided, Meta locks permissions to Business assets and ignores user scopes.
+    // Hence, config_id is only attached if explicitly configured via META_USE_CONFIG_ID=true.
+    const configId = this.configService.get<string>('META_CONFIG_ID');
+    const useConfigId = this.configService.get<string>('META_USE_CONFIG_ID') === 'true';
+    if (configId && useConfigId) {
       url.searchParams.append('config_id', configId);
     }
 
     if (forceReauth) {
-      url.searchParams.append('auth_type', 'reauthenticate');
+      url.searchParams.append('auth_type', 'rerequest');
     }
 
     const defaultScopes =
-      'public_profile,email,pages_show_list,pages_read_engagement,instagram_basic,instagram_manage_insights,business_management';
+      'public_profile,email,pages_show_list,pages_read_engagement,pages_read_user_content';
     const customScopes = this.configService.get<string>('META_SCOPES');
 
     if (customScopes) {
       url.searchParams.append('scope', customScopes);
-    } else if (!configId) {
+    } else {
       url.searchParams.append('scope', defaultScopes);
     }
 
@@ -189,22 +188,21 @@ export class MetaProvider implements ISocialProvider {
     const appSecret = this.getAppSecret();
     const graphUrl = this.getGraphApiUrl();
 
-    // 1. Exchange short-lived token
-    const shortTokenUrl = `${graphUrl}/oauth/access_token?client_id=${appId}&redirect_uri=${encodeURIComponent(
+    // Exchange authorization code for short-lived access token
+    const tokenUrl = `${graphUrl}/oauth/access_token?client_id=${appId}&redirect_uri=${encodeURIComponent(
       redirectUri,
-    )}&client_secret=${appSecret}&code=${encodeURIComponent(code)}`;
+    )}&client_secret=${appSecret}&code=${code}`;
 
-    const shortRes = await fetch(shortTokenUrl);
-    const shortData = (await shortRes.json()) as MetaShortTokenResponse & { error?: any };
-
-    if (!shortRes.ok || shortData.error) {
-      this.logger.error('Meta OAuth short-lived token exchange failed', shortData.error);
-      throw new BadRequestException(
-        shortData.error?.message || 'Failed to exchange Meta authorization code',
-      );
+    const res = await fetch(tokenUrl);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      this.logger.error('Meta code exchange error:', err);
+      throw new BadRequestException(err?.error?.message || 'Failed to exchange Meta authorization code');
     }
 
-    // 2. Exchange for long-lived user access token (valid ~60 days)
+    const shortData = (await res.json()) as MetaShortTokenResponse;
+
+    // Exchange short-lived token for long-lived 60-day token
     const longTokenUrl = `${graphUrl}/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${shortData.access_token}`;
     const longRes = await fetch(longTokenUrl);
     const longData = (await longRes.json()) as MetaLongTokenResponse & { error?: any };
@@ -221,22 +219,135 @@ export class MetaProvider implements ISocialProvider {
     name: string;
     email?: string;
     avatar?: string;
+    followerCount?: number;
+    engagementRate?: number;
   } | null> {
     const graphUrl = this.getGraphApiUrl();
     try {
-      const userMeUrl = `${graphUrl}/me?fields=id,name,email,picture.width(480).height(480){url}&access_token=${userAccessToken}`;
+      const userMeUrl = `${graphUrl}/me?fields=id,name,email,picture.width(480).height(480){url},friends.summary(true),link&access_token=${userAccessToken}`;
       let res = await fetch(userMeUrl);
       if (!res.ok) {
         // Fallback to standard picture field if custom dimensions are unsupported
-        res = await fetch(`${graphUrl}/me?fields=id,name,email,picture{url}&access_token=${userAccessToken}`);
+        res = await fetch(`${graphUrl}/me?fields=id,name,email,picture{url},friends.summary(true),link&access_token=${userAccessToken}`);
       }
       if (!res.ok) return null;
-      const data = (await res.json()) as { id: string; name: string; email?: string; picture?: { data?: { url?: string } } };
+      const data = (await res.json()) as any;
+
+      // 1. Resolve Friends / Followers count
+      let friendCount = data.friends?.summary?.total_count ?? (Array.isArray(data.friends?.data) ? data.friends.data.length : null) ?? 0;
+      if (friendCount === 0) {
+        try {
+          const friendsRes = await fetch(`${graphUrl}/me/friends?summary=true&access_token=${userAccessToken}`);
+          if (friendsRes.ok) {
+            const friendsData = await friendsRes.json();
+            friendCount = friendsData.summary?.total_count ?? (Array.isArray(friendsData.data) ? friendsData.data.length : 0);
+          }
+        } catch (fErr) {
+          this.logger.debug('Could not fetch /me/friends summary count:', fErr);
+        }
+      }
+
+      // 1b. Check if user is in Professional Mode with followers_count
+      if (friendCount === 0) {
+        try {
+          const followerRes = await fetch(`${graphUrl}/me?fields=followers_count&access_token=${userAccessToken}`);
+          if (followerRes.ok) {
+            const fData = await followerRes.json();
+            if (typeof fData.followers_count === 'number') {
+              friendCount = fData.followers_count;
+            }
+          }
+        } catch (folErr) {
+          this.logger.debug('Could not fetch /me followers_count:', folErr);
+        }
+      }
+
+      // 1c. Fetch managed pages to aggregate followers if personal profile followers is 0
+      let managedPages: any[] = [];
+      try {
+        const pagesRes = await fetch(`${graphUrl}/me/accounts?fields=id,name,fan_count,followers_count,picture{url},access_token&access_token=${userAccessToken}`);
+        if (pagesRes.ok) {
+          const pagesData = await pagesRes.json();
+          managedPages = Array.isArray(pagesData.data) ? pagesData.data : [];
+          if (friendCount === 0 && managedPages.length > 0) {
+            friendCount = managedPages.reduce((sum, p) => sum + (p.followers_count ?? p.fan_count ?? 0), 0);
+          }
+        }
+      } catch (pagesErr) {
+        this.logger.debug('Could not fetch /me/accounts for follower fallback:', pagesErr);
+      }
+
+      // 2. Query personal posts to calculate live Engagement Rate
+      let totalInteractions = 0;
+      let postCount = 0;
+      try {
+        const postsRes = await fetch(
+          `${graphUrl}/me/posts?fields=id,message,created_time,reactions.summary(true),comments.summary(true),shares&limit=25&access_token=${userAccessToken}`,
+        );
+        if (postsRes.ok) {
+          const postsData = await postsRes.json();
+          let posts = Array.isArray(postsData.data) ? postsData.data : [];
+          if (posts.length === 0) {
+            const feedRes = await fetch(
+              `${graphUrl}/me/feed?fields=id,message,created_time,reactions.summary(true),comments.summary(true),shares&limit=25&access_token=${userAccessToken}`,
+            );
+            if (feedRes.ok) {
+              const feedData = await feedRes.json();
+              posts = Array.isArray(feedData.data) ? feedData.data : [];
+            }
+          }
+
+          postCount = posts.length;
+          for (const p of posts) {
+            const likes = p.reactions?.summary?.total_count ?? 0;
+            const comments = p.comments?.summary?.total_count ?? 0;
+            const shares = p.shares?.count ?? 0;
+            totalInteractions += likes + comments + shares;
+          }
+        }
+      } catch (pErr) {
+        this.logger.debug('Could not query user posts for engagement calculation:', pErr);
+      }
+
+      // If no personal posts returned, query managed pages posts using page access token
+      if (postCount === 0 && managedPages.length > 0) {
+        for (const page of managedPages) {
+          if (!page.access_token) continue;
+          try {
+            const pRes = await fetch(
+              `${graphUrl}/${page.id}/posts?fields=id,message,created_time,reactions.summary(true),comments.summary(true),shares&limit=25&access_token=${page.access_token}`,
+            );
+            if (pRes.ok) {
+              const pData = await pRes.json();
+              const pagePosts = Array.isArray(pData.data) ? pData.data : [];
+              postCount += pagePosts.length;
+              for (const p of pagePosts) {
+                const likes = p.reactions?.summary?.total_count ?? 0;
+                const comments = p.comments?.summary?.total_count ?? 0;
+                const shares = p.shares?.count ?? 0;
+                totalInteractions += likes + comments + shares;
+              }
+            }
+          } catch (pagePostErr) {
+            this.logger.debug(`Could not query page ${page.id} posts:`, pagePostErr);
+          }
+        }
+      }
+
+      let engagementRate = 0.0;
+      if (postCount > 0 && friendCount > 0) {
+        engagementRate = parseFloat((((totalInteractions / postCount) / friendCount) * 100).toFixed(2));
+      } else if (postCount > 0 && totalInteractions > 0) {
+        engagementRate = parseFloat((totalInteractions / postCount).toFixed(2));
+      }
+
       return {
         id: data.id,
         name: data.name,
         email: data.email,
         avatar: data.picture?.data?.url,
+        followerCount: friendCount,
+        engagementRate,
       };
     } catch (err) {
       this.logger.warn('Could not fetch primary Meta user profile:', err);
@@ -345,11 +456,9 @@ export class MetaProvider implements ISocialProvider {
     };
 
     const metricsToRequest = [
-      'page_media_view',
-      'page_impressions_unique',
-      'page_impressions',
       'page_post_engagements',
       'page_views_total',
+      'page_daily_follows',
       'page_daily_follows_unique',
     ].join(',');
 
@@ -376,21 +485,14 @@ export class MetaProvider implements ISocialProvider {
           : null;
 
         if (typeof latestVal === 'number') {
-          if (metricName === 'page_impressions_unique' || metricName === 'page_impressions') {
-            insights.reach = latestVal;
-          }
-          if (metricName === 'page_impressions') {
-            insights.impressions = latestVal;
-          }
-          if (metricName === 'page_media_view') {
-            insights.mediaViews = latestVal;
-          }
           if (metricName === 'page_post_engagements') {
             insights.totalInteractions = latestVal;
             insights.engagedUsers = latestVal;
           }
           if (metricName === 'page_views_total') {
             insights.views = latestVal;
+            insights.impressions = latestVal;
+            insights.reach = latestVal;
           }
         }
       }
@@ -474,7 +576,15 @@ export class MetaProvider implements ISocialProvider {
     while (nextUrl && posts.length < limit) {
       try {
         const res = await fetch(nextUrl);
-        if (!res.ok) break;
+        if (!res.ok) {
+          // If query failed because pages_read_user_content is missing, fall back to basic post fields
+          if (res.status === 400 && nextUrl.includes('reactions.summary')) {
+            const fallbackFields = 'id,message,created_time,permalink_url,shares';
+            nextUrl = `${graphUrl}/${pageId}/posts?fields=${fallbackFields}&limit=${Math.min(limit, 100)}&access_token=${pageAccessToken}`;
+            continue;
+          }
+          break;
+        }
 
         const json = await res.json();
         if (json.error || !Array.isArray(json.data)) break;

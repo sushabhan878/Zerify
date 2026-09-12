@@ -255,6 +255,46 @@ export class LinkedinProvider implements ISocialProvider {
   }
 
   /**
+   * Fetches the member's network size (1st-degree connections + followers)
+   * via LinkedIn's /rest/networkSize endpoint. Returns null when the endpoint
+   * is unavailable for this app's permissions (standard OIDC-only apps get 403).
+   *
+   * Docs: https://learn.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/sign-in-with-linkedin-v2#api-request-to-get-member-s-network-size
+   */
+  async fetchNetworkSize(accessToken: string): Promise<number | null> {
+    try {
+      const res = await fetch('https://api.linkedin.com/rest/networkSize?decoration=(elements(*(*))~version)', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'X-RestLi-Protocol-Version': '2.0.0',
+          'LinkedIn-Version': '202603',
+          Accept: 'application/json',
+        },
+      });
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        this.logger.warn(
+          `LinkedIn networkSize endpoint returned HTTP ${res.status} (standard OIDC scopes restrict member network size): ${errText.substring(0, 200)}`,
+        );
+        return null;
+      }
+
+      const data: any = await res.json();
+      const firstDegree = data?.firstDegreeSize;
+      if (typeof firstDegree === 'number' && firstDegree >= 0) {
+        return firstDegree;
+      }
+
+      this.logger.warn(`LinkedIn networkSize response missing firstDegreeSize: ${JSON.stringify(data).substring(0, 200)}`);
+      return null;
+    } catch (err: any) {
+      this.logger.warn(`LinkedIn networkSize fetch failed: ${err?.message || err}`);
+      return null;
+    }
+  }
+
+  /**
    * Validates LinkedIn OpenID Connect ID token signature, issuer, audience, and expiration.
    */
   private async validateIdToken(idToken: string, expectedClientId: string): Promise<Record<string, any>> {

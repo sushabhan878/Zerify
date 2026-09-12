@@ -323,13 +323,16 @@ export class SocialRepository {
     });
   }
 
-  async disconnectAccount(idOrPlatform: string): Promise<void> {
+  async disconnectAccount(idOrPlatform: string, ownerUserId?: string): Promise<void> {
+    // Guard: never mark every account of a platform (across all users) disconnected.
+    // A platform name is only valid when the requesting user owns an account of that platform.
     const isPlatformEnum = Object.values(SocialPlatform).includes(idOrPlatform as SocialPlatform);
 
-    if (isPlatformEnum) {
+    if (isPlatformEnum && ownerUserId) {
       await this.prisma.socialAccount.updateMany({
         where: {
           platform: idOrPlatform as SocialPlatform,
+          userId: ownerUserId,
         },
         data: {
           status: SocialAccountStatus.DISCONNECTED,
@@ -349,7 +352,9 @@ export class SocialRepository {
       if (account) {
         await this.prisma.socialAccount.updateMany({
           where: {
-            platform: account.platform,
+            id: account.id,
+            // Only the owning user may disconnect their own account
+            ...(ownerUserId ? { userId: ownerUserId } : {}),
           },
           data: {
             status: SocialAccountStatus.DISCONNECTED,
@@ -366,6 +371,8 @@ export class SocialRepository {
           { platformUserId: idOrPlatform },
           ...(isUuid ? [{ id: idOrPlatform }] : []),
         ],
+        // Only the owning user may disconnect their own account
+        ...(ownerUserId ? { userId: ownerUserId } : {}),
       },
       data: {
         status: SocialAccountStatus.DISCONNECTED,

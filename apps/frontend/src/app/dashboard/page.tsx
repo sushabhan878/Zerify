@@ -324,7 +324,13 @@ function DashboardContent() {
           {/* Prominent High-Tech Grid Pattern Background */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(168,85,247,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(168,85,247,0.12)_1px,transparent_1px)] bg-[size:36px_36px] pointer-events-none" />
 
-          <main className="relative z-10 h-full overflow-y-auto no-scrollbar p-4 sm:p-8 md:p-10 max-w-7xl mx-auto">
+          <main
+            className={`relative z-10 h-full no-scrollbar ${
+              activeRoute === 'messages'
+                ? 'p-2 sm:p-4 md:p-5 max-w-[1800px] w-full mx-auto flex flex-col'
+                : 'overflow-y-auto p-4 sm:p-8 md:p-10 max-w-7xl mx-auto'
+            }`}
+          >
             {userRole === 'BRAND' ? (
               <BrandDashboardView
                 userName={userName}

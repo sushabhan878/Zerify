@@ -223,6 +223,7 @@ export class ThreadsProvider implements ISocialProvider {
 
   /**
    * Fetches the user's follower count from Threads Insights API.
+   * Conforms to Meta Threads Insights API: total_value { value } or values[0] { value }.
    */
   async fetchFollowerCount(accessToken: string): Promise<number> {
     try {
@@ -230,10 +231,17 @@ export class ThreadsProvider implements ISocialProvider {
       const res = await fetch(endpoint, { method: 'GET' });
       if (res.ok) {
         const data = await res.json();
-        const count = data?.data?.[0]?.values?.[0]?.value;
+        const item = data?.data?.[0];
+        const count =
+          item?.total_value?.value ??
+          item?.values?.[0]?.value ??
+          item?.value;
         if (typeof count === 'number') {
           return count;
         }
+      } else {
+        const errText = await res.text();
+        this.logger.warn(`Could not fetch Threads followers count (${res.status}): ${errText}`);
       }
     } catch (e) {
       this.logger.warn('Could not fetch Threads followers count from insights endpoint:', e);
@@ -303,5 +311,36 @@ export class ThreadsProvider implements ISocialProvider {
       this.logger.warn('Error fetching user threads posts:', err);
       return [];
     }
+  }
+
+  /**
+   * Fetches lifetime insights for a specific Threads post (views, likes, replies, reposts, quotes).
+   */
+  async fetchThreadPostInsights(
+    accessToken: string,
+    mediaId: string,
+  ): Promise<{ views: number; likes: number; replies: number; reposts: number; quotes: number }> {
+    try {
+      const endpoint = `${this.getApiBaseUrl()}/v1.0/${mediaId}/insights?metric=views,likes,replies,reposts,quotes&access_token=${encodeURIComponent(accessToken)}`;
+      const res = await fetch(endpoint, { method: 'GET' });
+      if (res.ok) {
+        const data = await res.json();
+        const metrics: Record<string, number> = {};
+        for (const item of data?.data || []) {
+          const val = item?.values?.[0]?.value ?? item?.total_value?.value ?? 0;
+          metrics[item.name] = Number(val) || 0;
+        }
+        return {
+          views: metrics.views || 0,
+          likes: metrics.likes || 0,
+          replies: metrics.replies || 0,
+          reposts: metrics.reposts || 0,
+          quotes: metrics.quotes || 0,
+        };
+      }
+    } catch (e) {
+      this.logger.warn(`Could not fetch insights for thread post ${mediaId}:`, e);
+    }
+    return { views: 0, likes: 0, replies: 0, reposts: 0, quotes: 0 };
   }
 }

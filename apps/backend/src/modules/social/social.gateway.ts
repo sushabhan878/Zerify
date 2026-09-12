@@ -38,6 +38,10 @@ export class SocialGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   emitAccountMetricsUpdated(socialAccountId: string, data: any) {
+    if (!this.server) {
+      this.logger.debug(`WebSocket server not attached; skipping broadcast for ${socialAccountId}`);
+      return;
+    }
     this.logger.log(`Emitting real-time stats update for account ${socialAccountId}`);
     this.server.to(`account_${socialAccountId}`).emit('social_stats_updated', {
       socialAccountId,

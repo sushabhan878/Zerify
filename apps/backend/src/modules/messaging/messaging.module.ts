@@ -37,7 +37,7 @@ import { ConversationParticipantGuard } from './guards/conversation-participant.
     MessagingGateway,
     ConversationParticipantGuard,
   ],
-  // OutboxService is what CampaignModule needs to enqueue lifecycle events.
-  exports: [OutboxService, ConversationService, MessagingRepository],
+  // OutboxService, ConversationService, and MessageService are exported for CampaignModule.
+  exports: [OutboxService, ConversationService, MessageService, MessagingRepository],
 })
 export class MessagingModule {}

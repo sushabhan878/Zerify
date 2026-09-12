@@ -4,7 +4,8 @@ import React from 'react';
 import { MessageSquare } from 'lucide-react';
 import { ConnectionStatus } from '@/hooks/useMessagingSocket';
 
-export type ConversationFilter = 'ALL' | 'UNREAD' | 'CAMPAIGN';
+import { ConversationFilter } from './ConversationSidebar';
+export type { ConversationFilter };
 
 const STATUS_COPY: Record<ConnectionStatus, { label: string; dot: string; text: string }> = {
   CONNECTED: { label: 'Live', dot: 'bg-emerald-500', text: 'text-emerald-400' },

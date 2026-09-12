@@ -7,7 +7,13 @@ import { PeerPresence } from '@/context/MessagingContext';
 import LottieLoader from '@/components/ui/LottieLoader';
 import ConversationSearch from './ConversationSearch';
 import ConversationListItem from './ConversationListItem';
-import { ConversationFilter } from './MessagingToolbar';
+export type ConversationFilter = 'ALL' | 'UNREAD' | 'CAMPAIGN';
+
+const TABS: { id: ConversationFilter; label: string }[] = [
+  { id: 'ALL', label: 'All Chats' },
+  { id: 'UNREAD', label: 'Unread' },
+  { id: 'CAMPAIGN', label: 'Campaigns' },
+];
 
 const EMPTY_COPY: Record<ConversationFilter, { title: string; body: string }> = {
   ALL: {
@@ -30,6 +36,8 @@ interface Props {
   activeId: string | null;
   presence: Record<string, PeerPresence>;
   filter: ConversationFilter;
+  onFilterChange: (filter: ConversationFilter) => void;
+  counts: Record<ConversationFilter, number>;
   searchQuery: string;
   onSearch: (q: string) => void;
   onSelect: (id: string) => void;
@@ -41,6 +49,8 @@ export default function ConversationSidebar({
   activeId,
   presence,
   filter,
+  onFilterChange,
+  counts,
   searchQuery,
   onSearch,
   onSelect,
@@ -48,9 +58,41 @@ export default function ConversationSidebar({
   const empty = EMPTY_COPY[filter];
 
   return (
-    <div className="w-full md:w-[336px] border-r border-white/10 shrink-0 bg-slate-950/40 flex flex-col min-h-0">
-      <div className="p-3.5 pb-3 border-b border-white/5">
+    <div className="w-full md:w-[350px] lg:w-[380px] border-r border-white/10 shrink-0 bg-slate-950/40 flex flex-col min-h-0">
+      <div className="p-3.5 pb-2.5 border-b border-white/5 space-y-2.5">
         <ConversationSearch value={searchQuery} onChange={onSearch} />
+
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          {TABS.map((tab) => {
+            const isSelected = filter === tab.id;
+            const count = counts[tab.id] || 0;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => onFilterChange(tab.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
+                  isSelected
+                    ? 'bg-purple-600 text-white shadow-md shadow-purple-900/30'
+                    : 'text-slate-400 hover:text-white bg-slate-900/80 hover:bg-slate-800/80 border border-white/5'
+                }`}
+              >
+                <span>{tab.label}</span>
+                {count > 0 && (
+                  <span
+                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
+                      isSelected
+                        ? 'bg-purple-950/60 text-purple-200'
+                        : 'bg-slate-800 text-slate-300'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="p-2.5 space-y-1.5 overflow-y-auto flex-1 min-h-0">

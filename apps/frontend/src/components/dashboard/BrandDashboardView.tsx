@@ -95,7 +95,7 @@ export default function BrandDashboardView({
   };
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 ${activeRoute === 'messages' ? 'h-full flex flex-col' : ''}`}>
       {/* Profile Completion Setup Banner (Visible on all pages until setup reaches >= 90%) */}
       <ProfileCompletionBanner
         completionPercentage={completionPercentage}
@@ -103,7 +103,11 @@ export default function BrandDashboardView({
       />
 
       {/* Active Section Content */}
-      {renderSection()}
+      {activeRoute === 'messages' ? (
+        <div className="flex-1 min-h-0 flex flex-col">{renderSection()}</div>
+      ) : (
+        renderSection()
+      )}
     </div>
   );
 }

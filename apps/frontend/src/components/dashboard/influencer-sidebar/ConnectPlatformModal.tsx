@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Instagram, Youtube, Twitter, Globe, CheckCircle2, Loader2 } from 'lucide-react';
+import { X, Instagram, Youtube, Twitter, Linkedin, Globe, CheckCircle2, Loader2 } from 'lucide-react';
 
 interface ConnectPlatformModalProps {
   isOpen: boolean;
@@ -18,9 +18,10 @@ export default function ConnectPlatformModal({ isOpen, onClose }: ConnectPlatfor
   const platforms = [
     { name: 'Instagram', icon: Instagram, color: 'from-amber-500 via-rose-500 to-purple-600', description: 'Connect Instagram Business profile & metrics' },
     { name: 'Facebook', icon: Globe, color: 'from-blue-700 via-indigo-600 to-blue-400', description: 'Connect managed Facebook Pages & engagement' },
+    { name: 'LinkedIn', icon: Linkedin, color: 'from-blue-700 via-blue-600 to-cyan-600', description: 'Connect LinkedIn profile, connections & professional reach' },
     { name: 'YouTube', icon: Youtube, color: 'from-red-500 to-rose-700', description: 'Connect channel analytics & video metrics' },
-    { name: 'TikTok', icon: Globe, color: 'from-cyan-400 to-blue-600', description: 'Connect short-form video reach & views' },
     { name: 'X / Twitter', icon: Twitter, color: 'from-sky-400 to-indigo-600', description: 'Import tweet impressions & follower growth' },
+    { name: 'TikTok', icon: Globe, color: 'from-cyan-400 to-blue-600', description: 'Short-form video reach & views (Coming Soon)', isComingSoon: true },
   ];
 
   const handleConnect = (name: string) => {
@@ -78,26 +79,33 @@ export default function ConnectPlatformModal({ isOpen, onClose }: ConnectPlatfor
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleConnect(platform.name)}
-                    disabled={isConnected || isLoading}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                      isConnected
-                        ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
-                        : 'bg-purple-600 hover:bg-purple-500 text-white shadow-md shadow-purple-950/40'
-                    }`}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
-                    ) : isConnected ? (
-                      <>
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Connected</span>
-                      </>
-                    ) : (
-                      <span>Connect</span>
-                    )}
-                  </button>
+                  {platform.isComingSoon ? (
+                    <span className="px-2.5 py-1 rounded-xl text-[11px] font-semibold bg-amber-500/10 border border-amber-500/25 text-amber-300 flex items-center gap-1.5 shrink-0">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                      <span>Coming Soon</span>
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => handleConnect(platform.name)}
+                      disabled={isConnected || isLoading}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                        isConnected
+                          ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                          : 'bg-purple-600 hover:bg-purple-500 text-white shadow-md shadow-purple-950/40'
+                      }`}
+                    >
+                      {isLoading ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                      ) : isConnected ? (
+                        <>
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Connected</span>
+                        </>
+                      ) : (
+                        <span>Connect</span>
+                      )}
+                    </button>
+                  )}
                 </div>
               );
             })}

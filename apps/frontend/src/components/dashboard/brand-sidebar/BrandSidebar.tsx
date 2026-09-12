@@ -49,12 +49,6 @@ export default function BrandSidebar({
   const toggleCollapse = () => setIsCollapsed(!isCollapsed);
   const avatarChar = userName.charAt(0).toUpperCase();
 
-  const quickMessages = [
-    { id: 1, name: 'Erik Gunsel', initial: 'E', color: 'bg-indigo-600' },
-    { id: 2, name: 'Emily Smith', initial: 'E', color: 'bg-pink-600' },
-    { id: 3, name: 'Arthur Adelk', initial: 'A', color: 'bg-purple-600' },
-  ];
-
   return (
     <aside
       style={isCollapsed ? { ...style, width: '80px' } : style}
@@ -120,66 +114,6 @@ export default function BrandSidebar({
             onSelectRoute={handleSelectRoute}
             isCollapsed={isCollapsed}
           />
-
-          {/* Messages List Section */}
-          <div className="pt-1">
-            {!isCollapsed ? (
-              <div className="space-y-2">
-                <div className="px-3 flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                    MESSAGES
-                  </span>
-                  <button
-                    type="button"
-                    title="New Message"
-                    onClick={() => handleSelectRoute('brand-messages')}
-                    className="text-slate-400 hover:text-white"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                <div className="space-y-1">
-                  {quickMessages.map((msg) => (
-                    <button
-                      key={msg.id}
-                      onClick={() => handleSelectRoute('brand-messages')}
-                      type="button"
-                      className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl hover:bg-white/5 transition-colors group"
-                    >
-                      <div className="relative shrink-0">
-                        <div className={`w-7 h-7 rounded-full ${msg.color} text-white font-bold text-xs flex items-center justify-center border border-white/10`}>
-                          {msg.initial}
-                        </div>
-                        <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-500 border border-slate-950" />
-                      </div>
-                      <span className="text-xs font-semibold text-slate-300 group-hover:text-white truncate">
-                        {msg.name}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-2 pt-2">
-                <div className="w-8 h-[1px] bg-white/10 mb-1" />
-                {quickMessages.map((msg) => (
-                  <button
-                    key={msg.id}
-                    onClick={() => handleSelectRoute('brand-messages')}
-                    type="button"
-                    title={msg.name}
-                    className="relative group"
-                  >
-                    <div className={`w-8 h-8 rounded-full ${msg.color} text-white font-bold text-xs flex items-center justify-center border border-white/10 transition-transform group-hover:scale-105`}>
-                      {msg.initial}
-                    </div>
-                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-slate-950" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Bottom CTA Action Card & User Sign Out */}

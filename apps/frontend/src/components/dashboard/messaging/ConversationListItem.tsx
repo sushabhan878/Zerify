@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { ImageIcon, Paperclip, Sparkles } from 'lucide-react';
 import { ConversationItem } from '@/services/messaging.service';
 import ConversationAvatar from './ConversationAvatar';
 
@@ -22,21 +21,6 @@ function relativeTime(iso: string | null): string {
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
-function PreviewIcon({ type }: { type: string }) {
-  if (type === 'IMAGE') return <ImageIcon className="w-3 h-3 text-slate-500 shrink-0" />;
-  if (type === 'FILE') return <Paperclip className="w-3 h-3 text-slate-500 shrink-0" />;
-  if (type === 'SYSTEM') return <Sparkles className="w-3 h-3 text-purple-400 shrink-0" />;
-  return null;
-}
-
-function previewText(conversation: ConversationItem): string {
-  const last = conversation.lastMessage;
-  if (!last) return 'No messages yet';
-  if (last.type === 'IMAGE') return 'Sent an image';
-  if (last.type === 'FILE') return 'Sent a file';
-  return last.content || '';
-}
-
 export default function ConversationListItem({
   conversation,
   active,
@@ -54,7 +38,7 @@ export default function ConversationListItem({
   return (
     <button
       onClick={onSelect}
-      className={`w-full text-left p-3 rounded-2xl transition-all flex items-start gap-3 relative border ${
+      className={`w-full text-left p-3 rounded-2xl transition-all flex items-center gap-3 relative border ${
         active
           ? 'bg-gradient-to-r from-purple-600/25 via-purple-600/10 to-transparent border-purple-500/40 shadow-md shadow-purple-950/30'
           : 'border-transparent hover:bg-white/5 hover:border-white/10'
@@ -70,7 +54,7 @@ export default function ConversationListItem({
         online={online}
       />
 
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden min-w-0">
         <div className="flex items-center justify-between gap-2">
           <span
             className={`text-xs truncate ${
@@ -79,38 +63,27 @@ export default function ConversationListItem({
           >
             {name}
           </span>
-          <span
-            className={`text-[10px] font-bold shrink-0 ${
-              unread > 0 ? 'text-purple-300' : 'text-slate-500'
-            }`}
-          >
-            {relativeTime(conversation.lastMessageAt)}
-          </span>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {unread > 0 && (
+              <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-[9.5px] font-black text-white flex items-center justify-center shadow-sm shadow-purple-950/50">
+                {unread > 99 ? '99+' : unread}
+              </span>
+            )}
+            <span
+              className={`text-[10px] font-bold ${
+                unread > 0 ? 'text-purple-300' : 'text-slate-500'
+              }`}
+            >
+              {relativeTime(conversation.lastMessageAt)}
+            </span>
+          </div>
         </div>
 
         {conversation.campaign?.title && (
-          <span className="mt-0.5 inline-block max-w-full truncate px-1.5 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-[9.5px] font-black uppercase tracking-wide text-purple-300">
+          <span className="mt-1 inline-block max-w-full truncate px-1.5 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-[9.5px] font-black uppercase tracking-wide text-purple-300">
             {conversation.campaign.title}
           </span>
         )}
-
-        <div className="flex items-center justify-between gap-2 mt-1">
-          <span className="flex items-center gap-1.5 min-w-0">
-            {conversation.lastMessage && <PreviewIcon type={conversation.lastMessage.type} />}
-            <p
-              className={`text-[11px] truncate ${
-                unread > 0 ? 'text-slate-100 font-semibold' : 'text-slate-400 font-medium'
-              }`}
-            >
-              {previewText(conversation)}
-            </p>
-          </span>
-          {unread > 0 && (
-            <span className="shrink-0 min-w-[19px] h-[19px] px-1.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-[10px] font-black text-white flex items-center justify-center shadow-sm shadow-purple-950/50">
-              {unread > 99 ? '99+' : unread}
-            </span>
-          )}
-        </div>
       </div>
     </button>
   );

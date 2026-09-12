@@ -247,6 +247,7 @@ export class TwitterProvider implements ISocialProvider {
 
   /**
    * Fetches recent tweets for an X user ID.
+   * Throws on HTTP errors so callers can distinguish API failures from an empty timeline.
    */
   async fetchUserTweets(
     userId: string,
@@ -263,12 +264,31 @@ export class TwitterProvider implements ISocialProvider {
     });
 
     if (!res.ok) {
-      this.logger.warn(`Failed to fetch X user tweets (${res.status}): ${await res.text()}`);
-      return [];
+      const errText = await res.text();
+      this.logger.error(`Failed to fetch X user tweets (${res.status}): ${errText}`);
+      throw new BadRequestException(
+        `Failed to fetch X user tweets (${res.status}): ${this.summarizeErrorBody(errText, res.status)}`,
+      );
     }
 
     const json = await res.json();
     return (json?.data || []) as XTweetResponse[];
+  }
+
+  private summarizeErrorBody(errText: string, status: number): string {
+    try {
+      const parsed = JSON.parse(errText);
+      const detail = parsed?.detail || parsed?.title || parsed?.error_description || parsed?.error;
+      if (detail) {
+        if (status === 403) {
+          return `${detail} (X API tier may not include user tweet timeline access)`;
+        }
+        return String(detail);
+      }
+    } catch {
+      // not JSON, fall through
+    }
+    return errText?.substring(0, 200) || `HTTP ${status}`;
   }
 
   /**
