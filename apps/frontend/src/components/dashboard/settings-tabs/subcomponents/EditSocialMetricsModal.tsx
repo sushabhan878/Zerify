@@ -31,8 +31,13 @@ export default function EditSocialMetricsModal({
 
   useEffect(() => {
     if (account) {
-      const rawFollowers = account.followers ? String(account.followers).replace(/,/g, '') : '';
-      setFollowers(rawFollowers || '500+');
+      const isLi = (account.id || '').toLowerCase().includes('linkedin') || (account.platform || '').toLowerCase().includes('linkedin');
+      const rawFollowers = account.followers ? String(account.followers).replace(/,/g, '').trim() : '';
+      if (isLi && (rawFollowers === '500' || rawFollowers === '500+' || !rawFollowers)) {
+        setFollowers('500+');
+      } else {
+        setFollowers(rawFollowers || (isLi ? '500+' : '0'));
+      }
 
       const rawEr = account.engagementRate !== undefined && account.engagementRate !== null
         ? String(account.engagementRate).replace(/%/g, '')

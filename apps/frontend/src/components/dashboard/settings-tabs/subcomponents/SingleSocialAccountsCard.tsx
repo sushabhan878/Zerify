@@ -156,11 +156,17 @@ export default function SingleSocialAccountsCard({
     if (!editingAccount) return;
     setIsSavingMetrics(true);
     try {
+      const isLi = (editingAccount.id || '').toLowerCase().includes('linkedin');
+      const cleanVal = followersVal.trim();
+      const formattedFollowers = isLi && (cleanVal === '500' || cleanVal === '500+' || !cleanVal)
+        ? '500+'
+        : cleanVal;
+
       const updated = accounts.map((item) =>
         item.id === editingAccount.id
           ? {
             ...item,
-            followers: followersVal,
+            followers: formattedFollowers,
             engagementRate: erVal,
           }
           : item,
@@ -653,7 +659,16 @@ export default function SingleSocialAccountsCard({
                         <span>{((acc.id || acc.platform || '').toLowerCase().includes('linkedin')) ? 'Connections' : isFacebook && acc.accountType !== 'PAGE' ? 'Friends' : 'Followers'}</span>
                       </div>
                       <span className="text-sm sm:text-base font-bold text-white tracking-tight mt-0.5">
-                        {acc.followers ? acc.followers : isLinkedIn ? '500+' : '—'}
+                        {(() => {
+                          if (isLinkedIn) {
+                            if (!acc.followers || acc.followers === '500' || acc.followers === '500+') {
+                              return '500+';
+                            }
+                            const num = parseInt(String(acc.followers).replace(/,/g, ''), 10);
+                            return !isNaN(num) ? num.toLocaleString() : acc.followers;
+                          }
+                          return acc.followers ? acc.followers : '—';
+                        })()}
                       </span>
                     </div>
 

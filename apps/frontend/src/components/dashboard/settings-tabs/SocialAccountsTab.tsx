@@ -162,10 +162,13 @@ function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): Social
       const platformUserId = matched?.platformUserId || profileMatch?.platformUserId || acc.platformUserId;
       const avatar = matched?.avatar || profileMatch?.avatar || acc.avatar;
       const rawFollowers = matched?.followerCount ?? profileMatch?.followerCount;
+      const isLinkedInAcc = acc.id === 'linkedin' || (acc.name || '').toLowerCase() === 'linkedin';
       const followers =
         rawFollowers !== null && rawFollowers !== undefined
-          ? Number(rawFollowers).toLocaleString()
-          : acc.followers;
+          ? (isLinkedInAcc && (rawFollowers === 500 || rawFollowers === 0)
+              ? '500+'
+              : Number(rawFollowers).toLocaleString())
+          : (isLinkedInAcc ? '500+' : acc.followers);
       const dbId = matched?.id || profileMatch?.id;
 
       const profileUrl =
