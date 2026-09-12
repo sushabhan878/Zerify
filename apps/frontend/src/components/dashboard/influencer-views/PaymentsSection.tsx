@@ -63,6 +63,15 @@ export default function PaymentsSection() {
 
   useEffect(() => {
     fetchPayoutData();
+
+    // If navigated from Settings with intent to link payout account
+    try {
+      const shouldOpen = sessionStorage.getItem('zerify_open_link_payout');
+      if (shouldOpen === 'true') {
+        sessionStorage.removeItem('zerify_open_link_payout');
+        setIsLinkModalOpen(true);
+      }
+    } catch (e) {}
   }, []);
 
   const rawTx = [

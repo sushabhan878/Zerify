@@ -16,6 +16,7 @@ interface SettingsSectionProps {
   avatarUrl?: string;
   completionPercentage?: number;
   initialData?: any;
+  onNavigate?: (routeId: string) => void;
 }
 
 type TabType = 'basic' | 'creator' | 'social' | 'portfolio' | 'payment';
@@ -29,6 +30,7 @@ export default function SettingsSection({
   avatarUrl,
   completionPercentage,
   initialData,
+  onNavigate,
 }: SettingsSectionProps = {}) {
   const [activeTab, setActiveTab] = useState<TabType>('basic');
   const [direction, setDirection] = useState<number>(1);
@@ -178,7 +180,14 @@ export default function SettingsSection({
               />
             )}
             {activeTab === 'portfolio' && <PortfolioTab onSaveSuccess={() => handleTabSave('payment')} />}
-            {activeTab === 'payment' && <PaymentSettingsTab onSaveSuccess={() => handleTabSave()} />}
+            {activeTab === 'payment' && (
+              <PaymentSettingsTab
+                initialData={profileData}
+                userName={userName}
+                onNavigate={onNavigate}
+                onSaveSuccess={() => handleTabSave()}
+              />
+            )}
           </motion.div>
         </AnimatePresence>
       </div>

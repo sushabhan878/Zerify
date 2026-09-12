@@ -73,6 +73,7 @@ export default function InfluencerDashboardView({
             avatarUrl={avatarUrl}
             completionPercentage={completionPercentage}
             initialData={influencerProfile}
+            onNavigate={onSelectRoute}
           />
         );
       default:
