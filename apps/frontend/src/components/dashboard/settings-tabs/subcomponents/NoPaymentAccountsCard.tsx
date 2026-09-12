@@ -8,21 +8,9 @@ interface NoPaymentAccountsCardProps {
 }
 
 const STEPS = [
-  {
-    number: '01',
-    title: 'Choose a payout method',
-    description: 'Select a supported bank account or UPI ID.',
-  },
-  {
-    number: '02',
-    title: 'Verify your details',
-    description: 'Enter and verify the required payout information securely.',
-  },
-  {
-    number: '03',
-    title: 'Receive your payout',
-    description: 'Approved earnings are automatically transferred to your linked payout method.',
-  },
+  'Choose a payout method',
+  'Verify your details',
+  'Receive your payout',
 ];
 
 const SUPPORTED_METHODS = [
@@ -77,20 +65,14 @@ export default function NoPaymentAccountsCard({ onAddAccount }: NoPaymentAccount
         <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider text-center">
           How payouts work
         </h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full">
+        <ul className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs text-slate-300">
           {STEPS.map((step) => (
-            <div
-              key={step.number}
-              className="p-4 rounded-xl bg-slate-900/40 border border-white/5 text-left space-y-1.5"
-            >
-              <span className="text-[10px] font-mono font-bold text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20 inline-block">
-                {step.number}
-              </span>
-              <h5 className="text-xs font-semibold text-slate-200">{step.title}</h5>
-              <p className="text-[11px] text-slate-400 leading-relaxed">{step.description}</p>
-            </div>
+            <li key={step} className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
+              <span className="font-medium text-slate-300">{step}</span>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
 
       {/* 5. Supported Methods */}
