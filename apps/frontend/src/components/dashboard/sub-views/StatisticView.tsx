@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BarChart3, Calendar, Filter, Sparkles, Instagram, Youtube, Download } from 'lucide-react';
+import { Sparkles, Download } from 'lucide-react';
 import StatisticKpiCards from './statistic-subcomponents/StatisticKpiCards';
 import AudienceGrowthChart from './statistic-subcomponents/AudienceGrowthChart';
 import EngagementAnalyticsCard from './statistic-subcomponents/EngagementAnalyticsCard';
 import AudienceDemographicsCard from './statistic-subcomponents/AudienceDemographicsCard';
+import TimeframeDropdown from './statistic-subcomponents/TimeframeDropdown';
 
 export default function StatisticView() {
   const [selectedPlatform, setSelectedPlatform] = useState('all');
@@ -79,47 +80,37 @@ export default function StatisticView() {
 
   return (
     <div className="space-y-6">
-      {/* Header & Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-purple-400" />
-            <span>Statistics & Performance Analytics</span>
-          </h2>
-          <p className="text-xs text-slate-400">Aggregated social intelligence, reach metrics, and audience insights</p>
+      {/* Filter & Action Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* Platform filter pills */}
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-950/60 border border-white/10 backdrop-blur-xl overflow-x-auto">
+          {['all', 'instagram', 'youtube', 'twitter', 'threads', 'linkedin'].map((plat) => (
+            <button
+              key={plat}
+              onClick={() => setSelectedPlatform(plat)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all whitespace-nowrap ${
+                selectedPlatform === plat
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {plat === 'twitter' ? 'X (Twitter)' : plat}
+            </button>
+          ))}
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Platform filter pills */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-950/60 border border-white/10 backdrop-blur-xl">
-            {['all', 'instagram', 'youtube', 'tiktok', 'twitter', 'threads', 'linkedin'].map((plat) => (
-              <button
-                key={plat}
-                onClick={() => setSelectedPlatform(plat)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${
-                  selectedPlatform === plat
-                    ? 'bg-purple-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                {plat === 'twitter' ? 'X (Twitter)' : plat}
-              </button>
-            ))}
-          </div>
-
-          {/* Timeframe */}
-          <select
+        {/* Timeframe & Export side by side */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <TimeframeDropdown
             value={selectedTimeframe}
-            onChange={(e) => setSelectedTimeframe(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-slate-950/60 border border-white/10 text-xs font-bold text-slate-300 focus:outline-none focus:border-purple-500/50"
-          >
-            <option value="7d">Last 7 Days</option>
-            <option value="30d">Last 30 Days</option>
-            <option value="90d">Last 90 Days</option>
-          </select>
+            onChange={setSelectedTimeframe}
+          />
 
-          <button className="px-3 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-xs font-bold text-purple-300 flex items-center gap-1.5 transition-colors">
-            <Download className="w-3.5 h-3.5" />
+          <button
+            type="button"
+            className="px-3.5 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 active:scale-95 border border-purple-500/30 hover:border-purple-400/60 text-xs font-semibold text-purple-200 hover:text-white flex items-center gap-2 transition-all duration-200 shadow-sm shadow-purple-950/20 group cursor-pointer whitespace-nowrap"
+          >
+            <Download className="w-3.5 h-3.5 text-purple-400 group-hover:-translate-y-0.5 transition-transform" />
             <span>Export CSV</span>
           </button>
         </div>
@@ -151,7 +142,7 @@ export default function StatisticView() {
         <ul className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-300">
           <li className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-1">
             <span className="font-bold text-purple-300 block">Video Format Dominance</span>
-            <p className="text-[11px] text-slate-400">Video posts outperform static images by 41% higher engagement on Instagram & TikTok.</p>
+            <p className="text-[11px] text-slate-400">Video posts outperform static images by 41% higher engagement on Instagram & YouTube.</p>
           </li>
           <li className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-1">
             <span className="font-bold text-pink-300 block">Optimal Posting Schedule</span>
