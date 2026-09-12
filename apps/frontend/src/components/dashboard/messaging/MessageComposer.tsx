@@ -31,8 +31,11 @@ export default function MessageComposer({
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
-    el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+    el.style.height = '40px';
+    const scrollH = el.scrollHeight;
+    if (scrollH > 40) {
+      el.style.height = `${Math.min(scrollH, 120)}px`;
+    }
   }, [text]);
 
   useEffect(() => () => {
@@ -67,7 +70,7 @@ export default function MessageComposer({
       <div className="flex items-end gap-2">
         <AttachmentButton disabled={disabled || uploading} onPick={onPickFile} />
 
-        <div className="flex-1 relative">
+        <div className="flex-1 relative flex items-center">
           <textarea
             ref={textareaRef}
             rows={1}
@@ -84,7 +87,7 @@ export default function MessageComposer({
                 submit();
               }
             }}
-            className="w-full px-4 py-2.5 rounded-2xl bg-slate-950/80 border border-white/10 text-xs font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/60 focus:ring-1 focus:ring-purple-500/20 transition-all resize-none overflow-y-auto disabled:opacity-60"
+            className="w-full h-10 min-h-[40px] max-h-[120px] px-4 py-2.5 rounded-2xl bg-slate-950/80 border border-white/10 text-xs font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/60 focus:ring-1 focus:ring-purple-500/20 transition-all resize-none overflow-y-auto no-scrollbar disabled:opacity-60 leading-[18px] block"
           />
           {text.length > COUNTER_THRESHOLD && (
             <span className="absolute right-3 -top-5 text-[10px] font-bold text-amber-400">
@@ -97,16 +100,12 @@ export default function MessageComposer({
           type="submit"
           disabled={disabled || !text.trim()}
           aria-label="Send message"
-          className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-xs font-black text-white shadow-lg shadow-purple-950/50 transition-all flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
+          className="h-10 px-4 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-xs font-black text-white shadow-lg shadow-purple-950/50 transition-all flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] shrink-0"
         >
           <Send className="w-4 h-4" />
           <span className="hidden sm:inline">Send</span>
         </button>
       </div>
-
-      <span className="hidden sm:block mt-1.5 px-1 text-[9.5px] font-medium text-slate-600">
-        Enter to send · Shift+Enter for a new line · 25 MB max per file
-      </span>
     </form>
   );
 }

@@ -59,7 +59,7 @@ export default function ConversationSidebar({
 
   return (
     <div className="w-full md:w-[350px] lg:w-[380px] border-r border-white/10 shrink-0 bg-slate-950/40 flex flex-col min-h-0">
-      <div className="p-3.5 pb-2.5 border-b border-white/5 space-y-2.5">
+      <div className="p-3 pb-2 border-b border-white/5 space-y-2">
         <ConversationSearch value={searchQuery} onChange={onSearch} />
 
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
@@ -71,18 +71,18 @@ export default function ConversationSidebar({
                 key={tab.id}
                 type="button"
                 onClick={() => onFilterChange(tab.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap leading-none ${
                   isSelected
-                    ? 'bg-purple-600 text-white shadow-md shadow-purple-900/30'
+                    ? 'bg-purple-600 text-white shadow-sm shadow-purple-900/40'
                     : 'text-slate-400 hover:text-white bg-slate-900/80 hover:bg-slate-800/80 border border-white/5'
                 }`}
               >
                 <span>{tab.label}</span>
                 {count > 0 && (
                   <span
-                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
+                    className={`min-w-[15px] h-[15px] px-1 rounded-full text-[9px] font-bold flex items-center justify-center ${
                       isSelected
-                        ? 'bg-purple-950/60 text-purple-200'
+                        ? 'bg-purple-950/70 text-purple-200'
                         : 'bg-slate-800 text-slate-300'
                     }`}
                   >
@@ -95,7 +95,7 @@ export default function ConversationSidebar({
         </div>
       </div>
 
-      <div className="p-2.5 space-y-1.5 overflow-y-auto flex-1 min-h-0">
+      <div className="p-2.5 space-y-1.5 overflow-y-auto no-scrollbar flex-1 min-h-0">
         {loading ? (
           <div className="flex items-center justify-center py-10">
             <LottieLoader size={120} message="Loading chats" />

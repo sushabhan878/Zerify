@@ -63,7 +63,7 @@ export default function MessageList({
   }
 
   return (
-    <div className="px-4 py-4 space-y-2.5 overflow-y-auto flex-1 min-h-0">
+    <div className="px-4 py-4 space-y-2.5 overflow-y-auto no-scrollbar flex-1 min-h-0">
       {hasMore && (
         <div className="flex justify-center pb-1">
           <button

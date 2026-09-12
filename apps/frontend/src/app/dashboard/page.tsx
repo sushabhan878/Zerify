@@ -327,7 +327,7 @@ function DashboardContent() {
           <main
             className={`relative z-10 h-full no-scrollbar ${
               activeRoute === 'messages'
-                ? 'p-2 sm:p-4 md:p-5 max-w-[1800px] w-full mx-auto flex flex-col'
+                ? 'p-2 sm:p-4 md:p-5 max-w-[1800px] w-full mx-auto flex flex-col overflow-hidden'
                 : 'overflow-y-auto p-4 sm:p-8 md:p-10 max-w-7xl mx-auto'
             }`}
           >

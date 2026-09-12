@@ -70,13 +70,13 @@ export default function ConversationHeader({
     : null;
 
   return (
-    <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between gap-3 bg-slate-950/50 backdrop-blur-xl shrink-0">
-      <div className="flex items-center gap-3 min-w-0">
+    <div className="px-4 py-2 sm:py-2.5 border-b border-white/10 flex items-center justify-between gap-3 bg-slate-950/50 backdrop-blur-xl shrink-0">
+      <div className="flex items-center gap-2.5 min-w-0">
         {onBack && (
           <button
             onClick={onBack}
             aria-label="Back to conversations"
-            className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+            className="md:hidden p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -86,16 +86,16 @@ export default function ConversationHeader({
           name={name}
           avatarUrl={conversation.counterpart?.avatarUrl ?? null}
           online={online}
-          size="lg"
+          size="md"
         />
 
         <div className="min-w-0">
-          <h3 className="text-sm font-black text-white flex items-center gap-1.5">
+          <h3 className="text-sm font-bold text-white flex items-center gap-1.5 leading-tight">
             <span className="truncate">{name}</span>
-            <BadgeCheck className="w-4 h-4 text-purple-400 shrink-0" />
+            <BadgeCheck className="w-3.5 h-3.5 text-purple-400 shrink-0" />
           </h3>
           <span
-            className={`text-[11px] font-semibold ${
+            className={`text-[10.5px] font-medium leading-none ${
               online ? 'text-emerald-400' : 'text-slate-500'
             }`}
           >
@@ -104,15 +104,15 @@ export default function ConversationHeader({
         </div>
       </div>
 
-      <div className="hidden sm:flex items-center gap-2 shrink-0">
+      <div className="hidden sm:flex items-center gap-1.5 shrink-0">
         {conversation.campaign?.title && (
-          <span className="max-w-[180px] truncate px-2.5 py-1 rounded-lg bg-slate-900/80 border border-white/10 text-[10px] font-bold text-slate-300">
+          <span className="max-w-[180px] truncate px-2 py-0.5 rounded-md bg-slate-900/80 border border-white/10 text-[9.5px] font-semibold text-slate-300">
             {conversation.campaign.title}
           </span>
         )}
         {status && (
           <span
-            className={`px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-wide ${status.className}`}
+            className={`px-2.5 py-0.5 rounded-full border text-[9.5px] font-black uppercase tracking-wide ${status.className}`}
           >
             {status.label}
           </span>

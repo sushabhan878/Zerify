@@ -75,7 +75,7 @@ export default function MessagingWorkspace({ role }: { role: 'BRAND' | 'INFLUENC
     counterpartId && typingPeers[counterpartId] ? active?.counterpart?.name ?? 'They' : null;
 
   return (
-    <div className="h-[calc(100vh-95px)] min-h-[640px] md:min-h-[700px] w-full rounded-3xl bg-slate-900/60 border border-white/10 backdrop-blur-xl flex flex-col md:flex-row overflow-hidden shadow-xl shadow-purple-950/10">
+    <div className="h-[calc(100vh-175px)] min-h-[560px] md:min-h-[620px] w-full rounded-3xl bg-slate-900/60 border border-white/10 backdrop-blur-xl flex flex-col md:flex-row overflow-hidden shadow-xl shadow-purple-950/10">
       <div className={`${active ? 'hidden md:flex' : 'flex'} min-h-0`}>
         <ConversationSidebar
           conversations={visible}

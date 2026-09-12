@@ -101,11 +101,11 @@ export default function SettingsSection({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Settings className="w-4 h-4 text-purple-400" />
+          <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
+            <Settings className="w-5 h-5 text-purple-400" />
             <span>Profile & Account Settings</span>
           </h2>
-          <p className="text-xs text-slate-400/80">
+          <p className="text-xs text-slate-400">
             Manage your personal profile, creator niche details, social links & Cashfree payout preferences
           </p>
         </div>

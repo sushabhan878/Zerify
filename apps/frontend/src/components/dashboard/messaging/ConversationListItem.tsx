@@ -34,18 +34,19 @@ export default function ConversationListItem({
 }) {
   const name = conversation.counterpart?.name ?? 'Zerify User';
   const unread = conversation.unreadCount || 0;
+  const subtitle = conversation.campaign?.title || conversation.lastMessage?.content;
 
   return (
     <button
       onClick={onSelect}
-      className={`w-full text-left p-3 rounded-2xl transition-all flex items-center gap-3 relative border ${
+      className={`w-full text-left py-2 px-2.5 sm:px-3 rounded-2xl transition-all flex items-center gap-2.5 relative border ${
         active
           ? 'bg-gradient-to-r from-purple-600/25 via-purple-600/10 to-transparent border-purple-500/40 shadow-md shadow-purple-950/30'
           : 'border-transparent hover:bg-white/5 hover:border-white/10'
       }`}
     >
       {active && (
-        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-7 w-[3px] rounded-r-full bg-gradient-to-b from-purple-400 to-pink-500" />
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r-full bg-gradient-to-b from-purple-400 to-pink-500" />
       )}
 
       <ConversationAvatar
@@ -54,24 +55,26 @@ export default function ConversationListItem({
         online={online}
       />
 
-      <div className="flex-1 overflow-hidden min-w-0">
-        <div className="flex items-center justify-between gap-2">
+      <div className="flex-1 overflow-hidden min-w-0 h-10 flex flex-col justify-center">
+        {/* Line 1: Company / Counterpart Name (Bold, larger) + Timestamp / Unread Badge */}
+        <div className="flex items-center justify-between gap-2 min-w-0">
           <span
-            className={`text-xs truncate ${
-              unread > 0 ? 'font-black text-white' : 'font-bold text-slate-200'
+            className={`text-sm font-bold truncate leading-tight ${
+              unread > 0 ? 'text-white font-extrabold' : 'text-slate-100'
             }`}
+            title={name}
           >
             {name}
           </span>
           <div className="flex items-center gap-1.5 shrink-0">
             {unread > 0 && (
-              <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-[9.5px] font-black text-white flex items-center justify-center shadow-sm shadow-purple-950/50">
+              <span className="min-w-[17px] h-[17px] px-1 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-[9px] font-black text-white flex items-center justify-center shadow-sm shadow-purple-950/50">
                 {unread > 99 ? '99+' : unread}
               </span>
             )}
             <span
-              className={`text-[10px] font-bold ${
-                unread > 0 ? 'text-purple-300' : 'text-slate-500'
+              className={`text-[10px] font-medium shrink-0 leading-none ${
+                unread > 0 ? 'text-purple-300 font-bold' : 'text-slate-500'
               }`}
             >
               {relativeTime(conversation.lastMessageAt)}
@@ -79,10 +82,14 @@ export default function ConversationListItem({
           </div>
         </div>
 
-        {conversation.campaign?.title && (
-          <span className="mt-1 inline-block max-w-full truncate px-1.5 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-[9.5px] font-black uppercase tracking-wide text-purple-300">
-            {conversation.campaign.title}
-          </span>
+        {/* Line 2: Campaign title in simple text (One-liner, truncated) */}
+        {subtitle && (
+          <p
+            className="text-xs text-slate-400 font-normal truncate mt-0.5 leading-tight"
+            title={subtitle}
+          >
+            {subtitle}
+          </p>
         )}
       </div>
     </button>

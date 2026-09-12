@@ -52,7 +52,7 @@ export default function AttachmentButton({
         onClick={() => inputRef.current?.click()}
         aria-label="Attach a file"
         title="Attach a file (max 25 MB)"
-        className="p-2.5 rounded-2xl bg-slate-900/80 border border-white/10 text-slate-400 hover:text-purple-300 hover:border-purple-500/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+        className="w-10 h-10 rounded-2xl bg-slate-900/80 border border-white/10 text-slate-400 hover:text-purple-300 hover:border-purple-500/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shrink-0"
       >
         <Paperclip className="w-4 h-4" />
       </button>
