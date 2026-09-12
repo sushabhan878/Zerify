@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { CreditCard, Plus, ArrowRight, Building2, Smartphone, Lock } from 'lucide-react';
+import { CreditCard, Plus, ArrowRight, ArrowDown, Building2, Smartphone, Lock } from 'lucide-react';
 
 interface NoPaymentAccountsCardProps {
   onAddAccount: () => void;
@@ -10,7 +10,7 @@ interface NoPaymentAccountsCardProps {
 const STEPS = [
   'Choose a payout method',
   'Verify your details',
-  'Receive your payout',
+  'Receive your payouts',
 ];
 
 const SUPPORTED_METHODS = [
@@ -65,14 +65,19 @@ export default function NoPaymentAccountsCard({ onAddAccount }: NoPaymentAccount
         <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider text-center">
           How payouts work
         </h4>
-        <ul className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs text-slate-300">
-          {STEPS.map((step) => (
-            <li key={step} className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 text-xs text-slate-300">
+          {STEPS.map((step, idx) => (
+            <React.Fragment key={step}>
               <span className="font-medium text-slate-300">{step}</span>
-            </li>
+              {idx < STEPS.length - 1 && (
+                <>
+                  <ArrowRight className="hidden sm:block w-3.5 h-3.5 text-purple-400 shrink-0" />
+                  <ArrowDown className="sm:hidden w-3.5 h-3.5 text-purple-400 shrink-0" />
+                </>
+              )}
+            </React.Fragment>
           ))}
-        </ul>
+        </div>
       </div>
 
       {/* 5. Supported Methods */}
