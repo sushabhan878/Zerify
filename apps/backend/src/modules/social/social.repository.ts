@@ -246,10 +246,14 @@ export class SocialRepository {
   }
 
   async getAudienceDemographicsByAccountId(socialAccountId: string) {
-    return this.prisma.socialAudienceDemographic.findMany({
-      where: { socialAccountId },
-      orderBy: { value: 'desc' },
-    });
+    const [genders, ageGroups, countries, cities, locales] = await Promise.all([
+      this.prisma.socialAudienceGender.findMany({ where: { socialAccountId }, orderBy: { count: 'desc' } }),
+      this.prisma.socialAudienceAge.findMany({ where: { socialAccountId }, orderBy: { count: 'desc' } }),
+      this.prisma.socialAudienceCountry.findMany({ where: { socialAccountId }, orderBy: { count: 'desc' } }),
+      this.prisma.socialAudienceCity.findMany({ where: { socialAccountId }, orderBy: { count: 'desc' } }),
+      this.prisma.socialAudienceLocale.findMany({ where: { socialAccountId }, orderBy: { count: 'desc' } }),
+    ]);
+    return { genders, ageGroups, countries, cities, locales };
   }
 
   async getUserAudienceDemographics(userId: string) {
@@ -261,12 +265,74 @@ export class SocialRepository {
     const accountIds = userAccounts.map((a) => a.id);
     if (accountIds.length === 0) return { accounts: [], demographics: [] };
 
-    const demographics = await this.prisma.socialAudienceDemographic.findMany({
-      where: { socialAccountId: { in: accountIds } },
-      orderBy: { value: 'desc' },
-    });
+    const [genders, ageGroups, countries, cities, locales] = await Promise.all([
+      this.prisma.socialAudienceGender.findMany({ where: { socialAccountId: { in: accountIds } }, orderBy: { count: 'desc' } }),
+      this.prisma.socialAudienceAge.findMany({ where: { socialAccountId: { in: accountIds } }, orderBy: { count: 'desc' } }),
+      this.prisma.socialAudienceCountry.findMany({ where: { socialAccountId: { in: accountIds } }, orderBy: { count: 'desc' } }),
+      this.prisma.socialAudienceCity.findMany({ where: { socialAccountId: { in: accountIds } }, orderBy: { count: 'desc' } }),
+      this.prisma.socialAudienceLocale.findMany({ where: { socialAccountId: { in: accountIds } }, orderBy: { count: 'desc' } }),
+    ]);
 
-    return { accounts: userAccounts, demographics };
+    // Adapter array format for frontend dashboard charts
+    const demographics: Array<{
+      socialAccountId: string;
+      type: string;
+      key: string;
+      label: string | null;
+      value: number;
+      percentage: number | null;
+    }> = [
+      ...genders.map((g) => ({
+        socialAccountId: g.socialAccountId,
+        type: 'AGE_GENDER',
+        key: g.gender,
+        label: g.label,
+        value: g.count,
+        percentage: g.percentage,
+      })),
+      ...ageGroups.map((a) => ({
+        socialAccountId: a.socialAccountId,
+        type: 'AGE_GENDER',
+        key: a.ageRange,
+        label: a.label,
+        value: a.count,
+        percentage: a.percentage,
+      })),
+      ...countries.map((c) => ({
+        socialAccountId: c.socialAccountId,
+        type: 'COUNTRY',
+        key: c.countryCode,
+        label: c.countryName,
+        value: c.count,
+        percentage: c.percentage,
+      })),
+      ...cities.map((ct) => ({
+        socialAccountId: ct.socialAccountId,
+        type: 'CITY',
+        key: ct.cityName,
+        label: ct.cityName,
+        value: ct.count,
+        percentage: ct.percentage,
+      })),
+      ...locales.map((l) => ({
+        socialAccountId: l.socialAccountId,
+        type: 'LOCALE',
+        key: l.locale,
+        label: l.label,
+        value: l.count,
+        percentage: l.percentage,
+      })),
+    ];
+
+    return {
+      accounts: userAccounts,
+      demographics,
+      genders,
+      ageGroups,
+      countries,
+      cities,
+      locales,
+    };
   }
 
   async findByUserId(userId: string): Promise<SocialAccount[]> {
@@ -460,6 +526,175 @@ export class SocialRepository {
     });
   }
 
+
+
+  async upsertAudienceGender(
+    socialAccountId: string,
+    gender: string,
+    count: number,
+    label?: string,
+    percentage?: number | null,
+    rawData?: any,
+  ) {
+    const normGender = gender.toUpperCase();
+    return this.prisma.socialAudienceGender.upsert({
+      where: {
+        socialAccountId_gender: {
+          socialAccountId,
+          gender: normGender,
+        },
+      },
+      create: {
+        socialAccountId,
+        gender: normGender,
+        label: label || (normGender === 'M' ? 'Male' : normGender === 'F' ? 'Female' : 'Unspecified'),
+        count,
+        percentage,
+        rawData,
+      },
+      update: {
+        count,
+        label: label || (normGender === 'M' ? 'Male' : normGender === 'F' ? 'Female' : 'Unspecified'),
+        percentage,
+        rawData,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async upsertAudienceAge(
+    socialAccountId: string,
+    ageRange: string,
+    count: number,
+    label?: string,
+    percentage?: number | null,
+    rawData?: any,
+  ) {
+    return this.prisma.socialAudienceAge.upsert({
+      where: {
+        socialAccountId_ageRange: {
+          socialAccountId,
+          ageRange,
+        },
+      },
+      create: {
+        socialAccountId,
+        ageRange,
+        label: label || `Age ${ageRange}`,
+        count,
+        percentage,
+        rawData,
+      },
+      update: {
+        count,
+        label: label || `Age ${ageRange}`,
+        percentage,
+        rawData,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async upsertAudienceCountry(
+    socialAccountId: string,
+    countryCode: string,
+    count: number,
+    countryName?: string,
+    percentage?: number | null,
+    rawData?: any,
+  ) {
+    const normCode = countryCode.toUpperCase();
+    return this.prisma.socialAudienceCountry.upsert({
+      where: {
+        socialAccountId_countryCode: {
+          socialAccountId,
+          countryCode: normCode,
+        },
+      },
+      create: {
+        socialAccountId,
+        countryCode: normCode,
+        countryName: countryName || normCode,
+        count,
+        percentage,
+        rawData,
+      },
+      update: {
+        count,
+        countryName: countryName || normCode,
+        percentage,
+        rawData,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async upsertAudienceCity(
+    socialAccountId: string,
+    cityName: string,
+    count: number,
+    countryCode?: string,
+    percentage?: number | null,
+    rawData?: any,
+  ) {
+    return this.prisma.socialAudienceCity.upsert({
+      where: {
+        socialAccountId_cityName: {
+          socialAccountId,
+          cityName,
+        },
+      },
+      create: {
+        socialAccountId,
+        cityName,
+        countryCode,
+        count,
+        percentage,
+        rawData,
+      },
+      update: {
+        count,
+        countryCode: countryCode || undefined,
+        percentage,
+        rawData,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async upsertAudienceLocale(
+    socialAccountId: string,
+    locale: string,
+    count: number,
+    label?: string,
+    percentage?: number | null,
+    rawData?: any,
+  ) {
+    return this.prisma.socialAudienceLocale.upsert({
+      where: {
+        socialAccountId_locale: {
+          socialAccountId,
+          locale,
+        },
+      },
+      create: {
+        socialAccountId,
+        locale,
+        label,
+        count,
+        percentage,
+        rawData,
+      },
+      update: {
+        count,
+        label,
+        percentage,
+        rawData,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
   async upsertAudienceDemographic(
     socialAccountId: string,
     type: 'AGE_GENDER' | 'COUNTRY' | 'CITY' | 'LOCALE',
@@ -475,39 +710,20 @@ export class SocialRepository {
       rawData?: any;
     },
   ) {
-    return this.prisma.socialAudienceDemographic.upsert({
-      where: {
-        socialAccountId_type_key: {
-          socialAccountId,
-          type,
-          key,
-        },
-      },
-      create: {
-        socialAccountId,
-        type,
-        key,
-        value,
-        label,
-        percentage: extra?.percentage,
-        timeframe: extra?.timeframe || 'last_30_days',
-        source: extra?.source || 'instagram_graph_api',
-        sourceMetric: extra?.sourceMetric || 'follower_demographics',
-        fetchedAt: extra?.fetchedAt || new Date(),
-        rawData: extra?.rawData,
-      },
-      update: {
-        value,
-        label,
-        ...(extra?.percentage !== undefined ? { percentage: extra.percentage } : {}),
-        ...(extra?.timeframe !== undefined ? { timeframe: extra.timeframe } : {}),
-        ...(extra?.source !== undefined ? { source: extra.source } : {}),
-        ...(extra?.sourceMetric !== undefined ? { sourceMetric: extra.sourceMetric } : {}),
-        ...(extra?.fetchedAt !== undefined ? { fetchedAt: extra.fetchedAt } : {}),
-        ...(extra?.rawData !== undefined ? { rawData: extra.rawData } : {}),
-        updatedAt: new Date(),
-      },
-    });
+    if (type === 'AGE_GENDER') {
+      const upKey = key.toUpperCase();
+      if (['M', 'F', 'U', 'MALE', 'FEMALE', 'UNSPECIFIED'].includes(upKey)) {
+        return this.upsertAudienceGender(socialAccountId, upKey, value, label, extra?.percentage, extra?.rawData);
+      } else if (/^\d{2}-\d{2}$/.test(key) || /^\d{2}\+$/.test(key)) {
+        return this.upsertAudienceAge(socialAccountId, key, value, label, extra?.percentage, extra?.rawData);
+      }
+    } else if (type === 'COUNTRY') {
+      return this.upsertAudienceCountry(socialAccountId, key, value, label, extra?.percentage, extra?.rawData);
+    } else if (type === 'CITY') {
+      return this.upsertAudienceCity(socialAccountId, key, value, undefined, extra?.percentage, extra?.rawData);
+    } else if (type === 'LOCALE') {
+      return this.upsertAudienceLocale(socialAccountId, key, value, label, extra?.percentage, extra?.rawData);
+    }
   }
 
   async upsertMediaWithPerformance(
@@ -731,9 +947,11 @@ export class SocialRepository {
       where: { id: socialAccountId },
       include: {
         metadata: true,
-        demographics: {
-          orderBy: { value: 'desc' },
-        },
+        audienceGenders: { orderBy: { count: 'desc' } },
+        audienceAgeGroups: { orderBy: { count: 'desc' } },
+        audienceCountries: { orderBy: { count: 'desc' } },
+        audienceCities: { orderBy: { count: 'desc' } },
+        audienceLocales: { orderBy: { count: 'desc' } },
         performance: {
           orderBy: { recordedAt: 'desc' },
           take: 30,

@@ -372,7 +372,11 @@ export class ApplicationService {
                 socialAccounts: {
                   include: {
                     metadata: true,
-                    demographics: true,
+                    audienceGenders: true,
+                    audienceAgeGroups: true,
+                    audienceCountries: true,
+                    audienceCities: true,
+                    audienceLocales: true,
                     performance: true,
                   },
                 },
@@ -383,7 +387,11 @@ export class ApplicationService {
         socialAccount: {
           include: {
             metadata: true,
-            demographics: true,
+            audienceGenders: true,
+            audienceAgeGroups: true,
+            audienceCountries: true,
+            audienceCities: true,
+            audienceLocales: true,
             performance: true,
           },
         },

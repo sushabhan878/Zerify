@@ -289,11 +289,15 @@ model SocialAccount {
   lastTokenError  String?
 
   // Linked Small Modular Tables
-  metadata     SocialProfileMetadata?
-  demographics SocialAudienceDemographic[]
-  performance  SocialAccountPerformance[]
-  contents     SocialMediaContent[]
-  syncStates   SocialSyncState[]
+  metadata          SocialProfileMetadata?
+  audienceGenders   SocialAudienceGender[]
+  audienceAgeGroups SocialAudienceAge[]
+  audienceCountries SocialAudienceCountry[]
+  audienceCities    SocialAudienceCity[]
+  audienceLocales   SocialAudienceLocale[]
+  performance       SocialAccountPerformance[]
+  contents          SocialMediaContent[]
+  syncStates        SocialSyncState[]
 
   // Custom Platform Data (e.g. Facebook page access tokens, page IDs, YouTube channel IDs)
   customData   Json?
@@ -365,25 +369,94 @@ model SocialProfileMetadata {
   @@map("social_profile_metadata")
 }
 
-// 2. Audience Demographic Table (1-to-many with SocialAccount)
-model SocialAudienceDemographic {
-  id              String          @id @default(uuid())
+// 2a. Gender Distribution Table (1-to-many with SocialAccount)
+model SocialAudienceGender {
+  id              String                      @id @default(uuid())
   socialAccountId String
-  socialAccount   SocialAccount   @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
-  type            DemographicType
-  key             String // e.g., "18-24.M", "US", "New York", "en_US"
-  label           String? // Human-readable label
-  value           Float           @default(0) // Count or raw platform demographic measure
-  percentage      Float?          // Normalized percentage (0-100)
-  timeframe       String?         @default("last_30_days")
-  source          String?         // e.g. "instagram_graph_api", "youtube_analytics"
-  sourceMetric    String?         // e.g. "follower_demographics"
-  fetchedAt       DateTime?       @default(now())
-  rawData         Json?           // Sanitized raw breakdown object
-  updatedAt       DateTime        @updatedAt
+  socialAccount   SocialAccount               @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  gender          String                      // "M", "F", "U", "MALE", "FEMALE", "UNSPECIFIED"
+  label           String?                     // "Male", "Female", "Unspecified"
+  count           Float                       @default(0)
+  percentage      Float?                      // Normalized percentage (0-100)
+  rawData         Json?
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
 
-  @@unique([socialAccountId, type, key])
-  @@map("social_audience_demographics")
+  @@unique([socialAccountId, gender])
+  @@index([socialAccountId])
+  @@map("social_audience_genders")
+}
+
+// 2b. Age Group Distribution Table (1-to-many with SocialAccount)
+model SocialAudienceAge {
+  id              String                      @id @default(uuid())
+  socialAccountId String
+  socialAccount   SocialAccount               @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  ageRange        String                      // e.g. "13-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+"
+  label           String?                     // "Age 18-24"
+  count           Float                       @default(0)
+  percentage      Float?                      // Normalized percentage (0-100)
+  rawData         Json?
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+
+  @@unique([socialAccountId, ageRange])
+  @@index([socialAccountId])
+  @@map("social_audience_age_groups")
+}
+
+// 2c. Country Distribution Table (1-to-many with SocialAccount)
+model SocialAudienceCountry {
+  id              String                      @id @default(uuid())
+  socialAccountId String
+  socialAccount   SocialAccount               @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  countryCode     String                      // ISO 2-letter country code, e.g. "IN", "US", "RU"
+  countryName     String?                     // e.g. "India", "Russia", "United States"
+  count           Float                       @default(0)
+  percentage      Float?                      // Normalized percentage (0-100)
+  rawData         Json?
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+
+  @@unique([socialAccountId, countryCode])
+  @@index([socialAccountId])
+  @@map("social_audience_countries")
+}
+
+// 2d. City Distribution Table (1-to-many with SocialAccount)
+model SocialAudienceCity {
+  id              String                      @id @default(uuid())
+  socialAccountId String
+  socialAccount   SocialAccount               @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  cityName        String                      // e.g. "Kolkata, West Bengal", "Durgapur, West Bengal"
+  countryCode     String?                     // e.g. "IN"
+  count           Float                       @default(0)
+  percentage      Float?                      // Normalized percentage (0-100)
+  rawData         Json?
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+
+  @@unique([socialAccountId, cityName])
+  @@index([socialAccountId])
+  @@map("social_audience_cities")
+}
+
+// 2e. Locale / Language Distribution Table (1-to-many with SocialAccount)
+model SocialAudienceLocale {
+  id              String                      @id @default(uuid())
+  socialAccountId String
+  socialAccount   SocialAccount               @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  locale          String                      // e.g. "en_US", "hi_IN"
+  label           String?                     // "English (US)", "Hindi"
+  count           Float                       @default(0)
+  percentage      Float?                      // Normalized percentage (0-100)
+  rawData         Json?
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+
+  @@unique([socialAccountId, locale])
+  @@index([socialAccountId])
+  @@map("social_audience_locales")
 }
 
 // 3. Account Performance Table (Time-series / Snapshots 1-to-many with SocialAccount)

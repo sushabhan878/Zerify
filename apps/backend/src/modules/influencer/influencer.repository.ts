@@ -322,7 +322,11 @@ export class InfluencerRepository {
             role: true,
             socialAccounts: {
               include: {
-                demographics: true,
+                audienceGenders: true,
+                audienceAgeGroups: true,
+                audienceCountries: true,
+                audienceCities: true,
+                audienceLocales: true,
                 performance: true,
               },
             },

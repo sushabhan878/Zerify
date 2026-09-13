@@ -1056,8 +1056,8 @@ export class SocialService implements OnModuleInit {
         lastStartedAt: syncStartedAt,
       });
       await this.socialRepository.recordAccountPerformance(socialAccountId, {
-        recordedAt: this.truncateToHour(new Date()),
-        period: 'HOUR',
+        recordedAt: this.getStartOfDay(new Date()),
+        period: 'day',
         source: 'X_API_V2',
         likes: totalLikes,
         comments: totalReplies,
@@ -1101,7 +1101,7 @@ export class SocialService implements OnModuleInit {
       this.socialGateway.emitAccountMetricsUpdated(socialAccountId, fullAnalytics || account);
       this.logger.log(
         `Successfully synced X (Twitter) profile & tweets for account ${socialAccountId} ` +
-          `(tweets: ${tweets.length}, engagementRate: ${engagementRate ?? 'n/a'})`,
+        `(tweets: ${tweets.length}, engagementRate: ${engagementRate ?? 'n/a'})`,
       );
     } catch (err: any) {
       this.logger.error(`Failed to sync X account ${socialAccountId}:`, err?.stack || err);
@@ -2015,74 +2015,191 @@ export class SocialService implements OnModuleInit {
         });
       }
 
-      // 3. Fetch Time-Series Account Insights (Metric-by-Metric, preserving NULL for unsupported metrics)
-      const metricsMap: Record<string, number | null> = {};
-      const insightMetrics = isFacebook
-        ? ['page_post_engagements', 'page_views_total', 'page_daily_follows', 'page_video_views']
-        : ['reach', 'views', 'accounts_engaged', 'total_interactions', 'likes', 'comments', 'shares', 'saves'];
+      // 3. Fetch Account Insights (Instagram Graph API v26.0 - Past 7 Days Historical Daily Snapshots)
+      const igBatchMetrics = [
+        'reach',
+        'views',
+        'profile_views',
+        'website_clicks',
+        'accounts_engaged',
+        'total_interactions',
+        'likes',
+        'comments',
+        'shares',
+        'saves',
+        'replies',
+        'profile_links_taps',
+      ];
 
-      for (const metric of insightMetrics) {
-        const insResult = await this.fetchGraphApiWithFallback(
+      // 3a. Fetch Follows & Unfollows breakdown for today
+      let followsVal: number | null = null;
+      let unfollowsVal: number | null = null;
+      try {
+        const followResult = await this.fetchGraphApiWithFallback(
           account.platform,
           'insights',
-          { metric, period: 'day' },
+          {
+            metric: 'follows_and_unfollows',
+            breakdown: 'follow_type',
+            metric_type: 'total_value',
+            period: 'day',
+          },
           rawToken,
           account.platformUserId,
         );
 
-        if (insResult.ok && insResult.data) {
-          const valuesArr = insResult.data.data?.[0]?.values;
-          const latestVal = valuesArr?.[valuesArr.length - 1]?.value;
-          metricsMap[metric] = typeof latestVal === 'number' ? latestVal : null;
-        } else {
-          metricsMap[metric] = null;
+        if (followResult.ok && followResult.data?.data?.[0]) {
+          const item = followResult.data.data[0];
+          const results = item.total_value?.breakdowns?.[0]?.results;
+          if (Array.isArray(results)) {
+            followsVal = 0;
+            unfollowsVal = 0;
+            for (const r of results) {
+              const dim = (r.dimension_values || []).join(' ').toLowerCase();
+              if (dim.includes('unfollow')) {
+                unfollowsVal += typeof r.value === 'number' ? r.value : 0;
+              } else if (dim.includes('follow')) {
+                followsVal += typeof r.value === 'number' ? r.value : 0;
+              }
+            }
+          }
         }
+      } catch (fErr) {
+        this.logger.debug(`Follows & unfollows breakdown fetch skipped/failed: ${fErr}`);
       }
 
-      const todayDate = new Date();
-      todayDate.setHours(0, 0, 0, 0);
-
-      const reachVal = metricsMap['reach'] !== undefined && metricsMap['reach'] !== null
-        ? metricsMap['reach']
-        : (metricsMap['page_post_engagements'] ?? null);
-
-      const impressionsVal = metricsMap['views'] !== undefined && metricsMap['views'] !== null
-        ? metricsMap['views']
-        : (metricsMap['page_views_total'] ?? null);
-
-      const totalInteractionsVal = metricsMap['total_interactions'] !== undefined && metricsMap['total_interactions'] !== null
-        ? metricsMap['total_interactions']
-        : null;
-
-      // Calculate engagement rate safely: never 0/0. If reach is missing or 0, store null
+      // 3b. Sync daily snapshots for the past 7 days (today + past 6 days) so historical charts match Instagram app
       let calculatedEngagementRate: number | null = null;
-      if (typeof reachVal === 'number' && reachVal > 0 && typeof totalInteractionsVal === 'number') {
-        calculatedEngagementRate = Number(((totalInteractionsVal / reachVal) * 100).toFixed(2));
-      } else if (typeof account.followerCount === 'number' && account.followerCount > 0 && typeof totalInteractionsVal === 'number') {
-        calculatedEngagementRate = Number(((totalInteractionsVal / account.followerCount) * 100).toFixed(2));
-      }
+      const historyDays = 7;
+      for (let dayOffset = 0; dayOffset < historyDays; dayOffset++) {
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() - dayOffset);
+        targetDate.setHours(0, 0, 0, 0);
 
-      // Save into unified performance table with strict nullability (NULL = unsupported, not 0)
-      await this.socialRepository.recordAccountPerformance(socialAccountId, {
-        recordedAt: todayDate,
-        period: 'day',
-        source: isFacebook ? 'facebook_graph_api' : 'instagram_graph_api',
-        reach: reachVal,
-        impressions: impressionsVal,
-        profileViews: metricsMap['profile_views'] ?? null,
-        websiteClicks: metricsMap['website_clicks'] ?? null,
-        accountsEngaged: metricsMap['accounts_engaged'] ?? null,
-        totalInteractions: totalInteractionsVal,
-        views: metricsMap['views'] ?? null,
-        likes: metricsMap['likes'] ?? null,
-        comments: metricsMap['comments'] ?? null,
-        shares: metricsMap['shares'] ?? null,
-        saves: metricsMap['saves'] ?? null,
-        followerCount: account.followerCount ?? null,
-        engagementRate: calculatedEngagementRate,
-        rawMetrics: metricsMap,
-        extraMetrics: metricsMap,
-      });
+        const startTimestamp = Math.floor(targetDate.getTime() / 1000);
+        const endTimestamp = dayOffset === 0 ? Math.floor(Date.now() / 1000) : startTimestamp + 86399;
+
+        const dayMetricsMap: Record<string, number | null> = {};
+
+        const batchResult = await this.fetchGraphApiWithFallback(
+          account.platform,
+          'insights',
+          {
+            metric: igBatchMetrics.join(','),
+            metric_type: 'total_value',
+            period: 'day',
+            since: String(startTimestamp),
+            until: String(endTimestamp),
+          },
+          rawToken,
+          account.platformUserId,
+        );
+
+        if (batchResult.ok && Array.isArray(batchResult.data?.data)) {
+          for (const item of batchResult.data.data) {
+            const metricName = item.name;
+            if (typeof item.total_value?.value === 'number') {
+              dayMetricsMap[metricName] = item.total_value.value;
+            } else if (Array.isArray(item.values) && item.values.length > 0) {
+              const lastVal = item.values[item.values.length - 1]?.value;
+              dayMetricsMap[metricName] = typeof lastVal === 'number' ? lastVal : null;
+            }
+          }
+        }
+
+        // Fallback for today if batch query omitted metrics
+        if (dayOffset === 0) {
+          const missingMetrics = igBatchMetrics.filter((m) => dayMetricsMap[m] === undefined);
+          for (const metric of missingMetrics) {
+            const insResult = await this.fetchGraphApiWithFallback(
+              account.platform,
+              'insights',
+              { metric, metric_type: 'total_value', period: 'day' },
+              rawToken,
+              account.platformUserId,
+            );
+
+            if (insResult.ok && insResult.data) {
+              const item = insResult.data.data?.[0];
+              if (typeof item?.total_value?.value === 'number') {
+                dayMetricsMap[metric] = item.total_value.value;
+              } else if (Array.isArray(item?.values) && item.values.length > 0) {
+                const lastVal = item.values[item.values.length - 1]?.value;
+                dayMetricsMap[metric] = typeof lastVal === 'number' ? lastVal : null;
+              } else {
+                dayMetricsMap[metric] = null;
+              }
+            } else {
+              dayMetricsMap[metric] = null;
+            }
+          }
+        }
+
+        const reachVal = dayMetricsMap['reach'] !== undefined ? dayMetricsMap['reach'] : null;
+        // In Meta Graph API v18+, 'views' is the canonical metric replacing deprecated account impressions
+        const viewsVal = dayMetricsMap['views'] !== undefined ? dayMetricsMap['views'] : null;
+        const impressionsVal = viewsVal;
+        const profileViewsVal = dayMetricsMap['profile_views'] !== undefined ? dayMetricsMap['profile_views'] : null;
+        const websiteClicksVal = dayMetricsMap['website_clicks'] !== undefined ? dayMetricsMap['website_clicks'] : null;
+        const accountsEngagedVal = dayMetricsMap['accounts_engaged'] !== undefined ? dayMetricsMap['accounts_engaged'] : null;
+        const totalInteractionsVal = dayMetricsMap['total_interactions'] !== undefined ? dayMetricsMap['total_interactions'] : null;
+        const likesVal = dayMetricsMap['likes'] !== undefined ? dayMetricsMap['likes'] : null;
+        const commentsVal = dayMetricsMap['comments'] !== undefined ? dayMetricsMap['comments'] : null;
+        const sharesVal = dayMetricsMap['shares'] !== undefined ? dayMetricsMap['shares'] : null;
+        const savesVal = dayMetricsMap['saves'] !== undefined ? dayMetricsMap['saves'] : null;
+        const repliesVal = dayMetricsMap['replies'] !== undefined ? dayMetricsMap['replies'] : null;
+        const profileLinksTapsVal = dayMetricsMap['profile_links_taps'] !== undefined ? dayMetricsMap['profile_links_taps'] : null;
+
+        // Calculate engagement rate safely: never 0/0. If reach is missing or 0, store null
+        let dayEngagementRate: number | null = null;
+        if (typeof reachVal === 'number' && reachVal > 0 && typeof totalInteractionsVal === 'number') {
+          dayEngagementRate = Number(((totalInteractionsVal / reachVal) * 100).toFixed(2));
+        } else if (typeof account.followerCount === 'number' && account.followerCount > 0 && typeof totalInteractionsVal === 'number') {
+          dayEngagementRate = Number(((totalInteractionsVal / account.followerCount) * 100).toFixed(2));
+        }
+
+        // On day 0 (today), update the live SocialAccount followerCount & engagementRate
+        if (dayOffset === 0) {
+          calculatedEngagementRate = dayEngagementRate;
+          if (calculatedEngagementRate !== null) {
+            await this.socialRepository.updateAccountFollowerCount(
+              socialAccountId,
+              account.followerCount || 0,
+              calculatedEngagementRate,
+            );
+          }
+        }
+
+        // Save daily snapshot into unified performance table
+        await this.socialRepository.recordAccountPerformance(socialAccountId, {
+          recordedAt: targetDate,
+          period: 'day',
+          source: 'instagram_graph_api',
+          reach: reachVal,
+          impressions: impressionsVal,
+          profileViews: profileViewsVal,
+          websiteClicks: websiteClicksVal,
+          accountsEngaged: accountsEngagedVal,
+          totalInteractions: totalInteractionsVal,
+          views: viewsVal,
+          likes: likesVal,
+          comments: commentsVal,
+          shares: sharesVal,
+          saves: savesVal,
+          replies: repliesVal,
+          follows: dayOffset === 0 ? followsVal : null,
+          unfollows: dayOffset === 0 ? unfollowsVal : null,
+          profileLinksTaps: profileLinksTapsVal,
+          followerCount: account.followerCount ?? null,
+          engagementRate: dayEngagementRate,
+          rawMetrics: dayMetricsMap,
+          extraMetrics: {
+            ...dayMetricsMap,
+            follows: dayOffset === 0 ? followsVal : null,
+            unfollows: dayOffset === 0 ? unfollowsVal : null,
+          },
+        });
+      }
 
       // 4. Fetch Audience Demographics (Only real API-derived data; never fabricate or seed fake rows)
       let demographicCount = 0;
@@ -2791,8 +2908,8 @@ export class SocialService implements OnModuleInit {
         followerCount = typeof pageProfile.followers_count === 'number'
           ? pageProfile.followers_count
           : typeof pageProfile.fan_count === 'number'
-          ? pageProfile.fan_count
-          : (account.followerCount ?? 0);
+            ? pageProfile.fan_count
+            : (account.followerCount ?? 0);
         const isVerified = typeof pageProfile.is_verified === 'boolean' ? pageProfile.is_verified : null;
         profileUrl = pageProfile.link || account.profileUrl || `https://facebook.com/${account.platformUserId}`;
 
@@ -2844,8 +2961,11 @@ export class SocialService implements OnModuleInit {
         engagementRate = parseFloat(((insights.totalInteractions / followerCount) * 100).toFixed(2));
       }
 
+      const todayDate = new Date();
+      todayDate.setHours(0, 0, 0, 0);
+
       await this.socialRepository.recordAccountPerformance(socialAccountId, {
-        recordedAt: new Date(),
+        recordedAt: todayDate,
         period: 'day',
         source: 'FACEBOOK_GRAPH_API',
         reach: insights.reach,
