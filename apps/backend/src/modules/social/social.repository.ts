@@ -38,13 +38,18 @@ export class SocialRepository {
     // 1. Resolve Handle (always formatted with leading @)
     let handle = data.handle?.trim();
     if (!handle) {
-      handle = `@${data.username.replace(/^@/, '')}`;
+      if (data.username?.startsWith('@')) {
+        handle = data.username.trim();
+      } else if (data.username) {
+        handle = `@${data.username.replace(/^@/, '')}`;
+      }
     } else if (!handle.startsWith('@')) {
       handle = `@${handle}`;
     }
 
-    // 2. Resolve Person's Name (User Name)
-    let personName = (data.displayName?.trim() || data.username?.trim() || '').replace(/^@/, '');
+    // 2. Resolve Person's Name / Display Name
+    const resolvedDisplayName = data.displayName?.trim() || null;
+    let personName = (resolvedDisplayName || data.username?.trim() || '').replace(/^@/, '');
 
     // 3. Resolve Canonical Profile URL
     let profileUrl = data.profileUrl?.trim() || null;
@@ -111,8 +116,8 @@ export class SocialRepository {
       },
       update: {
         username: personName,
-        handle,
-        avatar: data.avatar,
+        ...(handle ? { handle } : {}),
+        ...(data.avatar !== undefined ? { avatar: data.avatar } : {}),
         ...(data.accountType !== undefined ? { accountType: data.accountType } : {}),
         ...(data.followerCount !== undefined ? { followerCount: data.followerCount } : {}),
         ...(data.engagementRate !== undefined ? { engagementRate: data.engagementRate } : {}),
@@ -710,12 +715,19 @@ export class SocialRepository {
       rawData?: any;
     },
   ) {
-    if (type === 'AGE_GENDER') {
+    if (type === 'AGE_GENDER' || (type as string) === 'AGE' || (type as string) === 'GENDER') {
       const upKey = key.toUpperCase();
       if (['M', 'F', 'U', 'MALE', 'FEMALE', 'UNSPECIFIED'].includes(upKey)) {
         return this.upsertAudienceGender(socialAccountId, upKey, value, label, extra?.percentage, extra?.rawData);
-      } else if (/^\d{2}-\d{2}$/.test(key) || /^\d{2}\+$/.test(key)) {
+      } else if (/^\d{2}-\d{2}$/.test(key) || /^\d{2}\+$/.test(key) || /^\d{2}_/.test(key)) {
         return this.upsertAudienceAge(socialAccountId, key, value, label, extra?.percentage, extra?.rawData);
+      } else if (key.includes('.')) {
+        const [agePart, genderPart] = key.split('.');
+        const cleanAge = agePart.replace(/^age/, '');
+        const upGender = (genderPart || '').toUpperCase();
+        const cleanGender = ['FEMALE', 'F'].includes(upGender) ? 'F' : ['MALE', 'M'].includes(upGender) ? 'M' : 'U';
+        await this.upsertAudienceAge(socialAccountId, cleanAge, value, `Age ${cleanAge}`, extra?.percentage, extra?.rawData);
+        return this.upsertAudienceGender(socialAccountId, cleanGender, value, cleanGender === 'F' ? 'Female' : 'Male', extra?.percentage, extra?.rawData);
       }
     } else if (type === 'COUNTRY') {
       return this.upsertAudienceCountry(socialAccountId, key, value, label, extra?.percentage, extra?.rawData);

@@ -5,6 +5,7 @@ export class SocialAccountProfileDto {
   platformUserId: string;
   username?: string;
   displayName?: string;
+  handle?: string;
   avatar?: string;
   followerCount?: number;
   profileUrl?: string;

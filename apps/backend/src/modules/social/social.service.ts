@@ -478,13 +478,18 @@ export class SocialService implements OnModuleInit {
           raw.subscriberCount !== undefined && raw.subscriberCount !== null ? raw.subscriberCount : profile.followerCount ?? null;
         const videoCount = raw.videoCount !== undefined && raw.videoCount !== null ? raw.videoCount : null;
 
+        const cleanHandle =
+          profile.handle ||
+          (profile.username?.startsWith('@') ? profile.username : (raw.customUrl || `@${profile.username}`));
+
         const savedAcc = await this.socialRepository.upsertAccount({
           userId,
           platform: profile.platform,
           platformUserId: profile.platformUserId,
           accountType: 'CHANNEL',
-          username: profile.username || 'YouTube Channel',
+          username: profile.displayName || profile.username || 'YouTube Channel',
           displayName: profile.displayName || profile.username,
+          handle: cleanHandle,
           avatar: profile.avatar,
           profileUrl: profile.profileUrl,
           followerCount: subscriberCount,
@@ -508,7 +513,7 @@ export class SocialService implements OnModuleInit {
 
         if (profile.rawData) {
           await this.socialRepository.upsertProfileMetadata(savedAcc.id, {
-            username: profile.username,
+            username: cleanHandle,
             displayName: raw.channelTitle || profile.displayName,
             bio: raw.channelDescription,
             customUrl: raw.customUrl,
@@ -1415,6 +1420,11 @@ export class SocialService implements OnModuleInit {
         platformUserId: account.platformUserId,
         accountType: 'CHANNEL',
         username: account.username || '',
+        displayName: account.username || undefined,
+        handle: account.handle || undefined,
+        avatar: account.avatar || undefined,
+        followerCount: account.followerCount ?? undefined,
+        profileUrl: account.profileUrl || undefined,
         accessToken: encryptedAccess,
         refreshToken: encryptedRefresh,
         expiresAt: refreshed.expiresAt,
@@ -1489,6 +1499,56 @@ export class SocialService implements OnModuleInit {
     try {
       this.logger.log(`Starting YouTube channel deep sync for account ${socialAccountId}...`);
 
+      // 1. Fetch live YouTube channel profile (channels.list) to refresh subscribers, title, handle, avatar
+      let currentFollowers = account.followerCount ?? 0;
+      try {
+        const channelProfile = await this.youtubeProvider.fetchChannelProfile(accessToken);
+        if (channelProfile) {
+          currentFollowers =
+            channelProfile.subscriberCount !== null ? channelProfile.subscriberCount : currentFollowers;
+
+          await this.socialRepository.upsertAccount({
+            userId: account.userId,
+            platform: account.platform,
+            platformUserId: account.platformUserId,
+            accountType: 'CHANNEL',
+            username: channelProfile.title || channelProfile.handle,
+            displayName: channelProfile.title,
+            handle: channelProfile.handle,
+            avatar: channelProfile.avatarUrl || account.avatar,
+            followerCount: currentFollowers,
+            profileUrl: channelProfile.profileUrl,
+            accessToken: account.accessToken,
+            refreshToken: account.refreshToken,
+            expiresAt: account.expiresAt,
+            tokenType: account.tokenType || 'BEARER',
+            tokenStatus: 'ACTIVE',
+            refreshMethod: 'OAUTH_REFRESH_TOKEN',
+          });
+
+          await this.socialRepository.upsertProfileMetadata(socialAccountId, {
+            username: channelProfile.handle,
+            displayName: channelProfile.title,
+            bio: channelProfile.description,
+            customUrl: channelProfile.customUrl,
+            avatarUrl: channelProfile.avatarUrl || account.avatar,
+            country: channelProfile.country,
+            isVerified: null,
+            followerCount: currentFollowers,
+            mediaCount: channelProfile.videoCount ?? undefined,
+            extraMetrics: {
+              subscriberCount: channelProfile.subscriberCount,
+              videoCount: channelProfile.videoCount,
+              viewCount: channelProfile.viewCount?.toString(),
+              bannerUrl: channelProfile.bannerUrl,
+              publishedAt: channelProfile.publishedAt,
+            },
+          });
+        }
+      } catch (profileErr) {
+        this.logger.warn(`Could not refresh YouTube channel profile for ${socialAccountId}:`, profileErr);
+      }
+
       const channelId = (account.customData as any)?.channelId || account.platformUserId;
       const playlistId =
         uploadsPlaylistId || (account.customData as any)?.uploadsPlaylistId || `UU${channelId.substring(2)}`;
@@ -1527,7 +1587,7 @@ export class SocialService implements OnModuleInit {
       for (const snap of analytics) {
         const snapViews = Number(snap.views || 0);
         const interactions = (snap.likes || 0) + (snap.comments || 0) + (snap.shares || 0);
-        const snapEngagementRate = snapViews > 0 ? Number(((interactions / snapViews) * 100).toFixed(2)) : null;
+        const snapEngagementRate = snapViews > 0 ? Number(((interactions / snapViews) * 100).toFixed(2)) : 0.0;
 
         await this.socialRepository.recordAccountPerformance(socialAccountId, {
           recordedAt: snap.date,
@@ -1541,6 +1601,7 @@ export class SocialService implements OnModuleInit {
           impressions: null,
           engagementRate: snapEngagementRate,
           totalInteractions: interactions,
+          followerCount: currentFollowers,
           rawMetrics: {
             views: snap.views.toString(),
             likes: snap.likes,
@@ -1555,20 +1616,47 @@ export class SocialService implements OnModuleInit {
       }
 
       // Calculate aggregate channel engagement rate across analytics
+      let overallEngagementRate: number | null = null;
       if (analytics.length > 0) {
         const totalViews = analytics.reduce((acc, a) => acc + Number(a.views || 0), 0);
         const totalInteractions = analytics.reduce(
           (acc, a) => acc + (a.likes || 0) + (a.comments || 0) + (a.shares || 0),
           0,
         );
-        const overallEngagementRate = totalViews > 0 ? Number(((totalInteractions / totalViews) * 100).toFixed(2)) : null;
-        if (overallEngagementRate !== null) {
-          await this.socialRepository.updateAccountFollowerCount(
-            socialAccountId,
-            account.followerCount ?? 0,
-            overallEngagementRate,
-          );
-        }
+        overallEngagementRate = totalViews > 0 ? Number(((totalInteractions / totalViews) * 100).toFixed(2)) : 0.0;
+      } else if (videos.length > 0) {
+        const totalViews = videos.reduce((acc, v) => acc + Number(v.viewCount || 0), 0);
+        const totalInteractions = videos.reduce(
+          (acc, v) => acc + (v.likeCount || 0) + (v.commentCount || 0),
+          0,
+        );
+        overallEngagementRate = totalViews > 0 ? Number(((totalInteractions / totalViews) * 100).toFixed(2)) : 0.0;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        await this.socialRepository.recordAccountPerformance(socialAccountId, {
+          recordedAt: today,
+          period: 'DAY',
+          source: 'YOUTUBE_DATA_API_VIDEOS',
+          views: totalViews,
+          likes: videos.reduce((acc, v) => acc + (v.likeCount || 0), 0),
+          comments: videos.reduce((acc, v) => acc + (v.commentCount || 0), 0),
+          shares: 0,
+          reach: null,
+          impressions: null,
+          engagementRate: overallEngagementRate,
+          totalInteractions,
+          followerCount: currentFollowers,
+        });
+      }
+
+      if (overallEngagementRate !== null) {
+        await this.socialRepository.updateAccountFollowerCount(
+          socialAccountId,
+          currentFollowers,
+          overallEngagementRate,
+        );
       }
 
       // Fetch channel demographics from YouTube Analytics (real only, zero synthetic fallbacks)

@@ -235,6 +235,10 @@ export class YoutubeProvider implements ISocialProvider {
     const bannerUrl = branding.image?.bannerExternalUrl;
     const uploadsPlaylistId = contentDetails.relatedPlaylists?.uploads;
 
+    const cleanHandle = snippet.customUrl
+      ? (snippet.customUrl.startsWith('@') ? snippet.customUrl : `@${snippet.customUrl}`)
+      : (snippet.title ? `@${snippet.title.replace(/\s+/g, '_').toLowerCase()}` : `@channel_${channelId}`);
+
     // Section 13: Canonical profile URL
     const canonicalProfileUrl = snippet.customUrl
       ? `https://www.youtube.com/${snippet.customUrl}`
@@ -244,8 +248,9 @@ export class YoutubeProvider implements ISocialProvider {
       {
         platform: SocialPlatform.YOUTUBE,
         platformUserId: channelId,
-        username: snippet.customUrl || snippet.title,
+        username: snippet.title || cleanHandle,
         displayName: snippet.title,
+        handle: cleanHandle,
         profileUrl: canonicalProfileUrl,
         avatar: avatarUrl,
         followerCount: subscriberCount ?? undefined,
@@ -268,6 +273,106 @@ export class YoutubeProvider implements ISocialProvider {
         },
       },
     ];
+  }
+
+  /**
+   * Fetches latest live channel profile directly from YouTube Data API v3 channels.list.
+   * Conforms to TRD Section 8, 9, 10, 13 & 14.
+   */
+  async fetchChannelProfile(accessToken: string): Promise<{
+    channelId: string;
+    title: string;
+    customUrl?: string;
+    handle: string;
+    description: string;
+    avatarUrl?: string;
+    bannerUrl?: string;
+    subscriberCount: number | null;
+    videoCount: number | null;
+    viewCount: bigint | null;
+    country?: string;
+    publishedAt?: Date;
+    uploadsPlaylistId?: string;
+    profileUrl: string;
+  } | null> {
+    if (accessToken.startsWith('mock_')) {
+      return null;
+    }
+
+    try {
+      const channelRes = await fetch(
+        'https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails,brandingSettings&mine=true',
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Accept: 'application/json',
+          },
+        },
+      );
+
+      if (!channelRes.ok) {
+        const errJson = await channelRes.json().catch(() => ({}));
+        this.logger.warn('Failed to query YouTube channels.list during sync:', errJson);
+        return null;
+      }
+
+      const channelData = await channelRes.json();
+      const items = channelData.items || [];
+      if (items.length === 0) return null;
+
+      const channel = items[0];
+      const channelId = channel.id;
+      const snippet = channel.snippet || {};
+      const stats = channel.statistics || {};
+      const contentDetails = channel.contentDetails || {};
+      const branding = channel.brandingSettings || {};
+
+      const subscriberCount =
+        stats.hiddenSubscriberCount === true || stats.subscriberCount === undefined || stats.subscriberCount === null
+          ? null
+          : parseInt(stats.subscriberCount, 10);
+
+      const videoCount =
+        stats.videoCount !== undefined && stats.videoCount !== null ? parseInt(stats.videoCount, 10) : null;
+
+      const viewCount = stats.viewCount ? BigInt(stats.viewCount) : null;
+
+      const avatarUrl =
+        snippet.thumbnails?.high?.url ||
+        snippet.thumbnails?.medium?.url ||
+        snippet.thumbnails?.default?.url;
+
+      const bannerUrl = branding.image?.bannerExternalUrl;
+      const uploadsPlaylistId = contentDetails.relatedPlaylists?.uploads;
+
+      const cleanHandle = snippet.customUrl
+        ? (snippet.customUrl.startsWith('@') ? snippet.customUrl : `@${snippet.customUrl}`)
+        : (snippet.title ? `@${snippet.title.replace(/\s+/g, '_').toLowerCase()}` : `@channel_${channelId}`);
+
+      const profileUrl = snippet.customUrl
+        ? `https://www.youtube.com/${snippet.customUrl}`
+        : `https://www.youtube.com/channel/${channelId}`;
+
+      return {
+        channelId,
+        title: snippet.title || 'YouTube Channel',
+        customUrl: snippet.customUrl,
+        handle: cleanHandle,
+        description: snippet.description || '',
+        avatarUrl,
+        bannerUrl,
+        subscriberCount,
+        videoCount,
+        viewCount,
+        country: snippet.country,
+        publishedAt: snippet.publishedAt ? new Date(snippet.publishedAt) : undefined,
+        uploadsPlaylistId,
+        profileUrl,
+      };
+    } catch (err: any) {
+      this.logger.error('Error in YouTube fetchChannelProfile:', err?.stack || err);
+      return null;
+    }
   }
 
   /**
@@ -510,29 +615,47 @@ export class YoutubeProvider implements ISocialProvider {
       if (ageRes.ok) {
         const ageData = await ageRes.json();
         if (Array.isArray(ageData.rows)) {
+          const ageMap = new Map<string, number>();
+          const genderMap = new Map<string, number>();
+
           for (const row of ageData.rows) {
-            const ageGroup = String(row[0] || ''); // e.g. "age18-24", "age25-34"
-            const gender = String(row[1] || ''); // "female", "male", "genderOther"
+            const rawAge = String(row[0] || ''); // e.g. "age18-24", "age25-34"
+            const rawGender = String(row[1] || ''); // "female", "male", "genderOther"
             const pct = Number(row[2] || 0);
 
-            const cleanAge = ageGroup.replace(/^age/, '');
-            const cleanGender = gender === 'female' ? 'F' : gender === 'male' ? 'M' : 'Other';
-            const key = `${cleanAge}.${cleanGender}`;
-            const label = `${cleanGender === 'F' ? 'Female' : cleanGender === 'M' ? 'Male' : 'Other'} (${cleanAge})`;
+            const cleanAge = rawAge.replace(/^age/, '');
+            const cleanGender = rawGender === 'female' ? 'F' : rawGender === 'male' ? 'M' : 'Other';
 
+            ageMap.set(cleanAge, (ageMap.get(cleanAge) || 0) + pct);
+            genderMap.set(cleanGender, (genderMap.get(cleanGender) || 0) + pct);
+          }
+
+          for (const [ageRange, pct] of ageMap.entries()) {
+            const roundedPct = Math.round(pct * 10) / 10;
             demographics.push({
               type: 'AGE_GENDER',
-              key,
-              label,
-              value: pct,
-              percentage: pct,
+              key: ageRange,
+              label: `Age ${ageRange}`,
+              value: roundedPct,
+              percentage: roundedPct,
+            });
+          }
+
+          for (const [gender, pct] of genderMap.entries()) {
+            const roundedPct = Math.round(pct * 10) / 10;
+            demographics.push({
+              type: 'AGE_GENDER',
+              key: gender,
+              label: gender === 'F' ? 'Female' : gender === 'M' ? 'Male' : 'Other',
+              value: roundedPct,
+              percentage: roundedPct,
             });
           }
         }
       }
 
       // 2. Geography / Country breakdown
-      const geoUrl = `https://youtubeanalytics.googleapis.com/v2/reports?ids=channel==MINE&startDate=${start}&endDate=${end}&metrics=views&dimensions=country&sort=-views&maxResults=10`;
+      const geoUrl = `https://youtubeanalytics.googleapis.com/v2/reports?ids=channel==MINE&startDate=${start}&endDate=${end}&metrics=views&dimensions=country&sort=-views&maxResults=25`;
       const geoRes = await fetch(geoUrl, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
@@ -549,6 +672,31 @@ export class YoutubeProvider implements ISocialProvider {
               type: 'COUNTRY',
               key: countryCode,
               label: countryCode,
+              value: views,
+              percentage: pct,
+            });
+          }
+        }
+      }
+
+      // 3. Geography / City breakdown
+      const cityUrl = `https://youtubeanalytics.googleapis.com/v2/reports?ids=channel==MINE&startDate=${start}&endDate=${end}&metrics=views&dimensions=city&sort=-views&maxResults=25`;
+      const cityRes = await fetch(cityUrl, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (cityRes.ok) {
+        const cityData = await cityRes.json();
+        if (Array.isArray(cityData.rows)) {
+          const totalCityViews = cityData.rows.reduce((sum: number, r: any[]) => sum + Number(r[1] || 0), 0) || 1;
+          for (const row of cityData.rows) {
+            const cityName = String(row[0] || '');
+            const views = Number(row[1] || 0);
+            const pct = Math.round((views / totalCityViews) * 1000) / 10;
+            demographics.push({
+              type: 'CITY',
+              key: cityName,
+              label: cityName,
               value: views,
               percentage: pct,
             });
