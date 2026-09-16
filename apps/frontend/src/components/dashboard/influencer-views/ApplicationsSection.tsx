@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Search, FileText, AlertCircle, Compass, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Search, FileText, AlertCircle, Compass } from 'lucide-react';
 import ApplicationKpiBar from './subcomponents/ApplicationKpiBar';
 import ApplicationCardItem, { ApplicationItem } from './subcomponents/ApplicationCardItem';
 import { ApplicationService } from '@/services/application.service';
+import { useCurrency } from '@/context/CurrencyContext';
 import LottieLoader from '@/components/ui/LottieLoader';
 
 interface ApplicationsSectionProps {
@@ -12,19 +13,14 @@ interface ApplicationsSectionProps {
 }
 
 export default function ApplicationsSection({ onNavigate }: ApplicationsSectionProps) {
+  const { format: formatCurrency } = useCurrency();
   const [activeTab, setActiveTab] = useState<'ALL' | 'CONTRACT_SENT' | 'SHORTLISTED' | 'UNDER_REVIEW' | 'DECLINED'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [applications, setApplications] = useState<ApplicationItem[]>([]);
 
-  const loadData = useCallback(async (showRefreshing = false) => {
-    if (showRefreshing) {
-      setIsRefreshing(true);
-    } else {
-      setIsLoading(true);
-    }
-
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
     try {
       const myApps = await ApplicationService.getMyApplications().catch(() => []);
       if (myApps && Array.isArray(myApps)) {
@@ -40,7 +36,8 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
 
           const currency = a.proposedCurrency || 'USD';
           const sym = currency === 'INR' ? '₹' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
-          const rateStr = a.proposedAmount ? `${sym}${Number(a.proposedAmount).toLocaleString()}` : 'Fixed Barter';
+          const rawAmount = Number(a.proposedAmount || 0);
+          const rateStr = rawAmount > 0 ? `${sym}${rawAmount.toLocaleString()}` : 'Fixed Barter';
 
           return {
             id: a.id,
@@ -53,6 +50,7 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
               year: 'numeric',
             }),
             proposedRate: rateStr,
+            proposedAmount: rawAmount,
             deliveryTime: '7 Days from acceptance',
             status: statusText,
             platforms: a.campaign?.targetPlatforms || a.campaign?.platforms || ['Instagram'],
@@ -70,7 +68,6 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
       setApplications([]);
     } finally {
       setIsLoading(false);
-      setIsRefreshing(false);
     }
   }, []);
 
@@ -91,14 +88,144 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
     }
   };
 
-  const totalProposedNumeric = applications.reduce((acc, app) => {
-    const match = app.proposedRate.replace(/,/g, '').match(/[0-9.]+/);
-    return acc + (match ? parseFloat(match[0]) : 0);
-  }, 0);
-  const totalProposedStr = `$${totalProposedNumeric.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+  const kpis = useMemo(() => {
+    const currentList =
+      activeTab === 'ALL' ? applications : applications.filter((a) => a.status === activeTab);
+    const count = currentList.length;
+    const totalRev = currentList.reduce((acc, a) => acc + (a.proposedAmount || 0), 0);
+    const avgRev = count > 0 ? totalRev / count : 0;
+    const maxRev = count > 0 ? Math.max(...currentList.map((a) => a.proposedAmount || 0)) : 0;
+
+    const shortlistedCount = applications.filter(
+      (a) => a.status === 'SHORTLISTED' || a.status === 'CONTRACT_SENT'
+    ).length;
+    const conversionRate =
+      applications.length > 0 ? Math.round((shortlistedCount / applications.length) * 100) : 0;
+
+    if (activeTab === 'CONTRACT_SENT') {
+      return [
+        {
+          label: 'Offers Received',
+          val: `${count} Offers`,
+          change: count > 0 ? 'Awaiting your review' : 'No active offers',
+        },
+        {
+          label: 'Offer Contract Value',
+          val: formatCurrency(totalRev),
+          change: count > 0 ? 'Across received offers' : 'No contract value',
+        },
+        {
+          label: 'Avg. Offer Rate',
+          val: formatCurrency(avgRev),
+          change: 'Per contract offer',
+        },
+        {
+          label: 'Top Offer Value',
+          val: formatCurrency(maxRev),
+          change: count > 0 ? 'Highest contract offer' : 'No offers',
+        },
+      ];
+    }
+
+    if (activeTab === 'SHORTLISTED') {
+      return [
+        {
+          label: 'Shortlisted Pitches',
+          val: `${count} Pitches`,
+          change: count > 0 ? 'Under brand discussion' : 'None shortlisted yet',
+        },
+        {
+          label: 'Shortlisted Value',
+          val: formatCurrency(totalRev),
+          change: count > 0 ? 'High probability deals' : 'No pipeline value',
+        },
+        {
+          label: 'Avg. Shortlist Size',
+          val: formatCurrency(avgRev),
+          change: 'Per shortlisted pitch',
+        },
+        {
+          label: 'Top Shortlisted',
+          val: formatCurrency(maxRev),
+          change: count > 0 ? 'Highest potential deal' : 'No shortlisted deals',
+        },
+      ];
+    }
+
+    if (activeTab === 'UNDER_REVIEW') {
+      return [
+        {
+          label: 'Under Review',
+          val: `${count} Pitches`,
+          change: count > 0 ? 'Awaiting brand decision' : 'No pending reviews',
+        },
+        {
+          label: 'Pending Review Value',
+          val: formatCurrency(totalRev),
+          change: count > 0 ? 'Pipeline under evaluation' : 'No pending value',
+        },
+        {
+          label: 'Avg. Proposed Rate',
+          val: formatCurrency(avgRev),
+          change: 'Per open application',
+        },
+        {
+          label: 'Top Pending Pitch',
+          val: formatCurrency(maxRev),
+          change: count > 0 ? 'Largest pending proposal' : 'No pending pitches',
+        },
+      ];
+    }
+
+    if (activeTab === 'DECLINED') {
+      return [
+        {
+          label: 'Declined Pitches',
+          val: `${count} Pitches`,
+          change: count > 0 ? 'Not selected / closed' : 'No declined pitches',
+        },
+        {
+          label: 'Declined Volume',
+          val: formatCurrency(totalRev),
+          change: count > 0 ? 'Total passed value' : 'No declined value',
+        },
+        {
+          label: 'Avg. Declined Rate',
+          val: formatCurrency(avgRev),
+          change: 'Per closed pitch',
+        },
+        {
+          label: 'Highest Declined',
+          val: formatCurrency(maxRev),
+          change: count > 0 ? 'Largest closed proposal' : 'No closed pitches',
+        },
+      ];
+    }
+
+    // ALL Pitches
+    return [
+      {
+        label: 'Applications Submitted',
+        val: `${count} Pitches`,
+        change: 'All-time proposals',
+      },
+      {
+        label: 'Total Proposed Value',
+        val: formatCurrency(totalRev),
+        change: 'Combined pitch pipeline',
+      },
+      {
+        label: 'Avg. Pitch Rate',
+        val: formatCurrency(avgRev),
+        change: 'Per submitted proposal',
+      },
+      {
+        label: 'Shortlist / Offer Rate',
+        val: `${conversionRate}%`,
+        change: `${shortlistedCount} of ${applications.length} progressed`,
+      },
+    ];
+  }, [activeTab, applications, formatCurrency]);
 
   const filtered = applications.filter((app) => {
     const matchesTab = activeTab === 'ALL' || app.status === activeTab;
@@ -114,10 +241,7 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
   return (
     <div className="space-y-6">
       {/* 1. KPI Stats Summary Bar */}
-      <ApplicationKpiBar
-        totalCount={applications.length}
-        totalProposedValue={totalProposedStr}
-      />
+      <ApplicationKpiBar kpis={kpis} />
 
       {/* 2. Controls Bar: Search & Status Filter Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -132,39 +256,27 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
           />
         </div>
 
-        {/* Filter Tabs & Refresh Button */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-white/10 overflow-x-auto no-scrollbar">
-            {[
-              { id: 'ALL', label: 'All Pitches' },
-              { id: 'CONTRACT_SENT', label: 'Contracts Sent' },
-              { id: 'SHORTLISTED', label: 'Shortlisted' },
-              { id: 'UNDER_REVIEW', label: 'Under Review' },
-              { id: 'DECLINED', label: 'Not Selected' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
-                  activeTab === tab.id
-                    ? 'bg-purple-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => loadData(true)}
-            disabled={isLoading || isRefreshing}
-            className="p-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-slate-300 hover:text-white hover:border-purple-500/40 transition-colors shadow-sm shrink-0"
-            title="Refresh applications"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-purple-400' : ''}`} />
-          </button>
+        {/* Filter Tabs */}
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-white/10 overflow-x-auto no-scrollbar">
+          {[
+            { id: 'ALL', label: 'All Pitches' },
+            { id: 'CONTRACT_SENT', label: 'Contracts Sent' },
+            { id: 'SHORTLISTED', label: 'Shortlisted' },
+            { id: 'UNDER_REVIEW', label: 'Under Review' },
+            { id: 'DECLINED', label: 'Not Selected' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+                activeTab === tab.id
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 

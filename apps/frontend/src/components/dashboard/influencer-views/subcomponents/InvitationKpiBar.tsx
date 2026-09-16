@@ -3,27 +3,25 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-interface InvitationKpiBarProps {
-  pendingCount: number;
-  totalPotentialPayout: string;
+export interface InvitationKpiItem {
+  label: string;
+  val: string;
+  change: string;
 }
 
-export default function InvitationKpiBar({ pendingCount, totalPotentialPayout }: InvitationKpiBarProps) {
-  const kpis = [
-    { label: 'Pending Offers', val: `${pendingCount} Offers`, change: 'Action Required' },
-    { label: 'Potential Revenue', val: totalPotentialPayout, change: 'Across pending deals' },
-    { label: 'Escrow Protected', val: '100% Secured', change: 'Locked upon accept' },
-    { label: 'Avg Brand Response', val: '< 2 Hours', change: 'Top responsiveness' },
-  ];
+interface InvitationKpiBarProps {
+  kpis: InvitationKpiItem[];
+}
 
+export default function InvitationKpiBar({ kpis }: InvitationKpiBarProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {kpis.map((kpi, idx) => (
         <motion.div
-          key={idx}
+          key={`${kpi.label}-${idx}`}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: idx * 0.05 }}
+          transition={{ duration: 0.2, delay: idx * 0.04 }}
           className="p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl hover:border-purple-500/30 transition-all space-y-2 group"
         >
           <span className="text-xs font-semibold text-slate-400 group-hover:text-slate-200 transition-colors block">

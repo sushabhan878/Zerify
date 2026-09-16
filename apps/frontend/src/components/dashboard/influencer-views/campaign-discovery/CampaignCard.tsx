@@ -72,6 +72,11 @@ export default function CampaignCard({
   onApply,
 }: CampaignCardProps) {
   const { formatBudget } = useCurrency();
+  const isBrandTruncated = (campaign.brandName || '').length > 16;
+  const displayBrandName = isBrandTruncated
+    ? `${campaign.brandName.slice(0, 16)}...`
+    : campaign.brandName;
+
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
       case 'Instagram':
@@ -113,16 +118,24 @@ export default function CampaignCard({
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm sm:text-base font-bold text-white group-hover:text-purple-300 transition-colors">
-                  {campaign.brandName}
+            <div className="space-y-0.5 min-w-0">
+              <div className="relative group/brand flex items-center gap-1.5">
+                <span
+                  title={isBrandTruncated ? campaign.brandName : undefined}
+                  className="text-sm sm:text-base font-bold text-white group-hover:text-purple-300 transition-colors cursor-default"
+                >
+                  {displayBrandName}
                 </span>
                 {campaign.isVerifiedBrand && (
                   <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                 )}
+                {isBrandTruncated && (
+                  <div className="absolute bottom-full left-0 mb-1.5 hidden group-hover/brand:flex items-center px-2.5 py-1 rounded-lg bg-slate-900/95 border border-purple-500/30 text-xs font-semibold text-white shadow-xl shadow-purple-950/60 whitespace-nowrap z-30 pointer-events-none">
+                    {campaign.brandName}
+                  </div>
+                )}
               </div>
-              <span className="text-xs text-purple-300/80 font-medium block">
+              <span className="text-xs text-purple-300/80 font-medium block truncate">
                 {campaign.category}
               </span>
             </div>
@@ -149,11 +162,10 @@ export default function CampaignCard({
                   onToggleSave(campaign.id);
                 }}
                 type="button"
-                className={`p-2 rounded-xl border transition-all ${
-                  isSaved
+                className={`p-2 rounded-xl border transition-all ${isSaved
                     ? 'bg-purple-600/30 border-purple-400/60 text-purple-300 shadow-md shadow-purple-950/40'
                     : 'bg-slate-900/80 border-purple-500/20 text-slate-400 hover:text-white hover:border-purple-400/40 hover:bg-slate-800'
-                }`}
+                  }`}
                 title={isSaved ? 'Remove from saved' : 'Save campaign'}
                 aria-label={isSaved ? 'Remove from saved' : 'Save campaign'}
               >
@@ -167,10 +179,16 @@ export default function CampaignCard({
         <div className="grid md:grid-cols-12 gap-6 sm:gap-8 items-start">
           {/* Left / Title & Description (col-span-8) */}
           <div className="md:col-span-8 space-y-3">
-            <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-purple-200 transition-colors leading-snug">
+            <h3
+              title={campaign.title}
+              className="text-lg sm:text-xl font-bold text-white group-hover:text-purple-200 transition-colors leading-snug line-clamp-2"
+            >
               {campaign.title}
             </h3>
-            <p className="text-xs sm:text-sm text-slate-300 line-clamp-2 leading-relaxed font-normal">
+            <p
+              title={campaign.description}
+              className="text-xs sm:text-sm text-slate-300 line-clamp-2 leading-relaxed font-normal"
+            >
               {campaign.description}
             </p>
 

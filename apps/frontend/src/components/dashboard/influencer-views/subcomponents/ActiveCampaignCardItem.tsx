@@ -26,6 +26,7 @@ export interface ActiveCampaignItem {
   stage: 'IN_PRODUCTION' | 'CONTENT_REVIEW' | 'READY_TO_PUBLISH' | 'COMPLETED';
   deadline: string;
   payout: string;
+  payoutAmount?: number;
   progress: number;
   deliverables: { title: string; completed: boolean }[];
   verifiedBrand: boolean;

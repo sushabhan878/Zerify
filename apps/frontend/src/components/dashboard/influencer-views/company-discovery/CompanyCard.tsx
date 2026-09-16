@@ -135,7 +135,7 @@ export default function CompanyCard({
 
         {/* Budget Highlight */}
         <div className="pt-1">
-          <span className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight">
+          <span className="text-xl sm:text-2xl font-black text-white tracking-tight">
             {formatBudget(company.campaignBudget)}
           </span>
         </div>

@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { MailCheck, Search, Sparkles, AlertCircle, Compass, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { MailCheck, Search, Sparkles, AlertCircle, Compass } from 'lucide-react';
 import InvitationKpiBar from './subcomponents/InvitationKpiBar';
 import OfferReceivedCard from './applications/OfferReceivedCard';
 import OfferDetailModal from './applications/OfferDetailModal';
@@ -10,6 +10,7 @@ import { OfferService, CampaignOfferItem } from '@/services/offer.service';
 import { useMessaging } from '@/context/MessagingContext';
 import { MessagingService } from '@/services/messaging.service';
 import { useToast } from '@/components/ui/Toast';
+import { useCurrency } from '@/context/CurrencyContext';
 import LottieLoader from '@/components/ui/LottieLoader';
 
 interface CampaignInvitationsSectionProps {
@@ -19,11 +20,11 @@ interface CampaignInvitationsSectionProps {
 export default function CampaignInvitationsSection({ onNavigate }: CampaignInvitationsSectionProps) {
   const { setActiveConversationId, refreshConversations } = useMessaging();
   const { toastSuccess, toastError } = useToast();
+  const { format: formatCurrency } = useCurrency();
 
-  const [activeTab, setActiveTab] = useState<'PENDING' | 'ALL' | 'ACCEPTED' | 'DECLINED'>('PENDING');
+  const [activeTab, setActiveTab] = useState<'PENDING' | 'ACCEPTED' | 'CANCELLED' | 'ALL'>('PENDING');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [offers, setOffers] = useState<CampaignOfferItem[]>([]);
   const [selectedOffer, setSelectedOffer] = useState<CampaignOfferItem | null>(null);
 
@@ -39,13 +40,8 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
   });
   const [isProcessingAction, setIsProcessingAction] = useState(false);
 
-  const loadData = useCallback(async (showRefreshing = false) => {
-    if (showRefreshing) {
-      setIsRefreshing(true);
-    } else {
-      setIsLoading(true);
-    }
-
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
     try {
       const myOffers = await OfferService.getMyOffers().catch(() => []);
       if (myOffers && Array.isArray(myOffers)) {
@@ -61,7 +57,6 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
       setOffers([]);
     } finally {
       setIsLoading(false);
-      setIsRefreshing(false);
     }
   }, []);
 
@@ -103,7 +98,7 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
         campaignId: offer.campaignId,
       });
       if (res?.conversationId) {
-        setActiveConversationId(res.conversationId);
+        setActiveConversationId(res?.conversationId);
       }
       await refreshConversations();
       onNavigate?.('messages');
@@ -120,7 +115,7 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
       if (confirmModal.type === 'ACCEPT') {
         const acceptRes: any = await OfferService.acceptOffer(confirmModal.offer.id);
         toastSuccess('Offer accepted! Starting your project workspace and opening messages...');
-        await loadData(true);
+        await loadData();
         setSelectedOffer(null);
         setConfirmModal({ isOpen: false, type: null, offer: null });
 
@@ -135,7 +130,7 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
         await OfferService.declineOffer(confirmModal.offer.id);
         toastSuccess('Offer declined.');
       }
-      await loadData(true);
+      await loadData();
       setSelectedOffer(null);
       setConfirmModal({ isOpen: false, type: null, offer: null });
     } catch (err: any) {
@@ -152,19 +147,159 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
     }
   };
 
-  const pendingOffers = offers.filter((o) => o.status === 'PENDING');
-  const pendingCount = pendingOffers.length;
+  const pendingOffers = useMemo(() => offers.filter((o) => o.status === 'PENDING'), [offers]);
+  const acceptedOffers = useMemo(() => offers.filter((o) => o.status === 'ACCEPTED'), [offers]);
+  const cancelledOffers = useMemo(
+    () =>
+      offers.filter(
+        (o) => o.status === 'CANCELLED' || o.status === 'DECLINED' || o.status === 'OFFER_EXPIRED'
+      ),
+    [offers]
+  );
 
-  const totalPotentialCash = offers
-    .filter((o) => o.status === 'PENDING' || o.status === 'ACCEPTED')
-    .reduce((acc, o) => acc + (Number(o.compensationAmount) || 0), 0);
-  const totalPotentialPayoutStr = `$${totalPotentialCash.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+  const kpis = useMemo(() => {
+    if (activeTab === 'PENDING') {
+      const totalRev = pendingOffers.reduce(
+        (acc, o) => acc + (Number(o.compensationAmount) || 0),
+        0
+      );
+      const avgRev = pendingOffers.length > 0 ? totalRev / pendingOffers.length : 0;
+      const maxRev =
+        pendingOffers.length > 0
+          ? Math.max(...pendingOffers.map((o) => Number(o.compensationAmount) || 0))
+          : 0;
+
+      return [
+        {
+          label: 'Pending Offers',
+          val: `${pendingOffers.length} Offers`,
+          change: pendingOffers.length > 0 ? 'Action Required' : 'All caught up',
+        },
+        {
+          label: 'Potential Revenue',
+          val: formatCurrency(totalRev),
+          change: 'Across pending deals',
+        },
+        {
+          label: 'Avg. Offer Value',
+          val: formatCurrency(avgRev),
+          change: 'Per pending contract',
+        },
+        {
+          label: 'Highest Offer',
+          val: formatCurrency(maxRev),
+          change: pendingOffers.length > 0 ? 'Top single opportunity' : 'No pending offers',
+        },
+      ];
+    }
+
+    if (activeTab === 'ACCEPTED') {
+      const totalRev = acceptedOffers.reduce(
+        (acc, o) => acc + (Number(o.compensationAmount) || 0),
+        0
+      );
+      const avgRev = acceptedOffers.length > 0 ? totalRev / acceptedOffers.length : 0;
+      const maxRev =
+        acceptedOffers.length > 0
+          ? Math.max(...acceptedOffers.map((o) => Number(o.compensationAmount) || 0))
+          : 0;
+
+      return [
+        {
+          label: 'Accepted Deals',
+          val: `${acceptedOffers.length} Deals`,
+          change: 'Active collaborations',
+        },
+        {
+          label: 'Secured Revenue',
+          val: formatCurrency(totalRev),
+          change: 'Confirmed earnings',
+        },
+        {
+          label: 'Avg. Deal Value',
+          val: formatCurrency(avgRev),
+          change: 'Average accepted rate',
+        },
+        {
+          label: 'Top Deal Value',
+          val: formatCurrency(maxRev),
+          change: acceptedOffers.length > 0 ? 'Largest active contract' : 'No accepted deals',
+        },
+      ];
+    }
+
+    if (activeTab === 'CANCELLED') {
+      const totalRev = cancelledOffers.reduce(
+        (acc, o) => acc + (Number(o.compensationAmount) || 0),
+        0
+      );
+      const avgRev = cancelledOffers.length > 0 ? totalRev / cancelledOffers.length : 0;
+      const maxRev =
+        cancelledOffers.length > 0
+          ? Math.max(...cancelledOffers.map((o) => Number(o.compensationAmount) || 0))
+          : 0;
+
+      return [
+        {
+          label: 'Cancelled Offers',
+          val: `${cancelledOffers.length} Offers`,
+          change: 'Declined or expired',
+        },
+        {
+          label: 'Declined Volume',
+          val: formatCurrency(totalRev),
+          change: 'Total passed revenue',
+        },
+        {
+          label: 'Avg. Offer Size',
+          val: formatCurrency(avgRev),
+          change: 'Average passed value',
+        },
+        {
+          label: 'Highest Declined',
+          val: formatCurrency(maxRev),
+          change: cancelledOffers.length > 0 ? 'Largest passed deal' : 'No cancelled offers',
+        },
+      ];
+    }
+
+    // Combined data for ALL Received
+    const totalRev = offers.reduce((acc, o) => acc + (Number(o.compensationAmount) || 0), 0);
+    const avgRev = offers.length > 0 ? totalRev / offers.length : 0;
+    const acceptanceRate =
+      offers.length > 0 ? Math.round((acceptedOffers.length / offers.length) * 100) : 0;
+
+    return [
+      {
+        label: 'Total Invitations',
+        val: `${offers.length} Offers`,
+        change: 'All-time pipeline',
+      },
+      {
+        label: 'Combined Deal Value',
+        val: formatCurrency(totalRev),
+        change: 'All states combined',
+      },
+      {
+        label: 'Avg. Invitation Value',
+        val: formatCurrency(avgRev),
+        change: 'Overall deal average',
+      },
+      {
+        label: 'Acceptance Rate',
+        val: `${acceptanceRate}%`,
+        change: `${acceptedOffers.length} of ${offers.length} converted`,
+      },
+    ];
+  }, [activeTab, offers, pendingOffers, acceptedOffers, cancelledOffers, formatCurrency]);
 
   const filteredOffers = offers.filter((offer) => {
-    const matchesTab = activeTab === 'ALL' || offer.status === activeTab;
+    const matchesTab =
+      activeTab === 'ALL'
+        ? true
+        : activeTab === 'CANCELLED'
+        ? offer.status === 'CANCELLED' || offer.status === 'DECLINED' || offer.status === 'OFFER_EXPIRED'
+        : offer.status === activeTab;
     const q = searchQuery.toLowerCase().trim();
     const app = offer.application || {};
     const campaign = app.campaign || {};
@@ -180,11 +315,8 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
 
   return (
     <div className="space-y-6">
-      {/* 1. KPI Stats Summary Bar */}
-      <InvitationKpiBar
-        pendingCount={pendingCount}
-        totalPotentialPayout={totalPotentialPayoutStr}
-      />
+      {/* 1. Dynamic KPI Stats Summary Bar */}
+      <InvitationKpiBar kpis={kpis} />
 
       {/* 2. Controls Bar: Search & Status Filter Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -199,38 +331,26 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
           />
         </div>
 
-        {/* Filter Tabs & Refresh */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-white/10 overflow-x-auto no-scrollbar">
-            {[
-              { id: 'PENDING', label: 'Pending Offers' },
-              { id: 'ALL', label: 'All Received' },
-              { id: 'ACCEPTED', label: 'Accepted' },
-              { id: 'DECLINED', label: 'Declined' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
-                  activeTab === tab.id
-                    ? 'bg-purple-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => loadData(true)}
-            disabled={isLoading || isRefreshing}
-            className="p-2 rounded-xl bg-slate-900/80 border border-white/10 text-slate-300 hover:text-white hover:border-purple-500/40 transition-colors shadow-sm shrink-0"
-            title="Refresh collaboration offers"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-purple-400' : ''}`} />
-          </button>
+        {/* Filter Tabs in Order: Pending -> Accepted -> Cancelled -> All Received */}
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-white/10 overflow-x-auto no-scrollbar">
+          {[
+            { id: 'PENDING', label: 'Pending Offers' },
+            { id: 'ACCEPTED', label: 'Accepted' },
+            { id: 'CANCELLED', label: 'Cancelled' },
+            { id: 'ALL', label: 'All Received' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+                activeTab === tab.id
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 

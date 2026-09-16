@@ -1,21 +1,21 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Building2, Search, RotateCw, Loader2 } from 'lucide-react';
+import { Building2, Search, Loader2 } from 'lucide-react';
 import NetworkKpiBar from './subcomponents/NetworkKpiBar';
 import BrandPartnerCardItem, { BrandPartnerItem } from './subcomponents/BrandPartnerCardItem';
 import { NetworkService } from '@/services/network.service';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export default function MyNetworkSection() {
+  const { format: formatCurrency } = useCurrency();
   const [activeTab, setActiveTab] = useState<'ALL' | 'PREFERRED' | 'REPEAT_SPONSOR'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [brands, setBrands] = useState<BrandPartnerItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const loadNetwork = useCallback(async (refresh = false) => {
-    if (refresh) setIsRefreshing(true);
-    else setIsLoading(true);
+  const loadNetwork = useCallback(async () => {
+    setIsLoading(true);
 
     try {
       const data = await NetworkService.getMyNetwork().catch(() => []);
@@ -29,7 +29,6 @@ export default function MyNetworkSection() {
       setBrands([]);
     } finally {
       setIsLoading(false);
-      setIsRefreshing(false);
     }
   }, []);
 
@@ -52,50 +51,111 @@ export default function MyNetworkSection() {
     });
   }, [brands, activeTab, searchQuery]);
 
-  // Aggregate KPI computations
-  const totalEarningsNum = useMemo(() => {
-    return brands.reduce((acc, b) => {
+  const kpis = useMemo(() => {
+    const currentList =
+      activeTab === 'ALL' ? brands : brands.filter((b) => b.relationshipTag === activeTab);
+    const count = currentList.length;
+    const totalEarnings = currentList.reduce((acc, b) => {
       const parsed = parseFloat(String(b.totalPaid).replace(/[^0-9.-]+/g, '')) || 0;
       return acc + parsed;
     }, 0);
-  }, [brands]);
-
-  const repeatRate = useMemo(() => {
-    if (brands.length === 0) return '0%';
+    const totalDeals = currentList.reduce((acc, b) => acc + (b.totalDeals || 0), 0);
+    const avgEarningsPerBrand = count > 0 ? totalEarnings / count : 0;
     const repeatCount = brands.filter((b) => b.totalDeals >= 2).length;
-    return `${Math.round((repeatCount / brands.length) * 100)}% Repeat`;
-  }, [brands]);
+    const repeatRate = brands.length > 0 ? Math.round((repeatCount / brands.length) * 100) : 0;
+
+    if (activeTab === 'PREFERRED') {
+      return [
+        {
+          label: 'Preferred Partners',
+          val: `${count} Brands`,
+          change: count > 0 ? 'Top collaboration partners' : 'No preferred partners',
+        },
+        {
+          label: 'Preferred Revenue',
+          val: formatCurrency(totalEarnings),
+          change: count > 0 ? 'From top-tier brands' : 'No revenue yet',
+        },
+        {
+          label: 'Completed Campaigns',
+          val: `${totalDeals} Deals`,
+          change: count > 0 ? 'High-priority collaborations' : '0 deals',
+        },
+        {
+          label: 'Avg. Revenue / Partner',
+          val: formatCurrency(avgEarningsPerBrand),
+          change: 'Per preferred brand',
+        },
+      ];
+    }
+
+    if (activeTab === 'REPEAT_SPONSOR') {
+      const avgDealsPerSponsor = count > 0 ? totalDeals / count : 0;
+      return [
+        {
+          label: 'Repeat Sponsors',
+          val: `${count} Brands`,
+          change: count > 0 ? 'Recurring partnerships' : 'No repeat sponsors',
+        },
+        {
+          label: 'Repeat Revenue',
+          val: formatCurrency(totalEarnings),
+          change: count > 0 ? 'From ongoing sponsors' : 'No repeat revenue',
+        },
+        {
+          label: 'Repeat Contracts',
+          val: `${totalDeals} Deals`,
+          change: count > 0 ? 'Across repeat sponsors' : '0 deals',
+        },
+        {
+          label: 'Avg. Deals / Sponsor',
+          val: `${avgDealsPerSponsor.toFixed(1)} Deals`,
+          change: count > 0 ? 'Campaigns per sponsor' : '0 deals',
+        },
+      ];
+    }
+
+    // ALL Partners
+    return [
+      {
+        label: 'Brand Partners',
+        val: `${count} Brands`,
+        change: 'Total connected network',
+      },
+      {
+        label: 'Total Revenue Earned',
+        val: formatCurrency(totalEarnings),
+        change: 'Cumulative lifetime earnings',
+      },
+      {
+        label: 'Total Deals Completed',
+        val: `${totalDeals} Campaigns`,
+        change: 'Delivered across network',
+      },
+      {
+        label: 'Repeat Partner Rate',
+        val: `${repeatRate}%`,
+        change: `${repeatCount} of ${brands.length} repeat sponsors`,
+      },
+    ];
+  }, [activeTab, brands, formatCurrency]);
 
   return (
     <div className="space-y-6">
       {/* 1. Dynamic KPI Stats Summary Bar */}
-      <NetworkKpiBar
-        totalBrands={brands.length}
-        totalEarnings={`$${totalEarningsNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-      />
+      <NetworkKpiBar kpis={kpis} />
 
-      {/* 2. Controls Bar: Search, Refresh & Relationship Tabs */}
+      {/* 2. Controls Bar: Search & Relationship Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2 flex-1 max-w-md">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search past brand partners by company, industry, or contact..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-950/80 border border-white/10 text-xs font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50"
-            />
-          </div>
-
-          <button
-            onClick={() => loadNetwork(true)}
-            disabled={isRefreshing || isLoading}
-            title="Refresh network partners"
-            className="p-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-white/10 text-slate-400 hover:text-white transition-all shrink-0"
-          >
-            <RotateCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-purple-400' : ''}`} />
-          </button>
+        <div className="relative flex-1 max-w-md">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Search past brand partners by company, industry, or contact..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-950/80 border border-white/10 text-xs font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50"
+          />
         </div>
 
         {/* Filter Tabs */}

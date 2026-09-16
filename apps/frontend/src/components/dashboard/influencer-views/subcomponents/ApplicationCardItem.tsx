@@ -19,6 +19,7 @@ export interface ApplicationItem {
   role: string;
   appliedDate: string;
   proposedRate: string;
+  proposedAmount?: number;
   deliveryTime: string;
   status: 'CONTRACT_SENT' | 'SHORTLISTED' | 'UNDER_REVIEW' | 'DECLINED';
   platforms: string[];
