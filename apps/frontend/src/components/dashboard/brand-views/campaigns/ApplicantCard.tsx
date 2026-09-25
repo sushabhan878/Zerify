@@ -152,9 +152,11 @@ export default function ApplicantCard({
 
       {/* Pitch Snippet */}
       {application.applicationMessage && (
-        <div className="p-3.5 rounded-2xl bg-purple-950/20 border border-purple-500/20 text-xs text-slate-300 leading-relaxed italic flex items-start gap-2.5">
-          <MessageSquare className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-          <p className="line-clamp-2">&quot;{application.applicationMessage}&quot;</p>
+        <div className="flex items-start gap-2 px-1 text-xs text-slate-300 leading-relaxed">
+          <MessageSquare className="w-3.5 h-3.5 text-purple-400/80 shrink-0 mt-0.5" />
+          <p className="line-clamp-2 italic">
+            &quot;{application.applicationMessage}&quot;
+          </p>
         </div>
       )}
 
@@ -193,7 +195,7 @@ export default function ApplicantCard({
             <button
               onClick={() => onSendOffer(application)}
               type="button"
-              className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white flex items-center gap-1.5 shadow-lg shadow-purple-950/40 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="px-6 py-2 min-w-[140px] justify-center rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white flex items-center gap-1.5 shadow-lg shadow-purple-950/40 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
               <span>Send Offer</span>

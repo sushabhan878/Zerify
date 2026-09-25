@@ -289,9 +289,11 @@ export default function ShortlistApplicantCard({
 
         {/* Pitch snippet */}
         {application.applicationMessage && (
-          <div className="p-3 rounded-2xl bg-purple-950/20 border border-purple-500/20 text-xs text-slate-300 leading-relaxed italic flex items-start gap-2.5">
-            <MessageSquare className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
-            <p className="line-clamp-2">&quot;{application.applicationMessage}&quot;</p>
+          <div className="flex items-start gap-2 px-1 text-xs text-slate-300 leading-relaxed">
+            <MessageSquare className="w-3.5 h-3.5 text-purple-400/80 shrink-0 mt-0.5" />
+            <p className="line-clamp-2 italic">
+              &quot;{application.applicationMessage}&quot;
+            </p>
           </div>
         )}
       </div>
@@ -312,7 +314,7 @@ export default function ShortlistApplicantCard({
             <button
               onClick={() => onSendOffer(application)}
               type="button"
-              className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-purple-600/30 via-indigo-600/30 to-purple-600/30 hover:from-purple-600 hover:to-indigo-600 text-xs font-bold text-purple-200 hover:text-white border border-purple-400/30 hover:border-transparent transition-all flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className="px-6 py-2 min-w-[140px] justify-center rounded-xl bg-gradient-to-r from-purple-600/30 via-indigo-600/30 to-purple-600/30 hover:from-purple-600 hover:to-indigo-600 text-xs font-bold text-purple-200 hover:text-white border border-purple-400/30 hover:border-transparent transition-all flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5 text-purple-300" />
               <span>Change Offer</span>
@@ -326,7 +328,7 @@ export default function ShortlistApplicantCard({
             <button
               onClick={() => onSendOffer(application)}
               type="button"
-              className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white flex items-center gap-1.5 shadow-lg shadow-purple-950/40 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className="px-6 py-2 min-w-[140px] justify-center rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white flex items-center gap-1.5 shadow-lg shadow-purple-950/40 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
               <span>Send Offer</span>

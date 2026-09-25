@@ -12,6 +12,7 @@ import { BrandModule } from './modules/brand/brand.module';
 import { CampaignModule } from './modules/campaign/campaign.module';
 import { MessagingModule } from './modules/messaging/messaging.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { ReviewModule } from './modules/review/review.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { PaymentModule } from './modules/payment/payment.module';
     CampaignModule,
     MessagingModule,
     PaymentModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [],

@@ -15,11 +15,13 @@ import {
   Play,
   Pause,
   AlertCircle,
+  Star,
 } from 'lucide-react';
 import { CampaignItem, CampaignService } from '@/services/campaign.service';
 import { ApplicationService, CampaignApplicationItem } from '@/services/application.service';
 import { OfferService, CampaignOfferItem } from '@/services/offer.service';
 import { DeliverableService } from '@/services/deliverable.service';
+import { ReviewService, ReviewStatusResponse } from '@/services/review.service';
 import ApplicationListView from './ApplicationListView';
 import ApplicantDetailModal from './ApplicantDetailModal';
 import SendOfferModal from './SendOfferModal';
@@ -31,6 +33,7 @@ import { CreatorItem } from '../find-influencers/CreatorCard';
 import LottieLoader from '@/components/ui/LottieLoader';
 import { useCurrency } from '@/context/CurrencyContext';
 import { formatCurrency } from '@/utils/currency';
+import CampaignReviewModal from '../../subcomponents/CampaignReviewModal';
 
 interface CampaignOverviewDashboardProps {
   campaignId: string;
@@ -54,6 +57,9 @@ export default function CampaignOverviewDashboard({
   const [selectedAppForDetail, setSelectedAppForDetail] = useState<CampaignApplicationItem | null>(null);
   const [selectedAppForOffer, setSelectedAppForOffer] = useState<CampaignApplicationItem | null>(null);
   const [comparingApplicants, setComparingApplicants] = useState<CampaignApplicationItem[] | null>(null);
+  const [reviewStatus, setReviewStatus] = useState<ReviewStatusResponse | null>(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewTargetInfluencer, setReviewTargetInfluencer] = useState<{ id: string; name: string } | null>(null);
 
   const loadData = async () => {
     try {
@@ -67,10 +73,27 @@ export default function CampaignOverviewDashboard({
       setApplications(appData);
       setOffers(offerData);
       setParticipants(partData);
+
+      if (campData.status === 'COMPLETED' || campData.status === 'CANCELLED') {
+        try {
+          const status = await ReviewService.getReviewStatus(campaignId);
+          setReviewStatus(status);
+        } catch {
+          // Review status fetch failed silently
+        }
+      }
     } catch (err) {
       console.error('Failed to load campaign data', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleReviewSuccess = () => {
+    setShowReviewModal(false);
+    setReviewTargetInfluencer(null);
+    if (campaign?.status === 'COMPLETED' || campaign?.status === 'CANCELLED') {
+      ReviewService.getReviewStatus(campaignId).then(setReviewStatus).catch(() => {});
     }
   };
 
@@ -270,6 +293,45 @@ export default function CampaignOverviewDashboard({
         </div>
       </div>
 
+      {/* Review Prompt Banner - shown when campaign is completed/cancelled and review not yet submitted */}
+      {(campaign.status === 'COMPLETED' || campaign.status === 'CANCELLED') &&
+        reviewStatus &&
+        !reviewStatus.hasBrandReview && (
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-900/30 via-indigo-900/20 to-purple-900/30 border border-purple-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center shrink-0">
+                <Star className="w-5 h-5 text-purple-400" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-white">Rate your experience</h4>
+                <p className="text-xs text-white/40">
+                  This campaign is {campaign.status.toLowerCase()}. Share your feedback about the creators you worked with.
+                </p>
+              </div>
+            </div>
+            {participants.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap">
+                {participants.map((p: any) => (
+                  <button
+                    key={p.id}
+                    onClick={() => {
+                      setReviewTargetInfluencer({
+                        id: p.influencerProfileId,
+                        name: p.influencerProfile?.handle || p.influencerProfile?.user?.name || 'Creator',
+                      });
+                      setShowReviewModal(true);
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-purple-600/80 hover:bg-purple-500 text-white text-xs font-medium transition-colors flex items-center gap-1.5"
+                  >
+                    <Star className="w-3 h-3" />
+                    Review {p.influencerProfile?.handle || p.influencerProfile?.user?.name || 'Creator'}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
       {/* Navigation Sub-Tabs */}
       <div className="flex items-center gap-2 border-b border-white/10 pb-2 overflow-x-auto no-scrollbar">
         <button
@@ -374,6 +436,20 @@ export default function CampaignOverviewDashboard({
             setComparingApplicants(null);
             setSelectedAppForOffer(app);
           }}
+        />
+      )}
+
+      {showReviewModal && reviewTargetInfluencer && (
+        <CampaignReviewModal
+          campaignId={campaignId}
+          reviewType="BRAND_TO_INFLUENCER"
+          revieweeInfluencerId={reviewTargetInfluencer.id}
+          revieweeName={reviewTargetInfluencer.name}
+          onClose={() => {
+            setShowReviewModal(false);
+            setReviewTargetInfluencer(null);
+          }}
+          onSuccess={handleReviewSuccess}
         />
       )}
     </div>

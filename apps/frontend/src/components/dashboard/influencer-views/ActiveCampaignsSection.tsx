@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Megaphone, Search, Compass, AlertCircle } from 'lucide-react';
+import { Megaphone, Search, Compass, AlertCircle, Star } from 'lucide-react';
 import ActiveCampaignKpiBar from './subcomponents/ActiveCampaignKpiBar';
 import ActiveCampaignCardItem, { ActiveCampaignItem } from './subcomponents/ActiveCampaignCardItem';
 import CollaborationWorkspace from './collaborations/CollaborationWorkspace';
 import { DeliverableService } from '@/services/deliverable.service';
+import { ReviewService, ReviewStatusResponse } from '@/services/review.service';
 import LottieLoader from '@/components/ui/LottieLoader';
 import { useCurrency } from '@/context/CurrencyContext';
+import CampaignReviewModal from '../subcomponents/CampaignReviewModal';
 
 interface ActiveCampaignsSectionProps {
   onNavigate?: (routeId: string) => void;
@@ -21,6 +23,9 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [campaigns, setCampaigns] = useState<ActiveCampaignItem[]>([]);
+  const [reviewStatuses, setReviewStatuses] = useState<Record<string, ReviewStatusResponse>>({});
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewTargetCampaign, setReviewTargetCampaign] = useState<{ campaignId: string; brandName: string; brandId: string } | null>(null);
 
   const loadData = useCallback(async (showRefreshing = false) => {
     if (showRefreshing) {
@@ -92,6 +97,22 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
           };
         });
         setCampaigns(formatted);
+
+        const completedCampaigns = data.filter(
+          (p: any) => p.campaign?.status === 'COMPLETED' || p.campaign?.status === 'CANCELLED',
+        );
+        const statuses: Record<string, ReviewStatusResponse> = {};
+        await Promise.all(
+          completedCampaigns.map(async (p: any) => {
+            try {
+              const status = await ReviewService.getReviewStatus(String(p.campaignId));
+              statuses[p.campaignId] = status;
+            } catch {
+              // silently fail
+            }
+          }),
+        );
+        setReviewStatuses(statuses);
       } else {
         setCampaigns([]);
       }
@@ -110,6 +131,12 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
 
   const handleUploadSubmit = (id: string | number) => {
     setActiveParticipantId(String(id));
+  };
+
+  const handleReviewSuccess = () => {
+    setShowReviewModal(false);
+    setReviewTargetCampaign(null);
+    loadData(true);
   };
 
   const filteredCampaigns = campaigns.filter((c) => {
@@ -368,10 +395,52 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredCampaigns.map((c) => (
-            <ActiveCampaignCardItem key={c.id} campaign={c} onUploadSubmit={handleUploadSubmit} />
-          ))}
+          {filteredCampaigns.map((c) => {
+            const status = reviewStatuses[String(c.id)];
+            const needsReview = status && !status.hasInfluencerReview;
+            return (
+              <div key={c.id}>
+                <ActiveCampaignCardItem campaign={c} onUploadSubmit={handleUploadSubmit} />
+                {needsReview && (
+                  <div className="mt-2 p-3 rounded-xl bg-gradient-to-r from-purple-900/20 to-indigo-900/20 border border-purple-500/20 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Star className="w-4 h-4 text-purple-400" />
+                      <span className="text-xs text-white/60 font-medium">Rate this brand collaboration</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setReviewTargetCampaign({
+                          campaignId: String(c.id),
+                          brandName: c.brand,
+                          brandId: '',
+                        });
+                        setShowReviewModal(true);
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-purple-600/80 hover:bg-purple-500 text-white text-xs font-medium transition-colors flex items-center gap-1.5"
+                    >
+                      <Star className="w-3 h-3" />
+                      Leave Review
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
+      )}
+
+      {showReviewModal && reviewTargetCampaign && (
+        <CampaignReviewModal
+          campaignId={reviewTargetCampaign.campaignId}
+          reviewType="INFLUENCER_TO_BRAND"
+          revieweeBrandId={reviewTargetCampaign.brandId || undefined}
+          revieweeName={reviewTargetCampaign.brandName}
+          onClose={() => {
+            setShowReviewModal(false);
+            setReviewTargetCampaign(null);
+          }}
+          onSuccess={handleReviewSuccess}
+        />
       )}
     </div>
   );

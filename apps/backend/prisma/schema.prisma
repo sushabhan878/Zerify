@@ -36,6 +36,9 @@ model User {
   // Payments
   payments ZerifyPayment[]
 
+  // Campaign reviews
+  campaignReviewsGiven CampaignReview[]
+
   @@map("users")
 }
 
@@ -97,6 +100,10 @@ model BrandProfile {
 
   // Reviews given by this brand
   reviewsGiven Review[]
+
+  // Campaign reviews given by this brand
+  campaignReviewsGiven CampaignReview[] @relation("ReviewerBrand")
+  campaignReviewsReceived CampaignReview[] @relation("RevieweeBrand")
 
   // Brand partners in creators network
   influencerPartners InfluencerBrandPartner[]
@@ -177,6 +184,10 @@ model InfluencerProfile {
 
   // Reviews received from brands
   reviews Review[]
+
+  // Campaign reviews given by this influencer
+  campaignReviewsGiven CampaignReview[] @relation("ReviewerInfluencer")
+  campaignReviewsReceived CampaignReview[] @relation("RevieweeInfluencer")
 
   // Brand partners in creator network
   brandPartners InfluencerBrandPartner[]
@@ -713,6 +724,9 @@ model Campaign {
   participants  CampaignParticipant[]
   conversations Conversation[]
 
+  // Reviews
+  campaignReviews CampaignReview[]
+
   // Payments domain
   zerifyPayments ZerifyPayment[]
   finance        CampaignFinance?
@@ -1024,7 +1038,7 @@ model CampaignPayment {
   @@map("campaign_payments")
 }
 
-// Creator / Brand Review & Rating Model
+// Creator / Brand Review & Rating Model (profile-level testimonials)
 model Review {
   id                  String            @id @default(uuid())
   influencerProfileId String
@@ -1051,6 +1065,98 @@ model Review {
   @@index([influencerProfileId, rating])
   @@index([brandProfileId])
   @@map("reviews")
+}
+
+// ============================================================================
+// CAMPAIGN REVIEW SYSTEM — Bidirectional reviews after campaign completion
+// ============================================================================
+
+enum ReviewType {
+  BRAND_TO_INFLUENCER
+  INFLUENCER_TO_BRAND
+}
+
+enum CampaignReviewStatus {
+  PENDING
+  SUBMITTED
+}
+
+// Predefined review questions
+model ReviewQuestion {
+  id        String  @id @default(uuid())
+  text      String
+  category  String? // e.g. "communication", "quality", "timeliness", "professionalism"
+  reviewType ReviewType
+  isActive  Boolean @default(true)
+  order     Int     @default(0)
+
+  ratings ReviewRating[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("review_questions")
+}
+
+// A campaign-level review tying reviewer to reviewee for a specific campaign
+model CampaignReview {
+  id         String   @id @default(uuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  reviewType ReviewType
+
+  // Reviewer (who submitted the review)
+  reviewerUserId     String?
+  reviewerUser       User?             @relation(fields: [reviewerUserId], references: [id], onDelete: SetNull)
+  reviewerBrandId    String?
+  reviewerBrand      BrandProfile?     @relation("ReviewerBrand", fields: [reviewerBrandId], references: [id], onDelete: SetNull)
+  reviewerInfluencerId String?
+  reviewerInfluencer InfluencerProfile? @relation("ReviewerInfluencer", fields: [reviewerInfluencerId], references: [id], onDelete: SetNull)
+
+  // Reviewee (who is being reviewed)
+  revieweeInfluencerId String?
+  revieweeInfluencer   InfluencerProfile? @relation("RevieweeInfluencer", fields: [revieweeInfluencerId], references: [id], onDelete: SetNull)
+  revieweeBrandId      String?
+  revieweeBrand        BrandProfile?     @relation("RevieweeBrand", fields: [revieweeBrandId], references: [id], onDelete: SetNull)
+
+  // Normalized overall rating (0-5), computed from individual ratings
+  overallRating Float @default(0)
+
+  // Optional free-text comment
+  comment String? @db.Text
+
+  status      CampaignReviewStatus @default(PENDING)
+  submittedAt DateTime?
+
+  ratings ReviewRating[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([campaignId, reviewerUserId, reviewType])
+  @@index([campaignId, reviewType])
+  @@index([revieweeInfluencerId])
+  @@index([revieweeBrandId])
+  @@map("campaign_reviews")
+}
+
+// Individual question rating within a campaign review
+model ReviewRating {
+  id       String         @id @default(uuid())
+  reviewId String
+  review   CampaignReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  questionId String
+  question   ReviewQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  rating Int // 0-5
+
+  createdAt DateTime @default(now())
+
+  @@unique([reviewId, questionId])
+  @@index([reviewId])
+  @@map("review_ratings")
 }
 
 // Influencer Brand Partner Network Model
