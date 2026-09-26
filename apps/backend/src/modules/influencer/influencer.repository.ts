@@ -129,6 +129,7 @@ export class InfluencerRepository {
     if (dto.minPricePerReel !== undefined && dto.minPricePerReel !== null) dataToUpdate.minPricePerReel = Number(dto.minPricePerReel);
     if (dto.currency !== undefined && dto.currency !== null) dataToUpdate.currency = dto.currency;
     if (dto.responseTime !== undefined && dto.responseTime !== null) dataToUpdate.responseTime = dto.responseTime;
+    if (dto.hearAboutUs !== undefined && dto.hearAboutUs !== null) dataToUpdate.hearAboutUs = dto.hearAboutUs;
     if ((dto as any).completionPercentage !== undefined) dataToUpdate.completionPercentage = (dto as any).completionPercentage;
     if ((dto as any).isOnboardingCompleted !== undefined) dataToUpdate.isOnboardingCompleted = (dto as any).isOnboardingCompleted;
 

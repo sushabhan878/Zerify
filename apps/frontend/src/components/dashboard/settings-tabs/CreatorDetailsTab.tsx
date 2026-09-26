@@ -30,7 +30,13 @@ export default function CreatorDetailsTab({ initialData, onSaveSuccess }: Creato
   const [categories, setCategories] = useState<string[]>(() => (Array.isArray(cached?.niches) ? cached.niches : []));
   const [languages, setLanguages] = useState<string[]>(() => (Array.isArray(cached?.contentLanguages) ? cached.contentLanguages : []));
   const [minAmount, setMinAmount] = useState<string>(() => (cached?.minPricePerReel != null ? String(cached.minPricePerReel) : ''));
-  const [currency, setCurrency] = useState<string>(() => cached?.currency || 'INR');
+  const [preferredCurrency, setPreferredCurrency] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('zerify_preferred_currency') || cached?.currency || 'INR';
+    }
+    return cached?.currency || 'INR';
+  });
+  const [hearAboutUs, setHearAboutUs] = useState<string>(() => cached?.hearAboutUs || '');
   const [collabTypes, setCollabTypes] = useState<string[]>(() => (Array.isArray(cached?.collaborationTypes) ? cached.collaborationTypes : []));
   const [barterAvailable, setBarterAvailable] = useState<boolean>(() => cached?.availableForBarter ?? false);
   const [travelReady, setTravelReady] = useState<boolean>(() => cached?.availableForRelocation ?? false);
@@ -43,13 +49,24 @@ export default function CreatorDetailsTab({ initialData, onSaveSuccess }: Creato
       if (Array.isArray(initialData.niches)) setCategories(initialData.niches);
       if (Array.isArray(initialData.contentLanguages)) setLanguages(initialData.contentLanguages);
       if (initialData.minPricePerReel != null) setMinAmount(String(initialData.minPricePerReel));
-      if (initialData.currency) setCurrency(initialData.currency);
+      if (initialData.currency) setPreferredCurrency(initialData.currency);
+      if (initialData.hearAboutUs) setHearAboutUs(initialData.hearAboutUs);
       if (Array.isArray(initialData.collaborationTypes)) setCollabTypes(initialData.collaborationTypes);
       if (initialData.availableForBarter !== undefined) setBarterAvailable(initialData.availableForBarter);
       if (initialData.availableForRelocation !== undefined) setTravelReady(initialData.availableForRelocation);
       if (initialData.responseTime) setResponseTime(initialData.responseTime);
     }
   }, [initialData]);
+
+  // Keep preferred currency updated if changed in basic info
+  useEffect(() => {
+    const handleCurrencySync = () => {
+      const stored = localStorage.getItem('zerify_preferred_currency');
+      if (stored) setPreferredCurrency(stored);
+    };
+    window.addEventListener('zerify_currency_change', handleCurrencySync);
+    return () => window.removeEventListener('zerify_currency_change', handleCurrencySync);
+  }, []);
 
   // Fetch in background to ensure fresh cache
   useEffect(() => {
@@ -69,7 +86,8 @@ export default function CreatorDetailsTab({ initialData, onSaveSuccess }: Creato
           if (data.minPricePerReel !== null && data.minPricePerReel !== undefined) {
             setMinAmount(String(data.minPricePerReel));
           }
-          if (data.currency) setCurrency(data.currency);
+          if (data.currency) setPreferredCurrency(data.currency);
+          if (data.hearAboutUs) setHearAboutUs(data.hearAboutUs);
           if (Array.isArray(data.collaborationTypes)) setCollabTypes(data.collaborationTypes);
           if (data.availableForBarter !== undefined) setBarterAvailable(data.availableForBarter);
           if (data.availableForRelocation !== undefined) setTravelReady(data.availableForRelocation);
@@ -94,7 +112,7 @@ export default function CreatorDetailsTab({ initialData, onSaveSuccess }: Creato
       niches: categories,
       contentLanguages: languages,
       minPricePerReel: minAmount ? Number(minAmount) : undefined,
-      currency,
+      hearAboutUs,
       collaborationTypes: collabTypes,
       availableForBarter: barterAvailable,
       availableForRelocation: travelReady,
@@ -120,11 +138,7 @@ export default function CreatorDetailsTab({ initialData, onSaveSuccess }: Creato
         const updatedData = await res.json();
         try {
           localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(updatedData));
-          if (updatedData.currency) {
-            localStorage.setItem('zerify_preferred_currency', updatedData.currency);
-          }
           window.dispatchEvent(new Event('zerify_influencer_profile_update'));
-          window.dispatchEvent(new Event('zerify_currency_change'));
         } catch (e) {}
       }
 
@@ -147,8 +161,9 @@ export default function CreatorDetailsTab({ initialData, onSaveSuccess }: Creato
         setLanguages={setLanguages}
         minAmount={minAmount}
         setMinAmount={setMinAmount}
-        currency={currency}
-        setCurrency={setCurrency}
+        currency={preferredCurrency}
+        hearAboutUs={hearAboutUs}
+        setHearAboutUs={setHearAboutUs}
         collabTypes={collabTypes}
         setCollabTypes={setCollabTypes}
         barterAvailable={barterAvailable}

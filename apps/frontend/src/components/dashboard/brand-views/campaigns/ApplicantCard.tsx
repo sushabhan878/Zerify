@@ -16,7 +16,7 @@ import { CampaignApplicationItem } from '@/services/application.service';
 import { CreatorItem } from '../find-influencers/CreatorCard';
 import { mapApplicationToCreator } from './mapApplicationToCreator';
 import { useCurrency } from '@/context/CurrencyContext';
-import { formatCurrency } from '@/utils/currency';
+import Money from '@/components/currency/Money';
 
 interface ApplicantCardProps {
   application: CampaignApplicationItem;
@@ -62,10 +62,6 @@ export default function ApplicantCard({
 
   // Engagement Rate
   const engagementDisplay = creatorItem.engRate;
-
-  const quoteDisplay = application.proposedAmount
-    ? formatCurrency(application.proposedAmount, application.proposedCurrency || currency)
-    : 'Flexible';
 
   return (
     <div className="p-5 sm:p-6 rounded-3xl bg-slate-950/75 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 space-y-4 shadow-xl shadow-purple-950/20 backdrop-blur-xl group">
@@ -150,7 +146,14 @@ export default function ApplicantCard({
             Pitch Quote
           </span>
           <span className="text-sm sm:text-base font-black text-purple-300">
-            {quoteDisplay}
+            {application.proposedAmount ? (
+              <Money
+                amount={application.proposedAmount}
+                currency={application.proposedCurrency || 'USD'}
+              />
+            ) : (
+              'Flexible'
+            )}
           </span>
         </div>
       </div>

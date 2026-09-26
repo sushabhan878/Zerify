@@ -167,6 +167,7 @@ model InfluencerProfile {
   minPricePerReel        Float?
   currency               String?  @default("INR")
   responseTime           String?  @default("Within 24 hours")
+  hearAboutUs            String?
 
   avatarUrl    String?
   pricingRange String?
@@ -1781,4 +1782,37 @@ model FinancialAuditLog {
   @@index([entityType, entityId])
   @@index([action, createdAt])
   @@map("financial_audit_logs")
+}
+
+// ---- Currency & FX Models (PRD §15, §16) ----
+
+model Currency {
+  code           String   @id // e.g. "USD", "INR"
+  name           String
+  symbol         String?
+  numericCode    String?  @map("numeric_code")
+  decimalDigits  Int      @default(2) @map("decimal_digits")
+  symbolPosition String?  @map("symbol_position")
+  isActive       Boolean  @default(true) @map("is_active")
+  provider       String?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("currencies")
+}
+
+model ExchangeRate {
+  id            String    @id @default(uuid())
+  baseCurrency  String    @map("base_currency")
+  quoteCurrency String    @map("quote_currency")
+  rate          Decimal   @db.Decimal(24, 12)
+  provider      String
+  rateTimestamp DateTime  @map("rate_timestamp")
+  fetchedAt     DateTime  @default(now()) @map("fetched_at")
+  expiresAt     DateTime? @map("expires_at")
+
+  @@unique([baseCurrency, quoteCurrency, provider, rateTimestamp])
+  @@index([baseCurrency, quoteCurrency], map: "idx_exchange_rates_pair")
+  @@index([rateTimestamp], map: "idx_exchange_rates_timestamp")
+  @@map("exchange_rates")
 }

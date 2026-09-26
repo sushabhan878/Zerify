@@ -407,7 +407,7 @@ export default function SearchCreatorsSection() {
           <div
             className={
               viewMode === 'grid'
-                ? 'grid grid-cols-1 xl:grid-cols-2 gap-6 pt-1'
+                ? 'grid grid-cols-1 xl:grid-cols-2 gap-8 pt-4'
                 : 'space-y-4 pt-1'
             }
           >

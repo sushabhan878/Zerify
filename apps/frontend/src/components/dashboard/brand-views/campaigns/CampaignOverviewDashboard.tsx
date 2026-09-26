@@ -34,6 +34,7 @@ import { CreatorItem } from '../find-influencers/CreatorCard';
 import LottieLoader from '@/components/ui/LottieLoader';
 import { useCurrency } from '@/context/CurrencyContext';
 import { formatCurrency } from '@/utils/currency';
+import Money from '@/components/currency/Money';
 import CampaignReviewModal from '../../subcomponents/CampaignReviewModal';
 
 interface CampaignOverviewDashboardProps {
@@ -249,7 +250,10 @@ export default function CampaignOverviewDashboard({
                   Budget
                 </span>
                 <span className="text-2xl sm:text-3xl font-black text-purple-300 tracking-tight block">
-                  {formatCurrency(Number(campaign.budgetTotalAmount || 0), campaign.budgetCurrency || currency)}
+                  <Money
+                    amount={Number(campaign.budgetTotalAmount || 0)}
+                    currency={campaign.budgetCurrency || currency}
+                  />
                 </span>
               </div>
               <div className="space-y-0.5 text-left sm:text-right">

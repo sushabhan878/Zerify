@@ -4,9 +4,12 @@ import React, { useState, useRef, useMemo } from 'react';
 import Image from 'next/image';
 import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
 import * as Flags from 'country-flag-icons/react/3x2';
-import { Camera, User, Mail, Calendar, Users, Phone, MapPin, Pencil } from 'lucide-react';
+import { Camera, User, Mail, Calendar, Users, Phone, MapPin, Pencil, Coins } from 'lucide-react';
 import LocationAutocomplete from './LocationAutocomplete';
 import CustomSelect from './CustomSelect';
+import CustomDatePicker from '@/components/ui/CustomDatePicker';
+import { SUPPORTED_CURRENCIES } from '@/utils/currency';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface SingleBasicInfoCardProps {
   name: string;
@@ -57,6 +60,7 @@ export default function SingleBasicInfoCard({
   onAvatarChange,
   onRemoveAvatar,
 }: SingleBasicInfoCardProps) {
+  const { currencies } = useCurrency();
   const [isEditingNameInline, setIsEditingNameInline] = useState(false);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -112,10 +116,15 @@ export default function SingleBasicInfoCard({
     { value: 'Prefer not to say', label: 'Prefer not to say' },
   ];
 
-  const currencyOptions = [
-    { value: 'INR', label: '₹ INR (Indian Rupee - Default)' },
-    { value: 'USD', label: '$ USD (US Dollar)' },
-  ];
+  const currencyOptions = useMemo(() => {
+    const list = currencies && currencies.length > 0 ? currencies : Object.values(SUPPORTED_CURRENCIES);
+    return list.map((c) => ({
+      value: c.code,
+      label: `${c.flag ? c.flag + ' ' : ''}${c.code} — ${c.name} (${c.symbol})`,
+      triggerLabel: `${c.flag ? c.flag + ' ' : ''}${c.code} (${c.symbol})`,
+      keywords: `${c.code} ${c.name} ${c.symbol}`,
+    }));
+  }, [currencies]);
 
   return (
     <div className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-5 shadow-xl">
@@ -306,15 +315,14 @@ export default function SingleBasicInfoCard({
           <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
             Date of Birth (DOB)
           </label>
-          <div className="relative">
-            <Calendar className="w-4 h-4 text-purple-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              type="date"
-              value={dob}
-              onChange={(e) => setDob(e.target.value)}
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs text-white focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold shadow-inner [color-scheme:dark] cursor-pointer"
-            />
-          </div>
+          <CustomDatePicker
+            value={dob}
+            onChange={setDob}
+            placeholder="Select date of birth..."
+            position="top"
+            iconLeft={<Calendar className="w-4 h-4 text-purple-400" />}
+            className="w-full"
+          />
         </div>
 
         <div>
@@ -326,6 +334,7 @@ export default function SingleBasicInfoCard({
             value={gender}
             onChange={setGender}
             iconLeft={<Users className="w-4 h-4 text-purple-400" />}
+            placement="top"
           />
         </div>
 
@@ -337,7 +346,10 @@ export default function SingleBasicInfoCard({
             options={currencyOptions}
             value={currency}
             onChange={(val) => setCurrency?.(val)}
-            iconLeft={<span className="text-xs font-bold text-pink-400">₹/$</span>}
+            iconLeft={<Coins className="w-4 h-4 text-purple-400" />}
+            placement="top"
+            searchable={true}
+            searchPlaceholder="Search currency..."
           />
         </div>
       </div>

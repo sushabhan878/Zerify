@@ -2,12 +2,14 @@
 
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, Globe, MapPin, Calendar, FileText, Check, Loader2, Sparkles, Instagram, Linkedin, Twitter, Youtube, Camera, Pencil, Upload, Trash2, Plus, Link as LinkIcon } from 'lucide-react';
+import { Building2, Globe, MapPin, Calendar, FileText, Check, Loader2, Sparkles, Instagram, Linkedin, Twitter, Youtube, Camera, Pencil, Upload, Trash2, Plus, Link as LinkIcon, Coins } from 'lucide-react';
 import Image from 'next/image';
 
 import CustomSelect, { SelectOption } from '../settings-tabs/subcomponents/CustomSelect';
 import LocationAutocomplete from '../settings-tabs/subcomponents/LocationAutocomplete';
 import { useToast } from '@/components/ui/Toast';
+import { SUPPORTED_CURRENCIES } from '@/utils/currency';
+import { useCurrency } from '@/context/CurrencyContext';
 // @ts-ignore
 import { Industry } from 'naics';
 
@@ -96,6 +98,7 @@ const BRAND_VALUES_OPTIONS = [
 
 export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: BrandCompanyInfoTabProps) {
   const { toastSuccess, toastError } = useToast();
+  const { currencies } = useCurrency();
 
   const getCachedData = () => {
     if (initialData) return initialData;
@@ -159,10 +162,15 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
     }
   }, [initialData]);
 
-  const currencyOptions: SelectOption[] = [
-    { value: 'INR', label: '₹ INR (Indian Rupee - Default)' },
-    { value: 'USD', label: '$ USD (US Dollar)' },
-  ];
+  const currencyOptions: SelectOption[] = React.useMemo(() => {
+    const list = currencies && currencies.length > 0 ? currencies : Object.values(SUPPORTED_CURRENCIES);
+    return list.map((c) => ({
+      value: c.code,
+      label: `${c.flag ? c.flag + ' ' : ''}${c.code} — ${c.name} (${c.symbol})`,
+      triggerLabel: `${c.flag ? c.flag + ' ' : ''}${c.code} (${c.symbol})`,
+      keywords: `${c.code} ${c.name} ${c.symbol}`,
+    }));
+  }, [currencies]);
 
   const handleAddCustomLink = () => {
     setCustomLinks((prev) => [
@@ -438,7 +446,9 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
             options={currencyOptions}
             value={currency}
             onChange={(val) => setCurrency(val)}
-            iconLeft={<span className="text-xs font-bold text-purple-400">₹/$</span>}
+            iconLeft={<Coins className="w-4 h-4 text-purple-400" />}
+            searchable={true}
+            searchPlaceholder="Search currency..."
           />
         </div>
       </div>

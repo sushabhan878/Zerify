@@ -11,6 +11,8 @@ interface CustomDatePickerProps {
   minDate?: string;
   maxDate?: string;
   className?: string;
+  triggerClassName?: string;
+  iconLeft?: React.ReactNode;
   disabled?: boolean;
   align?: 'left' | 'right' | 'center';
   position?: 'bottom' | 'top' | 'auto';
@@ -30,6 +32,8 @@ export default function CustomDatePicker({
   minDate,
   maxDate,
   className = '',
+  triggerClassName = '',
+  iconLeft,
   disabled = false,
   align = 'left',
   position = 'bottom',
@@ -178,11 +182,18 @@ export default function CustomDatePicker({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setIsOpen((prev) => !prev)}
-        className={`w-full px-3.5 py-2.5 bg-slate-900/90 hover:bg-slate-900 border border-purple-400/25 hover:border-purple-400/50 rounded-xl text-xs flex items-center justify-between text-left transition-all shadow-sm ${
-          disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-        } ${isOpen ? 'ring-2 ring-purple-500/40 border-purple-400' : ''}`}
+        className={`w-full relative flex items-center justify-between text-xs transition-all shadow-sm ${
+          iconLeft ? 'pl-10 pr-3.5' : 'px-3.5'
+        } py-2.5 rounded-lg bg-slate-950/80 hover:bg-slate-900 border border-white/15 hover:border-purple-400/50 text-left cursor-pointer ${
+          disabled ? 'opacity-50 cursor-not-allowed' : ''
+        } ${isOpen ? 'ring-2 ring-purple-500/40 border-purple-400/80' : ''} ${triggerClassName}`}
       >
-        <span className={formattedDisplay ? 'text-white font-medium' : 'text-slate-500'}>
+        {iconLeft && (
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400 pointer-events-none">
+            {iconLeft}
+          </div>
+        )}
+        <span className={formattedDisplay ? 'text-white font-semibold' : 'text-slate-500'}>
           {formattedDisplay || placeholder}
         </span>
         <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
@@ -206,22 +217,44 @@ export default function CustomDatePicker({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: position === 'top' ? -6 : 6, scale: 0.96 }}
+            initial={{ opacity: 0, y: position === 'top' ? 6 : -6, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: position === 'top' ? -6 : 6, scale: 0.96 }}
+            exit={{ opacity: 0, y: position === 'top' ? 6 : -6, scale: 0.96 }}
             transition={{ duration: 0.15 }}
             className={`absolute z-[100] ${positionClasses} ${alignClasses} bg-[#0c101d] border border-purple-500/35 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9)] backdrop-blur-2xl p-4 w-[280px] text-xs select-none`}
           >
             {/* Header: Month & Year Navigator */}
             <div className="flex items-center justify-between pb-3 border-b border-purple-400/15">
-              <span className="font-extrabold text-white text-xs tracking-wide">
-                {MONTH_NAMES[currentMonth]} {currentYear}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <select
+                  value={currentMonth}
+                  onChange={(e) => setCurrentMonth(Number(e.target.value))}
+                  className="bg-slate-900 border border-purple-500/30 text-white text-[11px] font-bold rounded-md px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-purple-400 cursor-pointer [color-scheme:dark]"
+                >
+                  {MONTH_NAMES.map((m, idx) => (
+                    <option key={m} value={idx}>
+                      {m.slice(0, 3)}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={currentYear}
+                  onChange={(e) => setCurrentYear(Number(e.target.value))}
+                  className="bg-slate-900 border border-purple-500/30 text-white text-[11px] font-bold rounded-md px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-purple-400 cursor-pointer [color-scheme:dark]"
+                >
+                  {Array.from({ length: 90 }, (_, i) => new Date().getFullYear() - i + 5).map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={handlePrevMonth}
                   className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  title="Previous month"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -229,6 +262,7 @@ export default function CustomDatePicker({
                   type="button"
                   onClick={handleNextMonth}
                   className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  title="Next month"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>

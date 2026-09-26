@@ -53,6 +53,9 @@ export class UpdateInfluencerProfileDto {
   responseTime?: string;
 
   @IsOptional()
+  hearAboutUs?: string;
+
+  @IsOptional()
   completionPercentage?: number;
 
   @IsOptional()

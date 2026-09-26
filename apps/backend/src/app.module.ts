@@ -13,6 +13,7 @@ import { CampaignModule } from './modules/campaign/campaign.module';
 import { MessagingModule } from './modules/messaging/messaging.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ReviewModule } from './modules/review/review.module';
+import { CurrencyModule } from './modules/currency/currency.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ReviewModule } from './modules/review/review.module';
     MessagingModule,
     PaymentModule,
     ReviewModule,
+    CurrencyModule,
   ],
   controllers: [AppController],
   providers: [],

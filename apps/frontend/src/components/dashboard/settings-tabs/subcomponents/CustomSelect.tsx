@@ -23,6 +23,7 @@ interface CustomSelectProps {
   searchable?: boolean;
   searchPlaceholder?: string;
   dropdownHeight?: string;
+  placement?: 'bottom' | 'top';
 }
 
 export default function CustomSelect({
@@ -36,6 +37,7 @@ export default function CustomSelect({
   searchable = false,
   searchPlaceholder = 'Search...',
   dropdownHeight = 'max-h-48',
+  placement = 'bottom',
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -135,11 +137,13 @@ export default function CustomSelect({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -4, scale: 0.98 }}
+            initial={{ opacity: 0, y: placement === 'top' ? 4 : -4, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -4, scale: 0.98 }}
+            exit={{ opacity: 0, y: placement === 'top' ? 4 : -4, scale: 0.98 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className={`absolute left-0 right-0 top-full mt-1.5 bg-slate-900/95 border border-purple-500/30 rounded-lg shadow-2xl z-50 backdrop-blur-2xl p-1 ${dropdownHeight} overflow-y-auto space-y-0.5 [scrollbar-width:thin] [scrollbar-color:rgba(168,85,247,0.4)_rgba(15,23,42,0.6)]`}
+            className={`absolute left-0 right-0 ${
+              placement === 'top' ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
+            } bg-slate-900/95 border border-purple-500/30 rounded-lg shadow-2xl z-50 backdrop-blur-2xl p-1 ${dropdownHeight} overflow-y-auto space-y-0.5 [scrollbar-width:thin] [scrollbar-color:rgba(168,85,247,0.4)_rgba(15,23,42,0.6)]`}
           >
             {searchable && (
               <div className="sticky top-0 z-10 px-1.5 pt-1 pb-1.5 bg-slate-900/95">

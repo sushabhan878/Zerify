@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sliders, Tag, Globe, RefreshCw, Plane, DollarSign, Clock, Plus, X, Sparkles } from 'lucide-react';
+import { Sliders, Tag, Globe, RefreshCw, Plane, DollarSign, Clock, Plus, X, Sparkles, Share2, CircleDollarSign } from 'lucide-react';
 import CustomSelect from './CustomSelect';
 
 interface SingleCreatorDetailsCardProps {
@@ -11,8 +11,9 @@ interface SingleCreatorDetailsCardProps {
   setLanguages: React.Dispatch<React.SetStateAction<string[]>>;
   minAmount: string;
   setMinAmount: (val: string) => void;
-  currency: string;
-  setCurrency: (val: string) => void;
+  currency?: string;
+  hearAboutUs: string;
+  setHearAboutUs: (val: string) => void;
   collabTypes: string[];
   setCollabTypes: React.Dispatch<React.SetStateAction<string[]>>;
   barterAvailable: boolean;
@@ -54,21 +55,37 @@ const ALL_COLLAB_TYPES = [
   'YouTube Short',
 ];
 
-// Currency options
-const CURRENCY_OPTIONS = [
-  { value: 'INR', label: 'INR (₹)' },
-  { value: 'USD', label: 'USD ($)' },
-  { value: 'EUR', label: 'EUR (€)' },
-  { value: 'GBP', label: 'GBP (£)' },
+// "From where did you hear about us?" options covering all social media platforms, word of mouth, ads, and others
+export const HEAR_ABOUT_US_OPTIONS = [
+  { value: '', label: 'Select an option...', triggerLabel: 'Select an option' },
+  { value: 'Instagram', label: 'Instagram' },
+  { value: 'YouTube', label: 'YouTube' },
+  { value: 'TikTok', label: 'TikTok' },
+  { value: 'Twitter / X', label: 'Twitter / X' },
+  { value: 'LinkedIn', label: 'LinkedIn' },
+  { value: 'Facebook', label: 'Facebook' },
+  { value: 'Threads', label: 'Threads' },
+  { value: 'Reddit', label: 'Reddit' },
+  { value: 'Pinterest', label: 'Pinterest' },
+  { value: 'Snapchat', label: 'Snapchat' },
+  { value: 'Word of Mouth', label: 'Word of Mouth (Friends / Colleagues)' },
+  { value: 'Creator Referral', label: 'Creator / Influencer Recommendation' },
+  { value: 'Brand Partner', label: 'Brand Partner / Agency Referral' },
+  { value: 'Google / Web Search', label: 'Google / Web Search' },
+  { value: 'Online Ad', label: 'Online Ad (Meta, Google, YouTube)' },
+  { value: 'Podcast / Media', label: 'Podcast / Media Feature' },
+  { value: 'Event / Conference', label: 'Event / Creator Summit' },
+  { value: 'Community Group', label: 'Community (Discord / Telegram / WhatsApp)' },
+  { value: 'Other', label: 'Other' },
 ];
 
 // Response time options
 const RESPONSE_TIME_OPTIONS = [
-  { value: 'Within 1 hour', label: '⚡ Within 1 hour (Fastest)' },
-  { value: 'Within 6 hours', label: '🚀 Within 6 hours' },
-  { value: 'Within 24 hours', label: '✅ Within 24 hours (Standard)' },
-  { value: 'Within 48 hours', label: '🕒 Within 48 hours' },
-  { value: 'Within 3-5 days', label: '📅 Within 3-5 days' },
+  { value: 'Within 1 hour', label: 'Within 1 hour (Fastest)' },
+  { value: 'Within 6 hours', label: 'Within 6 hours' },
+  { value: 'Within 24 hours', label: 'Within 24 hours (Standard)' },
+  { value: 'Within 48 hours', label: 'Within 48 hours' },
+  { value: 'Within 3-5 days', label: 'Within 3-5 days' },
 ];
 
 export default function SingleCreatorDetailsCard({
@@ -78,8 +95,9 @@ export default function SingleCreatorDetailsCard({
   setLanguages,
   minAmount,
   setMinAmount,
-  currency,
-  setCurrency,
+  currency = 'INR',
+  hearAboutUs,
+  setHearAboutUs,
   collabTypes,
   setCollabTypes,
   barterAvailable,
@@ -338,11 +356,12 @@ export default function SingleCreatorDetailsCard({
           })}
         </div>
 
-        {/* Minimum Rate Input, Currency Selector & Response Time in a Single Line */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Minimum Rate Input, Source Dropdown & Response Time in a Single Line */}
+        <div className="mt-6 pt-5 border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-              Minimum Rate / Price
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1 flex items-center gap-1">
+              <CircleDollarSign className="w-3 h-3 text-purple-400" />
+              <span>Minimum Rate / Price</span>
             </label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
@@ -359,13 +378,15 @@ export default function SingleCreatorDetailsCard({
           </div>
 
           <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-              Currency
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1 flex items-center gap-1">
+              <Share2 className="w-3 h-3 text-purple-400" />
+              <span>From where did you hear about us?</span>
             </label>
             <CustomSelect
-              options={CURRENCY_OPTIONS}
-              value={currency}
-              onChange={setCurrency}
+              options={HEAR_ABOUT_US_OPTIONS}
+              value={hearAboutUs}
+              onChange={setHearAboutUs}
+              placement="top"
             />
           </div>
 
@@ -378,6 +399,7 @@ export default function SingleCreatorDetailsCard({
               options={RESPONSE_TIME_OPTIONS}
               value={responseTime}
               onChange={setResponseTime}
+              placement="top"
             />
           </div>
         </div>
