@@ -29,6 +29,7 @@ export const OfferService = {
     endDate?: string;
     responseDeadline?: string;
     customNotes?: string;
+    isCounterOffer?: boolean;
   }): Promise<CampaignOfferItem> {
     return apiRequest(`/applications/${applicationId}/offers`, {
       method: 'POST',

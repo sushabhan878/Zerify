@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import DeliverableWorkflowFields from '../../../campaign-execution/DeliverableWorkflowFields';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Video, Hash, AtSign, ChevronDown, Check, Sparkles, FileText } from 'lucide-react';
 
@@ -135,6 +136,8 @@ export default function DeliverablesStep({ formData, onChange }: DeliverablesSte
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
+
+              <DeliverableWorkflowFields item={item} onChange={(field, value) => updateItem(idx, field, value)} />
 
               {/* Row 1: Asset Type, Quantity, Revision Limit */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

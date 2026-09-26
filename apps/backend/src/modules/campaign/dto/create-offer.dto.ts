@@ -1,4 +1,4 @@
-import { IsNumber, IsString, IsOptional, IsEnum, IsDateString } from 'class-validator';
+import { IsNumber, IsString, IsOptional, IsEnum, IsDateString, IsBoolean } from 'class-validator';
 import { PaymentModel } from '@prisma/client';
 
 export class CreateOfferDto {
@@ -28,4 +28,8 @@ export class CreateOfferDto {
   @IsOptional()
   @IsString()
   customNotes?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isCounterOffer?: boolean;
 }

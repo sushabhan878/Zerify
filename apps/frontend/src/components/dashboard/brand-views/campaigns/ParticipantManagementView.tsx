@@ -5,6 +5,7 @@ import { Users, CheckCircle, Clock, Video, ShieldCheck, ChevronRight } from 'luc
 import DeliverableReviewCard from './DeliverableReviewCard';
 import { useCurrency } from '@/context/CurrencyContext';
 import { formatCurrency } from '@/utils/currency';
+import { isComplete } from '@/services/deliverable-workflow';
 
 interface ParticipantManagementViewProps {
   participants: any[];
@@ -39,7 +40,7 @@ export default function ParticipantManagementView({
         {participants.map((p) => {
           const profile = p.influencerProfile || {};
           const deliverables = p.deliverables || [];
-          const completedCount = deliverables.filter((d: any) => d.status === 'VERIFIED' || d.status === 'APPROVED').length;
+          const completedCount = deliverables.filter(isComplete).length;
           const isSelected = selectedParticipantId === p.id;
 
           return (
@@ -101,27 +102,59 @@ export default function ParticipantManagementView({
       </div>
 
       {/* Expanded Participant Workspace */}
-      {selectedParticipant && (
-        <div className="p-6 rounded-3xl bg-slate-950/90 border border-purple-500/30 space-y-4">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <div>
-              <span className="text-[10px] font-black text-purple-400 uppercase">Participant Workspace</span>
-              <h3 className="text-base font-black text-white">
-                Deliverable Tracker: @{selectedParticipant.influencerProfile?.handle}
-              </h3>
-            </div>
-            <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-              Contract Active
-            </span>
-          </div>
+      {selectedParticipant && (() => {
+        const pDeliverables = selectedParticipant.deliverables || [];
+        const isAllDone = pDeliverables.length > 0 && pDeliverables.every(isComplete);
+        const isCompleted = selectedParticipant.status === 'PARTICIPANT_COMPLETED';
 
-          <div className="space-y-3">
-            {(selectedParticipant.deliverables || []).map((del: any) => (
-              <DeliverableReviewCard key={del.id} deliverable={del} onRefresh={onRefresh} />
-            ))}
+        return (
+          <div className="p-6 rounded-3xl bg-slate-950/90 border border-purple-500/30 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+              <div>
+                <span className="text-[10px] font-black text-purple-400 uppercase">Participant Workspace</span>
+                <h3 className="text-base font-black text-white">
+                  Deliverable Tracker: @{selectedParticipant.influencerProfile?.handle}
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                {isCompleted ? (
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    Collaboration Completed · Eligible for Settlement
+                  </span>
+                ) : isAllDone ? (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const { DeliverableService } = await import('@/services/deliverable.service');
+                        await DeliverableService.completeParticipant(selectedParticipant.id);
+                        onRefresh();
+                      } catch (err: any) {
+                        alert(err?.message || 'Could not complete collaboration');
+                      }
+                    }}
+                    className="px-4 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-950/40 transition flex items-center gap-1.5"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    Finalize Collaboration & Mark Completed
+                  </button>
+                ) : (
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-500/10 text-purple-300 border border-purple-500/30">
+                    Active in Production
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {pDeliverables.map((del: any) => (
+                <DeliverableReviewCard key={del.id} deliverable={del} onRefresh={onRefresh} />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

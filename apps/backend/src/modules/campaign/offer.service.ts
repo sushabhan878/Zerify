@@ -55,6 +55,8 @@ export class OfferService {
       startDate: dto.startDate,
       endDate: dto.endDate,
       responseDeadline: dto.responseDeadline,
+      isCounterOffer: Boolean(dto.isCounterOffer),
+      originalProposedAmount: application.proposedAmount,
     };
 
     const offer = await this.repository.createOffer({
@@ -107,7 +109,19 @@ export class OfferService {
       title: d.title || undefined,
       description: d.description || undefined,
       quantity: d.quantity,
-      dueDate: d.dueDate || undefined,
+      dueDate: d.dueDate || offer.endDate || offer.application.campaign.endDate || undefined,
+      requirements: {
+        requiresPreApproval: d.requiresPreApproval,
+        requiresPublication: d.requiresPublication,
+        allowLateSubmission: d.allowLateSubmission,
+        publicationDeadline: d.publicationDeadline?.toISOString(),
+        maxFileSizeMb: d.maxFileSizeMb,
+        allowedMimeTypes: d.allowedMimeTypes,
+        mandatoryHashtags: d.mandatoryHashtags,
+        mandatoryMentions: d.mandatoryMentions,
+        requiredCta: d.requiredCta,
+        instructions: d.instructions,
+      },
     }));
 
     const participant = await this.repository.acceptOfferAndCreateParticipant({

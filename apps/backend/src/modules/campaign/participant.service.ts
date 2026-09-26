@@ -15,7 +15,9 @@ export class ParticipantService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async listCampaignParticipants(campaignId: string) {
+  async listCampaignParticipants(campaignId: string, userId: string) {
+    const campaign = await this.prisma.campaign.findUnique({ where: { id: campaignId }, include: { brandProfile: true } });
+    if (!campaign || campaign.brandProfile.userId !== userId) throw new ForbiddenException('Only the campaign owner can view participants');
     return this.repository.listParticipantsForCampaign(campaignId);
   }
 
@@ -29,12 +31,18 @@ export class ParticipantService {
     return this.repository.listParticipantsForInfluencer(influencerProfile.id);
   }
 
-  async getParticipantDetails(participantId: string) {
+  async getParticipantDetails(participantId: string, userId: string) {
     const participant = await this.repository.findParticipantById(participantId);
-    if (!participant) {
-      throw new NotFoundException('Participant not found');
+    if (!participant) throw new NotFoundException('Participant not found');
+    if (participant.influencerProfile.userId !== userId && participant.campaign.brandProfile.userId !== userId) {
+      throw new ForbiddenException('You do not have access to this collaboration');
     }
-    return participant;
+    const payouts = await this.prisma.zerifyPayout.findMany({
+      where: { campaignId: participant.campaignId, influencerProfileId: participant.influencerProfileId },
+      select: { id: true, status: true, currency: true, failureReason: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    return { ...participant, payouts };
   }
 
   async startParticipantWork(userId: string, participantId: string) {
@@ -50,10 +58,20 @@ export class ParticipantService {
       throw new ForbiddenException('You do not have permission to update this participant');
     }
 
-    return this.repository.updateParticipantStatus(
-      participantId,
-      ParticipantStatus.PARTICIPANT_ACTIVE,
-    );
+    if (!isInfluencer) throw new ForbiddenException('Only the assigned creator can start this campaign');
+    if (participant.status !== 'CONFIRMED') throw new BadRequestException('Only a confirmed collaboration can be started');
+    return this.prisma.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM campaigns WHERE id = ${participant.campaignId} FOR UPDATE`;
+      const campaign = await tx.campaign.findUniqueOrThrow({ where: { id: participant.campaignId } });
+      if (!['OPEN', 'FILLING', 'ACTIVE'].includes(campaign.status)) throw new BadRequestException('Campaign is no longer active');
+      const changed = await tx.campaignParticipant.updateMany({ where: { id: participantId, status: 'CONFIRMED' }, data: { status: 'PARTICIPANT_ACTIVE', startedAt: new Date() } });
+      if (!changed.count) throw new BadRequestException('Campaign has already been started or cancelled');
+      await tx.participantDeliverable.updateMany({ where: { participantId, status: 'PENDING' }, data: { status: 'IN_PROGRESS' } });
+      await tx.deliverableEvent.createMany({ data: participant.deliverables.map(d => ({
+        deliverableId: d.id, actorId: userId, actorRole: 'INFLUENCER', eventType: 'CAMPAIGN_STARTED', previousState: d.status, newState: 'IN_PROGRESS',
+      })) });
+      return { started: true };
+    });
   }
 
   async completeParticipant(userId: string, participantId: string) {
@@ -69,8 +87,11 @@ export class ParticipantService {
 
     // Check if all deliverables are approved/verified
     const allDeliverables = participant.deliverables || [];
+    if (participant.status !== 'PARTICIPANT_ACTIVE' || allDeliverables.length === 0) {
+      throw new BadRequestException('Only an active collaboration with deliverables can be completed');
+    }
     const pendingDeliverables = allDeliverables.filter(
-      (d) => d.status !== 'VERIFIED' && d.status !== 'APPROVED',
+      (d) => d.status !== 'VERIFIED' && !(d.status === 'APPROVED' && (d.requirements as any)?.requiresPublication === false),
     );
 
     if (pendingDeliverables.length > 0) {

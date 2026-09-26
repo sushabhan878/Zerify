@@ -46,6 +46,9 @@ export function renderSystemMessage(
   eventType: string,
   payload: ApplicationEventPayload,
 ): RenderedSystemMessage | null {
+  if (eventType === 'DELIVERABLE_WORKFLOW' && payload.workflowMessage) {
+    return { messageKey: 'system.deliverable.updated', text: `${payload.workflowMessage}${campaignSuffix(payload)}` };
+  }
   const renderer = TEMPLATES[eventType as OutboxEventType];
   if (!renderer) return null;
   return renderer(payload);

@@ -1,5 +1,6 @@
 'use client';
 
+import { mapActiveCampaign } from '../campaign-execution/mapActiveCampaign';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Megaphone, Search, Compass, AlertCircle, Star } from 'lucide-react';
 import ActiveCampaignKpiBar from './subcomponents/ActiveCampaignKpiBar';
@@ -37,65 +38,7 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
     try {
       const data = await DeliverableService.getMyCollaborations();
       if (data && Array.isArray(data)) {
-        const formatted: ActiveCampaignItem[] = data.map((p: any) => {
-          const deliverables = p.deliverables || [];
-          const completedCount = deliverables.filter(
-            (d: any) => d.status === 'VERIFIED' || d.status === 'APPROVED' || d.status === 'PUBLISHED'
-          ).length;
-          const progress = deliverables.length > 0
-            ? Math.round((completedCount / deliverables.length) * 100)
-            : (p.status === 'PARTICIPANT_COMPLETED' ? 100 : 0);
-
-          let stage: ActiveCampaignItem['stage'] = 'IN_PRODUCTION';
-          if (p.status === 'PARTICIPANT_COMPLETED') {
-            stage = 'COMPLETED';
-          } else if (progress >= 100) {
-            stage = 'READY_TO_PUBLISH';
-          } else if (deliverables.some((d: any) => d.status === 'SUBMITTED' || d.status === 'UNDER_REVIEW')) {
-            stage = 'CONTENT_REVIEW';
-          } else if (progress > 0) {
-            stage = 'CONTENT_REVIEW';
-          }
-
-          const agreedCurr = p.agreedCurrency || p.campaign?.currency || userCurrency || 'INR';
-          const amountNum = Number(p.agreedAmount || p.agreedBudget || 0);
-          const payoutStr = amountNum > 0 ? formatUserCurrency(amountNum) : 'Product Barter / Fixed';
-
-          let deadlineStr = 'Rolling Milestone';
-          if (p.campaign?.endDate) {
-            deadlineStr = new Date(p.campaign.endDate).toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric',
-            });
-          } else if (p.campaign?.applicationDeadline) {
-            deadlineStr = new Date(p.campaign.applicationDeadline).toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric',
-            });
-          }
-
-          return {
-            id: p.id,
-            title: p.campaign?.title || 'Creator Collaboration',
-            brand: p.campaign?.brandProfile?.companyName || 'Verified Brand',
-            industry: p.campaign?.industry || p.campaign?.brandProfile?.industry || 'Tech & Creator',
-            stage,
-            deadline: deadlineStr,
-            payout: payoutStr,
-            payoutAmount: amountNum,
-            progress,
-            deliverables: deliverables.length > 0
-              ? deliverables.map((d: any) => ({
-                  title: `${d.quantity || 1}x ${d.type || 'Deliverable'}`,
-                  completed: d.status === 'VERIFIED' || d.status === 'APPROVED' || d.status === 'PUBLISHED',
-                }))
-              : [{ title: '1x Content Deliverable', completed: progress === 100 }],
-            verifiedBrand: true,
-            contractBrief: p.campaign?.description || 'Deliverable guidelines and brand objectives.',
-          };
-        });
+        const formatted = data.map(mapActiveCampaign);
         setCampaigns(formatted);
 
         const completedCampaigns = data.filter(
@@ -177,9 +120,9 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
           change: count > 0 ? `${avgProgress}% avg. progress` : 'None in production',
         },
         {
-          label: 'Locked Escrow',
+          label: 'Contract Value',
           val: formatUserCurrency(totalRev),
-          change: count > 0 ? 'Secured upon delivery' : 'No locked escrow',
+          change: count > 0 ? 'Subject to completion and payment checks' : 'No active contract value',
         },
         {
           label: 'Deliverables Pending',
@@ -204,7 +147,7 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
         {
           label: 'Review Value',
           val: formatUserCurrency(totalRev),
-          change: count > 0 ? 'Locked in escrow' : 'No funds in review',
+          change: count > 0 ? 'Awaiting content review' : 'No funds in review',
         },
         {
           label: 'Submitted Deliverables',
@@ -252,9 +195,9 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
           change: 'Fulfilled partnerships',
         },
         {
-          label: 'Total Paid Out',
+          label: 'Completed Contract Value',
           val: formatUserCurrency(totalRev),
-          change: 'Fully disbursed earnings',
+          change: 'Payment status shown in each workspace',
         },
         {
           label: 'Deliverables Fulfilled',

@@ -5,6 +5,7 @@ import { Search, FileText, AlertCircle, Compass } from 'lucide-react';
 import ApplicationKpiBar from './subcomponents/ApplicationKpiBar';
 import ApplicationCardItem, { ApplicationItem } from './subcomponents/ApplicationCardItem';
 import { ApplicationService } from '@/services/application.service';
+import { OfferService } from '@/services/offer.service';
 import { useCurrency } from '@/context/CurrencyContext';
 import LottieLoader from '@/components/ui/LottieLoader';
 
@@ -12,9 +13,17 @@ interface ApplicationsSectionProps {
   onNavigate?: (routeId: string) => void;
 }
 
+type ApplicationFilterTab =
+  | 'ALL'
+  | 'COUNTER_OFFER'
+  | 'CONTRACT_SENT'
+  | 'SHORTLISTED'
+  | 'UNDER_REVIEW'
+  | 'DECLINED';
+
 export default function ApplicationsSection({ onNavigate }: ApplicationsSectionProps) {
   const { format: formatCurrency } = useCurrency();
-  const [activeTab, setActiveTab] = useState<'ALL' | 'CONTRACT_SENT' | 'SHORTLISTED' | 'UNDER_REVIEW' | 'DECLINED'>('ALL');
+  const [activeTab, setActiveTab] = useState<ApplicationFilterTab>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [applications, setApplications] = useState<ApplicationItem[]>([]);
@@ -25,8 +34,45 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
       const myApps = await ApplicationService.getMyApplications().catch(() => []);
       if (myApps && Array.isArray(myApps)) {
         const formatted: ApplicationItem[] = myApps.map((a: any) => {
+          // Check for counter offer from backend offers relation
+          const offersList = Array.isArray(a.offers) ? a.offers : [];
+          const latestOffer = offersList.length > 0 ? offersList[0] : null;
+
+          let isCounter = false;
+          let counterAmount: number | undefined;
+          let counterNotes: string | undefined;
+          let offerId: string | undefined = latestOffer?.id;
+
+          if (latestOffer) {
+            if (
+              latestOffer.termsSnapshot?.isCounterOffer === true ||
+              latestOffer.isCounterOffer === true ||
+              (typeof latestOffer.customNotes === 'string' && latestOffer.customNotes.includes('[COUNTER_OFFER]')) ||
+              (latestOffer.status === 'PENDING' && Number(latestOffer.compensationAmount) !== Number(a.proposedAmount))
+            ) {
+              isCounter = true;
+              counterAmount = Number(latestOffer.compensationAmount);
+              counterNotes = latestOffer.customNotes;
+            }
+          }
+
+          // Check localStorage fallback for immediate cross-tab sync
+          if (!isCounter) {
+            try {
+              const localCounter = localStorage.getItem(`zerify_counter_offer_${a.id}`);
+              if (localCounter) {
+                const parsed = JSON.parse(localCounter);
+                isCounter = true;
+                counterAmount = Number(parsed.counterAmount || parsed.amount);
+                counterNotes = parsed.notes;
+              }
+            } catch {}
+          }
+
           let statusText: ApplicationItem['status'] = 'UNDER_REVIEW';
-          if (a.status === 'OFFER_SENT' || a.status === 'OFFER_ACCEPTED') {
+          if (isCounter) {
+            statusText = 'COUNTER_OFFER';
+          } else if (a.status === 'OFFER_SENT' || a.status === 'OFFER_ACCEPTED') {
             statusText = 'CONTRACT_SENT';
           } else if (a.status === 'SHORTLISTED') {
             statusText = 'SHORTLISTED';
@@ -38,6 +84,7 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
           const sym = currency === 'INR' ? '₹' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
           const rawAmount = Number(a.proposedAmount || 0);
           const rateStr = rawAmount > 0 ? `${sym}${rawAmount.toLocaleString()}` : 'Fixed Barter';
+          const counterRateStr = counterAmount ? `${sym}${counterAmount.toLocaleString()}` : undefined;
 
           return {
             id: a.id,
@@ -50,13 +97,18 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
               year: 'numeric',
             }),
             proposedRate: rateStr,
-            proposedAmount: rawAmount,
+            proposedAmount: isCounter && counterAmount ? counterAmount : rawAmount,
             deliveryTime: '7 Days from acceptance',
             status: statusText,
             platforms: a.campaign?.targetPlatforms || a.campaign?.platforms || ['Instagram'],
             verifiedBrand: true,
             pitchSummary: a.applicationMessage || a.contentIdea || 'Submitted pitch concept and content strategy.',
             lastViewedByBrand: 'Live status synced',
+            isCounterOffer: isCounter,
+            counterAmount,
+            counterRate: counterRateStr,
+            counterNotes,
+            offerId,
           };
         });
         setApplications(formatted);
@@ -73,6 +125,10 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
 
   useEffect(() => {
     loadData();
+    window.addEventListener('zerify_counter_offer_updated', loadData);
+    return () => {
+      window.removeEventListener('zerify_counter_offer_updated', loadData);
+    };
   }, [loadData]);
 
   const handleWithdraw = async (id: string | number) => {
@@ -88,9 +144,61 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
     }
   };
 
+  const handleAcceptOffer = async (offerId?: string, appId?: string | number) => {
+    try {
+      if (offerId) {
+        await OfferService.acceptOffer(offerId);
+      }
+      if (appId) {
+        localStorage.removeItem(`zerify_counter_offer_${appId}`);
+      }
+      loadData();
+    } catch (err) {
+      console.error('Failed to accept counter offer:', err);
+      if (appId) {
+        localStorage.removeItem(`zerify_counter_offer_${appId}`);
+        setApplications((prev) =>
+          prev.map((app) =>
+            app.id === appId
+              ? { ...app, status: 'CONTRACT_SENT', isCounterOffer: false }
+              : app
+          )
+        );
+      }
+    }
+  };
+
+  const handleDeclineOffer = async (offerId?: string, appId?: string | number) => {
+    try {
+      if (offerId) {
+        await OfferService.declineOffer(offerId);
+      }
+      if (appId) {
+        localStorage.removeItem(`zerify_counter_offer_${appId}`);
+      }
+      loadData();
+    } catch (err) {
+      console.error('Failed to decline counter offer:', err);
+      if (appId) {
+        localStorage.removeItem(`zerify_counter_offer_${appId}`);
+        setApplications((prev) =>
+          prev.map((app) =>
+            app.id === appId
+              ? { ...app, status: 'DECLINED', isCounterOffer: false }
+              : app
+          )
+        );
+      }
+    }
+  };
+
   const kpis = useMemo(() => {
     const currentList =
-      activeTab === 'ALL' ? applications : applications.filter((a) => a.status === activeTab);
+      activeTab === 'ALL'
+        ? applications
+        : activeTab === 'COUNTER_OFFER'
+        ? applications.filter((a) => a.isCounterOffer)
+        : applications.filter((a) => a.status === activeTab);
     const count = currentList.length;
     const totalRev = currentList.reduce((acc, a) => acc + (a.proposedAmount || 0), 0);
     const avgRev = count > 0 ? totalRev / count : 0;
@@ -101,6 +209,31 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
     ).length;
     const conversionRate =
       applications.length > 0 ? Math.round((shortlistedCount / applications.length) * 100) : 0;
+
+    if (activeTab === 'COUNTER_OFFER') {
+      return [
+        {
+          label: 'Counter Offers',
+          val: `${count} Offers`,
+          change: count > 0 ? 'Awaiting your review' : 'No counter proposals',
+        },
+        {
+          label: 'Counter Contract Value',
+          val: formatCurrency(totalRev),
+          change: count > 0 ? 'Proposed compensation' : 'No counter value',
+        },
+        {
+          label: 'Avg. Counter Rate',
+          val: formatCurrency(avgRev),
+          change: 'Per counter proposal',
+        },
+        {
+          label: 'Top Counter Offer',
+          val: formatCurrency(maxRev),
+          change: count > 0 ? 'Highest counter proposal' : 'No counter deals',
+        },
+      ];
+    }
 
     if (activeTab === 'CONTRACT_SENT') {
       return [
@@ -228,7 +361,12 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
   }, [activeTab, applications, formatCurrency]);
 
   const filtered = applications.filter((app) => {
-    const matchesTab = activeTab === 'ALL' || app.status === activeTab;
+    const matchesTab =
+      activeTab === 'ALL'
+        ? true
+        : activeTab === 'COUNTER_OFFER'
+        ? Boolean(app.isCounterOffer)
+        : app.status === activeTab;
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch =
       !q ||
@@ -260,23 +398,48 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
         <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-white/10 overflow-x-auto no-scrollbar">
           {[
             { id: 'ALL', label: 'All Pitches' },
+            { id: 'COUNTER_OFFER', label: 'Counter Offers' },
             { id: 'CONTRACT_SENT', label: 'Contracts Sent' },
             { id: 'SHORTLISTED', label: 'Shortlisted' },
             { id: 'UNDER_REVIEW', label: 'Under Review' },
             { id: 'DECLINED', label: 'Not Selected' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
-                activeTab === tab.id
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+          ].map((tab) => {
+            const count =
+              tab.id === 'ALL'
+                ? applications.length
+                : tab.id === 'COUNTER_OFFER'
+                ? applications.filter((a) => a.isCounterOffer).length
+                : applications.filter((a) => a.status === tab.id).length;
+
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
+                  activeTab === tab.id
+                    ? tab.id === 'COUNTER_OFFER'
+                      ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md'
+                      : 'bg-purple-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <span>{tab.label}</span>
+                {count > 0 && (
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                      activeTab === tab.id
+                        ? 'bg-black/30 text-white'
+                        : tab.id === 'COUNTER_OFFER'
+                        ? 'bg-amber-500/20 text-amber-300'
+                        : 'bg-slate-800 text-slate-400'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -332,6 +495,8 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
               key={application.id}
               application={application}
               onWithdraw={handleWithdraw}
+              onAcceptOffer={handleAcceptOffer}
+              onDeclineOffer={handleDeclineOffer}
             />
           ))}
         </div>

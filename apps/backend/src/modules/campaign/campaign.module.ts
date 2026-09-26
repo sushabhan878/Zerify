@@ -1,4 +1,9 @@
 import { Module } from '@nestjs/common';
+import { FileUploadModule } from '../file-upload/file-upload.module';
+import { DeliverableAccessService } from './deliverable-access.service';
+import { DeliverableAssetsService } from './deliverable-assets.service';
+import { DeliverableEventsService } from './deliverable-events.service';
+import { DeliverableWorkflowService } from './deliverable-workflow.service';
 import { PrismaModule } from '../../database/prisma.module';
 import { MessagingModule } from '../messaging/messaging.module';
 import { CampaignController } from './campaign.controller';
@@ -22,7 +27,7 @@ import { ApplicationOwnerGuard } from './guards/application-owner.guard';
 @Module({
   // MessagingModule provides OutboxService so application lifecycle changes can
   // enqueue their system messages inside the same transaction.
-  imports: [PrismaModule, MessagingModule],
+  imports: [PrismaModule, MessagingModule, FileUploadModule],
   controllers: [
     DiscoveryController,
     CampaignController,
@@ -32,6 +37,10 @@ import { ApplicationOwnerGuard } from './guards/application-owner.guard';
     DeliverableController,
   ],
   providers: [
+    DeliverableAccessService,
+    DeliverableAssetsService,
+    DeliverableEventsService,
+    DeliverableWorkflowService,
     CampaignRepository,
     CampaignService,
     ApplicationService,

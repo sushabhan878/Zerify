@@ -25,6 +25,7 @@ import { ReviewService, ReviewStatusResponse } from '@/services/review.service';
 import ApplicationListView from './ApplicationListView';
 import ApplicantDetailModal from './ApplicantDetailModal';
 import SendOfferModal from './SendOfferModal';
+import CounterOfferModal from './CounterOfferModal';
 import ApplicantComparisonView from './ApplicantComparisonView';
 import ParticipantManagementView from './ParticipantManagementView';
 import OfferManagementView from './OfferManagementView';
@@ -56,6 +57,7 @@ export default function CampaignOverviewDashboard({
   const [selectedCreatorForProfile, setSelectedCreatorForProfile] = useState<CreatorItem | null>(null);
   const [selectedAppForDetail, setSelectedAppForDetail] = useState<CampaignApplicationItem | null>(null);
   const [selectedAppForOffer, setSelectedAppForOffer] = useState<CampaignApplicationItem | null>(null);
+  const [selectedAppForCounterOffer, setSelectedAppForCounterOffer] = useState<CampaignApplicationItem | null>(null);
   const [comparingApplicants, setComparingApplicants] = useState<CampaignApplicationItem[] | null>(null);
   const [reviewStatus, setReviewStatus] = useState<ReviewStatusResponse | null>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -116,6 +118,19 @@ export default function CampaignOverviewDashboard({
       loadData();
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleAccept = async (app: CampaignApplicationItem) => {
+    try {
+      await OfferService.sendOffer(app.id, {
+        compensationAmount: app.proposedAmount || 0,
+        compensationCurrency: app.proposedCurrency || 'USD',
+        customNotes: 'Pitch accepted at proposed quote.',
+      });
+      loadData();
+    } catch (err) {
+      console.error('Failed to accept pitch offer:', err);
     }
   };
 
@@ -382,6 +397,8 @@ export default function CampaignOverviewDashboard({
             onReject={handleReject}
             onSendOffer={(app) => setSelectedAppForOffer(app)}
             onOpenComparison={(selected) => setComparingApplicants(selected)}
+            onAccept={handleAccept}
+            onCounterOffer={(app) => setSelectedAppForCounterOffer(app)}
           />
         )}
 
@@ -418,6 +435,18 @@ export default function CampaignOverviewDashboard({
           onClose={() => setSelectedAppForOffer(null)}
           onViewProfile={(creator) => {
             setSelectedAppForOffer(null);
+            setSelectedCreatorForProfile(creator);
+          }}
+          onSuccess={loadData}
+        />
+      )}
+
+      {selectedAppForCounterOffer && (
+        <CounterOfferModal
+          application={selectedAppForCounterOffer}
+          onClose={() => setSelectedAppForCounterOffer(null)}
+          onViewProfile={(creator) => {
+            setSelectedAppForCounterOffer(null);
             setSelectedCreatorForProfile(creator);
           }}
           onSuccess={loadData}

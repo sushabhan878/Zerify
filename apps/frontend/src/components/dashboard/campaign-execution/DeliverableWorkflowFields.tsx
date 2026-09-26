@@ -1,0 +1,12 @@
+'use client';
+
+import { input } from './ExecutionUi';
+
+export default function DeliverableWorkflowFields({ item, onChange }: { item: any; onChange: (field: string, value: unknown) => void }) {
+  return <fieldset className="space-y-3 rounded-xl border border-purple-500/20 p-4"><legend className="px-2 text-xs font-semibold text-purple-200">Submission & completion rules</legend>
+    <div className="grid gap-3 sm:grid-cols-2">{[['requiresPreApproval', 'Require approval before publication'], ['requiresPublication', 'Require a published social post'], ['allowLateSubmission', 'Allow late submissions (show overdue)']].map(([key, label]) => <label key={key} className="flex gap-2 text-xs text-slate-300"><input type="checkbox" checked={item[key] ?? true} onChange={e => onChange(key, e.target.checked)} />{label}</label>)}</div>
+    <div className="grid gap-3 sm:grid-cols-3"><label className="text-xs text-slate-300">Submission deadline<input className={`${input} mt-1`} type="date" value={item.dueDate?.slice(0, 10) || ''} onChange={e => onChange('dueDate', e.target.value || undefined)} /></label><label className="text-xs text-slate-300">Publication deadline<input className={`${input} mt-1`} type="date" value={item.publicationDeadline?.slice(0, 10) || ''} onChange={e => onChange('publicationDeadline', e.target.value || undefined)} /></label><label className="text-xs text-slate-300">Max file size (MB)<input className={`${input} mt-1`} type="number" min={1} max={100} value={item.maxFileSizeMb ?? 100} onChange={e => onChange('maxFileSizeMb', Number(e.target.value))} /></label></div>
+    <label className="block text-xs text-slate-300">Allowed files<select className={`${input} mt-1`} value={item.allowedMimeTypes?.every((m: string) => m.startsWith('image/')) ? 'images' : item.allowedMimeTypes?.every((m: string) => m.startsWith('video/')) ? 'videos' : 'both'} onChange={e => onChange('allowedMimeTypes', e.target.value === 'images' ? ['image/jpeg', 'image/png', 'image/webp'] : e.target.value === 'videos' ? ['video/mp4', 'video/quicktime'] : ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/quicktime'])}><option value="both">Images and video</option><option value="images">Images only</option><option value="videos">MP4 / MOV only</option></select></label>
+    <p className="text-xs text-slate-500">Each quantity becomes an independent deliverable. Accepted requirements are preserved even if the campaign is edited later.</p>
+  </fieldset>;
+}

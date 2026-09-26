@@ -10,6 +10,7 @@ import {
   MessageSquare,
   ArrowUpRight,
   User,
+  RefreshCw,
 } from 'lucide-react';
 import { CampaignApplicationItem } from '@/services/application.service';
 import { CreatorItem } from '../find-influencers/CreatorCard';
@@ -26,6 +27,8 @@ interface ApplicantCardProps {
   onSendOffer: (app: CampaignApplicationItem) => void;
   onSelectCompare?: (appId: string) => void;
   isCompareSelected?: boolean;
+  onAccept?: (app: CampaignApplicationItem) => void;
+  onCounterOffer?: (app: CampaignApplicationItem) => void;
 }
 
 export default function ApplicantCard({
@@ -37,6 +40,8 @@ export default function ApplicantCard({
   onSendOffer,
   onSelectCompare,
   isCompareSelected,
+  onAccept,
+  onCounterOffer,
 }: ApplicantCardProps) {
   const { currency } = useCurrency();
   const [imageError, setImageError] = React.useState(false);
@@ -160,38 +165,50 @@ export default function ApplicantCard({
         </div>
       )}
 
-      {/* Action Footer (No Top Horizontal Line) */}
-      <div className="flex items-center justify-between pt-1">
+      {/* Action Footer */}
+      <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1">
         <button
           onClick={() => onViewDetails(application)}
           type="button"
-          className="text-xs font-bold text-slate-300 hover:text-purple-300 flex items-center gap-1.5 transition-colors py-1 px-2 rounded-lg hover:bg-slate-900"
+          className="text-xs font-bold text-slate-300 hover:text-purple-300 flex items-center gap-1.5 transition-colors py-1.5 px-2 rounded-lg hover:bg-slate-900 cursor-pointer"
         >
           <Eye className="w-4 h-4 text-purple-400" />
-          <span>Full Pitch</span>
+          <span>View Full Pitch</span>
         </button>
 
-        <div className="flex items-center gap-2.5">
-          {application.status === 'APPLIED' && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {application.status === 'APPLIED' ? (
             <>
+              {/* Option 2: Reject */}
               <button
                 onClick={() => onReject(application.id)}
                 type="button"
-                className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 hover:text-rose-300 border border-white/5 hover:border-rose-500/30 text-xs font-bold text-slate-400 transition-all"
+                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 hover:text-rose-300 border border-white/5 hover:border-rose-500/30 text-xs font-bold text-slate-400 transition-all cursor-pointer"
               >
-                Pass
+                Reject
               </button>
+
+              {/* Option 3: Counter Offer */}
               <button
-                onClick={() => onShortlist(application.id)}
+                onClick={() => (onCounterOffer ? onCounterOffer(application) : onSendOffer(application))}
                 type="button"
-                className="px-4 py-1.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600 text-xs font-bold text-indigo-200 hover:text-white border border-indigo-500/40 transition-all shadow-sm"
+                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-600/20 via-orange-600/20 to-amber-600/20 hover:from-amber-600 hover:to-orange-600 border border-amber-500/40 hover:border-transparent text-xs font-bold text-amber-200 hover:text-white transition-all flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
-                Shortlist
+                <RefreshCw className="w-3.5 h-3.5 text-amber-300" />
+                <span>Counter Offer</span>
+              </button>
+
+              {/* Option 4: Accept */}
+              <button
+                onClick={() => (onAccept ? onAccept(application) : onSendOffer(application))}
+                type="button"
+                className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs font-bold text-white flex items-center gap-1.5 shadow-md shadow-emerald-950/40 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Accept</span>
               </button>
             </>
-          )}
-
-          {(application.status === 'SHORTLISTED' || application.status === 'UNDER_REVIEW') && (
+          ) : (
             <button
               onClick={() => onSendOffer(application)}
               type="button"

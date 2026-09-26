@@ -14,6 +14,8 @@ interface ApplicationListViewProps {
   onReject: (appId: string) => void;
   onSendOffer: (app: CampaignApplicationItem) => void;
   onOpenComparison: (selectedApps: CampaignApplicationItem[]) => void;
+  onAccept?: (app: CampaignApplicationItem) => void;
+  onCounterOffer?: (app: CampaignApplicationItem) => void;
 }
 
 const STATUS_TABS = [
@@ -33,6 +35,8 @@ export default function ApplicationListView({
   onReject,
   onSendOffer,
   onOpenComparison,
+  onAccept,
+  onCounterOffer,
 }: ApplicationListViewProps) {
   const [activeTab, setActiveTab] = useState('ALL');
   const [selectedForCompare, setSelectedForCompare] = useState<string[]>([]);
@@ -121,6 +125,8 @@ export default function ApplicationListView({
               onSendOffer={onSendOffer}
               onSelectCompare={toggleCompare}
               isCompareSelected={selectedForCompare.includes(app.id)}
+              onAccept={onAccept}
+              onCounterOffer={onCounterOffer}
             />
           ))}
         </div>

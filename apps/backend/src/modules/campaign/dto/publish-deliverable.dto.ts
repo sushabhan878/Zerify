@@ -1,11 +1,10 @@
-import { IsString, IsOptional, IsArray } from 'class-validator';
+import { IsInt, IsUrl, Min } from 'class-validator';
 
 export class PublishDeliverableDto {
-  @IsString()
+  @IsUrl({ protocols: ['https'], require_protocol: true })
   publishedUrl: string;
 
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  proofUrls?: string[];
+  @IsInt()
+  @Min(1)
+  expectedVersion: number;
 }

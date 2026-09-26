@@ -809,6 +809,12 @@ model CampaignDeliverable {
   mandatoryMentions String[] @default([])
   instructions      String?
   revisionLimit     Int      @default(2)
+  requiresPreApproval Boolean @default(true)
+  requiresPublication Boolean @default(true)
+  publicationDeadline DateTime?
+  allowLateSubmission Boolean @default(true)
+  maxFileSizeMb Int @default(100)
+  allowedMimeTypes String[] @default(["video/mp4", "video/quicktime", "image/jpeg", "image/png", "image/webp"])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -962,6 +968,12 @@ model ParticipantDeliverable {
   dueDate     DateTime?
 
   status DeliverableStatus @default(PENDING)
+  // Terms are snapshotted at acceptance, never read from mutable templates.
+  requirements Json?
+  version Int @default(0)
+  verificationStatus String?
+  assets DeliverableAsset[]
+  events DeliverableEvent[]
 
   // Submission
   contentUrls     String[]  @default([])
@@ -1005,10 +1017,50 @@ model DeliverableRevision {
   notes          String?
   status         String                 @default("SUBMITTED") // SUBMITTED, APPROVED, REVISION_REQUESTED, REJECTED
   reviewComments String?
+  reviewedBy     String?
+  reviewedAt     DateTime?
+  submissionType String @default("FILE")
+  isFinal        Boolean @default(true)
+  assetIds       String[] @default([])
+  publishedUrl   String?
+  caption        String?
   createdAt      DateTime               @default(now())
 
-  @@index([deliverableId, version])
+  @@unique([deliverableId, version])
   @@map("deliverable_revisions")
+}
+
+// Private media is referenced by ID, never by a public or client-supplied URL.
+model DeliverableAsset {
+  id String @id @default(uuid())
+  deliverableId String
+  deliverable ParticipantDeliverable @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
+  uploadedBy String
+  publicId String @unique
+  resourceType String
+  format String
+  mimeType String
+  filename String
+  size Int
+  duration Float?
+  createdAt DateTime @default(now())
+  @@index([deliverableId])
+  @@map("deliverable_assets")
+}
+
+model DeliverableEvent {
+  id String @id @default(uuid())
+  deliverableId String
+  deliverable ParticipantDeliverable @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
+  actorId String
+  actorRole String
+  eventType String
+  previousState String
+  newState String
+  metadata Json?
+  createdAt DateTime @default(now())
+  @@index([deliverableId, createdAt])
+  @@map("deliverable_events")
 }
 
 // Payment allocation per participant

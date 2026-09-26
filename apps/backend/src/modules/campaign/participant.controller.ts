@@ -19,16 +19,16 @@ export class ParticipantController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List all confirmed participants for a campaign' })
-  async listCampaignParticipants(@Param('campaignId') campaignId: string) {
-    return this.participantService.listCampaignParticipants(campaignId);
+  async listCampaignParticipants(@Req() req: any, @Param('campaignId') campaignId: string) {
+    return this.participantService.listCampaignParticipants(campaignId, req.user.id);
   }
 
   @Get('participants/:participantId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get participant details with deliverables and payment status' })
-  async getParticipantDetails(@Param('participantId') participantId: string) {
-    return this.participantService.getParticipantDetails(participantId);
+  async getParticipantDetails(@Req() req: any, @Param('participantId') participantId: string) {
+    return this.participantService.getParticipantDetails(participantId, req.user.id);
   }
 
   @Post('participants/:participantId/start')

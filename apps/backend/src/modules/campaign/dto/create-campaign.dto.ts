@@ -8,11 +8,43 @@ import {
   ValidateNested,
   IsDateString,
   Min,
+  Max,
+  IsInt,
+  ArrayNotEmpty,
+  IsIn,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentModel } from '@prisma/client';
 
 export class CampaignDeliverableDto {
+  @IsOptional()
+  @IsBoolean()
+  requiresPreApproval?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  requiresPublication?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  allowLateSubmission?: boolean;
+
+  @IsOptional()
+  @IsDateString()
+  publicationDeadline?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  maxFileSizeMb?: number;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsIn(['video/mp4', 'video/quicktime', 'image/jpeg', 'image/png', 'image/webp'], { each: true })
+  allowedMimeTypes?: string[];
+
   @IsOptional()
   @IsString()
   platform?: string;
@@ -29,8 +61,9 @@ export class CampaignDeliverableDto {
   description?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   @Min(1)
+  @Max(100)
   quantity?: number;
 
   @IsOptional()

@@ -61,6 +61,7 @@ export interface ApplicationEventPayload {
   influencerName?: string | null;
   /** Which side triggered the transition — used to pick the actor in the copy. */
   actor: 'BRAND' | 'INFLUENCER';
+  workflowMessage?: string;
 }
 
 /** Machine-readable error codes surfaced to clients (PRD §67). */

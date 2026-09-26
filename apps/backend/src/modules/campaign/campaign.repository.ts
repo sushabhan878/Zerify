@@ -389,6 +389,7 @@ export class CampaignRepository {
       description?: string;
       quantity?: number;
       dueDate?: Date;
+      requirements?: Prisma.InputJsonValue;
     }[];
   }) {
     return this.prisma.$transaction(async (tx) => {
@@ -426,17 +427,18 @@ export class CampaignRepository {
       // 4. Instantiate Participant Deliverables from template
       if (params.deliverables && params.deliverables.length > 0) {
         await tx.participantDeliverable.createMany({
-          data: params.deliverables.map((d) => ({
+          data: params.deliverables.flatMap((d) => Array.from({ length: d.quantity || 1 }, (_, index) => ({
             campaignId: params.campaignId,
             participantId: participant.id,
             platform: d.platform,
             type: d.type,
-            title: d.title,
+            title: (d.quantity || 1) > 1 ? `${d.title || d.type} #${index + 1}` : d.title,
             description: d.description,
-            quantity: d.quantity || 1,
+            quantity: 1,
             dueDate: d.dueDate,
+            requirements: d.requirements,
             status: DeliverableStatus.PENDING,
-          })),
+          }))),
         });
       }
 
@@ -470,7 +472,7 @@ export class CampaignRepository {
       where: { id },
       include: {
         campaign: {
-          include: { brandProfile: true },
+          include: { brandProfile: true, product: true, requirement: true, deliverables: true },
         },
         influencerProfile: {
           include: {
@@ -496,7 +498,7 @@ export class CampaignRepository {
             user: { select: { id: true, name: true, email: true } },
           },
         },
-        deliverables: true,
+        deliverables: { include: { revisions: { orderBy: { version: 'desc' } }, events: { orderBy: { createdAt: 'desc' } } } },
         payments: true,
       },
       orderBy: { joinedAt: 'desc' },
