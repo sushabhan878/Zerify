@@ -1,15 +1,164 @@
 'use client';
 
-import React from 'react';
-import { Star, Award, MapPin } from 'lucide-react';
-import { CreatorItem } from '../CreatorCard';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Star, Award, MapPin, ExternalLink, BadgeCheck } from 'lucide-react';
+import { CreatorItem, CreatorSocialAccount } from '../CreatorCard';
 
 interface ProfileMainInfoProps {
   creator: CreatorItem;
 }
 
+const SOCIAL_LOGOS: Record<string, string> = {
+  youtube: '/social/youtube.png',
+  instagram: '/social/instagram.png',
+  twitter: '/social/twitter.png',
+  x: '/social/twitter.png',
+  linkedin: '/social/linkedin.png',
+  facebook: '/social/facebook.png',
+  threads: '/social/threads.png',
+  tiktok: '/social/tik-tok.png',
+};
+
+function getSocialLogo(platformName: string): string | null {
+  const p = platformName.toLowerCase().trim();
+  if (p.includes('youtube')) return SOCIAL_LOGOS.youtube;
+  if (p.includes('instagram')) return SOCIAL_LOGOS.instagram;
+  if (p.includes('twitter') || p === 'x' || p.includes(' x')) return SOCIAL_LOGOS.twitter;
+  if (p.includes('linkedin')) return SOCIAL_LOGOS.linkedin;
+  if (p.includes('facebook')) return SOCIAL_LOGOS.facebook;
+  if (p.includes('threads')) return SOCIAL_LOGOS.threads;
+  if (p.includes('tiktok') || p.includes('tik-tok') || p.includes('tik tok')) return SOCIAL_LOGOS.tiktok;
+  return null;
+}
+
+function formatSocialCount(count: number | undefined | null): string {
+  if (count === undefined || count === null) return '0';
+  if (count >= 1_000_000) {
+    const val = (count / 1_000_000).toFixed(1).replace(/\.0$/, '');
+    return `${val}M`;
+  }
+  if (count >= 1_000) {
+    const val = (count / 1_000).toFixed(1).replace(/\.0$/, '');
+    return `${val}K`;
+  }
+  return count.toLocaleString();
+}
+
+interface DisplaySocialItem {
+  platform: string;
+  count: number;
+  handle?: string;
+  profileUrl?: string;
+  isVerified?: boolean;
+}
+
 export default function ProfileMainInfo({ creator }: ProfileMainInfoProps) {
   const defaultAvatar = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80';
+
+  // Live state of social accounts fetched directly from DB
+  const [socialAccounts, setSocialAccounts] = useState<CreatorSocialAccount[]>(
+    creator.socialAccounts || []
+  );
+
+  // Sync if creator prop already provides them, otherwise query DB
+  useEffect(() => {
+    if (creator.socialAccounts && creator.socialAccounts.length > 0) {
+      setSocialAccounts(creator.socialAccounts);
+      return;
+    }
+
+    let isMounted = true;
+    async function fetchCreatorSocialsFromDb() {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('zerify_token') : null;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
+        const res = await fetch(`${apiUrl}/influencer/discovery`, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+
+        if (res.ok) {
+          const list = await res.json();
+          if (Array.isArray(list) && isMounted) {
+            const match = list.find(
+              (item: any) =>
+                item.id === creator.id ||
+                item.user?.name?.toLowerCase() === creator.name?.toLowerCase() ||
+                item.handle?.toLowerCase() === creator.handle?.toLowerCase()
+            );
+
+            if (match && match.user?.socialAccounts) {
+              setSocialAccounts(
+                match.user.socialAccounts.map((sa: any) => ({
+                  platform: sa.platform,
+                  handle: sa.handle,
+                  followerCount: sa.followerCount,
+                  subscribers: sa.followerCount,
+                  connections: sa.followerCount,
+                  engagementRate: sa.engagementRate,
+                  isVerified: sa.isVerified,
+                  profileUrl: sa.profileUrl,
+                  status: sa.status,
+                }))
+              );
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Could not fetch influencer social accounts from DB:', err);
+      }
+    }
+
+    fetchCreatorSocialsFromDb();
+    return () => {
+      isMounted = false;
+    };
+  }, [creator.id, creator.name, creator.handle, creator.socialAccounts]);
+
+  // Deduplicate and aggregate DB social accounts by platform
+  const accountsToDisplay: DisplaySocialItem[] = useMemo(() => {
+    if (socialAccounts && socialAccounts.length > 0) {
+      const map = new Map<string, DisplaySocialItem>();
+
+      for (const sa of socialAccounts) {
+        const canonicalKey = sa.platform.toLowerCase().trim();
+        const count = sa.followerCount ?? sa.subscribers ?? sa.connections ?? 0;
+        const existing = map.get(canonicalKey);
+
+        if (!existing) {
+          map.set(canonicalKey, {
+            platform: sa.platform,
+            count,
+            handle: sa.handle,
+            profileUrl: sa.profileUrl,
+            isVerified: sa.isVerified,
+          });
+        } else {
+          // If multiple pages for the same platform, pick the highest count account
+          if (count > existing.count) {
+            map.set(canonicalKey, {
+              ...existing,
+              count,
+              handle: sa.handle || existing.handle,
+              profileUrl: sa.profileUrl || existing.profileUrl,
+            });
+          }
+        }
+      }
+
+      return Array.from(map.values()).sort((a, b) => b.count - a.count);
+    }
+
+    return [];
+  }, [socialAccounts]);
+
+  // Determine if creator is verified
+  const isVerified =
+    Boolean(creator.isVerified) ||
+    socialAccounts.some((sa) => sa.isVerified === true);
 
   return (
     <div className="space-y-7">
@@ -24,9 +173,16 @@ export default function ProfileMainInfo({ creator }: ProfileMainInfoProps) {
         <div className="space-y-1.5 min-w-0">
           {/* Name & Star Rating */}
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-              {creator.name}
-            </h2>
+            <div className="flex items-center gap-1.5">
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                {creator.name}
+              </h2>
+              {isVerified && (
+                <span className="shrink-0 text-purple-400 inline-flex items-center" title="Verified Creator">
+                  <BadgeCheck className="w-5 h-5 fill-purple-600 text-[#090C15]" />
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-1 text-sm font-bold text-amber-400">
               <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
               <span>{Number(creator.rating || 5.0).toFixed(1)}</span>
@@ -40,27 +196,54 @@ export default function ProfileMainInfo({ creator }: ProfileMainInfoProps) {
           {/* Location */}
           <div className="flex items-center gap-1.5 text-xs text-slate-400">
             <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-            <span>{creator.location || 'Garden Grove, CA, United States'}</span>
+            <span>{creator.location || 'United States'}</span>
           </div>
 
-          {/* Social Followers Badges */}
-          <div className="flex items-center gap-2 flex-wrap pt-1">
-            {/* Instagram Badge */}
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-pink-500/10 border border-pink-500/25 text-pink-400 text-xs font-semibold shadow-sm">
-              <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-              </svg>
-              <span>{creator.reach || '1.6k'} Followers</span>
-            </span>
+          {/* Linked Social Media Badges: Fetched from DB, ONLY Logo & Number (No words) */}
+          {accountsToDisplay.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap pt-1.5">
+              {accountsToDisplay.map((acc, idx) => {
+                const logo = getSocialLogo(acc.platform);
+                const formattedNumber = formatSocialCount(acc.count);
 
-            {/* TikTok Badge */}
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/25 text-cyan-400 text-xs font-semibold shadow-sm">
-              <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.86 4.46V12.9a8.28 8.28 0 0 0 5.73 2.25V11.7a4.84 4.84 0 0 1-3.77-1.57A4.85 4.85 0 0 1 19.59 6.69z"/>
-              </svg>
-              <span>2.6k Followers</span>
-            </span>
-          </div>
+                const Tag = acc.profileUrl ? 'a' : 'div';
+                const linkProps = acc.profileUrl
+                  ? {
+                      href: acc.profileUrl,
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                    }
+                  : {};
+
+                return (
+                  <Tag
+                    key={`${acc.platform}_${idx}`}
+                    {...linkProps}
+                    title={acc.handle ? `${acc.platform}: ${acc.handle}` : acc.platform}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-white/10 hover:border-purple-500/40 text-slate-200 text-xs font-semibold shadow-sm transition-all hover:scale-[1.02] group cursor-pointer"
+                  >
+                    {logo ? (
+                      <img
+                        src={logo}
+                        alt={acc.platform}
+                        className="w-4 h-4 object-contain shrink-0 group-hover:scale-110 transition-transform"
+                      />
+                    ) : (
+                      <span className="w-4 h-4 rounded-full bg-purple-600/30 text-[10px] flex items-center justify-center font-bold text-purple-300 shrink-0">
+                        {acc.platform.charAt(0)}
+                      </span>
+                    )}
+                    <span className="font-extrabold text-white tracking-tight">
+                      {formattedNumber}
+                    </span>
+                    {acc.profileUrl && (
+                      <ExternalLink className="w-3 h-3 text-slate-500 group-hover:text-purple-300 transition-colors ml-0.5 shrink-0" />
+                    )}
+                  </Tag>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 

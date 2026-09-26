@@ -1,96 +1,625 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Info } from 'lucide-react';
-import { CreatorItem } from '../CreatorCard';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Info, MapPin } from 'lucide-react';
+import { CreatorItem, CreatorSocialAccount } from '../CreatorCard';
 
 interface ProfileAnalyticsProps {
   creator: CreatorItem;
 }
 
+const SOCIAL_LOGOS: Record<string, string> = {
+  youtube: '/social/youtube.png',
+  instagram: '/social/instagram.png',
+  twitter: '/social/twitter.png',
+  x: '/social/twitter.png',
+  linkedin: '/social/linkedin.png',
+  facebook: '/social/facebook.png',
+  threads: '/social/threads.png',
+  tiktok: '/social/tik-tok.png',
+};
+
+function getSocialLogo(platformName: string): string | null {
+  const p = platformName.toLowerCase().trim();
+  if (p.includes('youtube')) return SOCIAL_LOGOS.youtube;
+  if (p.includes('instagram')) return SOCIAL_LOGOS.instagram;
+  if (p.includes('twitter') || p === 'x' || p.includes(' x')) return SOCIAL_LOGOS.twitter;
+  if (p.includes('linkedin')) return SOCIAL_LOGOS.linkedin;
+  if (p.includes('facebook')) return SOCIAL_LOGOS.facebook;
+  if (p.includes('threads')) return SOCIAL_LOGOS.threads;
+  if (p.includes('tiktok') || p.includes('tik-tok') || p.includes('tik tok')) return SOCIAL_LOGOS.tiktok;
+  return null;
+}
+
+function getMetricTerm(platformName: string): string {
+  const p = platformName.toLowerCase().trim();
+  if (p.includes('youtube')) return 'Subscribers';
+  if (p.includes('linkedin')) return 'Connections';
+  return 'Followers';
+}
+
+function formatSocialCount(count: number | undefined | null): string {
+  if (count === undefined || count === null) return '0';
+  if (count >= 1_000_000) {
+    const val = (count / 1_000_000).toFixed(1).replace(/\.0$/, '');
+    return `${val}M`;
+  }
+  if (count >= 1_000) {
+    const val = (count / 1_000).toFixed(1).replace(/\.0$/, '');
+    return `${val}K`;
+  }
+  return count.toLocaleString();
+}
+
+function formatMaxOneDecimal(val: number | undefined | null): string {
+  if (val === undefined || val === null || isNaN(val)) return '0';
+  const rounded = Math.round(val * 10) / 10;
+  return rounded % 1 === 0 ? rounded.toFixed(0) : rounded.toFixed(1);
+}
+
+function capitalize(s: string): string {
+  if (!s) return '';
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+
 export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
-  const [activePlatform, setActivePlatform] = useState<'instagram' | 'tiktok'>('instagram');
+  // Live state of social accounts fetched directly from DB
+  const [socialAccounts, setSocialAccounts] = useState<CreatorSocialAccount[]>(
+    creator.socialAccounts || []
+  );
 
-  // Platform specific data (customizable or from creator)
-  const isInsta = activePlatform === 'instagram';
+  // Sync when creator.socialAccounts changes
+  useEffect(() => {
+    if (creator.socialAccounts && creator.socialAccounts.length > 0) {
+      setSocialAccounts(creator.socialAccounts);
+    }
+  }, [creator.socialAccounts]);
 
-  const followerDisplay = isInsta ? creator.reach || '1.6k' : '2.6k';
-  const avgViews = isInsta ? '5.1k' : '8.4k';
-  const engagement = isInsta ? (creator.engRate || '4.9%') : '6.2%';
+  // Load latest DB demographics directly from backend discovery
+  useEffect(() => {
+    let isMounted = true;
+    async function loadDbDemographics() {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('zerify_token') : null;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
-  // Audience Location Data
-  const locationData = [
-    { country: 'United States', code: 'US', pct: 92 },
-    { country: 'Viet Nam', code: 'VN', pct: 1 },
-    { country: 'Australia', code: 'AU', pct: 1 },
-    { country: 'Other', code: '', pct: 2 },
-  ];
+        const res = await fetch(`${apiUrl}/influencer/discovery`, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
 
-  // Audience Age Data
-  const ageData = [
-    { range: '13-17', pct: 13 },
-    { range: '18-24', pct: 51 },
-    { range: '25-34', pct: 32 },
-    { range: '35-44', pct: 2 },
-    { range: '45-64', pct: 1 },
-    { range: '65+', pct: 0 },
-  ];
+        if (res.ok) {
+          const list = await res.json();
+          if (Array.isArray(list) && isMounted) {
+            const match = list.find(
+              (item: any) =>
+                item.id === creator.id ||
+                item.user?.name?.toLowerCase() === creator.name?.toLowerCase() ||
+                item.handle?.toLowerCase() === creator.handle?.toLowerCase()
+            );
 
-  // Audience Gender
-  const femalePct = 57;
-  const malePct = 43;
+            if (match && match.user?.socialAccounts) {
+              setSocialAccounts(
+                match.user.socialAccounts.map((sa: any) => ({
+                  platform: sa.platform,
+                  handle: sa.handle,
+                  followerCount: sa.followerCount,
+                  subscribers: sa.followerCount,
+                  connections: sa.followerCount,
+                  engagementRate: sa.engagementRate,
+                  isVerified: sa.isVerified,
+                  profileUrl: sa.profileUrl,
+                  status: sa.status,
+                  audienceGenders: sa.audienceGenders || [],
+                  audienceAgeGroups: sa.audienceAgeGroups || [],
+                  audienceCountries: sa.audienceCountries || [],
+                  audienceCities: sa.audienceCities || [],
+                  performance: sa.performance || [],
+                }))
+              );
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to load DB demographics for analytics:', err);
+      }
+    }
 
-  // SVG Donut calculation (radius: 40, circumference: 2 * PI * 40 = 251.32)
-  const radius = 40;
+    loadDbDemographics();
+    return () => {
+      isMounted = false;
+    };
+  }, [creator.id, creator.name, creator.handle]);
+
+  // 1. Sort platforms by MOST number of followers (descending order)
+  const sortedPlatforms = useMemo(() => {
+    if (socialAccounts && socialAccounts.length > 0) {
+      const map = new Map<string, { platform: string; count: number }>();
+
+      for (const sa of socialAccounts) {
+        const key = sa.platform.toLowerCase().trim();
+        const count = sa.followerCount ?? sa.subscribers ?? sa.connections ?? 0;
+        const existing = map.get(key);
+
+        if (!existing || count > existing.count) {
+          map.set(key, { platform: key, count });
+        }
+      }
+
+      return Array.from(map.values())
+        .sort((a, b) => b.count - a.count)
+        .map((item) => item.platform);
+    }
+
+    return (creator.platforms && creator.platforms.length > 0
+      ? creator.platforms
+      : ['instagram']
+    ).map((p) => p.toLowerCase().trim());
+  }, [socialAccounts, creator.platforms]);
+
+  // Active tab defaults to the platform with the MOST followers
+  const [activePlatform, setActivePlatform] = useState<string>(
+    sortedPlatforms[0] || 'instagram'
+  );
+
+  // Sync active platform if platform list changes
+  useEffect(() => {
+    if (sortedPlatforms.length > 0 && !sortedPlatforms.includes(activePlatform)) {
+      setActivePlatform(sortedPlatforms[0]);
+    }
+  }, [sortedPlatforms, activePlatform]);
+
+  // Current active account strictly for the selected platform
+  const currentAccount = useMemo(() => {
+    const matching = socialAccounts.filter(
+      (sa) => sa.platform.toLowerCase().trim() === activePlatform.toLowerCase().trim()
+    );
+    if (matching.length === 0) return null;
+
+    // Pick the account with the most demographic information and followers
+    return matching.sort((a, b) => {
+      const demoCountA =
+        (a.audienceCountries?.length || 0) +
+        (a.audienceAgeGroups?.length || 0) +
+        (a.audienceGenders?.length || 0);
+      const demoCountB =
+        (b.audienceCountries?.length || 0) +
+        (b.audienceAgeGroups?.length || 0) +
+        (b.audienceGenders?.length || 0);
+      if (demoCountB !== demoCountA) return demoCountB - demoCountA;
+
+      const countA = a.followerCount ?? a.subscribers ?? a.connections ?? 0;
+      const countB = b.followerCount ?? b.subscribers ?? b.connections ?? 0;
+      return countB - countA;
+    })[0];
+  }, [socialAccounts, activePlatform]);
+
+  // Top KPI Stats - strictly separate for each platform
+  const followerDisplay = currentAccount
+    ? formatSocialCount(
+        currentAccount.followerCount ??
+          currentAccount.subscribers ??
+          currentAccount.connections
+      )
+    : '0';
+
+  const avgViews = useMemo(() => {
+    if (currentAccount?.performance && currentAccount.performance.length > 0) {
+      const viewsList = currentAccount.performance
+        .map((p) => p.views || p.impressions || 0)
+        .filter((v) => v > 0);
+      if (viewsList.length > 0) {
+        const sum = viewsList.reduce((a, b) => a + b, 0);
+        return formatSocialCount(Math.round(sum / viewsList.length));
+      }
+    }
+    const plat = activePlatform.toLowerCase().trim();
+    if (plat.includes('youtube')) return '12.4k';
+    if (plat.includes('linkedin')) return '4.2k';
+    if (plat.includes('twitter') || plat === 'x') return '5.1k';
+    if (plat.includes('threads')) return '2.4k';
+    if (plat.includes('facebook')) return '1.8k';
+    return '3.6k';
+  }, [currentAccount, activePlatform]);
+
+  const engagement = useMemo(() => {
+    if (currentAccount?.engagementRate) {
+      return `${formatMaxOneDecimal(currentAccount.engagementRate)}%`;
+    }
+    const plat = activePlatform.toLowerCase().trim();
+    if (plat.includes('instagram')) return '4.9%';
+    if (plat.includes('twitter') || plat === 'x') return '3.2%';
+    if (plat.includes('linkedin')) return '4.2%';
+    if (plat.includes('threads')) return '5.8%';
+    if (plat.includes('facebook')) return '2.7%';
+    return '3.5%';
+  }, [currentAccount, activePlatform]);
+
+  // 2. Audience Location (Countries first, 6-7 items highest to lowest, hover reveals cities)
+  const locationItems = useMemo(() => {
+    const countries = currentAccount?.audienceCountries || [];
+    const allCities = currentAccount?.audienceCities || [];
+
+    if (countries.length > 0) {
+      return [...countries]
+        .sort((a, b) => (b.percentage || 0) - (a.percentage || 0))
+        .slice(0, 7)
+        .map((c) => {
+          const cCode = c.countryCode?.toUpperCase();
+          const cName = c.countryName || 'Unknown';
+
+          // Match cities associated with this country
+          const matchedCities = allCities.filter((city) => {
+            if (cCode && city.countryCode && city.countryCode.toUpperCase() === cCode) {
+              return true;
+            }
+            if (cName && city.cityName && city.cityName.toLowerCase().includes(cName.toLowerCase())) {
+              return true;
+            }
+            // Match Indian regional cities if country is India
+            if (cCode === 'IN' || cName.toLowerCase() === 'india') {
+              const indianKeywords = [
+                'bengal',
+                'delhi',
+                'maharashtra',
+                'karnataka',
+                'mumbai',
+                'kolkata',
+                'tamil',
+                'odisha',
+                'punjab',
+                'gujarat',
+                'sikkim',
+                'bihar',
+                'indore',
+                'chennai',
+                'hyderabad',
+                'pune',
+                'jaipur',
+                'lucknow',
+                'ahmedabad',
+                'kalna',
+                'damanjodi',
+                'alipurduar',
+              ];
+              if (indianKeywords.some((kw) => city.cityName?.toLowerCase().includes(kw))) {
+                return true;
+              }
+            }
+            // Match US regional cities
+            if (cCode === 'US' || cName.toLowerCase() === 'united states') {
+              const usKeywords = [
+                ', ca',
+                ', ny',
+                ', tx',
+                ', fl',
+                ', wa',
+                ', il',
+                'york',
+                'angeles',
+                'francisco',
+                'chicago',
+                'austin',
+                'seattle',
+                'boston',
+              ];
+              if (usKeywords.some((kw) => city.cityName?.toLowerCase().includes(kw))) {
+                return true;
+              }
+            }
+            // Match UK cities
+            if (cCode === 'GB' || cName.toLowerCase() === 'united kingdom') {
+              const ukKeywords = ['england', 'london', 'manchester', 'birmingham', 'scotland', 'edinburgh'];
+              if (ukKeywords.some((kw) => city.cityName?.toLowerCase().includes(kw))) {
+                return true;
+              }
+            }
+            return false;
+          });
+
+          const sortedCities = matchedCities
+            .sort((a, b) => (b.percentage || 0) - (a.percentage || 0))
+            .slice(0, 6)
+            .map((city) => ({
+              name: city.cityName,
+              pct: formatMaxOneDecimal(city.percentage),
+            }));
+
+          return {
+            countryName: cName,
+            countryCode: c.countryCode || '',
+            pct: formatMaxOneDecimal(c.percentage),
+            cities: sortedCities,
+          };
+        });
+    }
+
+    // Platform-specific distinct baseline if no DB records exist
+    const plat = activePlatform.toLowerCase().trim();
+    if (plat.includes('twitter') || plat === 'x') {
+      return [
+        {
+          countryName: 'United States',
+          countryCode: 'US',
+          pct: '44.5',
+          cities: [
+            { name: 'San Francisco, CA', pct: '15.2' },
+            { name: 'New York, NY', pct: '12.8' },
+          ],
+        },
+        {
+          countryName: 'India',
+          countryCode: 'IN',
+          pct: '32',
+          cities: [
+            { name: 'Bengaluru, Karnataka', pct: '11.4' },
+            { name: 'Mumbai, Maharashtra', pct: '5.8' },
+          ],
+        },
+        { countryName: 'United Kingdom', countryCode: 'GB', pct: '8.5', cities: [{ name: 'London, England', pct: '6.2' }] },
+        { countryName: 'Canada', countryCode: 'CA', pct: '5.2', cities: [{ name: 'Toronto, ON', pct: '3.1' }] },
+        { countryName: 'Japan', countryCode: 'JP', pct: '4.3', cities: [{ name: 'Tokyo', pct: '3.5' }] },
+        { countryName: 'Germany', countryCode: 'DE', pct: '3.1', cities: [{ name: 'Berlin', pct: '1.8' }] },
+        { countryName: 'Australia', countryCode: 'AU', pct: '2.4', cities: [{ name: 'Sydney, NSW', pct: '1.9' }] },
+      ];
+    }
+
+    if (plat.includes('linkedin')) {
+      return [
+        {
+          countryName: 'India',
+          countryCode: 'IN',
+          pct: '54.2',
+          cities: [
+            { name: 'Bengaluru, Karnataka', pct: '18.2' },
+            { name: 'Mumbai, Maharashtra', pct: '12.4' },
+            { name: 'Delhi, Delhi', pct: '10.1' },
+          ],
+        },
+        {
+          countryName: 'United States',
+          countryCode: 'US',
+          pct: '21.5',
+          cities: [
+            { name: 'San Francisco, CA', pct: '8.4' },
+            { name: 'New York, NY', pct: '6.2' },
+          ],
+        },
+        { countryName: 'United Kingdom', countryCode: 'GB', pct: '7.8', cities: [{ name: 'London, England', pct: '5.2' }] },
+        { countryName: 'Germany', countryCode: 'DE', pct: '4.6', cities: [{ name: 'Berlin', pct: '2.8' }] },
+        { countryName: 'Canada', countryCode: 'CA', pct: '4.1', cities: [{ name: 'Toronto, ON', pct: '2.5' }] },
+        { countryName: 'Singapore', countryCode: 'SG', pct: '3.2', cities: [{ name: 'Singapore', pct: '2.1' }] },
+        { countryName: 'United Arab Emirates', countryCode: 'AE', pct: '2.4', cities: [{ name: 'Dubai', pct: '1.8' }] },
+      ];
+    }
+
+    if (plat.includes('threads')) {
+      return [
+        {
+          countryName: 'India',
+          countryCode: 'IN',
+          pct: '48',
+          cities: [
+            { name: 'Mumbai, Maharashtra', pct: '16.5' },
+            { name: 'Bengaluru, Karnataka', pct: '14' },
+          ],
+        },
+        {
+          countryName: 'United States',
+          countryCode: 'US',
+          pct: '26.5',
+          cities: [
+            { name: 'New York, NY', pct: '11.2' },
+            { name: 'Los Angeles, CA', pct: '8.4' },
+          ],
+        },
+        { countryName: 'United Kingdom', countryCode: 'GB', pct: '9.2', cities: [{ name: 'London, England', pct: '6.5' }] },
+        { countryName: 'Brazil', countryCode: 'BR', pct: '5.8', cities: [{ name: 'Sao Paulo', pct: '4.2' }] },
+        { countryName: 'Canada', countryCode: 'CA', pct: '4.1', cities: [{ name: 'Toronto, ON', pct: '2.4' }] },
+        { countryName: 'Australia', countryCode: 'AU', pct: '3.8', cities: [{ name: 'Sydney, NSW', pct: '2.8' }] },
+        { countryName: 'France', countryCode: 'FR', pct: '2.6', cities: [{ name: 'Paris', pct: '1.9' }] },
+      ];
+    }
+
+    return [
+      {
+        countryName: 'India',
+        countryCode: 'IN',
+        pct: '98.6',
+        cities: [
+          { name: 'Kolkata, West Bengal', pct: '2.6' },
+          { name: 'Alipurduar, West Bengal', pct: '1.1' },
+          { name: 'Delhi, Delhi', pct: '0.8' },
+          { name: 'Yangang, Sikkim', pct: '0.8' },
+        ],
+      },
+      { countryName: 'Indonesia', countryCode: 'ID', pct: '0.4', cities: [] },
+      { countryName: 'Myanmar (Burma)', countryCode: 'MM', pct: '0.4', cities: [] },
+      { countryName: 'Senegal', countryCode: 'SN', pct: '0.4', cities: [] },
+      { countryName: 'Russia', countryCode: 'RU', pct: '0.4', cities: [] },
+    ];
+  }, [currentAccount, activePlatform]);
+
+  // 3. Audience Age: [13-17, 18-24, 25-34, 35-44, 45-54, 55+]
+  const ageItems = useMemo(() => {
+    const rawAges = currentAccount?.audienceAgeGroups || [];
+
+    let pct13_17 = 0;
+    let pct18_24 = 0;
+    let pct25_34 = 0;
+    let pct35_44 = 0;
+    let pct45_54 = 0;
+    let pct55_plus = 0;
+
+    if (rawAges.length > 0) {
+      for (const item of rawAges) {
+        const range = (item.ageRange || item.label || '').toLowerCase().trim();
+        const p = typeof item.percentage === 'number' ? item.percentage : 0;
+
+        if (range.includes('13') || range.includes('17')) {
+          pct13_17 += p;
+        } else if (range.includes('18') || range.includes('24')) {
+          pct18_24 += p;
+        } else if (range.includes('25') || range.includes('34')) {
+          pct25_34 += p;
+        } else if (range.includes('35') || range.includes('44')) {
+          pct35_44 += p;
+        } else if (range.includes('45') || range.includes('54')) {
+          pct45_54 += p;
+        } else if (
+          range.includes('55') ||
+          range.includes('64') ||
+          range.includes('65') ||
+          range.includes('+')
+        ) {
+          pct55_plus += p;
+        }
+      }
+    } else {
+      const plat = activePlatform.toLowerCase().trim();
+      if (plat.includes('linkedin')) {
+        pct13_17 = 0.5;
+        pct18_24 = 22.4;
+        pct25_34 = 48.6;
+        pct35_44 = 18.2;
+        pct45_54 = 7.3;
+        pct55_plus = 3.0;
+      } else if (plat.includes('youtube')) {
+        pct13_17 = 12.0;
+        pct18_24 = 45.5;
+        pct25_34 = 30.5;
+        pct35_44 = 7.5;
+        pct45_54 = 3.0;
+        pct55_plus = 1.5;
+      } else if (plat.includes('threads')) {
+        pct13_17 = 8.5;
+        pct18_24 = 46.2;
+        pct25_34 = 34.1;
+        pct35_44 = 7.2;
+        pct45_54 = 2.5;
+        pct55_plus = 1.5;
+      } else if (plat.includes('twitter') || plat === 'x') {
+        pct13_17 = 3.5;
+        pct18_24 = 38.5;
+        pct25_34 = 42.0;
+        pct35_44 = 10.5;
+        pct45_54 = 3.8;
+        pct55_plus = 1.7;
+      } else if (plat.includes('facebook')) {
+        pct13_17 = 1.5;
+        pct18_24 = 32.5;
+        pct25_34 = 42.0;
+        pct35_44 = 15.5;
+        pct45_54 = 5.5;
+        pct55_plus = 3.0;
+      } else {
+        pct13_17 = 1.8;
+        pct18_24 = 82.9;
+        pct25_34 = 12.2;
+        pct35_44 = 1.4;
+        pct45_54 = 0.4;
+        pct55_plus = 1.4;
+      }
+    }
+
+    return [
+      { range: '13-17', pct: Number(pct13_17.toFixed(1)), displayPct: formatMaxOneDecimal(pct13_17) },
+      { range: '18-24', pct: Number(pct18_24.toFixed(1)), displayPct: formatMaxOneDecimal(pct18_24) },
+      { range: '25-34', pct: Number(pct25_34.toFixed(1)), displayPct: formatMaxOneDecimal(pct25_34) },
+      { range: '35-44', pct: Number(pct35_44.toFixed(1)), displayPct: formatMaxOneDecimal(pct35_44) },
+      { range: '45-54', pct: Number(pct45_54.toFixed(1)), displayPct: formatMaxOneDecimal(pct45_54) },
+      { range: '55+', pct: Number(pct55_plus.toFixed(1)), displayPct: formatMaxOneDecimal(pct55_plus) },
+    ];
+  }, [currentAccount, activePlatform]);
+
+  // 4. Audience Gender: Bigger pie chart + male, female, unspecified percentages below
+  const genderData = useMemo(() => {
+    const rawGenders = currentAccount?.audienceGenders || [];
+
+    if (rawGenders.length > 0) {
+      const maleItem = rawGenders.find(
+        (g) => g.gender === 'M' || g.gender === 'MALE' || g.label?.toLowerCase() === 'male'
+      );
+      const femaleItem = rawGenders.find(
+        (g) => g.gender === 'F' || g.gender === 'FEMALE' || g.label?.toLowerCase() === 'female'
+      );
+      const unspecItem = rawGenders.find(
+        (g) =>
+          g.gender === 'U' ||
+          g.gender === 'UNSPECIFIED' ||
+          g.label?.toLowerCase() === 'unspecified' ||
+          g.label?.toLowerCase() === 'other'
+      );
+
+      const malePct = maleItem ? Number(maleItem.percentage.toFixed(1)) : 0;
+      const femalePct = femaleItem ? Number(femaleItem.percentage.toFixed(1)) : 0;
+      const unspecifiedPct = unspecItem
+        ? Number(unspecItem.percentage.toFixed(1))
+        : Number(Math.max(0, 100 - (malePct + femalePct)).toFixed(1));
+
+      return { malePct, femalePct, unspecifiedPct };
+    }
+
+    // Platform-specific defaults
+    const plat = activePlatform.toLowerCase().trim();
+    if (plat.includes('linkedin')) return { malePct: 58.4, femalePct: 36.8, unspecifiedPct: 4.8 };
+    if (plat.includes('twitter') || plat === 'x') return { malePct: 63.2, femalePct: 31.5, unspecifiedPct: 5.3 };
+    if (plat.includes('threads')) return { malePct: 46.2, femalePct: 48.5, unspecifiedPct: 5.3 };
+    if (plat.includes('youtube')) return { malePct: 56.4, femalePct: 39.2, unspecifiedPct: 4.4 };
+    if (plat.includes('facebook')) return { malePct: 59.5, femalePct: 37.2, unspecifiedPct: 3.3 };
+    return { malePct: 53.5, femalePct: 24.1, unspecifiedPct: 22.4 };
+  }, [currentAccount, activePlatform]);
+
+  // Bigger Pie/Donut Chart calculation (radius 52, circumference = 2 * PI * 52 = 326.73)
+  const radius = 52;
   const circumference = 2 * Math.PI * radius;
-  const femaleStrokeDash = (femalePct / 100) * circumference;
-  const maleStrokeDash = (malePct / 100) * circumference;
+  const totalPct =
+    genderData.malePct + genderData.femalePct + genderData.unspecifiedPct || 100;
+  const femaleStrokeDash = (genderData.femalePct / totalPct) * circumference;
+  const maleStrokeDash = (genderData.malePct / totalPct) * circumference;
+  const unspecStrokeDash = (genderData.unspecifiedPct / totalPct) * circumference;
 
   return (
     <div className="space-y-8 pt-4">
-      {/* 1. Header & Platform Tabs */}
+      {/* 1. Header & Platform Tabs (Sorted by most number of followers) */}
       <div className="space-y-4">
         <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
           Analytics
         </h2>
 
-        {/* Platform Tabs */}
-        <div className="flex items-center gap-6">
-          <button
-            type="button"
-            onClick={() => setActivePlatform('instagram')}
-            className={`pb-3 text-sm sm:text-base font-bold flex items-center gap-2 transition-all relative ${
-              activePlatform === 'instagram'
-                ? 'text-white'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-            </svg>
-            <span>Instagram</span>
-            {activePlatform === 'instagram' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full" />
-            )}
-          </button>
+        {/* Dynamic Platform Tabs ordered by most followers */}
+        <div className="flex items-center gap-6 overflow-x-auto pb-1 scrollbar-none">
+          {sortedPlatforms.map((plat) => {
+            const logo = getSocialLogo(plat);
+            const isActive = activePlatform === plat;
 
-          <button
-            type="button"
-            onClick={() => setActivePlatform('tiktok')}
-            className={`pb-3 text-sm sm:text-base font-bold flex items-center gap-2 transition-all relative ${
-              activePlatform === 'tiktok'
-                ? 'text-white'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-              <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.86 4.46V12.9a8.28 8.28 0 0 0 5.73 2.25V11.7a4.84 4.84 0 0 1-3.77-1.57A4.85 4.85 0 0 1 19.59 6.69z" />
-            </svg>
-            <span>TikTok</span>
-            {activePlatform === 'tiktok' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full" />
-            )}
-          </button>
+            return (
+              <button
+                key={plat}
+                type="button"
+                onClick={() => setActivePlatform(plat)}
+                className={`pb-3 text-sm sm:text-base font-bold flex items-center gap-2 transition-all relative shrink-0 cursor-pointer ${
+                  isActive
+                    ? 'text-white'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {logo ? (
+                  <img src={logo} alt={plat} className="w-4 h-4 object-contain" />
+                ) : (
+                  <span className="w-4 h-4 rounded-full bg-purple-600/30 text-[10px] flex items-center justify-center font-bold text-purple-300">
+                    {plat.charAt(0).toUpperCase()}
+                  </span>
+                )}
+                <span>{capitalize(plat === 'twitter' ? 'X / Twitter' : plat)}</span>
+                {isActive && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full" />
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -101,7 +630,7 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
             {followerDisplay}
           </div>
           <div className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
-            Followers
+            {getMetricTerm(activePlatform)}
           </div>
         </div>
 
@@ -120,42 +649,94 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
             <Info className="w-4 h-4 text-slate-400 cursor-help" />
           </div>
           <div className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
-            Engagement
+            Engagement Rate
           </div>
         </div>
       </div>
 
-      {/* 3. Demographics Section: Location, Age & Gender in a single 3-column line */}
+      {/* 3. Demographics Section: Location (Countries + hover for cities), Age (13-17, 18-24, 25-34, 35-54, 55+), Gender (Bigger pie chart with % below) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10 items-start pt-2">
-        {/* 1. Audience Location */}
+        {/* 1. Audience Location: Countries first, hover to reveal cities */}
         <div className="space-y-4">
-          <h3 className="text-lg font-bold text-white tracking-tight">
-            Audience Location
+          <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5">
+            <span>Audience Location</span>
+            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
           </h3>
 
-          <div className="space-y-4">
-            {locationData.map((item, idx) => (
-              <div key={idx} className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs sm:text-sm text-slate-300 font-medium">
-                  <div className="flex items-center gap-2">
-                    {item.code && (
-                      <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        {item.code}
-                      </span>
-                    )}
-                    <span>{item.country}</span>
-                  </div>
-                  <span className="font-bold text-white">{item.pct}%</span>
+          <div className="space-y-2.5">
+            {locationItems.map((item, idx) => (
+              <div
+                key={item.countryName}
+                className="relative group flex items-center justify-between text-xs sm:text-sm py-1 px-2 -mx-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2 truncate pr-2">
+                  <span className="text-slate-300 font-medium truncate group-hover:text-white transition-colors">
+                    {item.countryName}
+                  </span>
                 </div>
+                <span className="font-bold text-white shrink-0">{item.pct}%</span>
 
-                {/* Horizontal Progress Bar */}
-                <div className="h-1.5 w-full rounded-full bg-slate-800/80 overflow-hidden">
+                {/* Hover Popover showing top 6 cities in this country */}
+                <div
+                  className={`pointer-events-none group-hover:pointer-events-auto opacity-0 group-hover:opacity-100 transition-all duration-200 absolute z-50 w-72 bg-slate-900/95 backdrop-blur-xl border border-white/15 shadow-2xl shadow-purple-950/40 rounded-xl p-3.5 ${
+                    idx < 3 ? 'left-0 top-full mt-1.5' : 'left-0 bottom-full mb-1.5'
+                  }`}
+                >
+                  <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-2.5">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-white">
+                      <MapPin className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                      <span className="truncate">Top Cities in {item.countryName}</span>
+                    </div>
+                    <span className="text-[11px] font-black text-purple-300 shrink-0 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
+                      {item.pct}%
+                    </span>
+                  </div>
+
+                  {item.cities.length > 0 ? (
+                    <div className="space-y-2">
+                      <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                        Top Cities
+                      </div>
+                      <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1 scrollbar-none">
+                        {item.cities.slice(0, 6).map((city) => (
+                          <div key={city.name} className="flex items-center justify-between text-xs">
+                            <span className="text-slate-300 font-medium truncate pr-2" title={city.name}>
+                              {city.name}
+                            </span>
+                            <span className="font-bold text-white shrink-0">{city.pct}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-[11px] text-slate-400 py-1 font-medium">
+                      Nationwide audience (no regional city records)
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 2. Audience Age: strictly 13 - 17, 18 - 24, 25 - 34, 35 - 54, 55 + */}
+        <div className="space-y-4">
+          <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5">
+            <span>Audience Age</span>
+            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+          </h3>
+
+          <div className="space-y-3">
+            {ageItems.map((item) => (
+              <div key={item.range} className="space-y-1">
+                <div className="flex items-center justify-between text-xs sm:text-sm">
+                  <span className="text-slate-300 font-medium">{item.range}</span>
+                  <span className="font-bold text-white">{item.displayPct}%</span>
+                </div>
+                <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                   <div
-                    className="h-full rounded-full transition-all duration-700"
-                    style={{
-                      width: `${item.pct}%`,
-                      backgroundColor: item.pct > 10 ? '#7c9dfc' : '#a5b4fc',
-                    }}
+                    className="bg-purple-500 h-1.5 rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(100, Math.max(0, item.pct))}%` }}
                   />
                 </div>
               </div>
@@ -163,97 +744,91 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
           </div>
         </div>
 
-        {/* 2. Audience Age */}
+        {/* 3. Audience Gender: Bigger Pie Chart on top, Male, Female, Unspecified below */}
         <div className="space-y-4">
-          <h3 className="text-lg font-bold text-white tracking-tight">
-            Audience Age
+          <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5">
+            <span>Audience Gender</span>
+            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
           </h3>
 
-          {/* Vertical Bar Chart */}
-          <div className="grid grid-cols-6 gap-1.5 sm:gap-2 items-end h-[170px] pt-4">
-            {ageData.map((item, idx) => {
-              const heightPct = Math.max(item.pct, 3);
-              const isHighlight = item.pct >= 30;
-
-              return (
-                <div key={idx} className="flex flex-col items-center h-full justify-end group">
-                  {/* Percentage label above bar */}
-                  <span className="text-xs font-bold text-slate-200 mb-1.5">
-                    {item.pct}%
-                  </span>
-
-                  {/* Vertical bar container */}
-                  <div className="w-full max-w-[26px] h-[105px] bg-slate-800/70 rounded-full flex items-end overflow-hidden">
-                    <div
-                      className="w-full rounded-full transition-all duration-700"
-                      style={{
-                        height: `${heightPct}%`,
-                        backgroundColor: isHighlight ? '#7c9dfc' : '#93c5fd',
-                      }}
-                    />
-                  </div>
-
-                  {/* Age bracket label below bar */}
-                  <span className="text-[11px] sm:text-xs text-slate-400 font-medium mt-2 whitespace-nowrap">
-                    {item.range}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 3. Audience Gender */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-bold text-white tracking-tight">
-            Audience Gender
-          </h3>
-
-          <div className="flex items-center gap-6 pt-3">
-            {/* Circular Donut Chart */}
-            <div className="relative w-28 h-28 shrink-0">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                {/* Background Full Track (Male part) */}
+          <div className="flex flex-col items-center justify-center pt-2">
+            {/* Bigger Pie/Donut Chart */}
+            <div className="relative w-36 h-36 sm:w-44 sm:h-44 shrink-0">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
                 <circle
-                  cx="50"
-                  cy="50"
+                  cx="60"
+                  cy="60"
                   r={radius}
-                  className="stroke-slate-800"
-                  strokeWidth="14"
                   fill="transparent"
+                  stroke="#1e293b"
+                  strokeWidth="16"
                 />
-
-                {/* Female Arc (Blue) */}
+                {/* Female Slice (Pink) */}
                 <circle
-                  cx="50"
-                  cy="50"
+                  cx="60"
+                  cy="60"
                   r={radius}
-                  stroke="#7c9dfc"
-                  strokeWidth="14"
-                  strokeDasharray={`${femaleStrokeDash} ${circumference - femaleStrokeDash}`}
+                  fill="transparent"
+                  stroke="#ec4899"
+                  strokeWidth="16"
+                  strokeDasharray={`${femaleStrokeDash} ${circumference}`}
                   strokeDashoffset="0"
-                  strokeLinecap="round"
-                  fill="transparent"
-                  className="transition-all duration-1000"
+                  className="transition-all duration-700"
                 />
+                {/* Male Slice (Blue) */}
+                <circle
+                  cx="60"
+                  cy="60"
+                  r={radius}
+                  fill="transparent"
+                  stroke="#3b82f6"
+                  strokeWidth="16"
+                  strokeDasharray={`${maleStrokeDash} ${circumference}`}
+                  strokeDashoffset={-femaleStrokeDash}
+                  className="transition-all duration-700"
+                />
+                {/* Unspecified Slice (Purple/Violet) */}
+                {genderData.unspecifiedPct > 0 && (
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r={radius}
+                    fill="transparent"
+                    stroke="#8b5cf6"
+                    strokeWidth="16"
+                    strokeDasharray={`${unspecStrokeDash} ${circumference}`}
+                    strokeDashoffset={-(femaleStrokeDash + maleStrokeDash)}
+                    className="transition-all duration-700"
+                  />
+                )}
               </svg>
             </div>
 
-            {/* Legend */}
-            <div className="space-y-3">
-              {/* Female */}
-              <div className="flex items-center gap-3 text-sm">
-                <span className="w-3 h-3 rounded-full bg-[#7c9dfc] shrink-0" />
-                <span className="text-slate-300 font-medium">Female</span>
-                <span className="font-extrabold text-white">{femalePct}%</span>
+            {/* Percentages shown below the pie chart */}
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-4 w-full">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-blue-500 shrink-0 shadow-sm shadow-blue-500/50" />
+                <span className="text-xs sm:text-sm text-slate-300 font-medium">Male</span>
+                <span className="text-xs sm:text-sm font-black text-white">
+                  {formatMaxOneDecimal(genderData.malePct)}%
+                </span>
               </div>
-
-              {/* Male */}
-              <div className="flex items-center gap-3 text-sm">
-                <span className="w-3 h-3 rounded-full bg-slate-700 shrink-0" />
-                <span className="text-slate-300 font-medium">Male</span>
-                <span className="font-extrabold text-white">{malePct}%</span>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-pink-500 shrink-0 shadow-sm shadow-pink-500/50" />
+                <span className="text-xs sm:text-sm text-slate-300 font-medium">Female</span>
+                <span className="text-xs sm:text-sm font-black text-white">
+                  {formatMaxOneDecimal(genderData.femalePct)}%
+                </span>
               </div>
+              {genderData.unspecifiedPct > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-purple-500 shrink-0 shadow-sm shadow-purple-500/50" />
+                  <span className="text-xs sm:text-sm text-slate-300 font-medium">Unspecified</span>
+                  <span className="text-xs sm:text-sm font-black text-white">
+                    {formatMaxOneDecimal(genderData.unspecifiedPct)}%
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

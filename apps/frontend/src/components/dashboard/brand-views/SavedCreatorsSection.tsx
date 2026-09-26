@@ -131,6 +131,22 @@ export default function SavedCreatorsSection() {
               rateNumber: startingRateNum,
               platforms: Array.from(new Set(platformsList)),
               primaryPlatform: mainPlatform,
+              socialAccounts: (inf.user?.socialAccounts || []).map((sa: any) => ({
+                platform: sa.platform,
+                handle: sa.handle,
+                followerCount: sa.followerCount,
+                subscribers: sa.followerCount,
+                connections: sa.followerCount,
+                engagementRate: sa.engagementRate,
+                isVerified: sa.isVerified,
+                profileUrl: sa.profileUrl,
+                status: sa.status,
+                audienceGenders: sa.audienceGenders || [],
+                audienceAgeGroups: sa.audienceAgeGroups || [],
+                audienceCountries: sa.audienceCountries || [],
+                audienceCities: sa.audienceCities || [],
+                performance: sa.performance || [],
+              })),
               location: inf.location || 'United States',
               matchScore: baseMatch,
               matchReasons: [
@@ -138,7 +154,7 @@ export default function SavedCreatorsSection() {
                 `Strong organic engagement in ${inf.niches?.[0] || 'their category'}`,
                 'Verified creator with reliable turnaround track record',
               ],
-              isVerified: socialAcc.isVerified ?? true,
+              isVerified: Boolean(inf.isVerified || inf.user?.socialAccounts?.some((sa: any) => sa.isVerified === true) || socialAcc.isVerified),
               isBookmarked: true,
               skills: inf.collaborationTypes?.length > 0
                 ? inf.collaborationTypes

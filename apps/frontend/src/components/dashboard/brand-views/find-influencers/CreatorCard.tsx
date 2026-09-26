@@ -11,6 +11,23 @@ import {
 } from 'lucide-react';
 import { useCurrency } from '@/context/CurrencyContext';
 
+export interface CreatorSocialAccount {
+  platform: string;
+  handle?: string;
+  followerCount?: number;
+  subscribers?: number;
+  connections?: number;
+  engagementRate?: number;
+  isVerified?: boolean;
+  profileUrl?: string;
+  status?: string;
+  audienceGenders?: Array<{ gender: string; label?: string; count?: number; percentage: number }>;
+  audienceAgeGroups?: Array<{ ageRange: string; label?: string; count?: number; percentage: number }>;
+  audienceCountries?: Array<{ countryCode?: string | null; countryName: string; count?: number; percentage: number }>;
+  audienceCities?: Array<{ cityName: string; countryCode?: string | null; count?: number; percentage: number }>;
+  performance?: Array<{ views?: number; impressions?: number; reach?: number }>;
+}
+
 export interface CreatorItem {
   id: string;
   name: string;
@@ -30,6 +47,7 @@ export interface CreatorItem {
   rateNumber: number;
   platforms: string[];
   primaryPlatform: string;
+  socialAccounts?: CreatorSocialAccount[];
   location: string;
   statusText?: string;
   matchScore: number;
