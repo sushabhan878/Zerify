@@ -1,17 +1,19 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Globe, ArrowRight, Loader2, DollarSign } from 'lucide-react';
 import AuthAlert from './AuthAlert';
+import AuthCurrencySelector from './AuthCurrencySelector';
+import { SUPPORTED_CURRENCIES } from '@/utils/currency';
 
 interface RegisterBrandStepProps {
   website: string;
   setWebsite: (val: string) => void;
   budget: number;
   setBudget: (val: number) => void;
-  currency: 'INR' | 'USD';
-  setCurrency: (curr: 'INR' | 'USD') => void;
+  currency: string;
+  setCurrency: (curr: string) => void;
   loading: boolean;
   errorMessage: string;
   onSubmit: (e: React.FormEvent) => void;
@@ -29,29 +31,47 @@ export default function RegisterBrandStep({
   errorMessage,
   onSubmit,
 }: RegisterBrandStepProps) {
-  const handleCurrencyChange = (newCurr: 'INR' | 'USD') => {
+  const currDetails = useMemo(() => {
+    return SUPPORTED_CURRENCIES[currency] || {
+      code: currency,
+      symbol: currency,
+      exchangeRateToUSD: 1,
+    };
+  }, [currency]);
+
+  const maxBudget = useMemo(() => {
+    const rate = currDetails.exchangeRateToUSD || 1;
+    if (currency === 'INR') return 2500000;
+    if (currency === 'USD') return 25000;
+    const raw = 25000 * rate;
+    if (raw > 500000) return Math.round(raw / 100000) * 100000;
+    if (raw > 50000) return Math.round(raw / 10000) * 10000;
+    return Math.round(raw / 1000) * 1000;
+  }, [currency, currDetails]);
+
+  const sliderStep = useMemo(() => {
+    if (maxBudget >= 500000) return 25000;
+    if (maxBudget >= 50000) return 2500;
+    return 250;
+  }, [maxBudget]);
+
+  const handleCurrencyChange = (newCurr: string) => {
     if (newCurr === currency) return;
-    if (newCurr === 'USD') {
-      // Convert INR (e.g. 500000) to USD (~6000)
-      const converted = Math.round(budget / 83.5);
-      setBudget(Math.max(0, Math.min(converted, 25000)));
-    } else {
-      // Convert USD (e.g. 7000) to INR (~580000)
-      const converted = Math.round((budget * 83.5) / 25000) * 25000;
-      setBudget(Math.max(0, Math.min(converted, 2500000)));
-    }
+    const oldRate = currDetails.exchangeRateToUSD || 1;
+    const newDetails = SUPPORTED_CURRENCIES[newCurr];
+    const newRate = newDetails?.exchangeRateToUSD || 1;
+
+    const inUSD = budget / oldRate;
+    const converted = Math.round(inUSD * newRate);
+    setBudget(converted);
     setCurrency(newCurr);
   };
 
   const formatBudget = (val: number) => {
-    if (val === 0) return `${currency === 'INR' ? '₹0' : '$0'} / month`;
-    if (currency === 'INR') {
-      if (val >= 2500000) return '₹25,00,000+ / month';
-      return `₹${val.toLocaleString('en-IN')} / month`;
-    } else {
-      if (val >= 25000) return '$25,000+ / month';
-      return `$${val.toLocaleString()} / month`;
-    }
+    const symbol = currDetails.symbol || currency;
+    if (val === 0) return `${symbol}0 / month`;
+    if (val >= maxBudget) return `${symbol}${maxBudget.toLocaleString()}+ / month`;
+    return `${symbol}${val.toLocaleString()} / month`;
   };
 
   return (
@@ -90,88 +110,57 @@ export default function RegisterBrandStep({
         </div>
 
         {/* 2. Campaign Budget Slider with Currency Selector */}
-        <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 space-y-3.5">
-          {/* Header Row: Label & Currency Segmented Toggle */}
+        <div className="space-y-3 pt-1">
+          {/* Header Row: Label & Currency Selector */}
           <div className="flex items-center justify-between">
             <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
               <DollarSign className="w-3.5 h-3.5 text-purple-400" />
               <span>Monthly Creator Budget</span>
             </label>
 
-            {/* Currency Selector Pill */}
-            <div className="flex items-center gap-1 bg-slate-950/80 p-0.5 rounded-lg border border-white/10">
-              <button
-                type="button"
-                onClick={() => handleCurrencyChange('INR')}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
-                  currency === 'INR'
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                ₹ INR
-              </button>
-              <button
-                type="button"
-                onClick={() => handleCurrencyChange('USD')}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
-                  currency === 'USD'
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                $ USD
-              </button>
-            </div>
+            {/* Platform Currency Selector */}
+            <AuthCurrencySelector
+              value={currency}
+              onChange={handleCurrencyChange}
+            />
           </div>
 
           {/* Budget Badge Display */}
           <div className="flex justify-end">
-            <span className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">
+            <span className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 shadow-inner">
               {formatBudget(budget)}
             </span>
           </div>
 
-          {/* Dynamic Range Slider (INR / USD) */}
+          {/* Dynamic Range Slider */}
           <input
             type="range"
             min={0}
-            max={currency === 'INR' ? 2500000 : 25000}
-            step={currency === 'INR' ? 25000 : 500}
-            value={budget}
+            max={maxBudget}
+            step={sliderStep}
+            value={Math.min(budget, maxBudget)}
             onChange={(e) => setBudget(Number(e.target.value))}
             className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-500 hover:accent-purple-400 transition-all"
           />
 
           {/* Slider Axis Ticks */}
           <div className="flex justify-between text-[10px] text-slate-500 font-semibold px-0.5">
-            {currency === 'INR' ? (
-              <>
-                <span>₹0</span>
-                <span>₹5,00,000</span>
-                <span>₹15,00,000</span>
-                <span>₹25,00,000+</span>
-              </>
-            ) : (
-              <>
-                <span>$0</span>
-                <span>$5,000</span>
-                <span>$15,000</span>
-                <span>$25,000+</span>
-              </>
-            )}
+            <span>{currDetails.symbol}0</span>
+            <span>{currDetails.symbol}{Math.round(maxBudget * 0.2).toLocaleString()}</span>
+            <span>{currDetails.symbol}{Math.round(maxBudget * 0.5).toLocaleString()}</span>
+            <span>{currDetails.symbol}{maxBudget.toLocaleString()}+</span>
           </div>
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:opacity-95 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:opacity-95 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 mt-4 cursor-pointer"
         >
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Creating Account...</span>
+              <span>Creating Brand Account...</span>
             </>
           ) : (
             <>

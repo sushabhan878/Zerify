@@ -1,7 +1,9 @@
 import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsProfessionalEmail } from '../validators/is-professional-email.validator';
 
 export class RegisterBrandDto {
   @IsEmail({}, { message: 'Please provide a valid business email address' })
+  @IsProfessionalEmail()
   email: string;
 
   @IsString()

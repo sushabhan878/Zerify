@@ -456,7 +456,7 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
           <div className="space-y-1.5 max-w-md">
             <h3 className="text-base font-bold text-white">No Pitches Submitted Yet</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              You haven&apos;t pitched or applied to any campaign opportunities yet. Browse open campaign briefs in Campaign Discovery to submit your first concept!
+              You haven&apos;t pitched or applied to any campaign opportunities yet. Browse open campaign briefs in Discover Campaigns to submit your first concept!
             </p>
           </div>
           {onNavigate && (

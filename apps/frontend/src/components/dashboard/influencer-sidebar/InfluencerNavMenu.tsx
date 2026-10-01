@@ -6,7 +6,6 @@ import {
   User,
   Building2,
   Compass,
-  Sparkles,
   MailCheck,
   Megaphone,
   MessageSquare,
@@ -74,17 +73,8 @@ export default function InfluencerNavMenu({
       icon: BarChart3,
       section: 'MAIN',
     },
-    { id: 'company-discovery', label: 'Company Discovery', icon: Building2, section: 'MAIN' },
-    { id: 'campaign-discovery', label: 'Campaign Discovery', icon: Compass, section: 'MAIN' },
-    {
-      id: 'ai-profile-match',
-      label: 'AI Profile Match',
-      icon: Sparkles,
-      isAi: true,
-      badge: 'AI Match',
-      badgeColor: 'bg-gradient-to-r from-purple-600 to-pink-600 text-white',
-      section: 'MAIN',
-    },
+    { id: 'company-discovery', label: 'Discover Companies', icon: Building2, section: 'MAIN' },
+    { id: 'campaign-discovery', label: 'Discover Campaigns', icon: Compass, section: 'MAIN' },
   ];
 
   const creatorRoutes: NavItem[] = [

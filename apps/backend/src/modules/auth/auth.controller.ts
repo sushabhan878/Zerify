@@ -5,6 +5,8 @@ import { SocialService } from '../social/social.service';
 import { RegisterBrandDto } from './dto/register-brand.dto';
 import { RegisterInfluencerDto } from './dto/register-influencer.dto';
 import { LoginDto } from './dto/login.dto';
+import { SendVerificationOtpDto } from './dto/send-verification-otp.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { ConnectCallbackQueryDto } from '../social/dto/connect-callback-query.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
@@ -16,6 +18,24 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly socialService: SocialService,
   ) {}
+
+  // Email Verification Endpoints
+  @Post('send-verification-otp')
+  @ApiOperation({ summary: 'Send email verification 6-digit OTP code' })
+  @ApiResponse({ status: 200, description: 'Verification OTP sent to recipient email.' })
+  @ApiResponse({ status: 400, description: 'Invalid email or public email domain blocked for brand role.' })
+  @ApiResponse({ status: 409, description: 'Email already exists.' })
+  async sendVerificationOtp(@Body() dto: SendVerificationOtpDto) {
+    return this.authService.sendVerificationOtp(dto);
+  }
+
+  @Post('verify-otp')
+  @ApiOperation({ summary: 'Verify email 6-digit OTP code' })
+  @ApiResponse({ status: 200, description: 'Email verified successfully.' })
+  @ApiResponse({ status: 400, description: 'Invalid or expired OTP code.' })
+  async verifyOtp(@Body() dto: VerifyOtpDto) {
+    return this.authService.verifyOtp(dto);
+  }
 
   // Meta OAuth Callback Endpoint
   @ApiOperation({ summary: 'Meta OAuth Authorization Callback (/api/v1/auth/meta/callback)' })

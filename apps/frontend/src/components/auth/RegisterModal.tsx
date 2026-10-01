@@ -8,6 +8,9 @@ import RegisterCredentialsStep from './subcomponents/RegisterCredentialsStep';
 import RegisterBrandStep from './subcomponents/RegisterBrandStep';
 import RegisterInfluencerStep from './subcomponents/RegisterInfluencerStep';
 import RegisterSuccessScreen from './subcomponents/RegisterSuccessScreen';
+import { isPublicEmail } from '@/lib/email-validator';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/Toast';
 
 interface RegisterModalProps {
   step?: 1 | 2 | 3 | 4;
@@ -20,6 +23,8 @@ export default function RegisterModal({
   setStep: externalSetStep,
   onStepChange,
 }: RegisterModalProps = {}) {
+  const router = useRouter();
+  const { toastSuccess } = useToast();
   const [internalStep, setInternalStep] = useState<1 | 2 | 3 | 4>(1);
   const step = externalStep !== undefined ? externalStep : internalStep;
 
@@ -41,8 +46,10 @@ export default function RegisterModal({
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [verificationToken, setVerificationToken] = useState<string | undefined>(undefined);
 
-  const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
+  const [currency, setCurrency] = useState<string>('INR');
 
   // Brand fields
   const [companyName, setCompanyName] = useState('');
@@ -52,8 +59,8 @@ export default function RegisterModal({
   // Influencer fields
   const [handle, setHandle] = useState('');
   const [platform, setPlatform] = useState('Instagram');
-  const [category, setCategory] = useState('Fashion & Beauty');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(['Fashion & Beauty']);
+  const [category, setCategory] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [pricePerReel, setPricePerReel] = useState(20000);
   const [gender, setGender] = useState('Prefer not to say');
   const [openToAffiliate, setOpenToAffiliate] = useState(false);
@@ -66,6 +73,8 @@ export default function RegisterModal({
 
   const handleSelectRole = (selectedRole: 'BRAND' | 'INFLUENCER') => {
     setRole(selectedRole);
+    setEmailVerified(false);
+    setVerificationToken(undefined);
     setErrorMessage('');
     setStep(2);
   };
@@ -77,6 +86,17 @@ export default function RegisterModal({
       setErrorMessage('Please fill in all required fields.');
       return;
     }
+
+    if (role === 'BRAND' && isPublicEmail(email)) {
+      setErrorMessage('Brands must register with an official business email (e.g. name@company.com). Public domains like @gmail.com or @yahoo.com are not permitted.');
+      return;
+    }
+
+    if (!emailVerified) {
+      setErrorMessage('Please verify your email address with the 6-digit verification code before proceeding.');
+      return;
+    }
+
     if (password.length < 6) {
       setErrorMessage('Password must be at least 6 characters.');
       return;
@@ -90,9 +110,10 @@ export default function RegisterModal({
 
   const handleGoogleRegister = () => {
     if (!fullName) setFullName('Google User');
-    if (!email) setEmail('user@gmail.com');
+    if (!email) setEmail(role === 'BRAND' ? 'partner@googlecorp.com' : 'creator@gmail.com');
     if (!companyName) setCompanyName('Google Business');
     if (!handle) setHandle('@googleuser');
+    setEmailVerified(true);
     setStep(3);
   };
 
@@ -122,7 +143,8 @@ export default function RegisterModal({
             name: fullName,
             handle: handle.startsWith('@') ? handle : `@${handle}`,
             platform,
-            category,
+            category: selectedCategories[0] || 'General',
+            niches: selectedCategories,
             gender,
             openToAffiliate,
             openToUgc,
@@ -154,7 +176,11 @@ export default function RegisterModal({
       localStorage.setItem('zerify_preferred_currency', currency);
 
       window.dispatchEvent(new Event('zerify_auth_change'));
+      toastSuccess('Account created successfully! Redirecting to your dashboard...', 'Welcome to Zerify');
       setStep(4);
+      setTimeout(() => {
+        router.replace('/dashboard');
+      }, 1800);
     } catch (err: any) {
       setErrorMessage(err.message || 'Registration failed. Please check your credentials.');
     } finally {
@@ -183,6 +209,9 @@ export default function RegisterModal({
               setEmail={setEmail}
               password={password}
               setPassword={setPassword}
+              emailVerified={emailVerified}
+              setEmailVerified={setEmailVerified}
+              onVerificationTokenChange={setVerificationToken}
               errorMessage={errorMessage}
               onSubmit={handleStep2Submit}
               onBack={() => setStep(1)}

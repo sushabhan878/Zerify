@@ -23,7 +23,7 @@ export default function CompanyDiscoveryHeader({
           </div>
           <div>
             <h1 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-              Company Discovery Directory
+              Discover Companies
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
                 Matching Engine
               </span>

@@ -1,17 +1,19 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Loader2, Video, Sparkles, Search, X, Plus } from 'lucide-react';
+import { ArrowRight, Loader2, Sparkles, Search, X, Plus } from 'lucide-react';
 import AuthAlert from './AuthAlert';
+import AuthCurrencySelector from './AuthCurrencySelector';
+import { SUPPORTED_CURRENCIES } from '@/utils/currency';
 
 interface RegisterInfluencerStepProps {
   selectedCategories: string[];
   setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>;
   pricePerReel: number;
   setPricePerReel: (val: number) => void;
-  currency: 'INR' | 'USD';
-  setCurrency: (curr: 'INR' | 'USD') => void;
+  currency: string;
+  setCurrency: (curr: string) => void;
   loading: boolean;
   errorMessage: string;
   onSubmit: (e: React.FormEvent) => void;
@@ -35,6 +37,10 @@ const PRESET_CATEGORIES = [
   'Automotive & Cars',
   'Comedy & Entertainment',
   'Home & Interior Design',
+  'Photography & Videography',
+  'Books & Literature',
+  'Sports & Outdoors',
+  'Healthcare & Medicine',
 ];
 
 export default function RegisterInfluencerStep({
@@ -77,35 +83,57 @@ export default function RegisterInfluencerStep({
     setSelectedCategories(selectedCategories.filter((c) => c !== cat));
   };
 
-  const filteredCategories = PRESET_CATEGORIES.filter(
-    (c) =>
-      c.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !selectedCategories.includes(c)
-  );
+  // Show all available categories on focus/click, and filter when typing
+  const filteredCategories = useMemo(() => {
+    const available = PRESET_CATEGORIES.filter((c) => !selectedCategories.includes(c));
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return available;
+    return available.filter((c) => c.toLowerCase().includes(q));
+  }, [searchQuery, selectedCategories]);
 
-  const handleCurrencyChange = (newCurr: 'INR' | 'USD') => {
+  // Currency & Rate calculations
+  const currDetails = useMemo(() => {
+    return SUPPORTED_CURRENCIES[currency] || {
+      code: currency,
+      symbol: currency,
+      exchangeRateToUSD: 1,
+    };
+  }, [currency]);
+
+  const maxSliderRate = useMemo(() => {
+    const rate = currDetails.exchangeRateToUSD || 1;
+    if (currency === 'INR') return 500000;
+    if (currency === 'USD') return 5000;
+    const raw = 5000 * rate;
+    if (raw > 50000) return Math.round(raw / 10000) * 10000;
+    if (raw > 5000) return Math.round(raw / 1000) * 1000;
+    return Math.round(raw / 100) * 100;
+  }, [currency, currDetails]);
+
+  const sliderStep = useMemo(() => {
+    if (maxSliderRate >= 100000) return 5000;
+    if (maxSliderRate >= 10000) return 500;
+    return 50;
+  }, [maxSliderRate]);
+
+  const handleCurrencyChange = (newCurr: string) => {
     if (newCurr === currency) return;
-    if (newCurr === 'USD') {
-      // Convert INR (e.g. 20000) to USD (~240)
-      const converted = Math.round(pricePerReel / 83.5);
-      setPricePerReel(Math.max(0, Math.min(converted, 5000)));
-    } else {
-      // Convert USD (e.g. 250) to INR (~20000)
-      const converted = Math.round((pricePerReel * 83.5) / 1000) * 1000;
-      setPricePerReel(Math.max(0, Math.min(converted, 500000)));
-    }
+    const oldRate = currDetails.exchangeRateToUSD || 1;
+    const newDetails = SUPPORTED_CURRENCIES[newCurr];
+    const newRate = newDetails?.exchangeRateToUSD || 1;
+
+    // Convert existing price to target currency
+    const inUSD = pricePerReel / oldRate;
+    const converted = Math.round(inUSD * newRate);
+    setPricePerReel(converted);
     setCurrency(newCurr);
   };
 
   const formatReelPrice = (val: number) => {
-    if (val === 0) return `${currency === 'INR' ? '₹0' : '$0'} (Product Gifting)`;
-    if (currency === 'INR') {
-      if (val >= 500000) return '₹5,00,000+ / reel';
-      return `₹${val.toLocaleString('en-IN')} / reel`;
-    } else {
-      if (val >= 5000) return '$5,000+ / reel';
-      return `$${val.toLocaleString()} / reel`;
-    }
+    const symbol = currDetails.symbol || currency;
+    if (val === 0) return `${symbol}0 (Product Gifting)`;
+    if (val >= maxSliderRate) return `${symbol}${maxSliderRate.toLocaleString()} / reel`;
+    return `${symbol}${val.toLocaleString()} / reel`;
   };
 
   return (
@@ -135,12 +163,14 @@ export default function RegisterInfluencerStep({
               <Sparkles className="w-3.5 h-3.5 text-pink-400" />
               <span>Search Niche Categories</span>
             </label>
-            <span className="text-[10px] text-slate-400 font-medium">
-              {selectedCategories.length} tag{selectedCategories.length === 1 ? '' : 's'} added
-            </span>
+            {selectedCategories.length > 0 && (
+              <span className="text-[10px] text-slate-400 font-medium">
+                {selectedCategories.length} tag{selectedCategories.length === 1 ? '' : 's'} added
+              </span>
+            )}
           </div>
 
-          {/* Selected Tag Badges Container */}
+          {/* Selected Tag Badges Container (Only shown when tags are added) */}
           {selectedCategories.length > 0 && (
             <div className="flex flex-wrap gap-1.5 p-2 rounded-2xl bg-slate-900/60 border border-white/10 min-h-[44px]">
               <AnimatePresence>
@@ -156,7 +186,7 @@ export default function RegisterInfluencerStep({
                     <button
                       type="button"
                       onClick={() => removeCategoryTag(cat)}
-                      className="hover:text-pink-300 transition-colors p-0.5 rounded-full hover:bg-white/10"
+                      className="hover:text-pink-300 transition-colors p-0.5 rounded-full hover:bg-white/10 cursor-pointer"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -166,13 +196,14 @@ export default function RegisterInfluencerStep({
             </div>
           )}
 
-          {/* Search Input Bar with Auto-complete Dropdown */}
+          {/* Search Input Bar (No purple border on focus/click) */}
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
               type="text"
               value={searchQuery}
               onFocus={() => setDropdownOpen(true)}
+              onClick={() => setDropdownOpen(true)}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 setDropdownOpen(true);
@@ -183,29 +214,29 @@ export default function RegisterInfluencerStep({
                   addCategoryTag(searchQuery);
                 }
               }}
-              placeholder="Search or type a category tag (e.g. Gaming, Beauty)..."
-              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-900/90 border border-white/10 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 text-xs text-white placeholder-slate-500 outline-none transition-all"
+              placeholder="Search category tag (e.g. Gaming, Beauty, Tech)..."
+              className="w-full pl-10 pr-16 py-2.5 rounded-xl bg-slate-900/90 border border-white/10 focus:border-white/20 focus:ring-0 text-xs text-white placeholder-slate-500 outline-none transition-all"
             />
-            {searchQuery && (
+            {searchQuery.trim() && (
               <button
                 type="button"
                 onClick={() => addCategoryTag(searchQuery)}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-lg bg-pink-500/20 text-pink-300 hover:bg-pink-500/30 text-[10px] font-bold flex items-center gap-1"
+                className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-pink-600/30 text-pink-200 hover:bg-pink-600/50 border border-pink-500/40 text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-all"
               >
                 <Plus className="w-3 h-3" />
                 <span>Add</span>
               </button>
             )}
 
-            {/* Filtered Categories Search Dropdown */}
+            {/* Categories Dropdown (Opens on click showing all categories, filters as user types) */}
             {dropdownOpen && filteredCategories.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-1.5 z-30 max-h-48 overflow-y-auto rounded-xl bg-[#090d16] border border-white/15 shadow-2xl p-1.5 space-y-1 backdrop-blur-xl">
+              <div className="absolute left-0 right-0 top-full mt-1.5 z-30 max-h-52 overflow-y-auto rounded-xl bg-[#090d16] border border-white/15 shadow-2xl p-1.5 space-y-1 backdrop-blur-xl custom-scrollbar">
                 {filteredCategories.map((cat) => (
                   <button
                     key={cat}
                     type="button"
                     onClick={() => addCategoryTag(cat)}
-                    className="w-full text-left px-3 py-2 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-pink-500/20 transition-all flex items-center justify-between"
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer"
                   >
                     <span>{cat}</span>
                     <Plus className="w-3.5 h-3.5 text-pink-400" />
@@ -214,110 +245,54 @@ export default function RegisterInfluencerStep({
               </div>
             )}
           </div>
-
-          {/* Available Preset Category Quick Pills */}
-          {PRESET_CATEGORIES.filter((c) => !selectedCategories.includes(c)).length > 0 && (
-            <div className="pt-2">
-              <span className="block text-[11px] font-medium text-slate-400 mb-1.5">
-                Suggested categories:
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {PRESET_CATEGORIES.filter((c) => !selectedCategories.includes(c))
-                  .slice(0, 6)
-                  .map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => addCategoryTag(cat)}
-                      className="px-2.5 py-1 rounded-lg bg-slate-900/80 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500/30 text-[11px] text-slate-300 hover:text-white transition-all flex items-center gap-1"
-                    >
-                      <span>{cat}</span>
-                      <Plus className="w-3 h-3 text-pink-400" />
-                    </button>
-                  ))}
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* 2. Rate Per Reel Sliding Bar with Currency Selector */}
-        <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 space-y-3.5">
-          {/* Header Row: Label & Currency Segmented Toggle */}
+        {/* 2. Rate Per Reel / Video - Borderless, clean slider without outer card div */}
+        <div className="space-y-3 pt-1">
+          {/* Header Row: Label (no video icon) & Full Platform Currency Selector */}
           <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-              <Video className="w-3.5 h-3.5 text-pink-400" />
-              <span>Rate Per Reel / Video</span>
-            </label>
+            <span className="text-xs font-semibold text-slate-300">
+              Rate Per Reel / Video
+            </span>
 
-            {/* Currency Selector Pill */}
-            <div className="flex items-center gap-1 bg-slate-950/80 p-0.5 rounded-lg border border-white/10">
-              <button
-                type="button"
-                onClick={() => handleCurrencyChange('INR')}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
-                  currency === 'INR'
-                    ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                ₹ INR
-              </button>
-              <button
-                type="button"
-                onClick={() => handleCurrencyChange('USD')}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
-                  currency === 'USD'
-                    ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                $ USD
-              </button>
-            </div>
+            {/* Currency Selector (shows only currency term e.g. INR) */}
+            <AuthCurrencySelector
+              value={currency}
+              onChange={handleCurrencyChange}
+            />
           </div>
 
           {/* Rate Badge Display */}
           <div className="flex justify-end">
-            <span className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/20">
+            <span className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 shadow-inner">
               {formatReelPrice(pricePerReel)}
             </span>
           </div>
 
-          {/* Dynamic Slider (Adapts to INR / USD) */}
+          {/* Dynamic Slider */}
           <input
             type="range"
             min={0}
-            max={currency === 'INR' ? 500000 : 5000}
-            step={currency === 'INR' ? 1000 : 50}
-            value={pricePerReel}
+            max={maxSliderRate}
+            step={sliderStep}
+            value={Math.min(pricePerReel, maxSliderRate)}
             onChange={(e) => setPricePerReel(Number(e.target.value))}
             className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-pink-500 hover:accent-pink-400 transition-all"
           />
 
           {/* Slider Axis Ticks */}
           <div className="flex justify-between text-[10px] text-slate-500 font-semibold px-0.5">
-            {currency === 'INR' ? (
-              <>
-                <span>₹0</span>
-                <span>₹50,000</span>
-                <span>₹2,50,000</span>
-                <span>₹5,00,000+</span>
-              </>
-            ) : (
-              <>
-                <span>$0</span>
-                <span>$500</span>
-                <span>$2,500</span>
-                <span>$5,000+</span>
-              </>
-            )}
+            <span>{currDetails.symbol}0</span>
+            <span>{currDetails.symbol}{Math.round(maxSliderRate * 0.1).toLocaleString()}</span>
+            <span>{currDetails.symbol}{Math.round(maxSliderRate * 0.5).toLocaleString()}</span>
+            <span>{currDetails.symbol}{maxSliderRate.toLocaleString()}+</span>
           </div>
         </div>
 
         <button
           type="submit"
           disabled={loading || selectedCategories.length === 0}
-          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:opacity-95 text-white font-bold text-xs shadow-lg shadow-pink-600/30 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:opacity-95 text-white font-bold text-xs shadow-lg shadow-pink-600/30 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-4 cursor-pointer"
         >
           {loading ? (
             <>

@@ -20,7 +20,7 @@ export default function CampaignDiscoveryHeader({
             <Compass className="w-4 h-4" />
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-            <span>Campaign Discovery & Brand Deals</span>
+            <span>Discover Campaigns</span>
             <span className="px-2 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30 text-[10px] font-bold text-purple-300">
               Live Deals
             </span>

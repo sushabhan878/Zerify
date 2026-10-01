@@ -14,6 +14,7 @@ import { MessagingModule } from './modules/messaging/messaging.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ReviewModule } from './modules/review/review.module';
 import { CurrencyModule } from './modules/currency/currency.module';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { CurrencyModule } from './modules/currency/currency.module';
     PaymentModule,
     ReviewModule,
     CurrencyModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [],

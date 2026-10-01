@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Lottie from 'lottie-react';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles, Loader2 } from 'lucide-react';
 import successAnimation from '../../../../public/kOr3pk2jUY.json';
 
 interface RegisterSuccessScreenProps {
@@ -12,6 +12,16 @@ interface RegisterSuccessScreenProps {
 }
 
 export default function RegisterSuccessScreen({ role }: RegisterSuccessScreenProps) {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Automatically redirect to the dashboard after brief animation
+    const timer = setTimeout(() => {
+      router.replace('/dashboard');
+    }, 1800);
+    return () => clearTimeout(timer);
+  }, [router]);
+
   return (
     <motion.div
       key="step4"
@@ -43,39 +53,27 @@ export default function RegisterSuccessScreen({ role }: RegisterSuccessScreenPro
         </h2>
 
         <p className="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed">
-          Welcome to Zerify! Your {role === 'BRAND' ? 'Brand & Agency' : 'Creator / Influencer'} profile is ready to explore campaigns.
+          Welcome to Zerify! Your {role === 'BRAND' ? 'Brand & Agency' : 'Creator / Influencer'} profile is ready.
         </p>
+
+        {/* Redirecting indicator */}
+        <div className="flex items-center justify-center gap-2 text-xs text-purple-300 font-medium pt-1">
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400" />
+          <span>Redirecting to your dashboard...</span>
+        </div>
       </div>
 
       {/* Modern Glowing CTA Button */}
-      <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
-        {role === 'BRAND' ? (
-          <>
-            <Link
-              href="/onboarding/brand"
-              className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white font-bold text-xs shadow-xl shadow-purple-600/30 hover:shadow-purple-600/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden"
-            >
-              <span className="relative z-10">Start Brand Onboarding</span>
-              <ArrowRight className="relative z-10 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </Link>
-            <Link
-              href="/dashboard"
-              className="text-xs font-semibold text-slate-400 hover:text-white transition-colors py-2"
-            >
-              Go to Dashboard directly
-            </Link>
-          </>
-        ) : (
-          <Link
-            href="/dashboard"
-            className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white font-bold text-xs shadow-xl shadow-purple-600/30 hover:shadow-purple-600/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden"
-          >
-            <span className="relative z-10">Go to Dashboard</span>
-            <ArrowRight className="relative z-10 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </Link>
-        )}
+      <div className="pt-2 flex items-center justify-center">
+        <button
+          type="button"
+          onClick={() => router.replace('/dashboard')}
+          className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white font-bold text-xs shadow-xl shadow-purple-600/30 hover:shadow-purple-600/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden cursor-pointer"
+        >
+          <span className="relative z-10">Go to Dashboard Now</span>
+          <ArrowRight className="relative z-10 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </button>
       </div>
     </motion.div>
   );

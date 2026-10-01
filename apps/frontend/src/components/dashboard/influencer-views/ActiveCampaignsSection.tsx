@@ -304,7 +304,7 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
           <div className="space-y-1.5 max-w-md">
             <h3 className="text-base font-bold text-white">No Participated Campaigns Yet</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              You have not joined or participated in any brand campaigns yet. Apply to campaigns in Campaign Discovery or accept brand invitations to begin active collaborations!
+              You have not joined or participated in any brand campaigns yet. Apply to campaigns in Discover Campaigns or accept brand invitations to begin active collaborations!
             </p>
           </div>
           {onNavigate && (

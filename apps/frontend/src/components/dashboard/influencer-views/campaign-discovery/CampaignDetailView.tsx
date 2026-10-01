@@ -103,7 +103,7 @@ export default function CampaignDetailView({
           className="group inline-flex items-center gap-2 text-slate-300 hover:text-purple-300 text-xs font-bold transition-colors w-fit py-1"
         >
           <ArrowLeft className="w-4 h-4 text-purple-400 group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Campaign Discovery</span>
+          <span>Back to Discover Campaigns</span>
         </button>
       </div>
 

@@ -28,6 +28,54 @@ export class AuthRepository {
     });
   }
 
+  async upsertEmailVerification(email: string, code: string, expiresAt: Date) {
+    const cleanEmail = email.trim().toLowerCase();
+    return (this.prisma as any).emailVerification.upsert({
+      where: { email: cleanEmail },
+      create: {
+        email: cleanEmail,
+        code,
+        expiresAt,
+        isVerified: false,
+      },
+      update: {
+        code,
+        expiresAt,
+        isVerified: false,
+        verifiedAt: null,
+      },
+    });
+  }
+
+  async findEmailVerification(email: string) {
+    const cleanEmail = email.trim().toLowerCase();
+    return (this.prisma as any).emailVerification.findUnique({
+      where: { email: cleanEmail },
+    });
+  }
+
+  async markEmailVerified(email: string) {
+    const cleanEmail = email.trim().toLowerCase();
+    return (this.prisma as any).emailVerification.update({
+      where: { email: cleanEmail },
+      data: {
+        isVerified: true,
+        verifiedAt: new Date(),
+      },
+    });
+  }
+
+  async deleteEmailVerification(email: string) {
+    const cleanEmail = email.trim().toLowerCase();
+    try {
+      return await (this.prisma as any).emailVerification.delete({
+        where: { email: cleanEmail },
+      });
+    } catch {
+      return null;
+    }
+  }
+
   /**
    * Atomically creates a User record with BRAND role and populates BrandProfile
    */
@@ -41,6 +89,8 @@ export class AuthRepository {
           name: name || email.split('@')[0],
           password: hashedPassword,
           role: UserRole.BRAND,
+          isEmailVerified: true,
+          emailVerifiedAt: new Date(),
         },
       });
 
@@ -84,6 +134,8 @@ export class AuthRepository {
           name: name || email.split('@')[0],
           password: hashedPassword,
           role: UserRole.INFLUENCER,
+          isEmailVerified: true,
+          emailVerifiedAt: new Date(),
         },
       });
 

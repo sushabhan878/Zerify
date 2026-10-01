@@ -5,9 +5,14 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('zerify_token')?.value;
   const { pathname } = request.nextUrl;
 
-  // Redirect logged-in users away from public landing & auth pages directly to dashboard
+  // Redirect logged-in users away from auth pages directly to dashboard
   if (token && (pathname === '/' || pathname === '/login' || pathname === '/register')) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  // Unauthenticated visitors to app root go directly to login
+  if (!token && pathname === '/') {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   return NextResponse.next();
