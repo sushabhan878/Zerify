@@ -91,15 +91,6 @@ export default function CompanyDetailView({
               </>
             )}
           </button>
-
-          <button
-            type="button"
-            onClick={() => onPitch(company)}
-            className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-extrabold text-white flex items-center gap-1.5 shadow-lg shadow-purple-950/60 transition-all active:scale-95"
-          >
-            <Send className="w-3.5 h-3.5" />
-            <span>Pitch Brand</span>
-          </button>
         </div>
       </div>
 
