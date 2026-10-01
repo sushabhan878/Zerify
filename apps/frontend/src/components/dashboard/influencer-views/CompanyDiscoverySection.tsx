@@ -6,7 +6,7 @@ import CompanyQuickFilters, { QuickFilterState } from './company-discovery/Compa
 import CompanyActiveFilterChips from './company-discovery/CompanyActiveFilterChips';
 import CompanySortAndControls from './company-discovery/CompanySortAndControls';
 import CompanyCard, { CompanyItem } from './company-discovery/CompanyCard';
-import CompanyDetailModal from './company-discovery/CompanyDetailModal';
+import CompanyDetailView from './company-discovery/CompanyDetailView';
 import CompanyPitchModal from './company-discovery/CompanyPitchModal';
 import CompanyAdvancedFiltersModal, { AdvancedFilterState } from './company-discovery/CompanyAdvancedFiltersModal';
 import CompanyPagination from './company-discovery/CompanyPagination';
@@ -797,6 +797,29 @@ export default function CompanyDiscoverySection() {
     return filteredCompanies.slice(start, start + pageSize);
   }, [filteredCompanies, currentPage, pageSize]);
 
+  if (detailCompany) {
+    return (
+      <div className="space-y-6">
+        <CompanyDetailView
+          company={detailCompany}
+          onBack={() => {
+            setDetailCompany(null);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onPitch={(c) => setPitchCompany(c)}
+        />
+
+        <CompanyPitchModal
+          company={pitchCompany}
+          onClose={() => setPitchCompany(null)}
+          onSubmitPitch={(data) => {
+            console.log('Submitted pitch data:', data);
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
       {/* Full-Width Search Bar */}
@@ -875,12 +898,6 @@ export default function CompanyDiscoverySection() {
       )}
 
       {/* Modals */}
-      <CompanyDetailModal
-        company={detailCompany}
-        onClose={() => setDetailCompany(null)}
-        onPitch={(c) => setPitchCompany(c)}
-      />
-
       <CompanyPitchModal
         company={pitchCompany}
         onClose={() => setPitchCompany(null)}

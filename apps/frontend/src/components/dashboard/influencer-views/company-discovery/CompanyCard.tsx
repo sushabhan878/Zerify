@@ -6,7 +6,7 @@ import {
   Sparkles,
   ShieldCheck,
   Send,
-  Eye,
+  ArrowUpRight,
 } from 'lucide-react';
 import { useCurrency } from '@/context/CurrencyContext';
 
@@ -94,21 +94,33 @@ export default function CompanyCard({
         {/* Top Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            {company.logoUrl ? (
-              <img
-                src={company.logoUrl}
-                alt={company.companyName}
-                className="w-12 h-12 rounded-xl object-cover border border-white/10 bg-slate-900 shrink-0"
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center font-black text-white text-lg shadow-lg shrink-0">
-                {logoLetter}
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={() => onViewDetails(company)}
+              className="shrink-0 focus:outline-none hover:opacity-85 transition-opacity"
+              title="View brand details"
+            >
+              {company.logoUrl ? (
+                <img
+                  src={company.logoUrl}
+                  alt={company.companyName}
+                  className="w-12 h-12 rounded-xl object-cover border border-white/10 bg-slate-900 shrink-0"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center font-black text-white text-lg shadow-lg shrink-0">
+                  {logoLetter}
+                </div>
+              )}
+            </button>
 
             <div>
-              <div className="flex items-center gap-1.5">
-                <h3 className="text-sm font-extrabold text-white group-hover:text-purple-300 transition-colors">
+              <button
+                type="button"
+                onClick={() => onViewDetails(company)}
+                className="group/brand inline-flex items-center gap-1.5 text-left transition-colors focus:outline-none cursor-pointer"
+                title="View brand details"
+              >
+                <h3 className="text-sm font-extrabold text-white group-hover/brand:text-purple-300 group-hover/brand:underline underline-offset-4 decoration-purple-400/60 transition-all">
                   {company.companyName}
                 </h3>
                 {company.isVerified !== false && (
@@ -116,7 +128,8 @@ export default function CompanyCard({
                     <ShieldCheck className="w-4 h-4 text-purple-400 shrink-0" />
                   </span>
                 )}
-              </div>
+                <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover/brand:text-purple-300 group-hover/brand:scale-125 group-hover/brand:translate-x-0.5 group-hover/brand:-translate-y-0.5 transition-all duration-200 shrink-0" />
+              </button>
               <div className="flex items-center gap-2 text-[11px] text-slate-400">
                 <span className="font-bold text-slate-300">{company.industry || 'General Industry'}</span>
                 {company.location && <span>• {company.location}</span>}
@@ -142,22 +155,12 @@ export default function CompanyCard({
       </div>
 
       {/* Footer Actions */}
-      <div className={`pt-3 border-t border-white/5 flex items-center justify-between gap-2 shrink-0 ${
+      <div className={`pt-3 border-t border-white/5 flex items-center justify-end gap-2 shrink-0 ${
         viewMode === 'list' ? 'md:border-t-0 md:pt-0 md:self-end md:mt-2' : ''
       }`}>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => onViewDetails(company)}
-            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center gap-1.5"
-          >
-            <Eye className="w-3.5 h-3.5" />
-            <span>Details</span>
-          </button>
-        </div>
-
         <button
           onClick={() => onPitchBrand(company)}
-          className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-extrabold text-white flex items-center gap-1.5 shadow-lg shadow-purple-950/50 hover:shadow-purple-900/60 transition-all"
+          className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-extrabold text-white flex items-center gap-1.5 shadow-lg shadow-purple-950/50 hover:shadow-purple-900/60 transition-all ml-auto"
         >
           <Send className="w-3.5 h-3.5" />
           <span>Pitch Brand</span>
