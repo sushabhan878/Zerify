@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        background: #07090E;
+        color: #FFFFFF;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        overflow: hidden;
+      }
+
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #07090E;
+      }
+
+      /* Background Dot Matrix */
+      .dot-grid {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(168, 85, 247, 0.18) 1.5px, transparent 1.5px);
+        background-size: 40px 40px;
+        opacity: 0.7;
+      }
+
+      /* Center Ambient Aura */
+      .ambient-glow {
+        position: absolute;
+        width: 900px;
+        height: 900px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(236, 72, 153, 0.18) 45%, transparent 70%);
+        filter: blur(110px);
+        pointer-events: none;
+      }
+
+      .content-wrapper {
+        position: relative;
+        z-index: 10;
+        max-width: 1300px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* Logo Emblem */
+      .logo-box {
+        position: relative;
+        width: 130px;
+        height: 130px;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .conic-glow {
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        left: -10px;
+        top: -10px;
+        border-radius: 40px;
+        background: conic-gradient(from 0deg, #C084FC, #F472B6, #818CF8, #38BDF8, #C084FC);
+        filter: blur(14px);
+        opacity: 0.9;
+        transform-origin: center center;
+      }
+
+      .logo-inner {
+        position: relative;
+        z-index: 2;
+        width: 130px;
+        height: 130px;
+        border-radius: 36px;
+        background: #0B0F19;
+        border: 2px solid rgba(255, 255, 255, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
+        overflow: hidden;
+      }
+
+      .logo-img {
+        width: 92px;
+        height: 92px;
+        object-fit: contain;
+      }
+
+      .brand-title {
+        font-size: 40px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #FFFFFF;
+        margin-bottom: 8px;
+      }
+
+      .headline {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 78px;
+        line-height: 1.15;
+        font-weight: 600;
+        color: #FFFFFF;
+        margin-bottom: 18px;
+      }
+
+      .headline .gradient-text {
+        background: linear-gradient(135deg, #F5D0FE 0%, #E879F9 50%, #818CF8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .subheadline {
+        font-size: 24px;
+        color: #CBD5E1;
+        max-width: 900px;
+        font-weight: 400;
+        margin-bottom: 44px;
+      }
+
+      /* Glow CTA Button */
+      .cta-wrapper {
+        position: relative;
+        display: inline-flex;
+        padding: 2px;
+        border-radius: 9999px;
+        overflow: hidden;
+        box-shadow: 0 0 50px rgba(168, 85, 247, 0.45);
+        margin-bottom: 24px;
+      }
+
+      .cta-conic {
+        position: absolute;
+        width: 140%;
+        height: 140%;
+        left: -20%;
+        top: -20%;
+        background: conic-gradient(from 0deg, #C084FC, #F472B6, #818CF8, #38BDF8, #C084FC);
+        transform-origin: center center;
+      }
+
+      .cta-btn {
+        position: relative;
+        z-index: 2;
+        padding: 20px 54px;
+        border-radius: 9999px;
+        background: #0B0F19;
+        color: #FFFFFF;
+        font-size: 24px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        letter-spacing: -0.01em;
+      }
+
+      .cta-btn .cta-arrow {
+        color: #C084FC;
+        font-size: 26px;
+      }
+
+      .social-proof {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #94A3B8;
+        font-size: 17px;
+        font-weight: 500;
+      }
+
+      .social-avatars {
+        display: flex;
+        margin-right: 6px;
+      }
+
+      .avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 2px solid #07090E;
+        margin-left: -8px;
+        object-fit: cover;
+      }
+      .avatar:first-child { margin-left: 0; }
+
+      .proof-bold {
+        color: #FFFFFF;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="scene5" data-width="1920" data-height="1080">
+      <div class="dot-grid"></div>
+      <div class="ambient-glow" id="glow" data-layout-allow-overflow></div>
+
+      <div class="content-wrapper">
+        <div class="logo-box" id="outro-logo">
+          <div class="conic-glow" id="conic-glow" data-layout-allow-overflow></div>
+          <div class="logo-inner">
+            <img src="assets/logo.png" alt="Zerify" class="logo-img" />
+          </div>
+        </div>
+
+        <div class="brand-title" id="brand-title">Zerify</div>
+
+        <h1 class="headline" id="outro-headline">
+          Connect. Collaborate. <span class="gradient-text">Scale</span>.
+        </h1>
+
+        <p class="subheadline" id="outro-sub">
+          The fastest & easiest way for brands & influencers to connect.
+        </p>
+
+        <div class="cta-wrapper" id="cta-wrap">
+          <div class="cta-conic" id="cta-conic" data-layout-allow-overflow></div>
+          <div class="cta-btn">
+            <span>Get Started for Free • zerify.com</span>
+            <span class="cta-arrow">→</span>
+          </div>
+        </div>
+
+        <div class="social-proof" id="social-proof">
+          <div class="social-avatars">
+            <img class="avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" />
+            <img class="avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" alt="Avatar" />
+            <img class="avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" alt="Avatar" />
+            <img class="avatar" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80" alt="Avatar" />
+          </div>
+          <div>
+            <span class="proof-bold">2,840+</span> Brands & Creators already joined
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Continuous conic glow rotation
+      tl.to("#conic-glow", { rotation: 360, transformOrigin: "50% 50%", duration: 3.7, ease: "none" }, 0);
+      tl.to("#cta-conic", { rotation: 360, transformOrigin: "50% 50%", duration: 3.7, ease: "none" }, 0);
+
+      // Logo drop-in
+      tl.fromTo("#outro-logo", { scale: 0.3, opacity: 0, y: -40 }, { scale: 1, opacity: 1, y: 0, duration: 0.7, ease: "back.out(1.6)" }, 0.1);
+
+      // Brand title entrance
+      tl.fromTo("#brand-title", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.4);
+
+      // Headline entrance
+      tl.fromTo("#outro-headline", { opacity: 0, scale: 0.94, y: 25 }, { opacity: 1, scale: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.55);
+
+      // Subheadline entrance
+      tl.fromTo("#outro-sub", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.85);
+
+      // CTA button scale entrance
+      tl.fromTo("#cta-wrap", { opacity: 0, scale: 0.88, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(1.4)" }, 1.1);
+
+      // Social proof fade-in
+      tl.fromTo("#social-proof", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 1.5);
+
+      // Ambient breathing aura to end of video
+      tl.fromTo("#glow", { scale: 0.95 }, { scale: 1.25, duration: 3.7, ease: "sine.inOut" }, 0);
+
+      window.__timelines["scene5"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

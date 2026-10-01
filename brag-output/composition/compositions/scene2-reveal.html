@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        background: #07090E;
+        color: #FFFFFF;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        overflow: hidden;
+      }
+
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #07090E;
+      }
+
+      /* Background Dot Matrix */
+      .dot-grid {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(168, 85, 247, 0.15) 1.5px, transparent 1.5px);
+        background-size: 40px 40px;
+        opacity: 0.6;
+      }
+
+      /* Cosmic Ambient Glow */
+      .ambient-glow {
+        position: absolute;
+        width: 850px;
+        height: 850px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(147, 51, 234, 0.28) 0%, rgba(236, 72, 153, 0.16) 45%, transparent 70%);
+        filter: blur(100px);
+        pointer-events: none;
+      }
+
+      .content-wrapper {
+        position: relative;
+        z-index: 10;
+        max-width: 1400px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* Logo Container with Conic Glow */
+      .logo-box {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin-bottom: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .conic-glow {
+        position: absolute;
+        inset: -8px;
+        border-radius: 36px;
+        background: conic-gradient(from 0deg, #C084FC, #F472B6, #818CF8, #38BDF8, #C084FC);
+        filter: blur(12px);
+        opacity: 0.85;
+      }
+
+      .logo-inner {
+        position: relative;
+        z-index: 2;
+        width: 120px;
+        height: 120px;
+        border-radius: 32px;
+        background: #0B0F19;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+        overflow: hidden;
+      }
+
+      .logo-img {
+        width: 86px;
+        height: 86px;
+        object-fit: contain;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 22px;
+        border-radius: 9999px;
+        background: rgba(168, 85, 247, 0.14);
+        border: 1px solid rgba(168, 85, 247, 0.35);
+        color: #D8B4FE;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+      }
+
+      .headline {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 82px;
+        line-height: 1.12;
+        font-weight: 600;
+        color: #FFFFFF;
+        margin-bottom: 16px;
+      }
+
+      .headline .gradient-text {
+        background: linear-gradient(135deg, #F5D0FE 0%, #E879F9 50%, #818CF8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .subheadline {
+        font-size: 26px;
+        color: #CBD5E1;
+        max-width: 950px;
+        font-weight: 400;
+        margin-bottom: 48px;
+      }
+
+      .pillars-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px;
+        width: 100%;
+        max-width: 1200px;
+      }
+
+      .pillar-card {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 20px;
+        padding: 30px 24px;
+        text-align: left;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .pillar-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #A855F7, #EC4899);
+      }
+
+      .pillar-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: rgba(168, 85, 247, 0.18);
+        border: 1px solid rgba(168, 85, 247, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+      }
+
+      .pillar-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #FFFFFF;
+      }
+
+      .pillar-desc {
+        font-size: 17px;
+        line-height: 1.45;
+        color: #CBD5E1;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="scene2" data-width="1920" data-height="1080">
+      <div class="dot-grid"></div>
+      <div class="ambient-glow" id="glow"></div>
+
+      <div class="content-wrapper">
+        <div class="logo-box" id="logo-box">
+          <div class="conic-glow" id="conic-glow"></div>
+          <div class="logo-inner">
+            <img src="assets/logo.png" alt="Zerify" class="logo-img" />
+          </div>
+        </div>
+
+        <div class="badge" id="reveal-badge">Direct Brand-Creator Marketplace</div>
+
+        <h1 class="headline" id="reveal-headline">
+          Introducing <span class="gradient-text">Zerify</span>.
+        </h1>
+
+        <p class="subheadline" id="reveal-sub">
+          The fastest and easiest way for brands and creators to connect without agency overhead.
+        </p>
+
+        <div class="pillars-grid" id="pillars">
+          <div class="pillar-card" id="pillar-1">
+            <div class="pillar-icon">⚡</div>
+            <div class="pillar-title">Direct Discovery</div>
+            <div class="pillar-desc">Connect with vetted influencers across Instagram, YouTube & TikTok.</div>
+          </div>
+          <div class="pillar-card" id="pillar-2">
+            <div class="pillar-icon">🔒</div>
+            <div class="pillar-title">Escrow Protected</div>
+            <div class="pillar-desc">Milestone-based payouts locked safely until deliverables are approved.</div>
+          </div>
+          <div class="pillar-card" id="pillar-3">
+            <div class="pillar-icon">📈</div>
+            <div class="pillar-title">Zero Agency Markup</div>
+            <div class="pillar-desc">Retain 100% of campaign value with transparent direct rates.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Subtle rotation on conic glow
+      tl.to("#conic-glow", { rotation: 360, duration: 4.5, ease: "none" }, 0);
+
+      // Logo entrance with scale bounce
+      tl.fromTo("#logo-box", { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.7, ease: "back.out(1.6)" }, 0.1);
+
+      // Badge entrance
+      tl.fromTo("#reveal-badge", { opacity: 0, y: -15 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.35);
+
+      // Headline entrance
+      tl.fromTo("#reveal-headline", { opacity: 0, y: 25, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power3.out" }, 0.5);
+
+      // Subheadline entrance
+      tl.fromTo("#reveal-sub", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.8);
+
+      // Staggered 3 pillar cards
+      tl.fromTo("#pillar-1", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 1.3);
+      tl.fromTo("#pillar-2", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 1.8);
+      tl.fromTo("#pillar-3", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 2.3);
+
+      // Settled hold for readability (2.8s - 3.9s)
+
+      // Smooth transition out
+      tl.to(".content-wrapper", { opacity: 0, scale: 0.95, y: -25, duration: 0.5, ease: "power2.in" }, 4.0);
+
+      window.__timelines["scene2"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

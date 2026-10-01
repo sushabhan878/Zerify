@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        background: #07090e;
+        color: #ffffff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      #scene {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #title {
+        font-size: 72px;
+        font-weight: 700;
+        color: #ffffff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="scene" data-composition-id="test-scene" data-width="1920" data-height="1080">
+      <h1 id="title">Zerify Launch</h1>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1 }, 0);
+      window.__timelines["test-scene"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
