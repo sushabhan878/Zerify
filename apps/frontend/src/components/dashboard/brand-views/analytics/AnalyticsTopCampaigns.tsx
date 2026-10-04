@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Eye, Heart, TrendingUp, DollarSign, ArrowUpRight } from 'lucide-react';
+import { Trophy, Eye, Heart, TrendingUp, DollarSign, ArrowUpRight, ArrowRight } from 'lucide-react';
 
 interface CampaignPerformanceItem {
   rank: number;
@@ -16,7 +16,11 @@ interface CampaignPerformanceItem {
   badgeBg: string;
 }
 
-export default function AnalyticsTopCampaigns() {
+interface AnalyticsTopCampaignsProps {
+  onViewCampaigns?: () => void;
+}
+
+export default function AnalyticsTopCampaigns({ onViewCampaigns }: AnalyticsTopCampaignsProps = {}) {
   const campaigns: CampaignPerformanceItem[] = [
     {
       rank: 1,
@@ -62,7 +66,18 @@ export default function AnalyticsTopCampaigns() {
           </div>
           <h3 className="text-sm font-black text-white">Top Performing Campaigns</h3>
         </div>
-        <span className="text-xs font-bold text-slate-400">Ranked by overall ER & Reach</span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold text-slate-400 hidden sm:inline">Ranked by overall ER & Reach</span>
+          {onViewCampaigns && (
+            <button
+              onClick={onViewCampaigns}
+              className="text-xs font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors"
+            >
+              <span>View All</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-3">

@@ -2,7 +2,6 @@
 
 import React from 'react';
 import BrandOverviewSection from './brand-views/BrandOverviewSection';
-import BrandAnalyticsSection from './brand-views/BrandAnalyticsSection';
 import SearchCreatorsSection from './brand-views/SearchCreatorsSection';
 import BrandAiRecommendationsSection from './brand-views/BrandAiRecommendationsSection';
 import SavedCreatorsSection from './brand-views/SavedCreatorsSection';
@@ -43,6 +42,9 @@ export default function BrandDashboardView({
   const renderSection = () => {
     switch (activeRoute) {
       case 'overview':
+      case 'brand-analytics':
+      case 'statistic':
+      case 'traffic':
         return (
           <BrandOverviewSection
             userName={userName}
@@ -50,10 +52,6 @@ export default function BrandDashboardView({
             onNavigate={(routeId) => onSelectRoute?.(routeId)}
           />
         );
-      case 'brand-analytics':
-      case 'statistic':
-      case 'traffic':
-        return <BrandAnalyticsSection />;
       case 'activity':
         return <ActivityView />;
       case 'search-creators':

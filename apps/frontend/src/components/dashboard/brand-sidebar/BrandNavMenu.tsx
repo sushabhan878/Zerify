@@ -9,7 +9,6 @@ import {
   Bookmark,
   ListChecks,
   Megaphone,
-  BarChart3,
   FileText,
   MessageSquare,
   DollarSign,
@@ -66,12 +65,6 @@ export default function BrandNavMenu({
       id: 'my-campaigns',
       label: 'Campaigns',
       icon: Megaphone,
-      section: 'MAIN',
-    },
-    {
-      id: 'brand-analytics',
-      label: 'Analytics',
-      icon: BarChart3,
       section: 'MAIN',
     },
   ];
