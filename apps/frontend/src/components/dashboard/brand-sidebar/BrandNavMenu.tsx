@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   Search,
   Users,
-  Sparkles,
   Bookmark,
   ListChecks,
   Megaphone,
@@ -73,15 +72,6 @@ export default function BrandNavMenu({
       id: 'brand-analytics',
       label: 'Analytics',
       icon: BarChart3,
-      section: 'MAIN',
-    },
-    {
-      id: 'ai-recommendations',
-      label: 'AI Recommendations',
-      icon: Sparkles,
-      isAi: true,
-      badge: 'AI Match',
-      badgeColor: 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white',
       section: 'MAIN',
     },
   ];
