@@ -42,6 +42,7 @@ export interface CampaignApplicationItem {
   influencerProfile?: any;
   socialAccount?: any;
   offers?: any[];
+  hasWorkedWithBrand?: boolean;
 }
 
 export const ApplicationService = {

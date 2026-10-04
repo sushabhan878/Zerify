@@ -79,7 +79,7 @@ const SOCIAL_ICONS: Record<string, string> = {
   tiktok: '/social/tik-tok.png',
 };
 
-function PlatformBadge({ platform }: { platform: string }) {
+export function PlatformBadge({ platform }: { platform: string }) {
   const p = platform.toLowerCase().trim();
   const baseClasses =
     'w-7 h-7 sm:w-8 sm:h-8 rounded-full ring-2 ring-[#090C15] flex items-center justify-center shadow-md transition-all shrink-0 cursor-pointer overflow-hidden bg-slate-900 border border-white/10 hover:ring-purple-400/60';

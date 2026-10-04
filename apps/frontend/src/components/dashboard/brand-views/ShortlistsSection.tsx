@@ -1,12 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Users,
-  Layers,
-  ArrowRight,
-} from 'lucide-react';
+import { Users } from 'lucide-react';
 import { CampaignApplicationItem, ApplicationService } from '@/services/application.service';
 import { CampaignItem, CampaignService } from '@/services/campaign.service';
 import { CreatorItem } from './find-influencers/CreatorCard';
@@ -19,7 +14,6 @@ import CreatorPagination from './find-influencers/CreatorPagination';
 import CreatorProfileFullView from './find-influencers/CreatorProfileFullView';
 import SendOfferModal from './campaigns/SendOfferModal';
 import ApplicantDetailModal from './campaigns/ApplicantDetailModal';
-import ApplicantComparisonView from './campaigns/ApplicantComparisonView';
 import LottieLoader from '@/components/ui/LottieLoader';
 
 const INITIAL_FILTERS: ShortlistFiltersState = {
@@ -43,10 +37,6 @@ export default function ShortlistsSection() {
   const [filters, setFilters] = useState<ShortlistFiltersState>(INITIAL_FILTERS);
   const [sortBy, setSortBy] = useState('matchScore');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-
-  // Comparison & Selection state
-  const [selectedForCompare, setSelectedForCompare] = useState<string[]>([]);
-  const [isComparingOpen, setIsComparingOpen] = useState(false);
 
   // Modals state
   const [selectedAppForOffer, setSelectedAppForOffer] = useState<CampaignApplicationItem | null>(null);
@@ -98,11 +88,6 @@ export default function ShortlistsSection() {
     setCurrentPage(1);
   };
 
-  const handleToggleCompare = (appId: string) => {
-    setSelectedForCompare((prev) =>
-      prev.includes(appId) ? prev.filter((id) => id !== appId) : [...prev, appId],
-    );
-  };
 
   const handleRejectApplication = async (appId: string) => {
     try {
@@ -132,6 +117,23 @@ export default function ShortlistsSection() {
       }
     });
     return counts;
+  }, [applications]);
+
+  // Set of influencer IDs who have accepted offers or worked with this brand previously
+  const pastCollaboratorIds = useMemo(() => {
+    const set = new Set<string>();
+    applications.forEach((app) => {
+      if (
+        app.status === 'OFFER_ACCEPTED' ||
+        app.hasWorkedWithBrand ||
+        app.offers?.some((o: any) => o.status === 'ACCEPTED')
+      ) {
+        if (app.influencerProfileId) set.add(app.influencerProfileId);
+        if (app.influencerProfile?.id) set.add(app.influencerProfile.id);
+        if (app.influencerProfile?.userId) set.add(app.influencerProfile.userId);
+      }
+    });
+    return set;
   }, [applications]);
 
   // Filtered applications
@@ -260,10 +262,6 @@ export default function ShortlistsSection() {
     return sortedApplications.slice(start, start + pageSize);
   }, [sortedApplications, currentPage, pageSize]);
 
-  // Applications selected for comparison modal
-  const compareApplicantsList = useMemo(() => {
-    return applications.filter((a) => selectedForCompare.includes(a.id));
-  }, [applications, selectedForCompare]);
 
   if (isLoading) {
     return (
@@ -320,24 +318,32 @@ export default function ShortlistsSection() {
         <div
           className={
             viewMode === 'grid'
-              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'
-              : 'space-y-3'
+              ? 'grid grid-cols-1 xl:grid-cols-2 gap-8 pt-4'
+              : 'space-y-4 pt-1'
           }
         >
-          {paginatedApplications.map((app) => (
-            <ShortlistApplicantCard
-              key={app.id}
-              application={app}
-              viewMode={viewMode}
-              onViewDetails={(a) => setSelectedAppForDetail(a)}
-              onViewProfile={(creator) => setSelectedCreatorForProfile(creator)}
-              onSendOffer={(a) => setSelectedAppForOffer(a)}
-              onReject={handleRejectApplication}
-              onSelectCompare={handleToggleCompare}
-              isCompareSelected={selectedForCompare.includes(app.id)}
-              onFilterByCampaign={(cId) => handleFilterChange('campaignId', cId)}
-            />
-          ))}
+          {paginatedApplications.map((app) => {
+            const isPastCollaborator = Boolean(
+              app.hasWorkedWithBrand ||
+              pastCollaboratorIds.has(app.influencerProfileId) ||
+              pastCollaboratorIds.has(app.influencerProfile?.id) ||
+              app.status === 'OFFER_ACCEPTED' ||
+              app.offers?.some((o: any) => o.status === 'ACCEPTED'),
+            );
+            return (
+              <ShortlistApplicantCard
+                key={app.id}
+                application={app}
+                hasWorkedWithBrand={isPastCollaborator}
+                viewMode={viewMode}
+                onViewDetails={(a) => setSelectedAppForDetail(a)}
+                onViewProfile={(creator) => setSelectedCreatorForProfile(creator)}
+                onSendOffer={(a) => setSelectedAppForOffer(a)}
+                onReject={handleRejectApplication}
+                onFilterByCampaign={(cId) => handleFilterChange('campaignId', cId)}
+              />
+            );
+          })}
         </div>
       ) : (
         <div className="p-12 text-center rounded-3xl bg-slate-900/40 border border-purple-500/15 backdrop-blur-xl space-y-4">
@@ -376,45 +382,6 @@ export default function ShortlistsSection() {
         />
       )}
 
-      {/* Floating Comparison Drawer / Action Bar */}
-      <AnimatePresence>
-        {selectedForCompare.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 30 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3.5 rounded-2xl bg-[#0b0f19]/95 border border-purple-500/40 shadow-2xl shadow-purple-950/80 backdrop-blur-2xl flex items-center gap-4 text-xs select-none"
-          >
-            <div className="flex items-center gap-2 text-white font-bold">
-              <Layers className="w-4 h-4 text-purple-400" />
-              <span>
-                {selectedForCompare.length} Candidate{selectedForCompare.length !== 1 ? 's' : ''}{' '}
-                Selected
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setSelectedForCompare([])}
-                className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
-              >
-                Clear
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsComparingOpen(true)}
-                disabled={selectedForCompare.length < 2}
-                className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
-              >
-                <span>Compare Side-by-Side</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Send / Change Offer Modal */}
       {selectedAppForOffer && (
         <SendOfferModal
@@ -446,22 +413,6 @@ export default function ShortlistsSection() {
           }}
           onShortlist={handleShortlistApplication}
           onReject={handleRejectApplication}
-        />
-      )}
-
-      {/* Side-by-Side Comparison Modal */}
-      {isComparingOpen && compareApplicantsList.length > 0 && (
-        <ApplicantComparisonView
-          applicants={compareApplicantsList}
-          onClose={() => setIsComparingOpen(false)}
-          onViewProfile={(creator) => {
-            setIsComparingOpen(false);
-            setSelectedCreatorForProfile(creator);
-          }}
-          onSendOffer={(app) => {
-            setIsComparingOpen(false);
-            setSelectedAppForOffer(app);
-          }}
         />
       )}
     </div>

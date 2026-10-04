@@ -4,7 +4,7 @@ import React from 'react';
 import {
   Sparkles,
   Send,
-  Eye,
+  ArrowRight,
   CheckCircle2,
   ShieldCheck,
   MessageSquare,
@@ -173,10 +173,12 @@ export default function ApplicantCard({
         <button
           onClick={() => onViewDetails(application)}
           type="button"
-          className="text-xs font-bold text-slate-300 hover:text-purple-300 flex items-center gap-1.5 transition-colors py-1.5 px-2 rounded-lg hover:bg-slate-900 cursor-pointer"
+          className="group/pitch relative h-8 w-20 sm:w-24 rounded-xl bg-slate-900/60 hover:bg-slate-800 border border-white/5 hover:border-purple-500/40 text-xs font-bold text-slate-300 hover:text-white flex items-center justify-center transition-colors duration-200 cursor-pointer shadow-sm overflow-hidden select-none"
         >
-          <Eye className="w-4 h-4 text-purple-400" />
-          <span>View Full Pitch</span>
+          <span className="transition-transform duration-200 group-hover/pitch:-translate-x-2">
+            Pitch
+          </span>
+          <ArrowRight className="w-3.5 h-3.5 text-purple-400 absolute right-2.5 opacity-0 translate-x-2 group-hover/pitch:opacity-100 group-hover/pitch:translate-x-0 transition-all duration-200" />
         </button>
 
         <div className="flex items-center gap-2 flex-wrap">

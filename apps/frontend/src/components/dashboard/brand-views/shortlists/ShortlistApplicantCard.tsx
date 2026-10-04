@@ -1,44 +1,132 @@
 'use client';
 
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   Sparkles,
   Send,
-  Eye,
+  ArrowRight,
   CheckCircle2,
-  ShieldCheck,
-  MessageSquare,
-  ArrowUpRight,
+  BadgeCheck,
   RefreshCw,
   Target,
-  Trash2,
 } from 'lucide-react';
 import { CampaignApplicationItem } from '@/services/application.service';
-import { CreatorItem } from '../find-influencers/CreatorCard';
+import { CreatorItem, PlatformBadge } from '../find-influencers/CreatorCard';
 import { mapApplicationToCreator } from '../campaigns/mapApplicationToCreator';
 import { useCurrency } from '@/context/CurrencyContext';
 import { formatCurrency } from '@/utils/currency';
 
 interface ShortlistApplicantCardProps {
   application: CampaignApplicationItem;
+  hasWorkedWithBrand?: boolean;
   onViewDetails: (app: CampaignApplicationItem) => void;
   onViewProfile?: (creator: CreatorItem) => void;
   onSendOffer: (app: CampaignApplicationItem) => void;
-  onReject: (appId: string) => void;
-  onSelectCompare?: (appId: string) => void;
-  isCompareSelected?: boolean;
+  onReject?: (appId: string) => void;
   viewMode?: 'grid' | 'list';
   onFilterByCampaign?: (campaignId: string) => void;
 }
 
+function formatMaxOneDecimal(val: string | number | undefined | null): string {
+  if (val === undefined || val === null) return '';
+  if (typeof val === 'number') {
+    return Number.isInteger(val) ? val.toString() : val.toFixed(1);
+  }
+  return String(val).replace(/(\d+)\.(\d+)/g, (_, intPart, decPart) => {
+    if (decPart.length <= 1) return `${intPart}.${decPart}`;
+    const num = parseFloat(`${intPart}.${decPart}`);
+    return num.toFixed(1);
+  });
+}
+
+function BrandWorkedRibbonBadge({ size = 'default' }: { size?: 'default' | 'small' }) {
+  const isSmall = size === 'small';
+  return (
+    <div
+      className="relative group/ribbon flex items-center justify-center shrink-0 cursor-help select-none"
+      title="Previously collaborated with your brand"
+    >
+      <svg
+        className={`${
+          isSmall ? 'w-8 h-9' : 'w-11 h-12 sm:w-12 sm:h-13'
+        } drop-shadow-[0_4px_12px_rgba(168,85,247,0.55)] transition-transform duration-300 group-hover/ribbon:scale-115`}
+        viewBox="0 0 100 115"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="purpleRibbonLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#9333EA" />
+            <stop offset="100%" stopColor="#6B21A8" />
+          </linearGradient>
+          <linearGradient id="purpleRibbonRight" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#A855F7" />
+            <stop offset="100%" stopColor="#7E22CE" />
+          </linearGradient>
+          <linearGradient id="purpleRosette" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#C084FC" />
+            <stop offset="45%" stopColor="#9333EA" />
+            <stop offset="100%" stopColor="#6B21A8" />
+          </linearGradient>
+          <linearGradient id="purpleRosetteInner" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#F3E8FF" />
+            <stop offset="60%" stopColor="#E9D5FF" />
+            <stop offset="100%" stopColor="#D8B4FE" />
+          </linearGradient>
+          <linearGradient id="purpleStarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#7E22CE" />
+            <stop offset="100%" stopColor="#4C1D95" />
+          </linearGradient>
+        </defs>
+
+        {/* Dual Ribbon Tails with notched V-cut */}
+        <polygon
+          points="36,60 16,108 34,94 48,108 44,60"
+          fill="url(#purpleRibbonLeft)"
+        />
+        <polygon
+          points="56,60 52,108 66,94 84,108 64,60"
+          fill="url(#purpleRibbonRight)"
+        />
+
+        {/* Scalloped Rosette Medal Circle */}
+        <path
+          d="M 50 6
+             L 56.5 8.5 L 63.5 7 L 68.5 12 L 75.5 13 L 78.5 20 L 85.5 23.5 L 86.5 31 L 92.5 36.5 L 91 44 L 95 50.5 L 91 57 L 92.5 64.5 L 86.5 70 L 85.5 77.5 L 78.5 81 L 75.5 88 L 68.5 89 L 63.5 94 L 56.5 92.5 L 50 95 L 43.5 92.5 L 36.5 94 L 31.5 89 L 24.5 88 L 21.5 81 L 14.5 77.5 L 13.5 70 L 7.5 64.5 L 9 57 L 5 50.5 L 9 44 L 7.5 36.5 L 13.5 31 L 14.5 23.5 L 21.5 20 L 24.5 13 L 31.5 12 L 36.5 7 L 43.5 8.5 Z"
+          fill="url(#purpleRosette)"
+          stroke="#FAF5FF"
+          strokeWidth="1.8"
+        />
+
+        {/* Outer Circular Ring on Rosette */}
+        <circle cx="50" cy="50.5" r="28" fill="none" stroke="#7E22CE" strokeWidth="1.5" />
+
+        {/* Inner Disc */}
+        <circle cx="50" cy="50.5" r="24.5" fill="url(#purpleRosetteInner)" stroke="#9333EA" strokeWidth="1.5" />
+
+        {/* Center 5-Pointed Star */}
+        <polygon
+          points="50,30 55,42 68,43 58,52 61,65 50,58 39,65 42,52 32,43 45,42"
+          fill="url(#purpleStarGrad)"
+        />
+      </svg>
+
+      {/* Hover Floating Tooltip */}
+      <div className="absolute top-full left-0 mt-1 hidden group-hover/ribbon:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-950/95 border border-purple-500/40 text-[10px] font-black text-purple-200 shadow-xl whitespace-nowrap z-50 pointer-events-none">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <span>Worked with Brand</span>
+      </div>
+    </div>
+  );
+}
+
 export default function ShortlistApplicantCard({
   application,
+  hasWorkedWithBrand,
   onViewDetails,
   onViewProfile,
   onSendOffer,
-  onReject,
-  onSelectCompare,
-  isCompareSelected = false,
   viewMode = 'grid',
   onFilterByCampaign,
 }: ShortlistApplicantCardProps) {
@@ -65,262 +153,133 @@ export default function ShortlistApplicantCard({
 
   const campaignTitle = application.campaign?.title || 'Active Campaign';
   const campaignId = application.campaignId || application.campaign?.id;
+  const matchScore = match.score || creatorItem.matchScore || 95;
+
+  const workedWithBrand = Boolean(
+    hasWorkedWithBrand ?? (
+      application.hasWorkedWithBrand ||
+      application.status === 'OFFER_ACCEPTED' ||
+      application.offers?.some((o: any) => o.status === 'ACCEPTED')
+    )
+  );
+
+  const defaultAvatar =
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80';
 
   if (viewMode === 'list') {
     return (
-      <div className="p-4 rounded-2xl bg-slate-950/75 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 shadow-lg shadow-purple-950/20 backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
-        <div className="flex items-center gap-3.5 min-w-0 flex-1">
-          {onSelectCompare && (
-            <input
-              type="checkbox"
-              checked={isCompareSelected}
-              onChange={() => onSelectCompare(application.id)}
-              className="w-4 h-4 rounded border-purple-500/30 text-purple-600 focus:ring-purple-500 cursor-pointer"
-            />
-          )}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        onClick={handleOpenProfile}
+        className="p-5 rounded-3xl bg-[#0a0d14]/95 border border-white/10 backdrop-blur-xl hover:border-purple-500/40 transition-[border-color,box-shadow] duration-300 flex flex-col xl:flex-row xl:items-center justify-between gap-5 group shadow-xl hover:shadow-purple-950/20 cursor-pointer"
+      >
+        {/* Creator Identity */}
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="relative shrink-0">
+            {/* Overlapping Ribbon Award Badge */}
+            {workedWithBrand && (
+              <div className="absolute -top-3 -left-3 z-30 pointer-events-auto">
+                <BrandWorkedRibbonBadge size="small" />
+              </div>
+            )}
 
-          <button
-            type="button"
-            onClick={handleOpenProfile}
-            className="w-11 h-11 rounded-xl overflow-hidden border border-purple-500/30 hover:border-purple-400 bg-slate-900 shrink-0 shadow-md flex items-center justify-center transition-transform hover:scale-105 cursor-pointer"
-          >
             {creatorItem.avatarUrl && !imageError ? (
               <img
                 src={creatorItem.avatarUrl}
                 alt={creatorItem.name}
                 onError={() => setImageError(true)}
-                className="w-full h-full object-cover"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl object-cover border-2 border-white/15 group-hover:border-purple-500/50 shadow-md transition-colors"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 flex items-center justify-center text-white font-black text-sm">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-purple-700 via-indigo-700 to-pink-700 text-white font-black text-xl flex items-center justify-center border-2 border-white/15 shadow-md">
                 {creatorItem.name ? creatorItem.name.charAt(0).toUpperCase() : 'C'}
               </div>
             )}
-          </button>
+            <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center border-2 border-[#090D16] shadow-sm">
+              <BadgeCheck className="w-3.5 h-3.5 fill-white text-purple-600" />
+            </span>
+          </div>
 
-          <div className="space-y-0.5 min-w-0">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleOpenProfile}
-                className="text-sm font-bold text-white hover:text-purple-300 transition-colors truncate text-left cursor-pointer"
-              >
+          <div className="min-w-0 flex flex-col justify-center space-y-1">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-purple-300 transition-colors truncate">
                 {creatorItem.name}
-              </button>
-              <span className="px-2 py-0.5 rounded-md bg-purple-950/60 border border-purple-500/25 text-[10px] font-semibold text-purple-300">
-                {match.score || 95}% Match
+              </h3>
+              <span className="px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-[11px] font-black text-purple-300 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-purple-400" />
+                {formatMaxOneDecimal(matchScore)}% Match
               </span>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-              <span className="text-slate-300 font-medium">{creatorItem.handle}</span>
-              <span>•</span>
               <button
                 type="button"
-                onClick={() => campaignId && onFilterByCampaign?.(campaignId)}
-                className="text-[11px] text-purple-300 hover:underline flex items-center gap-1 font-semibold truncate max-w-[200px]"
-                title={`Filter by campaign: ${campaignTitle}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  campaignId && onFilterByCampaign?.(campaignId);
+                }}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-950/60 hover:bg-purple-900/70 border border-purple-500/30 text-[10.5px] font-bold text-purple-300 transition-colors truncate max-w-[170px]"
+                title={`Campaign: ${campaignTitle}`}
               >
-                <Target className="w-3 h-3 text-purple-400" />
+                <Target className="w-2.5 h-2.5 text-purple-400 shrink-0" />
                 <span className="truncate">{campaignTitle}</span>
               </button>
             </div>
-          </div>
-        </div>
 
-        <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5">
-          <div className="text-right">
-            <span className="text-[10px] text-slate-400 uppercase font-bold block">
-              Followers / Quote
-            </span>
-            <span className="text-xs font-black text-white">
-              {creatorItem.reach} • <span className="text-purple-300">{quoteDisplay}</span>
-            </span>
-          </div>
+            <div className="text-xs text-slate-300 font-medium truncate">
+              {creatorItem.category || 'Content Creator'}
+            </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onViewDetails(application)}
-              type="button"
-              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition-all cursor-pointer flex items-center gap-1"
-            >
-              <Eye className="w-3.5 h-3.5 text-purple-400" />
-              <span className="hidden sm:inline">Pitch</span>
-            </button>
+            <p className="text-xs text-slate-300/80 italic line-clamp-2 pt-0.5">
+              &quot;{application.applicationMessage || creatorItem.bio || 'No pitch description provided.'}&quot;
+            </p>
 
-            {hasExistingOffer && application.status !== 'OFFER_ACCEPTED' ? (
-              <button
-                onClick={() => onSendOffer(application)}
-                type="button"
-                className="px-3.5 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600 text-xs font-bold text-purple-200 hover:text-white border border-purple-400/30 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
-              >
-                <RefreshCw className="w-3 h-3" />
-                <span>Change Offer</span>
-              </button>
-            ) : application.status === 'OFFER_ACCEPTED' ? (
-              <span className="px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xs font-bold text-emerald-300 flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Accepted</span>
-              </span>
-            ) : (
-              <button
-                onClick={() => onSendOffer(application)}
-                type="button"
-                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white flex items-center gap-1.5 shadow-md shadow-purple-950/40 transition-all cursor-pointer"
-              >
-                <Send className="w-3 h-3" />
-                <span>Send Offer</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-5 sm:p-6 rounded-3xl bg-slate-950/75 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 space-y-4 shadow-xl shadow-purple-950/20 backdrop-blur-xl group flex flex-col justify-between">
-      <div className="space-y-3.5">
-        {/* Campaign Association Pill */}
-        <div className="flex items-center justify-between gap-2 pb-1">
-          <button
-            type="button"
-            onClick={() => campaignId && onFilterByCampaign?.(campaignId)}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-purple-950/50 hover:bg-purple-900/60 border border-purple-500/25 text-[11px] font-bold text-purple-200 transition-colors truncate max-w-[220px] text-left cursor-pointer"
-            title={`Campaign: ${campaignTitle}`}
-          >
-            <Target className="w-3 h-3 text-purple-400 shrink-0" />
-            <span className="truncate">{campaignTitle}</span>
-          </button>
-
-          {onSelectCompare && (
-            <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 hover:text-white cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={isCompareSelected}
-                onChange={() => onSelectCompare(application.id)}
-                className="w-3.5 h-3.5 rounded border-purple-500/30 text-purple-600 focus:ring-purple-500 cursor-pointer"
-              />
-              <span>Compare</span>
-            </label>
-          )}
-        </div>
-
-        {/* Header: Avatar, Name & Match Badge */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3.5 min-w-0">
-            <button
-              type="button"
-              onClick={handleOpenProfile}
-              title={`View ${creatorItem.name}'s platform profile`}
-              className="w-12 h-12 rounded-2xl overflow-hidden border border-purple-500/30 hover:border-purple-400 bg-slate-900 shrink-0 shadow-md flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer text-left relative"
-            >
-              {creatorItem.avatarUrl && !imageError ? (
-                <img
-                  src={creatorItem.avatarUrl}
-                  alt={creatorItem.name}
-                  onError={() => setImageError(true)}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 flex items-center justify-center text-white font-black text-base shadow-inner">
-                  {creatorItem.name ? creatorItem.name.charAt(0).toUpperCase() : 'C'}
+            {/* Overlapping Social Platforms */}
+            <div className="flex items-center -space-x-2 isolate pt-1">
+              {(creatorItem.platforms && creatorItem.platforms.length > 0
+                ? creatorItem.platforms
+                : ['YouTube', 'Instagram']
+              ).map((plat, idx) => (
+                <div key={plat} style={{ zIndex: 10 + idx }}>
+                  <PlatformBadge platform={plat} />
                 </div>
-              )}
-            </button>
-
-            <div className="space-y-1 min-w-0">
-              <button
-                type="button"
-                onClick={handleOpenProfile}
-                title={`View ${creatorItem.name}'s platform profile`}
-                className="inline-flex items-center gap-1.5 min-w-0 group/name cursor-pointer max-w-full text-left"
-              >
-                <h4 className="text-sm sm:text-base font-bold text-white group-hover/name:text-purple-300 transition-colors truncate">
-                  {creatorItem.name}
-                </h4>
-                <span className="p-0.5 rounded-md bg-purple-500/10 group-hover/name:bg-purple-500/25 border border-purple-500/20 text-purple-400 group-hover/name:text-purple-300 transition-all flex items-center justify-center shrink-0">
-                  <ArrowUpRight className="w-3.5 h-3.5 group-hover/name:translate-x-0.5 group-hover/name:-translate-y-0.5 transition-transform" />
-                </span>
-              </button>
-
-              <div>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-950/60 border border-purple-500/25 text-[11px] font-semibold text-purple-300 shadow-sm">
-                  <ShieldCheck className="w-3 h-3 text-purple-400 shrink-0" />
-                  <span>Zerify Creator</span>
-                </span>
-              </div>
+              ))}
             </div>
           </div>
-
-          <div className="px-3 py-1 rounded-full bg-purple-950/70 border border-purple-500/35 flex items-center gap-1.5 text-xs font-black text-purple-200 shadow-sm shrink-0">
-            <Sparkles className="w-3.5 h-3.5 text-purple-300 animate-pulse" />
-            <span>{match.score || 95}% Match</span>
-          </div>
         </div>
 
-        {/* Key Metrics Grid */}
-        <div className="grid grid-cols-3 divide-x divide-purple-500/20 py-2 text-center bg-slate-900/40 rounded-2xl border border-white/5">
-          <div className="px-2">
-            <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-0.5">
-              Followers
-            </span>
-            <span className="text-sm sm:text-base font-black text-white">
-              {creatorItem.reach}
-            </span>
-          </div>
-          <div className="px-2">
-            <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-0.5">
-              Engagement
-            </span>
-            <span className="text-sm sm:text-base font-black text-emerald-400">
-              {creatorItem.engRate}
-            </span>
-          </div>
-          <div className="px-2">
-            <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-0.5">
-              Pitch Quote
-            </span>
-            <span className="text-sm sm:text-base font-black text-purple-300">
-              {quoteDisplay}
-            </span>
-          </div>
+        {/* Amount Display */}
+        <div className="flex flex-col items-end justify-center shrink-0 pr-2">
+          <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+            Pitch Quote
+          </span>
+          <span className="text-lg sm:text-2xl font-black text-purple-300">
+            {quoteDisplay}
+          </span>
         </div>
 
-        {/* Pitch snippet */}
-        {application.applicationMessage && (
-          <div className="flex items-start gap-2 px-1 text-xs text-slate-300 leading-relaxed">
-            <MessageSquare className="w-3.5 h-3.5 text-purple-400/80 shrink-0 mt-0.5" />
-            <p className="line-clamp-2 italic">
-              &quot;{application.applicationMessage}&quot;
-            </p>
-          </div>
-        )}
-      </div>
+        {/* Actions */}
+        <div className="flex items-center gap-2.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={() => onViewDetails(application)}
+            type="button"
+            className="group/pitch relative h-9 w-20 sm:w-24 rounded-xl bg-slate-900/90 hover:bg-slate-800 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/50 text-xs font-bold text-slate-200 hover:text-white flex items-center justify-center transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-purple-900/30 cursor-pointer shrink-0 select-none overflow-hidden"
+          >
+            <span className="transition-transform duration-200 group-hover/pitch:-translate-x-2">
+              Pitch
+            </span>
+            <ArrowRight className="w-3.5 h-3.5 text-purple-400 absolute right-2.5 opacity-0 translate-x-2 group-hover/pitch:opacity-100 group-hover/pitch:translate-x-0 transition-all duration-200" />
+          </button>
 
-      {/* Action Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-white/5">
-        <button
-          onClick={() => onViewDetails(application)}
-          type="button"
-          className="text-xs font-bold text-slate-300 hover:text-purple-300 flex items-center gap-1.5 transition-colors py-1 px-2 rounded-lg hover:bg-slate-900 cursor-pointer"
-        >
-          <Eye className="w-4 h-4 text-purple-400" />
-          <span>Full Pitch</span>
-        </button>
-
-        <div className="flex items-center gap-2">
           {hasExistingOffer && application.status !== 'OFFER_ACCEPTED' ? (
             <button
               onClick={() => onSendOffer(application)}
               type="button"
-              className="px-6 py-2 min-w-[140px] justify-center rounded-xl bg-gradient-to-r from-purple-600/30 via-indigo-600/30 to-purple-600/30 hover:from-purple-600 hover:to-indigo-600 text-xs font-bold text-purple-200 hover:text-white border border-purple-400/30 hover:border-transparent transition-all flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-purple-600/30 hover:bg-purple-600 text-xs font-bold text-purple-200 hover:text-white border border-purple-400/30 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
             >
-              <RefreshCw className="w-3.5 h-3.5 text-purple-300" />
+              <RefreshCw className="w-3.5 h-3.5" />
               <span>Change Offer</span>
             </button>
           ) : application.status === 'OFFER_ACCEPTED' ? (
-            <span className="px-3.5 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+            <span className="px-3.5 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xs font-bold text-emerald-300 flex items-center gap-1.5 shadow-sm">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
               <span>Offer Accepted</span>
             </span>
@@ -328,14 +287,176 @@ export default function ShortlistApplicantCard({
             <button
               onClick={() => onSendOffer(application)}
               type="button"
-              className="px-6 py-2 min-w-[140px] justify-center rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white flex items-center gap-1.5 shadow-lg shadow-purple-950/40 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-500 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-purple-600/25 hover:shadow-purple-600/40 border border-purple-400/20 active:scale-[0.98] cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
               <span>Send Offer</span>
             </button>
           )}
         </div>
+      </motion.div>
+    );
+  }
+
+  // Grid Mode: Identical layout and aesthetic as CreatorCard in Find Influencers & Saved Creators
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      onClick={handleOpenProfile}
+      className="p-5 sm:p-6 lg:p-7 rounded-[26px] bg-[#090C15]/95 border border-white/[0.08] backdrop-blur-2xl hover:border-purple-500/40 transition-[border-color,box-shadow] duration-300 group shadow-2xl hover:shadow-purple-950/30 relative overflow-visible flex flex-col md:flex-row gap-5 lg:gap-6 items-stretch cursor-pointer mt-3"
+    >
+      {/* Background ambient purple glow */}
+      <div className="absolute -top-32 -right-32 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl pointer-events-none group-hover:bg-purple-600/20 transition-all duration-500" />
+
+      {/* Floating Match Rate Badge Overlapping Top-Right Corner */}
+      <div className="absolute -top-3.5 right-6 sm:right-8 z-30 pointer-events-none">
+        <span className="px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 border border-purple-400/50 text-xs sm:text-sm font-black text-white flex items-center gap-1.5 shadow-xl shadow-purple-950/80 ring-4 ring-[#090C15] group-hover:scale-105 group-hover:shadow-purple-600/40 transition-all duration-300">
+          <Sparkles className="w-3.5 h-3.5 text-purple-200 animate-pulse shrink-0" />
+          <span>{formatMaxOneDecimal(matchScore)}% Match</span>
+        </span>
       </div>
-    </div>
+
+      {/* LEFT COLUMN: Portrait Image with Overlapping Badges */}
+      <div className="relative w-full md:w-[180px] lg:w-[195px] h-[250px] sm:h-[260px] md:h-auto min-h-[240px] lg:min-h-[260px] shrink-0 rounded-2xl border border-white/10 group-hover:border-purple-500/40 bg-slate-900/60 shadow-md transition-colors flex flex-col justify-end">
+        {/* Overlapping Rosette Ribbon Award Medal on top-left corner */}
+        {workedWithBrand && (
+          <div className="absolute -top-4 -left-4 z-30 pointer-events-auto">
+            <BrandWorkedRibbonBadge />
+          </div>
+        )}
+
+        {/* Clipped Inner Container for Image and Bottom Shadow */}
+        <div className="absolute inset-0 rounded-2xl overflow-hidden">
+          {creatorItem.avatarUrl && !imageError ? (
+            <img
+              src={creatorItem.avatarUrl || defaultAvatar}
+              alt={creatorItem.name}
+              onError={() => setImageError(true)}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-tr from-purple-700 via-indigo-700 to-pink-700 flex items-center justify-center text-white font-black text-4xl">
+              {creatorItem.name ? creatorItem.name.charAt(0).toUpperCase() : 'C'}
+            </div>
+          )}
+
+          {/* Gradient shadow for icon legibility at bottom of photo */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
+        </div>
+
+        {/* Overlapping Social Media Logos starting from left with no outer card */}
+        <div className="relative z-10 p-3 flex items-center justify-start -space-x-2 isolate">
+          {(creatorItem.platforms && creatorItem.platforms.length > 0
+            ? creatorItem.platforms
+            : ['YouTube', 'Instagram']
+          ).map((plat, idx) => (
+            <div
+              key={plat}
+              style={{ zIndex: 10 + idx }}
+              className="hover:z-30 transition-transform duration-200 hover:scale-125 hover:-translate-y-1"
+            >
+              <PlatformBadge platform={plat} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* RIGHT COLUMN: Info, Pitch, Quote & CTA Actions */}
+      <div className="flex-1 flex flex-col justify-between space-y-3.5 relative z-10 min-w-0 pt-1">
+        <div className="space-y-2.5">
+          {/* Top bar: Campaign tag */}
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                campaignId && onFilterByCampaign?.(campaignId);
+              }}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-purple-950/60 hover:bg-purple-900/70 border border-purple-500/30 text-[11px] font-bold text-purple-200 transition-colors truncate max-w-[240px] text-left cursor-pointer"
+              title={`Campaign: ${campaignTitle}`}
+            >
+              <Target className="w-3 h-3 text-purple-400 shrink-0" />
+              <span className="truncate">{campaignTitle}</span>
+            </button>
+          </div>
+
+          {/* Name & Category without @handle and without Zerify Creator tag */}
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-2xl sm:text-[26px] font-black text-white group-hover:text-purple-300 transition-colors tracking-tight leading-snug truncate">
+                {creatorItem.name}
+              </h3>
+              {creatorItem.isVerified && (
+                <span className="shrink-0 text-purple-400" title="Verified Creator">
+                  <BadgeCheck className="w-5 h-5 fill-purple-600 text-[#090C15]" />
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-slate-300 font-medium truncate whitespace-nowrap mt-0.5">
+              {creatorItem.category || 'Content Creator'}
+            </p>
+          </div>
+
+          {/* Description shown normally in italic and truncated to 2 lines with ellipsis */}
+          <p className="text-sm text-slate-300/80 leading-relaxed italic line-clamp-2">
+            &quot;{application.applicationMessage || creatorItem.bio || 'No pitch description provided.'}&quot;
+          </p>
+        </div>
+
+        {/* Pitch Quote Amount & Action Buttons */}
+        <div className="space-y-4 pt-1">
+          {/* Amount Only Display */}
+          <div className="flex items-center justify-between py-2 px-1 border-t border-white/[0.08]">
+            <span className="text-xs uppercase font-extrabold tracking-wider text-slate-400">
+              Pitch Quote
+            </span>
+            <span className="text-2xl sm:text-[28px] font-black text-purple-300 tracking-tight">
+              {quoteDisplay}
+            </span>
+          </div>
+
+          {/* Action Buttons: Full Pitch + Main Action */}
+          <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => onViewDetails(application)}
+              type="button"
+              className="group/pitch relative h-10 sm:h-11 w-24 sm:w-28 rounded-xl bg-slate-900/90 hover:bg-slate-800 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/50 text-xs sm:text-sm font-bold text-slate-200 hover:text-white flex items-center justify-center transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-purple-900/30 cursor-pointer shrink-0 select-none overflow-hidden"
+            >
+              <span className="transition-transform duration-200 group-hover/pitch:-translate-x-2">
+                Pitch
+              </span>
+              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400 absolute right-3 opacity-0 translate-x-2 group-hover/pitch:opacity-100 group-hover/pitch:translate-x-0 transition-all duration-200" />
+            </button>
+
+            {hasExistingOffer && application.status !== 'OFFER_ACCEPTED' ? (
+              <button
+                onClick={() => onSendOffer(application)}
+                type="button"
+                className="flex-1 py-2 sm:py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-500 hover:from-purple-500 hover:to-indigo-500 text-xs sm:text-sm font-bold text-white flex items-center justify-center gap-1.5 transition-all shadow-md shadow-purple-600/25 hover:shadow-purple-600/40 hover:scale-[1.01] active:scale-[0.98] border border-purple-400/30 cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Change Offer</span>
+              </button>
+            ) : application.status === 'OFFER_ACCEPTED' ? (
+              <div className="flex-1 py-2 sm:py-2.5 px-4 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xs sm:text-sm font-bold text-emerald-300 flex items-center justify-center gap-1.5 shadow-sm">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span>Offer Accepted</span>
+              </div>
+            ) : (
+              <button
+                onClick={() => onSendOffer(application)}
+                type="button"
+                className="flex-1 py-2 sm:py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-500 hover:from-purple-500 hover:to-indigo-500 text-xs sm:text-sm font-bold text-white flex items-center justify-center gap-1.5 transition-all shadow-md shadow-purple-600/25 hover:shadow-purple-600/40 hover:scale-[1.01] active:scale-[0.98] border border-purple-400/30 cursor-pointer"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>Send Offer</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 }

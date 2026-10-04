@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { CampaignRepository } from './campaign.repository';
 import { CreateApplicationDto } from './dto/create-application.dto';
-import { ApplicationStatus, CampaignStatus, Prisma } from '@prisma/client';
+import { ApplicationStatus, CampaignStatus, ParticipantStatus, OfferStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { OutboxService } from '../messaging/outbox.service';
 import {
@@ -346,7 +346,7 @@ export class ApplicationService {
   }
 
   async listBrandApplications(userId: string, status?: ApplicationStatus) {
-    return this.prisma.campaignApplication.findMany({
+    const applications = await this.prisma.campaignApplication.findMany({
       where: {
         campaign: {
           brandProfile: {
@@ -401,6 +401,58 @@ export class ApplicationService {
       },
       orderBy: { submittedAt: 'desc' },
     });
+
+    // Check which influencers have worked previously with this brand
+    // (either as a confirmed CampaignParticipant, or having an accepted offer/deal with this brand)
+    const [confirmedParticipants, acceptedOffers] = await Promise.all([
+      this.prisma.campaignParticipant.findMany({
+        where: {
+          campaign: {
+            brandProfile: {
+              userId,
+            },
+          },
+          status: {
+            in: [
+              ParticipantStatus.CONFIRMED,
+              ParticipantStatus.PARTICIPANT_ACTIVE,
+              ParticipantStatus.PARTICIPANT_COMPLETED,
+            ],
+          },
+        },
+        select: {
+          influencerProfileId: true,
+        },
+      }),
+      this.prisma.campaignOffer.findMany({
+        where: {
+          application: {
+            campaign: {
+              brandProfile: {
+                userId,
+              },
+            },
+          },
+          status: OfferStatus.ACCEPTED,
+        },
+        select: {
+          influencerProfileId: true,
+        },
+      }),
+    ]);
+
+    const pastCollaboratorIds = new Set<string>([
+      ...confirmedParticipants.map((p) => p.influencerProfileId),
+      ...acceptedOffers.map((o) => o.influencerProfileId),
+    ]);
+
+    return applications.map((app) => ({
+      ...app,
+      hasWorkedWithBrand:
+        pastCollaboratorIds.has(app.influencerProfileId) ||
+        app.status === ApplicationStatus.OFFER_ACCEPTED ||
+        app.offers?.some((o: any) => o.status === OfferStatus.ACCEPTED),
+    }));
   }
 
   async listApplicationsForInfluencer(userId: string) {
