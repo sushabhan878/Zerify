@@ -195,7 +195,7 @@ export default function DealCard({
             ) : deal.status === 'COMPLETED' ? (
               <div className="flex-1 py-2 sm:py-2.5 px-4 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xs sm:text-sm font-bold text-emerald-300 flex items-center justify-center gap-1.5 shadow-sm">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Contract Completed</span>
+                <span>Completed</span>
               </div>
             ) : (
               <div className="flex-1 py-2 sm:py-2.5 px-4 rounded-xl bg-rose-500/15 border border-rose-500/30 text-xs sm:text-sm font-bold text-rose-300 flex items-center justify-center gap-1.5 shadow-sm">
