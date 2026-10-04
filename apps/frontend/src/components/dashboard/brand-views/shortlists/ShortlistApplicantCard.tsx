@@ -40,7 +40,7 @@ function formatMaxOneDecimal(val: string | number | undefined | null): string {
   });
 }
 
-function BrandWorkedRibbonBadge({ size = 'default' }: { size?: 'default' | 'small' }) {
+export function BrandWorkedRibbonBadge({ size = 'default' }: { size?: 'default' | 'small' }) {
   const isSmall = size === 'small';
   return (
     <div

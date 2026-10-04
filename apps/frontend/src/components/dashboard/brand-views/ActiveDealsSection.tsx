@@ -1,79 +1,195 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { FileText, CheckCircle2, Clock, ShieldCheck, Download } from 'lucide-react';
-import { useCurrency } from '@/context/CurrencyContext';
+import React, { useState, useMemo, useEffect } from 'react';
+import { AlertCircle } from 'lucide-react';
+import DealsKpiBanner from './deals/DealsKpiBanner';
+import DealsFilterBar, { DealsTabFilter } from './deals/DealsFilterBar';
+import DealCard from './deals/DealCard';
+import DealDetailModal from './deals/DealDetailModal';
+import DeliverablePreviewModal from './deals/DeliverablePreviewModal';
+import { DealItem, MOCK_DEALS } from './deals/deal-types';
+import { CampaignService } from '@/services/campaign.service';
 
 export default function ActiveDealsSection() {
-  const { formatBudget } = useCurrency();
-  const deals = [
-    { id: 'CNT-901', creator: 'Sarah Jenkins (@sarah_creativ)', campaign: 'Q3 Enterprise SaaS', deliverable: 'YouTube Dedicated Video Draft', stage: 'Draft Review Required', amount: formatBudget('$3,500'), releaseEscrow: true },
-    { id: 'CNT-882', creator: 'Marcus Vance (@marcus_vfit)', campaign: 'Summer Desk Showcase', deliverable: '2x IG Reels & Story', stage: 'Published & Verifying Stats', amount: formatBudget('$2,200'), releaseEscrow: false },
-  ];
+  const [deals, setDeals] = useState<DealItem[]>(MOCK_DEALS);
+  const [activeTab, setActiveTab] = useState<DealsTabFilter>('ACTIVE');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCampaignId, setSelectedCampaignId] = useState('ALL');
+  const [sortBy, setSortBy] = useState('newest');
+
+  // Modals state
+  const [selectedDealForDetails, setSelectedDealForDetails] = useState<DealItem | null>(null);
+  const [selectedDealForPreview, setSelectedDealForPreview] = useState<DealItem | null>(null);
+  const [campaignsList, setCampaignsList] = useState<{ id: string; title: string }[]>([]);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Fetch real campaigns for filter dropdown
+  useEffect(() => {
+    async function loadCampaigns() {
+      try {
+        const camps = await CampaignService.getBrandCampaigns();
+        if (camps && camps.length > 0) {
+          setCampaignsList(camps.map((c) => ({ id: c.id, title: c.title })));
+        } else {
+          setCampaignsList([
+            { id: 'camp-101', title: 'Q3 Enterprise SaaS Launch' },
+            { id: 'camp-102', title: 'Summer Desk Setup Showcase' },
+            { id: 'camp-103', title: 'Developer Tools AI Spotlight' },
+          ]);
+        }
+      } catch (err) {
+        setCampaignsList([
+          { id: 'camp-101', title: 'Q3 Enterprise SaaS Launch' },
+          { id: 'camp-102', title: 'Summer Desk Setup Showcase' },
+          { id: 'camp-103', title: 'Developer Tools AI Spotlight' },
+        ]);
+      }
+    }
+    loadCampaigns();
+  }, []);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const handleApproveRelease = (deal: DealItem) => {
+    setDeals((prev) =>
+      prev.map((d) =>
+        d.id === deal.id
+          ? {
+              ...d,
+              status: 'COMPLETED',
+              stage: 'COMPLETED',
+              stageLabel: 'Contract Fulfilled & Escrow Released',
+              escrowStatus: 'RELEASED',
+              completedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            }
+          : d,
+      ),
+    );
+    showToast(`Payment of $${deal.agreedAmount.toLocaleString()} released from Escrow to ${deal.creator.name}.`);
+  };
+
+  const handleRequestEdits = (deal: DealItem, note?: string) => {
+    setDeals((prev) =>
+      prev.map((d) =>
+        d.id === deal.id
+          ? {
+              ...d,
+              stageLabel: 'Revisions Requested from Creator',
+            }
+          : d,
+      ),
+    );
+    showToast(`Revision request dispatched to ${deal.creator.name}.`);
+  };
+
+  // Tab counts
+  const tabCounts = useMemo(() => ({
+    ACTIVE: deals.filter((d) => d.status === 'ACTIVE').length,
+    COMPLETED: deals.filter((d) => d.status === 'COMPLETED').length,
+    CANCELLED: deals.filter((d) => d.status === 'CANCELLED').length,
+    ALL: deals.length,
+  }), [deals]);
+
+  // Filtered & Sorted Deals
+  const filteredDeals = useMemo(() => {
+    return deals
+      .filter((deal) => {
+        // Tab filter
+        if (activeTab !== 'ALL' && deal.status !== activeTab) return false;
+
+        // Campaign filter
+        if (selectedCampaignId !== 'ALL' && deal.campaignId !== selectedCampaignId) return false;
+
+        // Search query
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          const matchName = deal.creator.name.toLowerCase().includes(q);
+          const matchHandle = deal.creator.handle.toLowerCase().includes(q);
+          const matchCampaign = deal.campaignTitle.toLowerCase().includes(q);
+          const matchId = deal.dealNumber.toLowerCase().includes(q);
+          if (!matchName && !matchHandle && !matchCampaign && !matchId) return false;
+        }
+
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'highest_amount') return b.agreedAmount - a.agreedAmount;
+        return 0; // Default newest
+      });
+  }, [deals, activeTab, selectedCampaignId, searchQuery, sortBy]);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
-            <FileText className="w-5 h-5 text-purple-400" />
-            <span>Active Deals & Contracts</span>
-          </h2>
-          <p className="text-xs text-slate-400">Review creator content submissions and release escrow milestone funds</p>
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-6 right-6 z-50 px-4 py-3 rounded-2xl bg-purple-950/90 border border-purple-500/40 text-purple-200 text-xs font-bold shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-4">
+          {toastMessage}
         </div>
-      </div>
+      )}
 
-      <div className="space-y-4">
-        {deals.map((deal) => (
-          <motion.div
-            key={deal.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl space-y-4 hover:border-purple-500/30 transition-all"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <span className="text-[10px] font-bold text-slate-500 uppercase">{deal.id} • {deal.campaign}</span>
-                <h3 className="text-base font-black text-white">{deal.creator}</h3>
-              </div>
 
-              <div className="text-right">
-                <span className="text-xs font-bold text-purple-400 block">{deal.stage}</span>
-                <span className="text-lg font-black text-emerald-400">{deal.amount}</span>
-              </div>
-            </div>
 
-            <div className="p-3 rounded-xl bg-slate-950/60 border border-white/5 text-xs text-slate-300 flex items-center justify-between">
-              <div>
-                <strong className="text-white block">Submitted Deliverable:</strong>
-                <span>{deal.deliverable}</span>
-              </div>
+      {/* KPI Stats Banner */}
+      <DealsKpiBanner deals={deals} />
 
-              <button className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition-colors flex items-center gap-1">
-                <Download className="w-3.5 h-3.5 text-purple-400" />
-                <span>Preview Draft</span>
-              </button>
-            </div>
+      {/* Switchable Tabs & Filter Bar */}
+      <DealsFilterBar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        tabCounts={tabCounts}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        campaignsList={campaignsList}
+        selectedCampaignId={selectedCampaignId}
+        onCampaignChange={setSelectedCampaignId}
+        sortBy={sortBy}
+        onSortByChange={setSortBy}
+      />
 
-            <div className="pt-2 flex items-center justify-between">
-              <span className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
-                <ShieldCheck className="w-4 h-4" />
-                <span>Funds Secured in Zerify Escrow</span>
-              </span>
+      {/* Deals List */}
+      {filteredDeals.length > 0 ? (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 pt-4">
+          {filteredDeals.map((deal) => (
+            <DealCard
+              key={deal.id}
+              deal={deal}
+              onPreviewDraft={setSelectedDealForPreview}
+              onViewDetails={setSelectedDealForDetails}
+              onApproveRelease={handleApproveRelease}
+              onRequestEdits={(d) => setSelectedDealForPreview(d)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="p-12 text-center rounded-3xl bg-[#090C15]/95 border border-white/[0.08] backdrop-blur-xl space-y-3">
+          <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 mx-auto flex items-center justify-center">
+            <AlertCircle className="w-7 h-7 opacity-80" />
+          </div>
+          <h3 className="text-base font-bold text-white">No deals found in this view</h3>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+            {searchQuery
+              ? 'No contracts match your current search criteria. Try modifying your search or reset filters.'
+              : `There are currently no deals categorized under ${activeTab.toLowerCase()} deals.`}
+          </p>
+        </div>
+      )}
 
-              <div className="flex items-center gap-2">
-                <button className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition-colors">
-                  Request Edits
-                </button>
-                <button className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black text-white transition-all shadow-md shadow-emerald-950/40">
-                  Approve & Release Payment
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+      {/* Modals */}
+      <DealDetailModal
+        deal={selectedDealForDetails}
+        onClose={() => setSelectedDealForDetails(null)}
+        onApproveRelease={handleApproveRelease}
+      />
+
+      <DeliverablePreviewModal
+        deal={selectedDealForPreview}
+        onClose={() => setSelectedDealForPreview(null)}
+        onApprove={handleApproveRelease}
+        onRequestEdits={handleRequestEdits}
+      />
     </div>
   );
 }
