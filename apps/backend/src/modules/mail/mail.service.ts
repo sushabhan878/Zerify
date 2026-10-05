@@ -66,7 +66,11 @@ export class MailService {
   /**
    * Sends 6-digit Email Verification OTP to the recipient
    */
-  async sendVerificationOtp(to: string, code: string, role?: string): Promise<{ success: boolean; previewUrl?: string }> {
+  async sendVerificationOtp(
+    to: string,
+    code: string,
+    role?: string,
+  ): Promise<{ success: boolean; previewUrl?: string; error?: string }> {
     const from = this.configService.get<string>('EMAIL_FROM') || '"Zerify Verification" <no-reply@zerify.io>';
     const isBrand = role === 'BRAND';
     const roleLabel = isBrand ? 'Brand & Agency' : 'Creator & Influencer';
@@ -175,12 +179,14 @@ export class MailService {
         if (!response.ok || data.error) {
           const errMsg = data.error?.message || data.message || `HTTP ${response.status}`;
           this.logger.error(`Resend API Error: ${errMsg}`);
+          return { success: false, error: errMsg };
         } else {
           this.logger.log(`Verification email sent successfully via Resend API to ${to} (ID: ${data.id})`);
           return { success: true };
         }
       } catch (err: any) {
         this.logger.error(`Resend API request failed: ${err.message}`);
+        return { success: false, error: err.message };
       }
     }
 

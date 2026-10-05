@@ -50,13 +50,20 @@ export class AuthService {
     // Save or update verification record in database
     await this.authRepository.upsertEmailVerification(cleanEmail, code, expiresAt);
 
-    // Send email via Nodemailer
-    await this.mailService.sendVerificationOtp(cleanEmail, code, dto.role);
+    // Send email via Nodemailer / Resend
+    const mailResult = await this.mailService.sendVerificationOtp(cleanEmail, code, dto.role);
+
+    let message = `A 6-digit verification code has been sent to ${cleanEmail}. Valid for 10 minutes.`;
+    if (!mailResult.success && mailResult.error) {
+      if (mailResult.error.includes('testing emails to your own email address')) {
+        message = `Resend Sandbox: Can only deliver to Resend account email. Verification code: ${code}`;
+      }
+    }
 
     return {
       success: true,
-      message: `A 6-digit verification code has been sent to ${cleanEmail}. Valid for 10 minutes.`,
-      devCode: process.env.NODE_ENV !== 'production' ? code : undefined,
+      message,
+      devCode: process.env.NODE_ENV !== 'production' ? code : (mailResult.error ? code : undefined),
     };
   }
 
