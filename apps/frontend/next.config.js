@@ -1,6 +1,14 @@
+const rawApiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/+$/, '');
+const normalizedApiUrl = rawApiUrl.endsWith('/api/v1') ? rawApiUrl : `${rawApiUrl}/api/v1`;
+const normalizedWsUrl = process.env.NEXT_PUBLIC_WS_URL || rawApiUrl.replace(/\/api\/v1\/?$/, '');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  env: {
+    NEXT_PUBLIC_API_URL: normalizedApiUrl,
+    NEXT_PUBLIC_WS_URL: normalizedWsUrl,
+  },
   images: {
     remotePatterns: [
       {
