@@ -3,6 +3,7 @@ import {
   ConflictException,
   UnauthorizedException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserRole } from '@prisma/client';
@@ -18,6 +19,8 @@ import { isProfessionalEmail } from '../../common/utils/email-domain.util';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
@@ -53,17 +56,29 @@ export class AuthService {
     // Send email via Nodemailer / Resend
     const mailResult = await this.mailService.sendVerificationOtp(cleanEmail, code, dto.role);
 
-    let message = `A 6-digit verification code has been sent to ${cleanEmail}. Valid for 10 minutes.`;
-    if (!mailResult.success && mailResult.error) {
-      if (mailResult.error.includes('testing emails to your own email address')) {
-        message = `Resend Sandbox: Can only deliver to Resend account email. Verification code: ${code}`;
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    if (!mailResult.success) {
+      this.logger.error(`Failed to deliver OTP to ${cleanEmail}: ${mailResult.error}`);
+
+      if (isProduction) {
+        if (mailResult.error?.includes('testing emails to your own email address')) {
+          throw new BadRequestException(
+            'Resend sandbox limitation: Can only send emails to the account owner (contact.zerify@gmail.com). To send to any email address, please configure SMTP credentials in Render or verify a custom domain in Resend.',
+          );
+        }
+        throw new BadRequestException(
+          `Unable to send verification email: ${mailResult.error || 'Email service error'}. Please try again later.`,
+        );
       }
     }
 
     return {
       success: true,
-      message,
-      devCode: process.env.NODE_ENV !== 'production' ? code : (mailResult.error ? code : undefined),
+      message: mailResult.success
+        ? `A 6-digit verification code has been sent to ${cleanEmail}. Valid for 10 minutes.`
+        : `[DEV MODE] Verification code: ${code} (Email delivery failed: ${mailResult.error})`,
+      devCode: isProduction ? undefined : code,
     };
   }
 

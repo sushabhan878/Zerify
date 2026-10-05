@@ -74,7 +74,7 @@ export default function EmailVerificationBox({
 
       setOtpSent(true);
       toastSuccess(data.message || `Verification code sent to ${email}!`, 'OTP Sent');
-      if (data.devCode) {
+      if (process.env.NODE_ENV !== 'production' && data.devCode) {
         setDevCode(data.devCode);
       }
       setResendCountdown(60);
@@ -217,8 +217,8 @@ export default function EmailVerificationBox({
               )}
             </div>
 
-            {/* Dev helper badge if devCode returned */}
-            {devCode && (
+            {/* Dev helper badge if devCode returned (strictly development only) */}
+            {process.env.NODE_ENV !== 'production' && devCode && (
               <button
                 type="button"
                 onClick={handleQuickPasteDevCode}

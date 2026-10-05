@@ -13,11 +13,16 @@ export class MailService {
   }
 
   private async initTransporter() {
-    const host = this.configService.get<string>('SMTP_HOST');
-    const port = this.configService.get<number>('SMTP_PORT', 587);
+    let host = this.configService.get<string>('SMTP_HOST');
+    const port = Number(this.configService.get<number | string>('SMTP_PORT', 587));
     const user = this.configService.get<string>('SMTP_USER');
     const pass = this.configService.get<string>('SMTP_PASS');
     const secure = this.configService.get<string>('SMTP_SECURE') === 'true' || port === 465;
+
+    // Smart default for Gmail if host not explicitly provided
+    if (!host && user && user.includes('@gmail.com')) {
+      host = 'smtp.gmail.com';
+    }
 
     if (host && user && pass) {
       try {
@@ -27,18 +32,23 @@ export class MailService {
           secure,
           auth: { user, pass },
         });
-        this.logger.log(`Nodemailer SMTP Transporter configured for ${host}:${port}`);
+        this.logger.log(`Nodemailer SMTP Transporter configured for ${host}:${port} (${user})`);
       } catch (err: any) {
         this.logger.warn(`Failed to initialize primary SMTP transporter: ${err.message}`);
       }
     } else {
-      this.logger.log('No SMTP credentials in environment. MailService will use Ethereal / Dev logger mode.');
+      this.logger.log('No SMTP credentials in environment.');
     }
   }
 
   private async getActiveTransporter(): Promise<nodemailer.Transporter | null> {
     if (this.transporter) {
       return this.transporter;
+    }
+
+    // Do NOT generate fake Ethereal accounts in production
+    if (process.env.NODE_ENV === 'production') {
+      return null;
     }
 
     if (!this.etherealTransporter) {
@@ -71,7 +81,7 @@ export class MailService {
     code: string,
     role?: string,
   ): Promise<{ success: boolean; previewUrl?: string; error?: string }> {
-    const from = this.configService.get<string>('EMAIL_FROM') || '"Zerify Verification" <no-reply@zerify.io>';
+    const from = this.configService.get<string>('EMAIL_FROM') || 'Zerify <notifications@zerify.in>';
     const isBrand = role === 'BRAND';
     const roleLabel = isBrand ? 'Brand & Agency' : 'Creator & Influencer';
 
@@ -157,9 +167,11 @@ export class MailService {
 
     // 1. Try Resend REST API if API key is provided (No react-dom/server dependency required)
     const resendApiKey = this.configService.get<string>('RESEND_API_KEY');
+    let resendError: string | null = null;
+
     if (resendApiKey) {
       try {
-        const fromAddress = this.configService.get<string>('EMAIL_FROM') || 'Zerify <onboarding@resend.dev>';
+        const fromAddress = this.configService.get<string>('EMAIL_FROM') || 'Zerify <notifications@zerify.in>';
         const response = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
@@ -179,39 +191,70 @@ export class MailService {
         if (!response.ok || data.error) {
           const errMsg = data.error?.message || data.message || `HTTP ${response.status}`;
           this.logger.error(`Resend API Error: ${errMsg}`);
-          return { success: false, error: errMsg };
+          resendError = errMsg;
         } else {
           this.logger.log(`Verification email sent successfully via Resend API to ${to} (ID: ${data.id})`);
           return { success: true };
         }
       } catch (err: any) {
         this.logger.error(`Resend API request failed: ${err.message}`);
-        return { success: false, error: err.message };
+        resendError = err.message;
       }
     }
 
-    // 2. Try Nodemailer / SMTP
-    try {
-      const activeTransporter = await this.getActiveTransporter();
-      if (activeTransporter) {
-        const info = await activeTransporter.sendMail({
-          from,
+    // 2. Try Nodemailer / SMTP (as primary or fallback if Resend failed)
+    if (this.transporter) {
+      try {
+        const smtpFrom = this.configService.get<string>('EMAIL_FROM') || this.configService.get<string>('SMTP_USER') || from;
+        const info = await this.transporter.sendMail({
+          from: smtpFrom,
           to,
           subject,
           text,
           html,
         });
-
-        const previewUrl = nodemailer.getTestMessageUrl(info) || undefined;
-        if (previewUrl) {
-          this.logger.log(`Ethereal Email Preview URL: ${previewUrl}`);
-        }
-        return { success: true, previewUrl };
+        this.logger.log(`Verification email sent successfully via SMTP to ${to} (MessageId: ${info.messageId})`);
+        return { success: true };
+      } catch (err: any) {
+        this.logger.error(`SMTP delivery failed: ${err.message}`);
+        return { success: false, error: `SMTP delivery failed: ${err.message}` };
       }
-    } catch (err: any) {
-      this.logger.error(`Failed to send email via transporter: ${err.message}`);
     }
 
-    return { success: true };
+    // If Resend failed and no SMTP was configured
+    if (resendError) {
+      return { success: false, error: resendError };
+    }
+
+    // 3. In non-production only, fall back to Ethereal mock preview
+    if (process.env.NODE_ENV !== 'production') {
+      try {
+        const etherealTransporter = await this.getActiveTransporter();
+        if (etherealTransporter) {
+          const info = await etherealTransporter.sendMail({
+            from,
+            to,
+            subject,
+            text,
+            html,
+          });
+
+          const previewUrl = nodemailer.getTestMessageUrl(info) || undefined;
+          if (previewUrl) {
+            this.logger.log(`Ethereal Email Preview URL: ${previewUrl}`);
+          }
+          return { success: true, previewUrl };
+        }
+      } catch (err: any) {
+        this.logger.warn(`Failed to send email via Ethereal: ${err.message}`);
+      }
+      return { success: true };
+    }
+
+    // In production with no valid email provider configured
+    return {
+      success: false,
+      error: 'No email service configured. Please provide RESEND_API_KEY or SMTP credentials in your environment variables.',
+    };
   }
 }
