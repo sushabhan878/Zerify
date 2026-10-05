@@ -9,6 +9,7 @@ import {
   formatCurrency,
   convertCurrency,
   formatBudgetString,
+  formatBudgetCompact,
   SUPPORTED_CURRENCIES,
 } from '@/utils/currency';
 import { currencyService, CurrencyItem } from '@/services/currency.service';
@@ -24,6 +25,7 @@ interface CurrencyContextType {
     options?: { compact?: boolean; showDecimals?: boolean; suffix?: string }
   ) => string;
   formatBudget: (budgetString: string | null | undefined) => string;
+  formatBudgetCompact: (budgetString: string | null | undefined) => string;
   convert: (amount: number, fromCurrency?: string) => number;
   isLoading: boolean;
   lastUpdated: string | null;
@@ -37,6 +39,7 @@ const CurrencyContext = createContext<CurrencyContextType>({
   setCurrency: async () => {},
   format: (amount) => formatCurrency(amount, DEFAULT_CURRENCY),
   formatBudget: (budgetString) => formatBudgetString(budgetString, DEFAULT_CURRENCY),
+  formatBudgetCompact: (budgetString) => formatBudgetCompact(budgetString, DEFAULT_CURRENCY),
   convert: (amount) => amount,
   isLoading: false,
   lastUpdated: null,
@@ -195,6 +198,13 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     [currency, rates]
   );
 
+  const formatBudgetCompactVal = useCallback(
+    (budgetString: string | null | undefined) => {
+      return formatBudgetCompact(budgetString, currency, rates);
+    },
+    [currency, rates]
+  );
+
   const convert = useCallback(
     (amount: number, fromCurrency?: string) => {
       return convertCurrency(amount, fromCurrency || 'USD', currency, rates);
@@ -212,6 +222,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         setCurrency,
         format,
         formatBudget,
+        formatBudgetCompact: formatBudgetCompactVal,
         convert,
         isLoading,
         lastUpdated,

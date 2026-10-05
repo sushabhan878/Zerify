@@ -871,8 +871,8 @@ export default function CompanyDiscoverySection() {
           <div
             className={
               viewMode === 'grid'
-                ? 'grid grid-cols-1 md:grid-cols-2 gap-4'
-                : 'flex flex-col space-y-3'
+                ? 'grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-8 pt-4'
+                : 'flex flex-col space-y-6 pt-4'
             }
           >
             {paginatedCompanies.map((company) => (

@@ -265,3 +265,80 @@ export function formatBudgetString(
 
   return budgetString;
 }
+
+/**
+ * Formats a budget range or amount string into a compact, human-readable format.
+ * E.g., >= 1,000,000 formats as 1.93M / 48.2M, and >= 1,000 (such as 100,000) formats as 100K / 481.5K.
+ */
+export function formatBudgetCompact(
+  budgetString: string | null | undefined,
+  targetCurrency: string | null | undefined = 'INR',
+  rates?: Record<string, number> | null
+): string {
+  const norm = normalizeCurrency(targetCurrency);
+  const symbol = getCurrencySymbol(norm);
+
+  if (!budgetString) {
+    return norm === 'INR' ? '₹400K – ₹1.5M' : '$5K – $20K';
+  }
+
+  // Detect original currency in the string
+  let sourceCurrency = 'USD';
+  if (budgetString.includes('₹') || budgetString.toUpperCase().includes('INR')) {
+    sourceCurrency = 'INR';
+  } else if (budgetString.includes('€') || budgetString.toUpperCase().includes('EUR')) {
+    sourceCurrency = 'EUR';
+  } else if (budgetString.includes('£') || budgetString.toUpperCase().includes('GBP')) {
+    sourceCurrency = 'GBP';
+  } else if (budgetString.includes('¥') || budgetString.toUpperCase().includes('JPY')) {
+    sourceCurrency = 'JPY';
+  }
+
+  const isPlus = budgetString.includes('+');
+  const isUnder = budgetString.toLowerCase().includes('under');
+
+  // Extract all numbers inside the string
+  const rawNumbers =
+    budgetString
+      .match(/[\d,.]+/g)
+      ?.map((s) => parseFloat(s.replace(/,/g, '')))
+      .filter((n) => !isNaN(n) && n > 0) || [];
+
+  if (rawNumbers.length === 0) return budgetString;
+
+  const converted = rawNumbers.map((val) => {
+    return convertCurrency(val, sourceCurrency, norm, rates);
+  });
+
+  const formatCompact = (num: number): string => {
+    if (Math.abs(num) >= 1_000_000_000) {
+      const val = num / 1_000_000_000;
+      return `${symbol}${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1).replace(/\.0$/, '')}B`;
+    }
+    if (Math.abs(num) >= 1_000_000) {
+      const val = num / 1_000_000;
+      const formatted = val >= 10 ? val.toFixed(1) : val.toFixed(2);
+      return `${symbol}${formatted.replace(/\.?0+$/, '')}M`;
+    }
+    if (Math.abs(num) >= 1_000) {
+      const val = num / 1_000;
+      const formatted = val >= 100 ? (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)) : val.toFixed(1);
+      return `${symbol}${formatted.replace(/\.?0+$/, '')}K`;
+    }
+    return `${symbol}${Math.round(num)}`;
+  };
+
+  const prefix = isUnder ? 'Under ' : '';
+  const suffix = isPlus ? '+' : '';
+
+  if (converted.length === 1) {
+    return `${prefix}${formatCompact(converted[0])}${suffix}`;
+  }
+
+  if (converted.length >= 2) {
+    return `${prefix}${formatCompact(converted[0])} – ${formatCompact(converted[1])}${suffix}`;
+  }
+
+  return budgetString;
+}
+

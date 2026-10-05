@@ -58,13 +58,7 @@ export default function CompanyCard({
   onPitchBrand,
   viewMode = 'grid',
 }: CompanyCardProps) {
-  const { formatBudget } = useCurrency();
-
-  const getMatchColor = (score: number) => {
-    if (score >= 85) return 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400';
-    if (score >= 70) return 'bg-purple-500/15 border-purple-500/40 text-purple-300';
-    return 'bg-blue-500/15 border-blue-500/40 text-blue-300';
-  };
+  const { formatBudgetCompact } = useCurrency();
 
   const logoLetter = company.companyName ? company.companyName.charAt(0).toUpperCase() : 'B';
 
@@ -74,26 +68,36 @@ export default function CompanyCard({
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4, scale: 1.008 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className={`relative p-5 rounded-2xl bg-slate-950/60 border border-white/10 backdrop-blur-xl shadow-xl hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-950/40 hover:bg-slate-950/85 transition-all flex flex-col justify-between group ${
+      className={`relative mt-3.5 p-5 rounded-2xl bg-slate-950/70 border border-white/10 backdrop-blur-xl shadow-xl hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-950/40 hover:bg-slate-950/90 transition-all flex flex-col justify-between group overflow-visible ${
         viewMode === 'list' ? 'md:flex-row md:items-center gap-4' : 'space-y-4'
       }`}
     >
-      {/* Top-Right Match Score Badge */}
-      <div className="absolute top-4 right-4 sm:top-5 sm:right-5 z-10">
-        <div
-          className={`px-3 py-1 rounded-full border text-xs font-black flex items-center gap-1.5 ${getMatchColor(
-            company.matchScore
-          )}`}
+      {/* Background Ambient Glow */}
+      <div className="absolute -top-20 -right-20 w-48 h-48 bg-purple-600/10 rounded-full blur-3xl pointer-events-none group-hover:bg-purple-600/20 transition-all duration-500" />
+
+      {/* Floating Match Rate Badge Overlapping Top-Right Corner - Shifted higher */}
+      <div
+        className="absolute right-6 sm:right-8 z-30 pointer-events-none"
+        style={{ top: '-14px', transform: 'translateY(-50%)' }}
+      >
+        <span
+          className={`px-4 sm:px-5 py-2 rounded-full border text-xs sm:text-sm md:text-sm font-black tracking-wide text-white flex items-center gap-2 shadow-2xl ring-4 ring-[#080B14] group-hover:scale-105 transition-all duration-300 ${
+            company.matchScore >= 90
+              ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 border-emerald-400/50 shadow-emerald-950/80 group-hover:shadow-emerald-600/40'
+              : company.matchScore >= 75
+              ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 border-purple-400/50 shadow-purple-950/80 group-hover:shadow-purple-600/40'
+              : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 border-blue-400/50 shadow-blue-950/80 group-hover:shadow-blue-600/40'
+          }`}
         >
-          <Sparkles className="w-3.5 h-3.5" />
+          <Sparkles className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white animate-pulse shrink-0" />
           <span>{company.matchScore}% Match</span>
-        </div>
+        </span>
       </div>
 
-      <div className="space-y-3 flex-1 pr-24 md:pr-0">
+      <div className="space-y-3 flex-1 min-w-0">
         {/* Top Header */}
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
               onClick={() => onViewDetails(company)}
@@ -113,14 +117,14 @@ export default function CompanyCard({
               )}
             </button>
 
-            <div>
+            <div className="min-w-0">
               <button
                 type="button"
                 onClick={() => onViewDetails(company)}
-                className="group/brand inline-flex items-center gap-1.5 text-left transition-colors focus:outline-none cursor-pointer"
+                className="group/brand inline-flex items-center gap-1.5 text-left transition-colors focus:outline-none cursor-pointer max-w-full"
                 title="View brand details"
               >
-                <h3 className="text-sm font-extrabold text-white group-hover/brand:text-purple-300 group-hover/brand:underline underline-offset-4 decoration-purple-400/60 transition-all">
+                <h3 className="text-sm font-extrabold text-white group-hover/brand:text-purple-300 group-hover/brand:underline underline-offset-4 decoration-purple-400/60 transition-all truncate">
                   {company.companyName}
                 </h3>
                 {company.isVerified !== false && (
@@ -130,9 +134,9 @@ export default function CompanyCard({
                 )}
                 <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover/brand:text-purple-300 group-hover/brand:scale-125 group-hover/brand:translate-x-0.5 group-hover/brand:-translate-y-0.5 transition-all duration-200 shrink-0" />
               </button>
-              <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                <span className="font-bold text-slate-300">{company.industry || 'General Industry'}</span>
-                {company.location && <span>• {company.location}</span>}
+              <div className="flex items-center gap-2 text-[11px] text-slate-400 truncate">
+                <span className="font-bold text-slate-300 truncate">{company.industry || 'General Industry'}</span>
+                {company.location && <span className="truncate">• {company.location}</span>}
               </div>
             </div>
           </div>
@@ -145,22 +149,27 @@ export default function CompanyCard({
               company.primaryGoals?.join(', ') || 'brand promotion & product showcase'
             }.`}
         </p>
-
-        {/* Budget Highlight */}
-        <div className="pt-1">
-          <span className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            {formatBudget(company.campaignBudget)}
-          </span>
-        </div>
       </div>
 
-      {/* Footer Actions */}
-      <div className={`pt-3 border-t border-white/5 flex items-center justify-end gap-2 shrink-0 ${
-        viewMode === 'list' ? 'md:border-t-0 md:pt-0 md:self-end md:mt-2' : ''
-      }`}>
+      {/* Footer: Budget & Pitch Action */}
+      <div
+        className={`pt-3.5 border-t border-white/10 flex items-center justify-between gap-3 shrink-0 ${
+          viewMode === 'list' ? 'md:border-t-0 md:pt-0 md:gap-6' : ''
+        }`}
+      >
+        <div className="min-w-0">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            Budget
+          </span>
+          <span className="text-base sm:text-lg font-black text-white tracking-tight">
+            {formatBudgetCompact(company.campaignBudget)}
+          </span>
+        </div>
+
         <button
           onClick={() => onPitchBrand(company)}
-          className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-extrabold text-white flex items-center gap-1.5 shadow-lg shadow-purple-950/50 hover:shadow-purple-900/60 transition-all ml-auto"
+          type="button"
+          className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 active:scale-[0.98] text-xs sm:text-sm font-extrabold text-white flex items-center gap-2 shadow-lg shadow-purple-950/60 hover:shadow-purple-900/80 hover:scale-[1.02] transition-all shrink-0 cursor-pointer"
         >
           <Send className="w-3.5 h-3.5" />
           <span>Pitch Brand</span>
