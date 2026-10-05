@@ -165,9 +165,9 @@ export default function CompanyCard({
         <button
           onClick={() => onPitchBrand(company)}
           type="button"
-          className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 active:scale-[0.98] text-xs sm:text-sm font-extrabold text-white flex items-center gap-2 shadow-lg shadow-purple-950/60 hover:shadow-purple-900/80 hover:scale-[1.02] transition-all shrink-0 cursor-pointer"
+          className="group/pitch px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 active:scale-[0.98] text-xs sm:text-sm font-extrabold text-white flex items-center gap-2 shadow-lg shadow-purple-950/60 hover:shadow-purple-900/80 hover:scale-[1.02] transition-all shrink-0 cursor-pointer"
         >
-          <Send className="w-3.5 h-3.5" />
+          <Send className="w-3.5 h-3.5 group-hover/pitch:translate-x-1 group-hover/pitch:-translate-y-0.5 group-hover/pitch:scale-110 transition-transform duration-200" />
           <span>Pitch Brand</span>
         </button>
       </div>

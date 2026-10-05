@@ -72,6 +72,11 @@ export default function CampaignCard({
     ? `${campaign.brandName.slice(0, 16)}...`
     : campaign.brandName;
 
+  const isTitleTruncated = (campaign.title || '').length > 28;
+  const displayTitle = isTitleTruncated
+    ? `${campaign.title.slice(0, 28)}...`
+    : campaign.title;
+
   const SOCIAL_ICONS: Record<string, string> = {
     youtube: '/social/youtube.png',
     instagram: '/social/instagram.png',
@@ -196,9 +201,9 @@ export default function CampaignCard({
           <div className="md:col-span-8 space-y-3">
             <h3
               title={campaign.title}
-              className="text-lg sm:text-xl font-bold text-white group-hover:text-purple-200 transition-colors leading-snug line-clamp-2"
+              className="text-lg sm:text-xl font-bold text-white group-hover:text-purple-200 transition-colors leading-snug"
             >
-              {campaign.title}
+              {displayTitle}
             </h3>
             <p
               title={campaign.description}
@@ -267,28 +272,28 @@ export default function CampaignCard({
         <button
           onClick={() => onViewBrief(campaign)}
           type="button"
-          className="w-full py-3 px-4 rounded-2xl bg-slate-900/80 hover:bg-purple-950/40 border border-purple-500/20 hover:border-purple-400/40 text-slate-300 hover:text-white text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm"
+          className="group/brief w-full py-3 px-4 rounded-2xl bg-slate-900/80 hover:bg-purple-950/40 border border-purple-500/20 hover:border-purple-400/40 text-slate-300 hover:text-white text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer hover:shadow-md hover:shadow-purple-950/30 active:scale-[0.98]"
         >
           <span>View Brief</span>
-          <ArrowUpRight className="w-4 h-4 text-slate-400" />
+          <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover/brief:text-purple-300 group-hover/brief:translate-x-1.5 group-hover/brief:-translate-y-1.5 group-hover/brief:scale-110 transition-all duration-200 shrink-0" />
         </button>
 
         {campaign.isApplied ? (
           <button
-            disabled
+            onClick={() => onViewBrief(campaign)}
             type="button"
-            className="w-full py-3 px-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm cursor-default"
+            className="group/applied w-full py-3 px-4 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 hover:border-emerald-400/60 text-emerald-300 hover:text-emerald-200 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm cursor-pointer transition-all duration-200 active:scale-[0.98]"
           >
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 group-hover/applied:scale-125 group-hover/applied:rotate-12 transition-transform duration-200 shrink-0" />
             <span>Applied</span>
           </button>
         ) : (
           <button
             onClick={() => onApply(campaign)}
             type="button"
-            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-bold transition-all shadow-lg shadow-purple-950/40 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
+            className="group/apply w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-bold transition-all shadow-lg shadow-purple-950/40 hover:shadow-purple-900/60 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           >
-            <Send className="w-3.5 h-3.5" />
+            <Send className="w-3.5 h-3.5 group-hover/apply:translate-x-1.5 group-hover/apply:-translate-y-1 group-hover/apply:scale-110 transition-transform duration-200 shrink-0" />
             <span>Apply Now</span>
           </button>
         )}
