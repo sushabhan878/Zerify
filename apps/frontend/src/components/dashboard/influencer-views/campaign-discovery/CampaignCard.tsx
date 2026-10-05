@@ -7,13 +7,8 @@ import {
   CheckCircle2,
   ArrowUpRight,
   Send,
-  Video,
-  Instagram,
-  Youtube,
   Gift,
   Clock,
-  Twitter,
-  Linkedin,
   Bookmark,
 } from 'lucide-react';
 import { useCurrency } from '@/context/CurrencyContext';
@@ -77,21 +72,27 @@ export default function CampaignCard({
     ? `${campaign.brandName.slice(0, 16)}...`
     : campaign.brandName;
 
-  const getPlatformIcon = (platform: string) => {
-    switch (platform) {
-      case 'Instagram':
-        return <Instagram className="w-3.5 h-3.5 text-pink-400" />;
-      case 'YouTube':
-        return <Youtube className="w-3.5 h-3.5 text-rose-500" />;
-      case 'TikTok':
-        return <Video className="w-3.5 h-3.5 text-cyan-400" />;
-      case 'LinkedIn':
-        return <Linkedin className="w-3.5 h-3.5 text-blue-400" />;
-      case 'Twitter':
-        return <Twitter className="w-3.5 h-3.5 text-sky-400" />;
-      default:
-        return <Video className="w-3.5 h-3.5 text-purple-400" />;
-    }
+  const SOCIAL_ICONS: Record<string, string> = {
+    youtube: '/social/youtube.png',
+    instagram: '/social/instagram.png',
+    twitter: '/social/twitter.png',
+    x: '/social/twitter.png',
+    linkedin: '/social/linkedin.png',
+    facebook: '/social/facebook.png',
+    threads: '/social/threads.png',
+    tiktok: '/social/tik-tok.png',
+  };
+
+  const getSocialIconSrc = (platform: string): string => {
+    const p = platform.toLowerCase().trim();
+    if (p.includes('youtube')) return SOCIAL_ICONS.youtube;
+    if (p.includes('instagram')) return SOCIAL_ICONS.instagram;
+    if (p.includes('twitter') || p === 'x') return SOCIAL_ICONS.twitter;
+    if (p.includes('linkedin')) return SOCIAL_ICONS.linkedin;
+    if (p.includes('facebook')) return SOCIAL_ICONS.facebook;
+    if (p.includes('threads')) return SOCIAL_ICONS.threads;
+    if (p.includes('tiktok') || p.includes('tik-tok') || p.includes('tik tok')) return SOCIAL_ICONS.tiktok;
+    return SOCIAL_ICONS.instagram;
   };
 
   return (
@@ -206,21 +207,31 @@ export default function CampaignCard({
               {campaign.description}
             </p>
 
-            {/* Platform Tag Icons */}
-            <div className="flex items-center gap-3 pt-2">
+            {/* Overlapping Platform Images with Thinner Purple Gradient Border (balanced size & 70% visible) */}
+            <div className="flex items-center gap-2.5 pt-2">
               <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
                 Platforms:
               </span>
-              <div className="flex items-center gap-2">
-                {campaign.targetPlatforms.map((p) => (
-                  <span
-                    key={p}
-                    title={p}
-                    className="p-2 rounded-xl bg-slate-900/80 border border-purple-500/20 text-purple-300 hover:border-purple-400/40 transition-colors shadow-sm"
-                  >
-                    {getPlatformIcon(p)}
-                  </span>
-                ))}
+              <div className="flex items-center -space-x-2 isolate">
+                {(campaign.targetPlatforms || []).map((p, idx) => {
+                  const iconSrc = getSocialIconSrc(p);
+                  return (
+                    <div
+                      key={p}
+                      title={p}
+                      style={{ zIndex: 10 + idx }}
+                      className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full p-[1px] bg-gradient-to-tr from-purple-600 via-indigo-500 to-purple-400 shadow-sm transition-transform duration-200 hover:scale-125 hover:z-30 cursor-pointer shrink-0"
+                    >
+                      <div className="w-full h-full rounded-full bg-[#090C15] flex items-center justify-center p-0.5 overflow-hidden">
+                        <img
+                          src={iconSrc}
+                          alt={p}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
