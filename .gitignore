@@ -37,3 +37,7 @@ Thumbs.db
 # Coverage & Testing
 coverage/
 .nyc_output/
+
+#aws Infrastructure
+Infrastructure/
+ecosystem.config.js
