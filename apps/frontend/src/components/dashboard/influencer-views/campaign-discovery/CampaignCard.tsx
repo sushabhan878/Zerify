@@ -102,10 +102,30 @@ export default function CampaignCard({
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
-      className="group relative rounded-3xl bg-slate-950/70 border border-purple-500/20 hover:border-purple-500/40 p-6 sm:p-7 flex flex-col justify-between backdrop-blur-2xl shadow-xl shadow-purple-950/20 transition-all duration-300 overflow-hidden space-y-6 sm:space-y-7"
+      className="group relative mt-4 rounded-3xl bg-slate-950/70 border border-purple-500/20 hover:border-purple-500/40 p-6 sm:p-7 flex flex-col justify-between backdrop-blur-2xl shadow-xl shadow-purple-950/20 transition-all duration-300 overflow-visible space-y-6 sm:space-y-7"
     >
       {/* Background Ambient Glow */}
       <div className="absolute -top-20 -right-20 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl group-hover:bg-purple-600/20 transition-all pointer-events-none" />
+
+      {/* Floating Match Rate Badge Overlapping Top-Right Corner */}
+      {typeof campaign.matchScore === 'number' && (
+        <div
+          className="absolute right-6 sm:right-8 z-30 pointer-events-none"
+          style={{ top: '-20px', transform: 'translateY(-50%)' }}
+        >
+          <span
+            className={`px-4 sm:px-5 py-2 rounded-full border text-xs sm:text-sm md:text-sm font-black tracking-wide text-white flex items-center gap-2 shadow-2xl ring-4 ring-[#080B14] group-hover:scale-105 transition-all duration-300 ${campaign.matchScore >= 90
+              ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 border-emerald-400/50 shadow-emerald-950/80 group-hover:shadow-emerald-600/40'
+              : campaign.matchScore >= 75
+                ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 border-purple-400/50 shadow-purple-950/80 group-hover:shadow-purple-600/40'
+                : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 border-blue-400/50 shadow-blue-950/80 group-hover:shadow-blue-600/40'
+              }`}
+          >
+            <Sparkles className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white animate-pulse shrink-0" />
+            <span>{campaign.matchScore}% Match</span>
+          </span>
+        </div>
+      )}
 
       <div className="space-y-5 sm:space-y-6">
         {/* Top Header Row: Brand Info (Left) and Badges (Right) */}
@@ -148,12 +168,6 @@ export default function CampaignCard({
               <span>Ends in {campaign.daysRemaining} days</span>
             </div>
 
-            {/* Match Score Badge */}
-            <div className="px-3 py-1 rounded-xl bg-purple-950/70 border border-purple-500/30 flex items-center gap-1.5 text-xs font-black text-purple-200 shadow-sm">
-              <Sparkles className="w-3 h-3 text-purple-300 animate-pulse" />
-              <span>{campaign.matchScore}%</span>
-            </div>
-
             {/* Save / Bookmark Campaign Button */}
             {onToggleSave && (
               <button
@@ -163,8 +177,8 @@ export default function CampaignCard({
                 }}
                 type="button"
                 className={`p-2 rounded-xl border transition-all ${isSaved
-                    ? 'bg-purple-600/30 border-purple-400/60 text-purple-300 shadow-md shadow-purple-950/40'
-                    : 'bg-slate-900/80 border-purple-500/20 text-slate-400 hover:text-white hover:border-purple-400/40 hover:bg-slate-800'
+                  ? 'bg-purple-600/30 border-purple-400/60 text-purple-300 shadow-md shadow-purple-950/40'
+                  : 'bg-slate-900/80 border-purple-500/20 text-slate-400 hover:text-white hover:border-purple-400/40 hover:bg-slate-800'
                   }`}
                 title={isSaved ? 'Remove from saved' : 'Save campaign'}
                 aria-label={isSaved ? 'Remove from saved' : 'Save campaign'}

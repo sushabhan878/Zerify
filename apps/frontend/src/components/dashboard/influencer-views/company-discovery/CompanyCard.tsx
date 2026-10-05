@@ -68,26 +68,24 @@ export default function CompanyCard({
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4, scale: 1.008 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className={`relative mt-3.5 p-5 rounded-2xl bg-slate-950/70 border border-white/10 backdrop-blur-xl shadow-xl hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-950/40 hover:bg-slate-950/90 transition-all flex flex-col justify-between group overflow-visible ${
-        viewMode === 'list' ? 'md:flex-row md:items-center gap-4' : 'space-y-4'
-      }`}
+      className={`relative mt-4 p-5 rounded-2xl bg-slate-950/70 border border-white/10 backdrop-blur-xl shadow-xl hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-950/40 hover:bg-slate-950/90 transition-all flex flex-col justify-between group overflow-visible ${viewMode === 'list' ? 'md:flex-row md:items-center gap-4' : 'space-y-4'
+        }`}
     >
       {/* Background Ambient Glow */}
       <div className="absolute -top-20 -right-20 w-48 h-48 bg-purple-600/10 rounded-full blur-3xl pointer-events-none group-hover:bg-purple-600/20 transition-all duration-500" />
 
-      {/* Floating Match Rate Badge Overlapping Top-Right Corner - Shifted higher */}
+      {/* Floating Match Rate Badge Overlapping Top-Right Corner */}
       <div
         className="absolute right-6 sm:right-8 z-30 pointer-events-none"
-        style={{ top: '-14px', transform: 'translateY(-50%)' }}
+        style={{ top: '-8px', transform: 'translateY(-50%)' }}
       >
         <span
-          className={`px-4 sm:px-5 py-2 rounded-full border text-xs sm:text-sm md:text-sm font-black tracking-wide text-white flex items-center gap-2 shadow-2xl ring-4 ring-[#080B14] group-hover:scale-105 transition-all duration-300 ${
-            company.matchScore >= 90
+          className={`px-4 sm:px-5 py-2 rounded-full border text-xs sm:text-sm md:text-sm font-black tracking-wide text-white flex items-center gap-2 shadow-2xl ring-4 ring-[#080B14] group-hover:scale-105 transition-all duration-300 ${company.matchScore >= 90
               ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 border-emerald-400/50 shadow-emerald-950/80 group-hover:shadow-emerald-600/40'
               : company.matchScore >= 75
-              ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 border-purple-400/50 shadow-purple-950/80 group-hover:shadow-purple-600/40'
-              : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 border-blue-400/50 shadow-blue-950/80 group-hover:shadow-blue-600/40'
-          }`}
+                ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 border-purple-400/50 shadow-purple-950/80 group-hover:shadow-purple-600/40'
+                : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 border-blue-400/50 shadow-blue-950/80 group-hover:shadow-blue-600/40'
+            }`}
         >
           <Sparkles className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white animate-pulse shrink-0" />
           <span>{company.matchScore}% Match</span>
@@ -145,17 +143,15 @@ export default function CompanyCard({
         {/* Short Campaign Goal / Description */}
         <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
           {company.description ||
-            `Looking for content creators for ${
-              company.primaryGoals?.join(', ') || 'brand promotion & product showcase'
+            `Looking for content creators for ${company.primaryGoals?.join(', ') || 'brand promotion & product showcase'
             }.`}
         </p>
       </div>
 
       {/* Footer: Budget & Pitch Action */}
       <div
-        className={`pt-3.5 border-t border-white/10 flex items-center justify-between gap-3 shrink-0 ${
-          viewMode === 'list' ? 'md:border-t-0 md:pt-0 md:gap-6' : ''
-        }`}
+        className={`pt-3.5 border-t border-white/10 flex items-center justify-between gap-3 shrink-0 ${viewMode === 'list' ? 'md:border-t-0 md:pt-0 md:gap-6' : ''
+          }`}
       >
         <div className="min-w-0">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">

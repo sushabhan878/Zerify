@@ -695,8 +695,8 @@ export default function CampaignDiscoverySection() {
         <div
           className={
             viewMode === 'grid'
-              ? 'grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6'
-              : 'space-y-4'
+              ? 'grid grid-cols-1 lg:grid-cols-2 gap-x-5 gap-y-8 pt-4'
+              : 'space-y-6 pt-4'
           }
         >
           {paginatedCampaigns.map((camp) => (
