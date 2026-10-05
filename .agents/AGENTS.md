@@ -23,10 +23,11 @@ Zerify is structured as a Turbo monorepo:
 - Wrap API routes with standard HTTP Exception filters; never let unhandled exceptions leak stack traces to clients.
 
 ### 2.2 Frontend (Next.js)
-- Maintain rich UI aesthetics: Glassmorphism, smooth gradients, dynamic animations (Framer Motion), and modern typography.
-- Use Vanilla TailwindCSS utilities. Never hardcode inline arbitrary color hex values when tailwind color tokens are applicable.
-- Ensure all interactive elements have hover effects, loading states (`Loader2` spinner), and accessible labels.
-- Handle API errors gracefully with user-facing alerts/toasts rather than silent failures.
+- **Component Decomposition & File Length**: Keep files short and focused (aim under 150-200 lines). Never write monolithic UI components. Always decompose complex pages, forms, and modals into small, single-responsibility sub-components (e.g., in `@/components/ui/` or feature subfolders) and import them into the main file.
+- **Maintain Rich UI Aesthetics**: Glassmorphism, smooth gradients, dynamic animations (Framer Motion), and modern typography.
+- **Use Vanilla TailwindCSS Utilities**: Never hardcode inline arbitrary color hex values when tailwind color tokens are applicable.
+- **Interactive State**: Ensure all interactive elements have hover effects, loading states (`Loader2` spinner), and accessible labels.
+- **Graceful Error Handling**: Handle API errors with user-facing alerts/toasts rather than silent failures.
 
 ---
 

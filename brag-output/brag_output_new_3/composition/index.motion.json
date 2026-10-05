@@ -1,0 +1,13 @@
+{
+  "duration": 24.5,
+  "assertions": [
+    { "kind": "appearsBy", "selector": "#hook-title", "bySec": 0.9 },
+    { "kind": "appearsBy", "selector": "#hero-shot-frame", "bySec": 4.4 },
+    { "kind": "appearsBy", "selector": "#match-shot-frame", "bySec": 8.5 },
+    { "kind": "appearsBy", "selector": "#analytics-panel", "bySec": 13.4 },
+    { "kind": "appearsBy", "selector": "#outro-mark", "bySec": 21.5 },
+    { "kind": "before", "a": "#match-shot-frame", "b": "#outro-mark" },
+    { "kind": "staysInFrame", "selector": "#hero-shot-frame" },
+    { "kind": "staysInFrame", "selector": "#outro-lockup" }
+  ]
+}

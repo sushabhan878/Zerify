@@ -1,0 +1,150 @@
+'use client';
+
+import React, { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import FacebookPageSelectorModal from '@/components/social/FacebookPageSelectorModal';
+
+function SocialCallbackContent() {
+  const searchParams = useSearchParams();
+  const status = searchParams.get('status');
+  const message = searchParams.get('message');
+  const count = searchParams.get('count');
+  const userId = searchParams.get('userId');
+
+  const [isSuccess, setIsSuccess] = useState(status === 'success');
+  const [successCount, setSuccessCount] = useState<string | number | null>(count);
+
+  const broadcastAndClose = (customStatus: string, customMessage?: string | null, customCount?: string | number | null) => {
+    const payload = {
+      type: 'ZERIFY_SOCIAL_CONNECTED',
+      status: customStatus,
+      message: customMessage,
+      count: customCount,
+      timestamp: Date.now(),
+    };
+
+    if (typeof window !== 'undefined' && window.opener) {
+      try {
+        window.opener.postMessage(payload, '*');
+      } catch (err) {
+        console.error('Could not postMessage to opener:', err);
+      }
+    }
+
+    try {
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        const bc = new BroadcastChannel('zerify_social_oauth');
+        bc.postMessage(payload);
+        bc.close();
+      }
+    } catch (bcErr) {
+      console.error('BroadcastChannel error:', bcErr);
+    }
+
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('zerify_social_connected_event', JSON.stringify(payload));
+      }
+    } catch (lsErr) {
+      console.error('localStorage event error:', lsErr);
+    }
+
+    const timer = setTimeout(() => {
+      try {
+        window.close();
+      } catch (e) {
+        console.warn('Could not auto-close window:', e);
+      }
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  };
+
+  useEffect(() => {
+    // If we're waiting for page selection, do not auto-close
+    if (status === 'select_pages') {
+      return;
+    }
+
+    broadcastAndClose(status || 'unknown', message, count);
+  }, [status, message, count]);
+
+  const handlePagesSelected = (connectedCount: number) => {
+    setIsSuccess(true);
+    setSuccessCount(connectedCount);
+    broadcastAndClose('success', `${connectedCount} Facebook Page(s) linked`, connectedCount);
+  };
+
+  const handleCloseSelection = () => {
+    try {
+      window.close();
+    } catch (e) {
+      console.warn('Could not close window:', e);
+    }
+  };
+
+  if (status === 'select_pages' && !isSuccess) {
+    return (
+      <div className="min-h-screen bg-[#07090E] text-white flex items-center justify-center p-4">
+        <FacebookPageSelectorModal
+          isOpen={true}
+          userId={userId || undefined}
+          onClose={handleCloseSelection}
+          onSuccess={handlePagesSelected}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#07090E] text-white flex flex-col items-center justify-center p-6 text-center">
+      <div className="w-full max-w-md p-8 rounded-2xl bg-slate-950/80 border border-purple-500/30 backdrop-blur-xl shadow-2xl space-y-5">
+        {isSuccess ? (
+          <>
+            <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 mx-auto animate-bounce">
+              <CheckCircle2 className="w-9 h-9" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white">Social Account Connected!</h2>
+              <p className="text-xs text-slate-300 mt-1">
+                {successCount ? `${successCount} account(s) successfully linked.` : 'Your social account has been authenticated.'}
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="w-16 h-16 rounded-full bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 mx-auto">
+              <AlertCircle className="w-9 h-9" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white">Connection Failed</h2>
+              <p className="text-xs text-rose-300 mt-1">
+                {message ? decodeURIComponent(message) : 'An error occurred during authentication.'}
+              </p>
+            </div>
+          </>
+        )}
+
+        <div className="pt-4 border-t border-white/10 text-xs text-slate-400 flex items-center justify-center gap-2 font-mono">
+          <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+          <span>Finalizing authentication & closing window...</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function SocialCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#07090E] text-white flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+        </div>
+      }
+    >
+      <SocialCallbackContent />
+    </Suspense>
+  );
+}

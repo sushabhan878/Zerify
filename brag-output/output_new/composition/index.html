@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Zerify — Brag</title>
+<style>
+  /* ===== Local fonts (no network) ===== */
+  @font-face {
+    font-family: "Playfair Display";
+    font-style: normal;
+    font-weight: 400 900;
+    src: url("assets/fonts/playfair-latin.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Playfair Display";
+    font-style: italic;
+    font-weight: 400 900;
+    src: url("assets/fonts/playfair-italic-latin.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Plus Jakarta Sans";
+    font-style: normal;
+    font-weight: 200 800;
+    src: url("assets/fonts/jakarta-latin.woff2") format("woff2");
+  }
+
+  :root {
+    --bg: #07090e;
+    --panel: #0b0f19;
+    --text: #f3f4f6;
+    --muted: #94a3b8;
+    --purple: #a855f7;
+    --purple-soft: #c084fc;
+    --pink: #f472b6;
+    --indigo: #818cf8;
+    --emerald: #34d399;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { background: var(--bg); }
+
+  #root {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: var(--bg);
+    overflow: hidden;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    color: var(--text);
+  }
+
+  .scene {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  /* ===== Shared background layers ===== */
+  .dot-grid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(148, 163, 184, 0.28) 1.5px, transparent 1.5px);
+    background-size: 34px 34px;
+  }
+
+  .glow-a {
+    position: absolute;
+    width: 900px;
+    height: 900px;
+    border-radius: 50%;
+    background: rgba(168, 85, 247, 0.16);
+    filter: blur(140px);
+    top: -240px;
+    left: -180px;
+  }
+  .glow-b {
+    position: absolute;
+    width: 760px;
+    height: 760px;
+    border-radius: 50%;
+    background: rgba(244, 114, 182, 0.12);
+    filter: blur(130px);
+    bottom: -260px;
+    right: -140px;
+  }
+
+  .hairline-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(30, 41, 59, 0.16) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(30, 41, 59, 0.16) 1px, transparent 1px);
+    background-size: 96px 96px;
+  }
+
+  /* ===== Type ===== */
+  .display {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 700;
+    color: #ffffff;
+  }
+  .display-italic {
+    font-family: "Playfair Display", Georgia, serif;
+    font-style: italic;
+    font-weight: 800;
+    background: linear-gradient(90deg, #d8b4fe, #f9a8d4, #a5b4fc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .caps {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .grad-text {
+    background: linear-gradient(90deg, #c084fc, #f472b6, #818cf8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ===== Cards / chips ===== */
+  .glass {
+    background: rgba(11, 15, 25, 0.86);
+    border: 1px solid rgba(168, 85, 247, 0.28);
+    border-radius: 28px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 60px rgba(168, 85, 247, 0.12);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 26px;
+    border-radius: 999px;
+    background: rgba(88, 28, 135, 0.55);
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    color: #e9d5ff;
+    font-weight: 800;
+  }
+
+  .sparkle {
+    width: 22px;
+    height: 22px;
+    flex: none;
+  }
+
+  .screen-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .screen-shot {
+    width: 1500px;
+    border-radius: 20px;
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.7), 0 0 90px rgba(168, 85, 247, 0.18);
+  }
+
+  .caption-chip {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    border-radius: 14px;
+    background: rgba(7, 9, 14, 0.9);
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    color: #f3f4f6;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  /* Scene 3 score card */
+  .score-card {
+    width: 760px;
+    padding: 56px 64px 52px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    position: relative;
+  }
+  .score-ring-box { position: relative; width: 340px; height: 340px; }
+  .score-ring-box svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .score-num {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 84px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+  }
+  .score-num .pct { font-size: 44px; color: var(--purple-soft); margin-left: 4px; }
+  .match-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 30px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(168, 85, 247, 0.25), rgba(244, 114, 182, 0.25));
+    border: 1px solid rgba(192, 132, 252, 0.6);
+    color: #ffffff;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+  }
+
+  /* Scene 5 escrow */
+  .escrow-card {
+    width: 900px;
+    padding: 54px 70px;
+    display: flex;
+    align-items: center;
+    gap: 44px;
+    border-color: rgba(52, 211, 153, 0.35);
+  }
+  .lock-box {
+    width: 150px;
+    height: 150px;
+    flex: none;
+    border-radius: 30px;
+    background: rgba(6, 78, 59, 0.45);
+    border: 1px solid rgba(52, 211, 153, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .escrow-amount {
+    font-size: 66px;
+    font-weight: 800;
+    color: var(--emerald);
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+  .escrow-sub { font-size: 26px; color: var(--muted); font-weight: 600; margin-top: 10px; }
+  .escrow-line {
+    font-family: "Playfair Display", Georgia, serif;
+    font-style: italic;
+    font-size: 34px;
+    color: #ffffff;
+    margin-top: 22px;
+  }
+
+  /* Scene 7 chips */
+  .chip {
+    width: 470px;
+    padding: 34px 38px;
+    border-radius: 24px;
+    background: rgba(11, 15, 25, 0.92);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+  .chip-icon {
+    width: 62px;
+    height: 62px;
+    flex: none;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .chip-title { font-size: 30px; font-weight: 800; color: #ffffff; }
+  .chip-sub { font-size: 20px; color: var(--muted); font-weight: 600; margin-top: 6px; }
+
+  /* Scene 8 outro */
+  .outro-stack {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 34px;
+  }
+  .outro-word {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 150px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    color: #ffffff;
+  }
+  .cta-wrap {
+    position: relative;
+    display: inline-flex;
+    padding: 2px;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .cta-spin {
+    position: absolute;
+    top: -150%;
+    left: -150%;
+    width: 400%;
+    height: 400%;
+    background: conic-gradient(from 0deg, #c084fc, #f472b6, #818cf8, #38bdf8, #c084fc);
+  }
+  .cta-pill {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 22px 46px;
+    border-radius: 999px;
+    background: rgba(11, 15, 25, 0.96);
+    color: #ffffff;
+    font-size: 30px;
+    font-weight: 800;
+  }
+
+  .logo-chip {
+    width: 92px;
+    height: 92px;
+    border-radius: 24px;
+    overflow: hidden;
+    background: rgba(11, 15, 25, 0.9);
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo-chip img { width: 68px; height: 68px; object-fit: contain; }
+
+  .center-stack {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+</head>
+<body>
+<div data-hf-id="hf-wq8n" id="root" data-composition-id="zerify-brag" data-width="1920" data-height="1080" data-duration="28" data-fps="30">
+
+  <!-- ============ SCENE 1 — HOOK (0.0 – 3.6) ============ -->
+  <div data-hf-id="hf-lzyf" class="scene clip" id="s1" data-start="0" data-duration="3.6" data-track-index="0">
+    <div data-hf-id="hf-my6p" class="dot-grid" id="s1-grid"></div>
+    <div data-hf-id="hf-s1y7" class="glow-a" id="s1-glow"></div>
+    <div data-hf-id="hf-41kv" class="hairline-grid"></div>
+    <div data-hf-id="hf-gobo" class="center-stack">
+      <div data-hf-id="hf-p01g" id="s1-l1" style="font-size: 92px; line-height: 1.15; text-align: center; padding: 0 160px;">
+        <span data-hf-id="hf-9x62" class="display">Brands waste budget</span><br data-hf-id="hf-x5px">
+        <span data-hf-id="hf-cwv7" class="display-italic">swiping.</span>
+      </div>
+      <div data-hf-id="hf-idr1" id="s1-l2" class="caps" style="font-size: 44px; color: #fda4af; opacity: 0; margin-top: 26px; visibility: hidden;">
+        WRONG CREATOR. GONE.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCENE 2 — REVEAL (3.6 – 7.2) ============ -->
+  <div data-hf-id="hf-ajss" class="scene clip" id="s2" data-start="3.6" data-duration="3.6" data-track-index="1">
+    <div data-hf-id="hf-gegq" class="dot-grid"></div>
+    <div data-hf-id="hf-nkpn" class="glow-b" id="s2-glow"></div>
+    <div data-hf-id="hf-61of" class="hairline-grid"></div>
+    <div data-hf-id="hf-ev7s" class="center-stack" style="gap: 36px;">
+      <div data-hf-id="hf-sas4" style="display: flex; align-items: center; gap: 26px;">
+        <div data-hf-id="hf-ywaz" class="logo-chip" id="s2-logo"><img data-hf-id="hf-klhk" src="assets/img/logo.png" alt="Zerify logo"></div>
+        <div data-hf-id="hf-zowi" id="s2-word" class="caps" style="font-size: 96px; color: #ffffff;">ZERIFY</div>
+      </div>
+      <div data-hf-id="hf-fy92" id="s2-sub" style="font-size: 34px; font-weight: 600; color: #cbd5e1; opacity: 0; visibility: hidden;">
+        Brands <span data-hf-id="hf-zyf1" style="color: var(--purple-soft);">↔</span> creators.
+        <span data-hf-id="hf-yblp" class="grad-text" style="font-weight: 800;">Zero agency overhead.</span>
+      </div>
+      <div data-hf-id="hf-r32y" id="s2-badge" class="badge" style="opacity: 0; visibility: hidden;">
+        <svg data-hf-id="hf-mbyj" class="sparkle" viewBox="0 0 24 24" fill="#c084fc"><path data-hf-id="hf-rb9c" d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" /></svg>
+        EARLY ACCESS
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCENE 3 — AI MATCH COUNTER (7.2 – 10.8) ============ -->
+  <div data-hf-id="hf-x9sq" class="scene clip" id="s3" data-start="7.2" data-duration="3.6" data-track-index="2">
+    <div data-hf-id="hf-mspq" class="dot-grid"></div>
+    <div data-hf-id="hf-p3ju" class="glow-a" id="s3-glow" style="left: auto; right: -200px;"></div>
+    <div data-hf-id="hf-g9uk" class="center-stack">
+      <div data-hf-id="hf-xqqk" class="glass score-card" id="s3-card">
+        <div data-hf-id="hf-r7ev" class="caps" style="font-size: 26px; color: var(--purple-soft);">AI Creator Match</div>
+        <div data-hf-id="hf-6rpx" class="score-ring-box">
+          <svg data-hf-id="hf-mlci" width="340" height="340" viewBox="0 0 340 340">
+            <circle data-hf-id="hf-awlb" cx="170" cy="170" r="150" fill="none" stroke="rgba(168,85,247,0.15)" stroke-width="22" />
+            <circle data-hf-id="hf-qgdo" id="s3-ring" cx="170" cy="170" r="150" fill="none" stroke="url(#s3-grad)" stroke-width="22" stroke-linecap="round" stroke-dasharray="942.48" stroke-dashoffset="942.48" />
+            <defs data-hf-id="hf-mh0t">
+              <lineargradient data-hf-id="hf-yyo8" id="s3-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop data-hf-id="hf-nx8n" offset="0%" stop-color="#c084fc" />
+                <stop data-hf-id="hf-h49v" offset="100%" stop-color="#f472b6" />
+              </lineargradient>
+            </defs>
+          </svg>
+          <div data-hf-id="hf-0vgp" class="score-num"><span data-hf-id="hf-arwu" id="s3-count">0</span><span data-hf-id="hf-ierl" class="pct">%</span></div>
+        </div>
+        <div data-hf-id="hf-zm3m" id="s3-badge" class="match-badge" style="opacity: 0; visibility: hidden;">
+          <svg data-hf-id="hf-0x7d" class="sparkle" viewBox="0 0 24 24" fill="#f0abfc"><path data-hf-id="hf-j5x4" d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" /></svg>
+          97% MATCH
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCENE 4 — PRODUCT PROOF 1 (10.8 – 13.4) ============ -->
+  <div data-hf-id="hf-hl9b" class="scene clip" id="s4" data-start="10.8" data-duration="2.6" data-track-index="3">
+    <div data-hf-id="hf-scyp" class="screen-wrap">
+      <img data-hf-id="hf-zbfw" class="screen-shot" id="s4-img" src="assets/img/creator-match.png" alt="Zerify AI Creator Match dashboard">
+    </div>
+    <div data-hf-id="hf-3g3o" class="caption-chip" id="s4-cap" style="left: 70px; bottom: 64px; opacity: 0; visibility: hidden;">
+      <svg data-hf-id="hf-2s17" class="sparkle" viewBox="0 0 24 24" fill="#c084fc"><path data-hf-id="hf-hz01" d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" /></svg>
+      Real dashboard. Not a mockup.
+    </div>
+  </div>
+
+  <!-- ============ SCENE 5 — ESCROW LOCK (13.4 – 16.8) ============ -->
+  <div data-hf-id="hf-ap35" class="scene clip" id="s5" data-start="13.4" data-duration="3.4" data-track-index="4">
+    <div data-hf-id="hf-n70r" class="dot-grid"></div>
+    <div data-hf-id="hf-pzl7" class="glow-b" style="background: rgba(52, 211, 153, 0.10);" id="s5-glow"></div>
+    <div data-hf-id="hf-f2xh" class="center-stack">
+      <div data-hf-id="hf-losx" class="glass escrow-card" id="s5-card">
+        <div data-hf-id="hf-mz5t" class="lock-box" id="s5-lock">
+          <svg data-hf-id="hf-gsck" width="76" height="76" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round">
+            <rect data-hf-id="hf-0zl7" x="4" y="11" width="16" height="10" rx="2" />
+            <path data-hf-id="hf-jpf8" d="M8 11V7a4 4 0 0 1 8 0v4" />
+            <circle data-hf-id="hf-1fut" cx="12" cy="16" r="1.6" fill="#34d399" stroke="none" />
+          </svg>
+        </div>
+        <div data-hf-id="hf-yeow">
+          <div data-hf-id="hf-hk4x" class="escrow-amount">₹2,33,800 <span data-hf-id="hf-fc9x" style="font-size: 30px; color: #a7f3d0; font-weight: 700;">in escrow</span></div>
+          <div data-hf-id="hf-t2sr" class="escrow-sub">Campaign funds locked · released on delivery</div>
+          <div data-hf-id="hf-e0is" class="escrow-line" id="s5-line" style="opacity: 0; visibility: hidden;">“Money doesn’t move until work does.”</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCENE 6 — PRODUCT PROOF 2 (16.8 – 19.4) ============ -->
+  <div data-hf-id="hf-wnwl" class="scene clip" id="s6" data-start="16.8" data-duration="2.6" data-track-index="5">
+    <div data-hf-id="hf-m7jp" class="screen-wrap">
+      <img data-hf-id="hf-agrd" class="screen-shot" id="s6-img" src="assets/img/zerify-hero.png" alt="Zerify platform hero" style="width: 1560px;">
+    </div>
+    <div data-hf-id="hf-n23o" class="caption-chip" id="s6-cap" style="right: 70px; bottom: 64px; opacity: 0; visibility: hidden;">
+      <svg data-hf-id="hf-4512" class="sparkle" viewBox="0 0 24 24" fill="#f472b6"><path data-hf-id="hf-idb2" d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" /></svg>
+      Built on Next.js + NestJS + Prisma
+    </div>
+  </div>
+
+  <!-- ============ SCENE 7 — FEATURE RAPID-FIRE (19.4 – 24.0) ============ -->
+  <div data-hf-id="hf-djto" class="scene clip" id="s7" data-start="19.4" data-duration="4.6" data-track-index="6">
+    <div data-hf-id="hf-nlbs" class="dot-grid"></div>
+    <div data-hf-id="hf-u7ot" class="glow-a"></div>
+    <div data-hf-id="hf-5v1a" class="center-stack" style="flex-direction: column; gap: 30px;">
+      <div data-hf-id="hf-feik" class="chip" id="s7-c1" style="opacity: 0; visibility: hidden;">
+        <div data-hf-id="hf-9ah3" class="chip-icon" style="background: rgba(168,85,247,0.18); border: 1px solid rgba(168,85,247,0.4);">
+          <svg data-hf-id="hf-yhsw" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round"><path data-hf-id="hf-h6dz" d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" /></svg>
+        </div>
+        <div data-hf-id="hf-y7yw">
+          <div data-hf-id="hf-xd5x" class="chip-title">AI Match Scoring</div>
+          <div data-hf-id="hf-tc9j" class="chip-sub">Audience · niche · brand-fit</div>
+        </div>
+      </div>
+      <div data-hf-id="hf-2m8r" class="chip" id="s7-c2" style="opacity: 0; visibility: hidden;">
+        <div data-hf-id="hf-ap5r" class="chip-icon" style="background: rgba(52,211,153,0.16); border: 1px solid rgba(52,211,153,0.4);">
+          <svg data-hf-id="hf-y3do" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round"><rect data-hf-id="hf-waa3" x="4" y="11" width="16" height="10" rx="2" /><path data-hf-id="hf-k5n0" d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+        </div>
+        <div data-hf-id="hf-x11t">
+          <div data-hf-id="hf-j0yn" class="chip-title">Escrow Payouts</div>
+          <div data-hf-id="hf-5q9r" class="chip-sub">Funds released on delivery</div>
+        </div>
+      </div>
+      <div data-hf-id="hf-7dum" class="chip" id="s7-c3" style="opacity: 0; visibility: hidden;">
+        <div data-hf-id="hf-latt" class="chip-icon" style="background: rgba(244,114,182,0.16); border: 1px solid rgba(244,114,182,0.4);">
+          <svg data-hf-id="hf-iwf7" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" stroke-linecap="round"><path data-hf-id="hf-mieh" d="M3 3v18h18" /><path data-hf-id="hf-lbsq" d="M7 14l4-4 3 3 5-6" /></svg>
+        </div>
+        <div data-hf-id="hf-xfcu">
+          <div data-hf-id="hf-zg2d" class="chip-title">Campaign Analytics</div>
+          <div data-hf-id="hf-xmjr" class="chip-sub">Real-time ROAS &amp; reach</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCENE 8 — OUTRO (24.0 – 28.0) ============ -->
+  <div data-hf-id="hf-9fpc" class="scene clip" id="s8" data-start="24.0" data-duration="4.0" data-track-index="7">
+    <div data-hf-id="hf-kt6l" class="dot-grid"></div>
+    <div data-hf-id="hf-7xfk" class="glow-a" id="s8-glow"></div>
+    <div data-hf-id="hf-y5su" class="glow-b"></div>
+    <div data-hf-id="hf-5nde" class="hairline-grid"></div>
+    <div data-hf-id="hf-fal6" class="outro-stack">
+      <div data-hf-id="hf-29uq" id="s8-word" class="outro-word" style="opacity: 0; visibility: hidden;">
+        ZER<span data-hf-id="hf-ur6b" class="grad-text">IFY</span>
+      </div>
+      <div data-hf-id="hf-d32c" id="s8-tag" style="font-size: 36px; font-weight: 600; color: #cbd5e1; opacity: 0; visibility: hidden;">
+        The fastest way for brands &amp; creators to connect.
+      </div>
+      <div data-hf-id="hf-bmxu" id="s8-cta" class="cta-wrap" style="opacity: 0; visibility: hidden;">
+        <div data-hf-id="hf-4yot" class="cta-spin" id="s8-spin"></div>
+        <div data-hf-id="hf-jrjq" class="cta-pill">
+          Get started for free
+          <svg data-hf-id="hf-crbq" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.4" stroke-linecap="round"><path data-hf-id="hf-m7n8" d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ AUDIO ============ -->
+  <audio data-hf-id="hf-pfkm" id="bg-music" data-start="0" data-duration="28" data-track-index="10" data-volume="0.34" data-automation="{&quot;version&quot;:1,&quot;lanes&quot;:[{&quot;target&quot;:&quot;volume&quot;,&quot;points&quot;:[{&quot;t&quot;:0,&quot;v&quot;:0.85},{&quot;t&quot;:1,&quot;v&quot;:1},{&quot;t&quot;:26.4,&quot;v&quot;:1},{&quot;t&quot;:27.9,&quot;v&quot;:0}]},{&quot;target&quot;:&quot;rate&quot;,&quot;points&quot;:[{&quot;t&quot;:0,&quot;v&quot;:1},{&quot;t&quot;:28,&quot;v&quot;:1}]}]}" src="assets/music/happy-beats-business-moves-vol-10-by-ende-dot-app.mp3"></audio>
+
+  <audio data-hf-id="hf-83n7" id="sfx-slam" data-start="0.25" data-duration="1.2" data-track-index="11" data-volume="0.8" src="assets/sfx/impact/impactPunch_medium_000.ogg"></audio>
+  <audio data-hf-id="hf-l9wf" id="sfx-glitch" data-start="2.40" data-duration="0.6" data-track-index="12" data-volume="0.7" src="assets/sfx/interface/glitch_002.ogg"></audio>
+  <audio data-hf-id="hf-w4vw" id="sfx-drop2" data-start="3.62" data-duration="0.8" data-track-index="13" data-volume="0.7" src="assets/sfx/interface/drop_001.ogg"></audio>
+  <audio data-hf-id="hf-uo73" id="sfx-deal" data-start="7.25" data-duration="0.8" data-track-index="14" data-volume="0.75" src="assets/sfx/casino/card-slide-1.ogg"></audio>
+  <audio data-hf-id="hf-w4y0" id="sfx-tick1" data-start="7.90" data-duration="0.4" data-track-index="15" data-volume="0.55" src="assets/sfx/casino/chips-stack-1.ogg"></audio>
+  <audio data-hf-id="hf-f1cn" id="sfx-tick2" data-start="8.45" data-duration="0.4" data-track-index="16" data-volume="0.55" src="assets/sfx/casino/chips-stack-1.ogg"></audio>
+  <audio data-hf-id="hf-boaw" id="sfx-stamp" data-start="9.05" data-duration="0.9" data-track-index="17" data-volume="0.8" src="assets/sfx/casino/chips-collide-1.ogg"></audio>
+  <audio data-hf-id="hf-nfdt" id="sfx-cap4" data-start="11.60" data-duration="0.7" data-track-index="18" data-volume="0.6" src="assets/sfx/interface/drop_001.ogg"></audio>
+  <audio data-hf-id="hf-8ywn" id="sfx-bong" data-start="14.10" data-duration="1.4" data-track-index="19" data-volume="0.75" src="assets/sfx/interface/bong_001.ogg"></audio>
+  <audio data-hf-id="hf-nnia" id="sfx-deal2" data-start="19.90" data-duration="0.6" data-track-index="20" data-volume="0.7" src="assets/sfx/casino/card-slide-1.ogg"></audio>
+  <audio data-hf-id="hf-9mrv" id="sfx-deal3" data-start="20.99" data-duration="0.6" data-track-index="21" data-volume="0.7" src="assets/sfx/casino/card-place-1.ogg"></audio>
+  <audio data-hf-id="hf-yj9d" id="sfx-deal4" data-start="22.08" data-duration="0.6" data-track-index="22" data-volume="0.7" src="assets/sfx/casino/card-place-1.ogg"></audio>
+  <audio data-hf-id="hf-kp6n" id="sfx-bell" data-start="24.00" data-duration="1.8" data-track-index="23" data-volume="0.85" src="assets/sfx/impact/impactBell_heavy_000.ogg"></audio>
+  <audio data-hf-id="hf-dyxf" id="sfx-cta" data-start="25.30" data-duration="0.7" data-track-index="24" data-volume="0.6" src="assets/sfx/interface/click_001.ogg"></audio>
+</div>
+
+<script src="assets/vendor/gsap.min.js"></script>
+<script>
+(function () {
+  // ===== Audio-reactive data (pre-extracted, 30fps, deterministic) =====
+  var AUDIO_DATA = null;
+  function sampleRms(t) {
+    if (!AUDIO_DATA) return 0.5;
+    var frames = AUDIO_DATA.frames || AUDIO_DATA;
+    var i = Math.max(0, Math.min(frames.length - 1, Math.round(t * 30)));
+    var f = frames[i];
+    if (!f) return 0.5;
+    if (typeof f.rms === "number") return f.rms;
+    if (f.bands && typeof f.bands[0] === "number") return f.bands[0];
+    return 0.5;
+  }
+
+  function build() {
+    var root = document.querySelector("[data-composition-id]");
+    var compositionId = root.dataset.compositionId;
+    var tl = gsap.timeline({ paused: true });
+
+    // The one intro line slams immediately (0.27 beat) — Scene 1 is the only
+    // clip alive at t=0, so its children may be staged here synchronously.
+    gsap.set("#s1-l2", { autoAlpha: 0, y: 26 });
+    gsap.set("#s2-sub", { autoAlpha: 0, y: 24 });
+    gsap.set("#s2-badge", { autoAlpha: 0, scale: 0.9 });
+    gsap.set("#s3-badge", { autoAlpha: 0, scale: 1.6 });
+    gsap.set("#s4-cap", { autoAlpha: 0, y: 24 });
+    gsap.set("#s5-line", { autoAlpha: 0, y: 18 });
+    gsap.set("#s6-cap", { autoAlpha: 0, y: 24 });
+    gsap.set("#s7-c1, #s7-c2, #s7-c3", { autoAlpha: 0, x: -70 });
+    gsap.set("#s8-word", { autoAlpha: 0, scale: 2.2 });
+    gsap.set("#s8-tag", { autoAlpha: 0, y: 22 });
+    gsap.set("#s8-cta", { autoAlpha: 0, scale: 0.9 });
+
+    // ===== SCENE 1 — HOOK (0 – 3.6) =====
+    // beat-locked: 0.267s strong cue — hero line slams on the first beat
+    tl.fromTo("#s1-l1",
+      { opacity: 0, scale: 1.35 },
+      { opacity: 1, scale: 1, duration: 0.42, ease: "power4.out", startAt: { opacity: 0 } }, 0.267);
+    tl.fromTo("#s1-grid", { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power2.out" }, 0.1);
+    tl.fromTo("#s1-glow", { opacity: 0 }, { opacity: 1, duration: 1.0, ease: "power2.out" }, 0.3);
+
+    // 2.4s beat — flash line in, glitch-styled (scene ends 3.6)
+    tl.to("#s1-l2", { autoAlpha: 1, y: 0, duration: 0.18, ease: "power3.out" }, 2.42);
+    tl.to("#s1-l1", { opacity: 0.28, scale: 0.97, duration: 0.2, ease: "power2.in" }, 2.42);
+    tl.to("#s1-l1", { opacity: 0.85, scale: 0.985, duration: 0.12, ease: "steps(2)" }, 2.62);
+
+    // ===== SCENE 2 — REVEAL (3.6 – 7.2) =====
+    // beat-locked: 3.5527s strong cue — logo lands with the scene cut
+    tl.fromTo("#s2-logo", { opacity: 0, x: -60, scale: 0.85 },
+      { opacity: 1, x: 0, scale: 1, duration: 0.4, ease: "power3.out" }, 3.62);
+    tl.fromTo("#s2-word", { opacity: 0, x: -40 },
+      { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 3.72);
+    tl.fromTo("#s2-sub", { autoAlpha: 0, y: 24 },
+      { autoAlpha: 1, y: 0, duration: 0.4, ease: "power3.out" }, 4.15);
+    tl.fromTo("#s2-badge", { autoAlpha: 0, scale: 0.9 },
+      { autoAlpha: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, 4.55);
+
+    // ===== SCENE 3 — AI MATCH COUNTER (7.2 – 10.8) =====
+    tl.fromTo("#s3-card", { opacity: 0, y: 90, rotation: -2.5 },
+      { opacity: 1, y: 0, rotation: 0, duration: 0.5, ease: "power3.out" }, 7.25);
+    tl.fromTo("#s3-glow", { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power2.out" }, 7.3);
+
+    // Counter 0 -> 97 over ~1.15s, ring draws in sync (beat-locked: 12.562s cue → payoff at 9.05 scene-abs)
+    var counterObj = { v: 0 };
+    var CIRC = 942.48;
+    tl.fromTo("#s3-ring", { strokeDashoffset: CIRC },
+      { strokeDashoffset: CIRC * (1 - 0.97), duration: 1.15, ease: "power2.inOut" }, 7.9);
+    tl.fromTo(counterObj, { v: 0 }, {
+      v: 97, duration: 1.15, ease: "power2.inOut",
+      onUpdate: function () {
+        document.getElementById("s3-count").textContent = Math.round(counterObj.v);
+      }
+    }, 7.9);
+    tl.fromTo("#s3-badge", { autoAlpha: 0, scale: 1.6 },
+      { autoAlpha: 1, scale: 1, duration: 0.3, ease: "power4.out" }, 9.05);
+
+    // ===== SCENE 4 — PRODUCT PROOF 1 (10.8 – 13.4) =====
+    // Ken Burns punch-in on the real dashboard
+    tl.fromTo("#s4-img", { opacity: 0, scale: 1.14 },
+      { opacity: 1, scale: 1.02, duration: 2.4, ease: "power1.out" }, 10.82);
+    // beat-locked: 12.562s strong cue — caption lands exactly on the downbeat
+    tl.fromTo("#s4-cap", { autoAlpha: 0, y: 24 },
+      { autoAlpha: 1, y: 0, duration: 0.35, ease: "power3.out" }, 12.562);
+
+    // ===== SCENE 5 — ESCROW LOCK (13.4 – 16.8) =====
+    tl.fromTo("#s5-card", { opacity: 0, y: 80, scale: 0.96 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power3.out" }, 13.45);
+    tl.fromTo("#s5-glow", { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.out" }, 13.5);
+    // Lock stamps at 14.1 (bong cue) // beat-grid: stamp lands with sfx-bong at 14.10
+    tl.fromTo("#s5-lock", { scale: 1.7, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.32, ease: "power4.in" }, 14.08);
+    tl.to("#s5-card", {
+      keyframes: [
+        { x: -8, duration: 0.08, ease: "power1.in" },
+        { x: 6, duration: 0.08, ease: "power1.inOut" },
+        { x: 0, duration: 0.1, ease: "power1.out" }
+      ]
+    }, 14.38);
+    tl.fromTo("#s5-line", { autoAlpha: 0, y: 18 },
+      { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" }, 14.85);
+
+    // ===== SCENE 6 — PRODUCT PROOF 2 (16.8 – 19.4) =====
+    tl.fromTo("#s6-img", { opacity: 0, scale: 1.0 },
+      { opacity: 1, scale: 1.06, duration: 2.4, ease: "power1.inOut" }, 16.82);
+    tl.fromTo("#s6-cap", { autoAlpha: 0, y: 24 },
+      { autoAlpha: 1, y: 0, duration: 0.35, ease: "power3.out" }, 17.35);
+
+    // ===== SCENE 7 — FEATURE RAPID-FIRE (19.4 – 24.0) =====
+    // beat-grid: chips deal every ~1.09s (every other beat) for readability
+    tl.fromTo("#s7-c1", { autoAlpha: 0, x: -70 }, { autoAlpha: 1, x: 0, duration: 0.38, ease: "power3.out" }, 19.92);
+    tl.fromTo("#s7-c2", { autoAlpha: 0, x: -70 }, { autoAlpha: 1, x: 0, duration: 0.38, ease: "power3.out" }, 21.01);
+    tl.fromTo("#s7-c3", { autoAlpha: 0, x: -70 }, { autoAlpha: 1, x: 0, duration: 0.38, ease: "power3.out" }, 22.10);
+
+    // ===== SCENE 8 — OUTRO (24.0 – 28.0) =====
+    // beat-locked: strongest cue energy (20.19/20.74 class) — logo slams at scene start
+    tl.fromTo("#s8-word", { autoAlpha: 0, scale: 2.2 },
+      { autoAlpha: 1, scale: 1, duration: 0.42, ease: "power4.in" }, 24.02);
+    tl.fromTo("#s8-tag", { autoAlpha: 0, y: 22 },
+      { autoAlpha: 1, y: 0, duration: 0.4, ease: "power3.out" }, 24.55);
+    tl.fromTo("#s8-cta", { autoAlpha: 0, scale: 0.9 },
+      { autoAlpha: 1, scale: 1, duration: 0.4, ease: "back.out(1.8)" }, 25.0);
+    // conic CTA border spins (finite, deterministic)
+    tl.fromTo("#s8-spin", { rotation: 0 }, { rotation: 360, duration: 2.8, ease: "none" }, 25.0);
+    // logo breathing on the hold
+    tl.to("#s8-word", { scale: 1.015, duration: 0.9, ease: "sine.inOut", yoyo: true, repeat: 3 }, 25.1);
+
+    // ===== Audio-reactive glow breathing (subtle, RMS-driven, deterministic) =====
+    // Applied via per-frame proxy tweens on glow opacity at fixed scene anchors.
+    var anchors = [
+      { sel: "#s1-glow", at: 0.5 },
+      { sel: "#s2-glow", at: 3.7 },
+      { sel: "#s3-glow", at: 7.3 },
+      { sel: "#s5-glow", at: 13.5 },
+      { sel: "#s8-glow", at: 24.1 }
+    ];
+    anchors.forEach(function (a) {
+      var el = document.querySelector(a.sel);
+      if (!el) return;
+      for (var k = 0; k < 6; k++) {
+        var t0 = a.at + k * 0.55;
+        var r1 = sampleRms(t0);
+        var r2 = sampleRms(t0 + 0.55);
+        var o1 = 0.55 + r1 * 0.45;
+        var o2 = 0.55 + r2 * 0.45;
+        tl.to(el, { opacity: o1, duration: 0.5, ease: "sine.inOut" }, t0 - 0.25);
+        tl.to(el, { opacity: o2, duration: 0.5, ease: "sine.inOut" }, t0 + 0.05);
+      }
+    });
+
+    window.__timelines = window.__timelines || {};
+    window.__timelines[compositionId] = tl;
+  }
+
+  // Load pre-extracted audio data synchronously via XHR (local file, deterministic).
+  try {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "assets/music/audio-data.json", false);
+    xhr.send(null);
+    if (xhr.status === 200) {
+      AUDIO_DATA = JSON.parse(xhr.responseText);
+    }
+  } catch (e) { AUDIO_DATA = null; }
+
+  build();
+})();
+</script>
+</body>
+</html>

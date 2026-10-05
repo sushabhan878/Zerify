@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        background: #07090E;
+        color: #FFFFFF;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        overflow: hidden;
+      }
+
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #07090E;
+      }
+
+      /* Background Dot Matrix */
+      .dot-grid {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1.5px, transparent 1.5px);
+        background-size: 40px 40px;
+        opacity: 0.5;
+        mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, #000 60%, transparent 100%);
+      }
+
+      /* Ambient Glow Spheres */
+      .ambient-orb {
+        position: absolute;
+        width: 700px;
+        height: 700px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(147, 51, 234, 0.22) 0%, rgba(236, 72, 153, 0.12) 40%, transparent 70%);
+        filter: blur(90px);
+        pointer-events: none;
+      }
+
+      .content-wrapper {
+        position: relative;
+        z-index: 10;
+        max-width: 1300px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 24px;
+        border-radius: 9999px;
+        background: rgba(239, 68, 68, 0.12);
+        border: 1px solid rgba(239, 68, 68, 0.35);
+        color: #FCA5A5;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 32px;
+      }
+
+      .badge-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #EF4444;
+        box-shadow: 0 0 12px #EF4444;
+      }
+
+      .headline {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 78px;
+        line-height: 1.15;
+        font-weight: 600;
+        color: #FFFFFF;
+        margin-bottom: 24px;
+      }
+
+      .headline .strike {
+        text-decoration: line-through;
+        color: #94A3B8;
+        text-decoration-color: #EF4444;
+        text-decoration-thickness: 4px;
+      }
+
+      .subheadline {
+        font-size: 26px;
+        line-height: 1.5;
+        color: #CBD5E1;
+        max-width: 900px;
+        font-weight: 400;
+        margin-bottom: 50px;
+      }
+
+      .pills-container {
+        display: flex;
+        gap: 24px;
+        justify-content: center;
+      }
+
+      .problem-card {
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 16px;
+        padding: 22px 32px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      }
+
+      .problem-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: rgba(239, 68, 68, 0.18);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #EF4444;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .problem-text {
+        font-size: 22px;
+        font-weight: 600;
+        color: #F1F5F9;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="scene1" data-width="1920" data-height="1080">
+      <div class="dot-grid"></div>
+      <div class="ambient-orb" id="orb"></div>
+
+      <div class="content-wrapper">
+        <div class="badge" id="hook-badge">
+          <span class="badge-dot"></span>
+          <span>The Traditional Creator Economy Problem</span>
+        </div>
+
+        <h1 class="headline" id="hook-headline">
+          Agency Middlemen Take <span class="strike">40% Fees</span>.
+        </h1>
+
+        <p class="subheadline" id="hook-sub">
+          Opaque rosters. Manual spreadsheets. Months of payment disputes.
+        </p>
+
+        <div class="pills-container" id="hook-cards">
+          <div class="problem-card" id="card-1">
+            <div class="problem-icon">✕</div>
+            <div class="problem-text">40% Agency Commission</div>
+          </div>
+          <div class="problem-card" id="card-2">
+            <div class="problem-icon">✕</div>
+            <div class="problem-text">Zero Escrow Protection</div>
+          </div>
+          <div class="problem-card" id="card-3">
+            <div class="problem-icon">✕</div>
+            <div class="problem-text">Unverified Follower Bots</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Ambient breathing orb
+      tl.fromTo("#orb", { scale: 0.85, opacity: 0.4 }, { scale: 1.25, opacity: 0.85, duration: 4.5, ease: "sine.inOut" }, 0);
+
+      // Badge entrance
+      tl.fromTo("#hook-badge", { opacity: 0, y: -25 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.2);
+
+      // Headline entrance
+      tl.fromTo("#hook-headline", { opacity: 0, y: 35, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.out" }, 0.4);
+
+      // Subheadline entrance
+      tl.fromTo("#hook-sub", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 0.8);
+
+      // 3 Problem cards staggered reveals
+      tl.fromTo("#card-1", { opacity: 0, y: 30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.4)" }, 1.4);
+      tl.fromTo("#card-2", { opacity: 0, y: 30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.4)" }, 1.9);
+      tl.fromTo("#card-3", { opacity: 0, y: 30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.4)" }, 2.4);
+
+      // Settled hold for reading (from 2.9s to 4.0s)
+
+      // Smooth scene exit
+      tl.to(".content-wrapper", { opacity: 0, scale: 1.05, y: -20, duration: 0.5, ease: "power2.in" }, 4.0);
+
+      window.__timelines["scene1"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,5 @@
+Introducing Zerify: The fastest and easiest way for brands and creators to connect, launch campaigns, and automate payouts without agency overhead.
+
+Discover vetted creators with 98% audience fit confidence, lock deliverables with escrow protection, and track real-time ROAS — built with Next.js 14, NestJS, and Neon PostgreSQL.
+
+Get started for free at zerify.com

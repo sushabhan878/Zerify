@@ -1,18 +1,46 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { CacheModule } from '@nestjs/cache-manager';
 import { AppController } from './app.controller';
 import { PrismaModule } from './database/prisma.module';
 import { VipAccessModule } from './modules/vip-access/vip-access.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { FileUploadModule } from './modules/file-upload/file-upload.module';
+import { InfluencerModule } from './modules/influencer/influencer.module';
+import { SocialModule } from './modules/social/social.module';
+import { BrandModule } from './modules/brand/brand.module';
+import { CampaignModule } from './modules/campaign/campaign.module';
+import { MessagingModule } from './modules/messaging/messaging.module';
+import { PaymentModule } from './modules/payment/payment.module';
+import { ReviewModule } from './modules/review/review.module';
+import { CurrencyModule } from './modules/currency/currency.module';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 300 * 1000, // 5 minutes default TTL
+    }),
     PrismaModule,
     VipAccessModule,
+    AuthModule,
+    FileUploadModule,
+    InfluencerModule,
+    SocialModule,
+    BrandModule,
+    CampaignModule,
+    MessagingModule,
+    PaymentModule,
+    ReviewModule,
+    CurrencyModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
+

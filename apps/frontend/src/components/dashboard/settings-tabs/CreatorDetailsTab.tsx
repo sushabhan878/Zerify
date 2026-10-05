@@ -1,0 +1,199 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { Sparkles, Loader2 } from 'lucide-react';
+import SingleCreatorDetailsCard from './subcomponents/SingleCreatorDetailsCard';
+import { useToast } from '@/components/ui/Toast';
+
+interface CreatorDetailsTabProps {
+  initialData?: any;
+  onSaveSuccess?: () => void;
+}
+
+export default function CreatorDetailsTab({ initialData, onSaveSuccess }: CreatorDetailsTabProps) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+  const { toastSuccess, toastError } = useToast();
+
+  const getCachedData = () => {
+    if (initialData) return initialData;
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('zerify_influencer_profile_cache');
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+    }
+    return null;
+  };
+
+  const cached = getCachedData();
+
+  const [categories, setCategories] = useState<string[]>(() => (Array.isArray(cached?.niches) ? cached.niches : []));
+  const [languages, setLanguages] = useState<string[]>(() => (Array.isArray(cached?.contentLanguages) ? cached.contentLanguages : []));
+  const [minAmount, setMinAmount] = useState<string>(() => (cached?.minPricePerReel != null ? String(cached.minPricePerReel) : ''));
+  const [preferredCurrency, setPreferredCurrency] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('zerify_preferred_currency') || cached?.currency || 'INR';
+    }
+    return cached?.currency || 'INR';
+  });
+  const [hearAboutUs, setHearAboutUs] = useState<string>(() => cached?.hearAboutUs || '');
+  const [collabTypes, setCollabTypes] = useState<string[]>(() => (Array.isArray(cached?.collaborationTypes) ? cached.collaborationTypes : []));
+  const [barterAvailable, setBarterAvailable] = useState<boolean>(() => cached?.availableForBarter ?? false);
+  const [travelReady, setTravelReady] = useState<boolean>(() => cached?.availableForRelocation ?? false);
+  const [responseTime, setResponseTime] = useState<string>(() => cached?.responseTime || 'Within 24 hours');
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Sync state whenever initialData changes
+  useEffect(() => {
+    if (initialData) {
+      if (Array.isArray(initialData.niches)) setCategories(initialData.niches);
+      if (Array.isArray(initialData.contentLanguages)) setLanguages(initialData.contentLanguages);
+      if (initialData.minPricePerReel != null) setMinAmount(String(initialData.minPricePerReel));
+      if (initialData.currency) setPreferredCurrency(initialData.currency);
+      if (initialData.hearAboutUs) setHearAboutUs(initialData.hearAboutUs);
+      if (Array.isArray(initialData.collaborationTypes)) setCollabTypes(initialData.collaborationTypes);
+      if (initialData.availableForBarter !== undefined) setBarterAvailable(initialData.availableForBarter);
+      if (initialData.availableForRelocation !== undefined) setTravelReady(initialData.availableForRelocation);
+      if (initialData.responseTime) setResponseTime(initialData.responseTime);
+    }
+  }, [initialData]);
+
+  // Keep preferred currency updated if changed in basic info
+  useEffect(() => {
+    const handleCurrencySync = () => {
+      const stored = localStorage.getItem('zerify_preferred_currency');
+      if (stored) setPreferredCurrency(stored);
+    };
+    window.addEventListener('zerify_currency_change', handleCurrencySync);
+    return () => window.removeEventListener('zerify_currency_change', handleCurrencySync);
+  }, []);
+
+  // Fetch in background to ensure fresh cache
+  useEffect(() => {
+    async function loadCreatorDetails() {
+      try {
+        const token = localStorage.getItem('zerify_token');
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const res = await fetch(`${apiUrl}/influencer/profile`, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.niches)) setCategories(data.niches);
+          if (Array.isArray(data.contentLanguages)) setLanguages(data.contentLanguages);
+          if (data.minPricePerReel !== null && data.minPricePerReel !== undefined) {
+            setMinAmount(String(data.minPricePerReel));
+          }
+          if (data.currency) setPreferredCurrency(data.currency);
+          if (data.hearAboutUs) setHearAboutUs(data.hearAboutUs);
+          if (Array.isArray(data.collaborationTypes)) setCollabTypes(data.collaborationTypes);
+          if (data.availableForBarter !== undefined) setBarterAvailable(data.availableForBarter);
+          if (data.availableForRelocation !== undefined) setTravelReady(data.availableForRelocation);
+          if (data.responseTime) setResponseTime(data.responseTime);
+
+          try {
+            localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(data));
+          } catch (e) {}
+        }
+      } catch (err) {
+        // Silently use cached data
+      }
+    }
+    loadCreatorDetails();
+  }, [apiUrl]);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+
+    const payload = {
+      niches: categories,
+      contentLanguages: languages,
+      minPricePerReel: minAmount ? Number(minAmount) : undefined,
+      hearAboutUs,
+      collaborationTypes: collabTypes,
+      availableForBarter: barterAvailable,
+      availableForRelocation: travelReady,
+      responseTime,
+    };
+
+    try {
+      const token = localStorage.getItem('zerify_token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(`${apiUrl}/influencer/creator-details`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const updatedData = await res.json();
+        try {
+          localStorage.setItem('zerify_influencer_profile_cache', JSON.stringify(updatedData));
+          window.dispatchEvent(new Event('zerify_influencer_profile_update'));
+        } catch (e) {}
+      }
+
+      toastSuccess('Creator details saved successfully!');
+      if (onSaveSuccess) onSaveSuccess();
+    } catch (err: any) {
+      console.warn('API save failed, using client state:', err);
+      toastError('Failed to save creator details.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSave} className="space-y-5">
+      <SingleCreatorDetailsCard
+        categories={categories}
+        setCategories={setCategories}
+        languages={languages}
+        setLanguages={setLanguages}
+        minAmount={minAmount}
+        setMinAmount={setMinAmount}
+        currency={preferredCurrency}
+        hearAboutUs={hearAboutUs}
+        setHearAboutUs={setHearAboutUs}
+        collabTypes={collabTypes}
+        setCollabTypes={setCollabTypes}
+        barterAvailable={barterAvailable}
+        setBarterAvailable={setBarterAvailable}
+        travelReady={travelReady}
+        setTravelReady={setTravelReady}
+        responseTime={responseTime}
+        setResponseTime={setResponseTime}
+      />
+
+      {/* Save Button */}
+      <div className="flex items-center justify-end gap-3 pt-2">
+        <button
+          type="submit"
+          disabled={isSaving}
+          className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-purple-950/50 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 border border-purple-400/20 disabled:opacity-50"
+        >
+          {isSaving ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Saving Creator Details...</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4" />
+              <span>Save Creator Details</span>
+            </>
+          )}
+        </button>
+      </div>
+    </form>
+  );
+}

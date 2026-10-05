@@ -1,1 +1,341 @@
-// influencer influencer.repository.ts
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import { SocialPlatform, SocialAccountStatus } from '@prisma/client';
+import { UpdateInfluencerProfileDto } from './dto/update-profile.dto';
+
+@Injectable()
+export class InfluencerRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findByUserId(userId: string) {
+    let profile = await this.prisma.influencerProfile.findUnique({
+      where: { userId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            socialAccounts: true,
+          },
+        },
+        pastDeliverables: true,
+        paymentDetails: true,
+      },
+    });
+
+    if (!profile) {
+      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      if (user) {
+        profile = await this.prisma.influencerProfile.create({
+          data: {
+            userId: user.id,
+            handle: `@${(user.name || 'creator').toLowerCase().replace(/\s+/g, '')}`,
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+                role: true,
+                socialAccounts: true,
+              },
+            },
+            pastDeliverables: true,
+            paymentDetails: true,
+          },
+        });
+      }
+    }
+
+    return profile;
+  }
+
+  async findFirstProfile() {
+    let firstProfile = await this.prisma.influencerProfile.findFirst({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            socialAccounts: true,
+          },
+        },
+        pastDeliverables: true,
+        paymentDetails: true,
+      },
+    });
+
+    if (!firstProfile) {
+      let user = await this.prisma.user.findFirst({ where: { role: 'INFLUENCER' } });
+      if (!user) {
+        user = await this.prisma.user.findFirst();
+      }
+
+      if (user) {
+        firstProfile = await this.prisma.influencerProfile.create({
+          data: {
+            userId: user.id,
+            handle: `@${(user.name || 'creator').toLowerCase().replace(/\s+/g, '')}`,
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+                role: true,
+                socialAccounts: true,
+              },
+            },
+            pastDeliverables: true,
+            paymentDetails: true,
+          },
+        });
+      }
+    }
+
+    return firstProfile;
+  }
+
+  async updateProfile(userId: string, dto: UpdateInfluencerProfileDto) {
+    // 1. If name is provided, update User.name
+    if (dto.name !== undefined && dto.name !== null) {
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { name: dto.name },
+      });
+    }
+
+    // 2. Format fields for InfluencerProfile update
+    const dataToUpdate: any = {};
+
+    if (dto.handle !== undefined && dto.handle !== null) dataToUpdate.handle = dto.handle;
+    if (dto.bio !== undefined && dto.bio !== null) dataToUpdate.bio = dto.bio;
+    if (dto.location !== undefined && dto.location !== null) dataToUpdate.location = dto.location;
+    if (dto.phoneCode !== undefined && dto.phoneCode !== null) dataToUpdate.phoneCode = dto.phoneCode;
+    if (dto.phoneNumber !== undefined && dto.phoneNumber !== null) dataToUpdate.phoneNumber = dto.phoneNumber;
+    if (dto.gender !== undefined && dto.gender !== null) dataToUpdate.gender = dto.gender;
+    if (dto.avatarUrl !== undefined && dto.avatarUrl !== null) dataToUpdate.avatarUrl = dto.avatarUrl;
+    if (dto.niches !== undefined && dto.niches !== null) dataToUpdate.niches = dto.niches;
+    if (dto.contentLanguages !== undefined && dto.contentLanguages !== null) dataToUpdate.contentLanguages = dto.contentLanguages;
+    if (dto.availableForBarter !== undefined && dto.availableForBarter !== null) dataToUpdate.availableForBarter = dto.availableForBarter;
+    if (dto.availableForRelocation !== undefined && dto.availableForRelocation !== null) dataToUpdate.availableForRelocation = dto.availableForRelocation;
+    if (dto.collaborationTypes !== undefined && dto.collaborationTypes !== null) dataToUpdate.collaborationTypes = dto.collaborationTypes;
+    if (dto.minPricePerReel !== undefined && dto.minPricePerReel !== null) dataToUpdate.minPricePerReel = Number(dto.minPricePerReel);
+    if (dto.currency !== undefined && dto.currency !== null) dataToUpdate.currency = dto.currency;
+    if (dto.responseTime !== undefined && dto.responseTime !== null) dataToUpdate.responseTime = dto.responseTime;
+    if (dto.hearAboutUs !== undefined && dto.hearAboutUs !== null) dataToUpdate.hearAboutUs = dto.hearAboutUs;
+    if ((dto as any).completionPercentage !== undefined) dataToUpdate.completionPercentage = (dto as any).completionPercentage;
+    if ((dto as any).isOnboardingCompleted !== undefined) dataToUpdate.isOnboardingCompleted = (dto as any).isOnboardingCompleted;
+
+    if (dto.dob) {
+      const parsedDate = new Date(dto.dob);
+      if (!isNaN(parsedDate.getTime())) {
+        dataToUpdate.dob = parsedDate;
+      }
+    }
+
+    // 3. Upsert InfluencerProfile record
+    return this.prisma.influencerProfile.upsert({
+      where: { userId },
+      update: dataToUpdate,
+      create: {
+        userId,
+        handle: dto.handle || '@creator',
+        ...dataToUpdate,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            socialAccounts: true,
+          },
+        },
+        pastDeliverables: true,
+        paymentDetails: true,
+      },
+    });
+  }
+
+  async syncConnectedAccounts(influencerId: string, accounts: any[]) {
+    const influencer = await this.prisma.influencerProfile.findUnique({
+      where: { id: influencerId },
+      select: { userId: true, user: { select: { name: true } } },
+    });
+
+    if (influencer) {
+      const userId = influencer.userId;
+      const personName = influencer.user?.name || null;
+
+      for (const acc of accounts) {
+        if (acc.connected || acc.handle) {
+          const hasFollowerInput = acc.followers !== undefined && acc.followers !== null && acc.followers !== '';
+          const parsedFollowers = hasFollowerInput ? parseInt(String(acc.followers).replace(/,/g, ''), 10) : NaN;
+
+          const hasEngagementInput = acc.engagementRate !== undefined && acc.engagementRate !== null && acc.engagementRate !== '';
+          const parsedEngagement = hasEngagementInput ? parseFloat(String(acc.engagementRate).replace(/%/g, '')) : NaN;
+
+          const platformUpper = (acc.id || acc.platform || acc.name || 'INSTAGRAM').toUpperCase();
+
+          let socialPlatform: SocialPlatform = SocialPlatform.INSTAGRAM;
+          if (Object.values(SocialPlatform).includes(platformUpper as SocialPlatform)) {
+            socialPlatform = platformUpper as SocialPlatform;
+          } else if (platformUpper.includes('FACEBOOK') || platformUpper.includes('META')) {
+            socialPlatform = SocialPlatform.FACEBOOK;
+          }
+
+          const rawHandle = (acc.handle || acc.username || '').trim();
+          const cleanHandle = rawHandle.replace(/^@/, '');
+          const formattedHandle = cleanHandle ? `@${cleanHandle}` : `@${acc.id || 'creator'}`;
+
+          // Profile URL: use acc.profileUrl / acc.url if provided, else compute canonical URL
+          let profileUrl = acc.profileUrl || acc.url || null;
+          if (!profileUrl && cleanHandle) {
+            switch (socialPlatform) {
+              case SocialPlatform.INSTAGRAM:
+                profileUrl = `https://instagram.com/${cleanHandle}`;
+                break;
+              case SocialPlatform.TWITTER:
+                profileUrl = `https://x.com/${cleanHandle}`;
+                break;
+              case SocialPlatform.YOUTUBE:
+                profileUrl = `https://youtube.com/@${cleanHandle}`;
+                break;
+              case SocialPlatform.TIKTOK:
+                profileUrl = `https://tiktok.com/@${cleanHandle}`;
+                break;
+              case SocialPlatform.THREADS:
+                profileUrl = `https://threads.net/@${cleanHandle}`;
+                break;
+              case SocialPlatform.LINKEDIN:
+                profileUrl = `https://linkedin.com/in/${cleanHandle}`;
+                break;
+              case SocialPlatform.FACEBOOK:
+                profileUrl = `https://facebook.com/${cleanHandle}`;
+                break;
+            }
+          }
+
+          // User Name: Person's name (distinct from handle!)
+          const finalUsername = (acc.name && acc.name !== acc.handle && !acc.name.startsWith('@'))
+            ? acc.name
+            : (personName || cleanHandle);
+
+          const existing = await this.prisma.socialAccount.findFirst({
+            where: {
+              userId,
+              platform: socialPlatform,
+            },
+          });
+
+          if (existing) {
+            const finalFollowerCount = !isNaN(parsedFollowers) && parsedFollowers > 0
+              ? parsedFollowers
+              : existing.followerCount;
+
+            const finalEngagementRate = !isNaN(parsedEngagement) && parsedEngagement > 0
+              ? parsedEngagement
+              : existing.engagementRate;
+
+            await this.prisma.socialAccount.update({
+              where: { id: existing.id },
+              data: {
+                username: finalUsername || existing.username,
+                handle: formattedHandle || existing.handle,
+                profileUrl: profileUrl || existing.profileUrl,
+                followerCount: finalFollowerCount,
+                engagementRate: finalEngagementRate,
+                status: SocialAccountStatus.CONNECTED,
+              },
+            });
+          } else {
+            await this.prisma.socialAccount.create({
+              data: {
+                userId,
+                platform: socialPlatform,
+                platformUserId: `user_${acc.id || 'acc'}_${Date.now()}`,
+                username: finalUsername,
+                handle: formattedHandle,
+                profileUrl,
+                followerCount: !isNaN(parsedFollowers) && parsedFollowers >= 0 ? parsedFollowers : null,
+                engagementRate: !isNaN(parsedEngagement) && parsedEngagement > 0 ? parsedEngagement : null,
+                accessToken: 'manual_connected_account',
+                status: SocialAccountStatus.CONNECTED,
+              },
+            });
+          }
+        }
+      }
+    }
+
+    return this.findByUserId(influencer?.userId || '');
+  }
+
+  async syncPastDeliverables(influencerId: string, items: any[]) {
+    await this.prisma.influencerPastDeliverable.deleteMany({ where: { influencerId } });
+
+    for (const item of items) {
+      await this.prisma.influencerPastDeliverable.create({
+        data: {
+          influencerId,
+          brandName: item.brandName || null,
+          title: item.campaignTitle || item.title || null,
+          contentUrl: item.deliverableLink || 'https://zerify.io',
+          contentType: item.category || item.contentType || 'Reel',
+        },
+      });
+    }
+
+    const influencer = await this.prisma.influencerProfile.findUnique({ where: { id: influencerId } });
+    return this.findByUserId(influencer?.userId || '');
+  }
+
+  async upsertPaymentDetails(influencerId: string, paymentDto: any) {
+    await this.prisma.influencerPaymentDetails.upsert({
+      where: { influencerId },
+      update: paymentDto,
+      create: {
+        influencerId,
+        ...paymentDto,
+      },
+    });
+
+    const influencer = await this.prisma.influencerProfile.findUnique({ where: { id: influencerId } });
+    return this.findByUserId(influencer?.userId || '');
+  }
+
+  async findAllForDiscovery() {
+    return this.prisma.influencerProfile.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            socialAccounts: {
+              include: {
+                audienceGenders: true,
+                audienceAgeGroups: true,
+                audienceCountries: true,
+                audienceCities: true,
+                audienceLocales: true,
+                performance: true,
+              },
+            },
+          },
+        },
+        pastDeliverables: true,
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+  }
+}
