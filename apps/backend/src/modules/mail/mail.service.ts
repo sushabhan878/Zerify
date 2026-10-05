@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
-import { Resend } from 'resend';
 
 @Injectable()
 export class MailService {
@@ -152,28 +151,36 @@ export class MailService {
     // High visibility console logging for dev / test verification
     this.logger.log(`\n======================================================\n📧 [ZERIFY EMAIL VERIFICATION OTP]\nTo: ${to}\nRole: ${role || 'UNKNOWN'}\nVerification Code: ${code}\nValid for: 10 minutes\n======================================================\n`);
 
-    // 1. Try Resend if API key is provided (Recommended for cloud hosting like Render)
+    // 1. Try Resend REST API if API key is provided (No react-dom/server dependency required)
     const resendApiKey = this.configService.get<string>('RESEND_API_KEY');
     if (resendApiKey) {
       try {
-        const resend = new Resend(resendApiKey);
         const fromAddress = this.configService.get<string>('EMAIL_FROM') || 'Zerify <onboarding@resend.dev>';
-        const result = await resend.emails.send({
-          from: fromAddress,
-          to: [to],
-          subject,
-          text,
-          html,
+        const response = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${resendApiKey.trim()}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: fromAddress,
+            to: [to],
+            subject,
+            text,
+            html,
+          }),
         });
 
-        if (result.error) {
-          this.logger.error(`Resend API Error: ${result.error.name} - ${result.error.message}`);
+        const data: any = await response.json().catch(() => ({}));
+        if (!response.ok || data.error) {
+          const errMsg = data.error?.message || data.message || `HTTP ${response.status}`;
+          this.logger.error(`Resend API Error: ${errMsg}`);
         } else {
-          this.logger.log(`Verification email sent successfully via Resend API to ${to} (ID: ${result.data?.id})`);
+          this.logger.log(`Verification email sent successfully via Resend API to ${to} (ID: ${data.id})`);
           return { success: true };
         }
       } catch (err: any) {
-        this.logger.error(`Resend API threw error: ${err.message}`);
+        this.logger.error(`Resend API request failed: ${err.message}`);
       }
     }
 
