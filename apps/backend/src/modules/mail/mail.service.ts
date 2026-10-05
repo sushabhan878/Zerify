@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 @Injectable()
 export class MailService {
@@ -151,6 +152,32 @@ export class MailService {
     // High visibility console logging for dev / test verification
     this.logger.log(`\n======================================================\n📧 [ZERIFY EMAIL VERIFICATION OTP]\nTo: ${to}\nRole: ${role || 'UNKNOWN'}\nVerification Code: ${code}\nValid for: 10 minutes\n======================================================\n`);
 
+    // 1. Try Resend if API key is provided (Recommended for cloud hosting like Render)
+    const resendApiKey = this.configService.get<string>('RESEND_API_KEY');
+    if (resendApiKey) {
+      try {
+        const resend = new Resend(resendApiKey);
+        const fromAddress = this.configService.get<string>('EMAIL_FROM') || 'Zerify <onboarding@resend.dev>';
+        const result = await resend.emails.send({
+          from: fromAddress,
+          to: [to],
+          subject,
+          text,
+          html,
+        });
+
+        if (result.error) {
+          this.logger.error(`Resend API Error: ${result.error.name} - ${result.error.message}`);
+        } else {
+          this.logger.log(`Verification email sent successfully via Resend API to ${to} (ID: ${result.data?.id})`);
+          return { success: true };
+        }
+      } catch (err: any) {
+        this.logger.error(`Resend API threw error: ${err.message}`);
+      }
+    }
+
+    // 2. Try Nodemailer / SMTP
     try {
       const activeTransporter = await this.getActiveTransporter();
       if (activeTransporter) {
