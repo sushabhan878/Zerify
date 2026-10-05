@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: zerify-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx prisma generate --schema=apps/backend/prisma/schema.prisma && npm run build --workspace=@zerify/backend
+    startCommand: node apps/backend/dist/main.js
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
