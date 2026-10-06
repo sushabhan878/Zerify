@@ -1800,6 +1800,11 @@ export class SocialService implements OnModuleInit {
           status: acc.status,
           connectedAt: acc.connectedAt,
           updatedAt: acc.updatedAt,
+          audienceGenders: acc.audienceGenders || [],
+          audienceAgeGroups: acc.audienceAgeGroups || [],
+          audienceCountries: acc.audienceCountries || [],
+          audienceCities: acc.audienceCities || [],
+          performance: acc.performance || [],
         };
       }),
     );

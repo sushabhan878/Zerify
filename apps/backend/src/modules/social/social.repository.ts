@@ -340,11 +340,19 @@ export class SocialRepository {
     };
   }
 
-  async findByUserId(userId: string): Promise<SocialAccount[]> {
+  async findByUserId(userId: string): Promise<any[]> {
     return this.prisma.socialAccount.findMany({
       where: {
         userId,
         status: SocialAccountStatus.CONNECTED,
+      },
+      include: {
+        metadata: true,
+        audienceCountries: { orderBy: { count: 'desc' } },
+        audienceCities: { orderBy: { count: 'desc' } },
+        audienceAgeGroups: { orderBy: { count: 'desc' } },
+        audienceGenders: { orderBy: { count: 'desc' } },
+        performance: { orderBy: { recordedAt: 'desc' }, take: 10 },
       },
       orderBy: { connectedAt: 'desc' },
     });

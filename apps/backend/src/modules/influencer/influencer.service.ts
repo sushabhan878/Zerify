@@ -196,4 +196,9 @@ export class InfluencerService {
 
     return influencers;
   }
+
+  async getInfluencerAnalytics(userId?: string) {
+    return this.influencerRepository.getInfluencerAnalyticsData(userId);
+  }
 }
+

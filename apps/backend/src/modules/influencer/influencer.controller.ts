@@ -99,4 +99,13 @@ export class InfluencerController {
     const partnerId = req.params.id;
     return this.networkService.updateRelationshipTag(userId, partnerId, tag);
   }
+
+  @Get('analytics/overview')
+  @ApiOperation({ summary: 'Get compiled live database analytics for influencer dashboard' })
+  @ApiResponse({ status: 200, description: 'Influencer statistics and analytics retrieved successfully.' })
+  async getAnalyticsOverview(@Req() req: any) {
+    const userId = this.extractUserId(req);
+    return this.influencerService.getInfluencerAnalytics(userId);
+  }
 }
+

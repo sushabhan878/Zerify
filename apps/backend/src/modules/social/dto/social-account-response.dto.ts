@@ -17,4 +17,9 @@ export class SocialAccountResponseDto {
   status: SocialAccountStatus;
   connectedAt: Date;
   updatedAt: Date;
+  audienceGenders?: any[];
+  audienceAgeGroups?: any[];
+  audienceCountries?: any[];
+  audienceCities?: any[];
+  performance?: any[];
 }
