@@ -66,7 +66,7 @@ export default function CampaignCard({
   onViewBrief,
   onApply,
 }: CampaignCardProps) {
-  const { formatBudget } = useCurrency();
+  const { formatBudgetCompact } = useCurrency();
   const isBrandTruncated = (campaign.brandName || '').length > 16;
   const displayBrandName = isBrandTruncated
     ? `${campaign.brandName.slice(0, 16)}...`
@@ -247,7 +247,7 @@ export default function CampaignCard({
               Compensation
             </span>
             <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              {formatBudget(campaign.payoutAmount)}
+              {formatBudgetCompact(campaign.payoutAmount)}
             </span>
 
             {campaign.hasFreeProduct && (

@@ -400,7 +400,7 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
           </button>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-8 sm:space-y-10 pt-5">
           {filteredOffers.map((offer) => (
             <OfferReceivedCard
               key={offer.id}

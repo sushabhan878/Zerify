@@ -226,8 +226,10 @@ export function formatBudgetString(
   }
 
   // Detect original currency in the string
-  let sourceCurrency = 'USD';
-  if (budgetString.includes('₹') || budgetString.toUpperCase().includes('INR')) {
+  let sourceCurrency = norm;
+  if (budgetString.includes('$') || budgetString.toUpperCase().includes('USD')) {
+    sourceCurrency = 'USD';
+  } else if (budgetString.includes('₹') || budgetString.toUpperCase().includes('INR')) {
     sourceCurrency = 'INR';
   } else if (budgetString.includes('€') || budgetString.toUpperCase().includes('EUR')) {
     sourceCurrency = 'EUR';
@@ -283,8 +285,10 @@ export function formatBudgetCompact(
   }
 
   // Detect original currency in the string
-  let sourceCurrency = 'USD';
-  if (budgetString.includes('₹') || budgetString.toUpperCase().includes('INR')) {
+  let sourceCurrency = norm;
+  if (budgetString.includes('$') || budgetString.toUpperCase().includes('USD')) {
+    sourceCurrency = 'USD';
+  } else if (budgetString.includes('₹') || budgetString.toUpperCase().includes('INR')) {
     sourceCurrency = 'INR';
   } else if (budgetString.includes('€') || budgetString.toUpperCase().includes('EUR')) {
     sourceCurrency = 'EUR';
@@ -297,12 +301,20 @@ export function formatBudgetCompact(
   const isPlus = budgetString.includes('+');
   const isUnder = budgetString.toLowerCase().includes('under');
 
-  // Extract all numbers inside the string
-  const rawNumbers =
-    budgetString
-      .match(/[\d,.]+/g)
-      ?.map((s) => parseFloat(s.replace(/,/g, '')))
-      .filter((n) => !isNaN(n) && n > 0) || [];
+  // Extract all numbers inside the string, supporting K / M / B suffix (e.g. 100K, 1.5M, 100,000)
+  const cleaned = budgetString.replace(/,/g, '');
+  const matches = Array.from(cleaned.matchAll(/(\d+(?:\.\d+)?)\s*([kmb])?/gi));
+  const rawNumbers = matches
+    .map((m) => {
+      const val = parseFloat(m[1]);
+      if (isNaN(val)) return 0;
+      const unit = (m[2] || '').toUpperCase();
+      if (unit === 'K') return val * 1_000;
+      if (unit === 'M') return val * 1_000_000;
+      if (unit === 'B') return val * 1_000_000_000;
+      return val;
+    })
+    .filter((n) => !isNaN(n) && n > 0);
 
   if (rawNumbers.length === 0) return budgetString;
 

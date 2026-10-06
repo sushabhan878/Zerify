@@ -127,7 +127,7 @@ export default function OffersOverviewTab({
 
       {/* Offers Cards List */}
       {filteredOffers.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-8 sm:space-y-10 pt-5">
           {filteredOffers.map((offer) => (
             <OfferReceivedCard
               key={offer.id}

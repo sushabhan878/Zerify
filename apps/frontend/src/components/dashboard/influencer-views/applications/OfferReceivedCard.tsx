@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   Clock,
   MessageSquare,
-  FileText,
   ShieldCheck,
   Check,
   X,
@@ -61,8 +60,43 @@ export default function OfferReceivedCard({
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-5 sm:p-6 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-4 hover:border-purple-500/40 transition-all group"
+      className="relative overflow-visible mt-4 p-5 sm:p-6 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-4 hover:border-purple-500/40 transition-all group"
     >
+      {/* Floating Offer Status Badge Overlapping Top-Right Corner (50% Overlap) */}
+      {offer.status && (
+        <div
+          className="absolute right-6 sm:right-8 z-20 pointer-events-none"
+          style={{ top: '0px', transform: 'translateY(-50%)' }}
+        >
+          {offer.status === 'ACCEPTED' ? (
+            <span className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-emerald-400/50 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white text-xs sm:text-sm font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-emerald-950/80 ring-4 ring-[#080B14]">
+              <CheckCircle2 className="w-4 h-4 text-emerald-200 shrink-0" />
+              <span>Offer Accepted</span>
+            </span>
+          ) : offer.status === 'DECLINED' ? (
+            <span className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-rose-400/50 bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 text-white text-xs sm:text-sm font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-rose-950/80 ring-4 ring-[#080B14]">
+              <X className="w-4 h-4 text-rose-200 shrink-0" />
+              <span>Offer Declined</span>
+            </span>
+          ) : offer.status === 'PENDING' ? (
+            <span className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600 text-white text-xs sm:text-sm font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-amber-950/80 ring-4 ring-[#080B14]">
+              <Clock className="w-4 h-4 text-amber-200 animate-pulse shrink-0" />
+              <span>Offer Pending</span>
+            </span>
+          ) : offer.status === 'OFFER_EXPIRED' ? (
+            <span className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-slate-500/40 bg-slate-800 text-slate-300 text-xs sm:text-sm font-bold tracking-wide flex items-center gap-1.5 shadow-xl ring-4 ring-[#080B14]">
+              <Clock className="w-4 h-4 text-slate-400 shrink-0" />
+              <span>Offer Expired</span>
+            </span>
+          ) : (
+            <span className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-slate-500/40 bg-slate-800 text-slate-400 text-xs sm:text-sm font-bold tracking-wide flex items-center gap-1.5 shadow-xl ring-4 ring-[#080B14]">
+              <X className="w-4 h-4 text-slate-500 shrink-0" />
+              <span>{offer.status.replace('_', ' ')}</span>
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-4">
@@ -101,21 +135,21 @@ export default function OfferReceivedCard({
         </div>
       </div>
 
-      {/* Middle: Campaign Details / Brief */}
-      <div className="p-3.5 sm:p-4 rounded-xl bg-slate-950/60 border border-white/10 text-xs text-slate-300 space-y-1.5">
-        <div className="flex items-center gap-1.5 text-[11px] font-bold text-purple-300 uppercase tracking-wider">
-          <FileText className="w-3.5 h-3.5 text-purple-400" />
-          <span>Campaign Details</span>
+      {/* Middle: Campaign Description & Notes */}
+      {(campaignDetailsText || offer.customNotes) && (
+        <div className="space-y-1">
+          {campaignDetailsText && (
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed line-clamp-3">
+              {campaignDetailsText}
+            </p>
+          )}
+          {offer.customNotes && campaign.description && (
+            <p className="text-[11px] text-purple-300/90 italic">
+              &quot;{offer.customNotes}&quot;
+            </p>
+          )}
         </div>
-        <p className="leading-relaxed text-slate-300 line-clamp-3">
-          {campaignDetailsText}
-        </p>
-        {offer.customNotes && campaign.description && (
-          <p className="text-[11px] text-purple-300/90 italic pt-1.5 border-t border-white/5">
-            &quot;{offer.customNotes}&quot;
-          </p>
-        )}
-      </div>
+      )}
 
       {/* Footer Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
@@ -140,7 +174,7 @@ export default function OfferReceivedCard({
         </div>
 
         {/* Right: Actions */}
-        {offer.status === 'PENDING' ? (
+        {offer.status === 'PENDING' && (
           <div className="flex items-center gap-2">
             <button
               onClick={() => onDecline(offer.id)}
@@ -159,16 +193,6 @@ export default function OfferReceivedCard({
               <span>{isAccepting ? 'Accepting...' : 'Accept & Start Project'}</span>
             </button>
           </div>
-        ) : (
-          <span
-            className={`px-3.5 py-1 rounded-full text-xs font-extrabold border ${
-              offer.status === 'ACCEPTED'
-                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
-            }`}
-          >
-            {offer.status === 'ACCEPTED' ? 'Offer Accepted' : 'Offer Declined'}
-          </span>
         )}
       </div>
     </motion.div>
