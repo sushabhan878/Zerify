@@ -60,7 +60,7 @@ export default function OfferReceivedCard({
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-visible mt-4 p-5 sm:p-6 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-4 hover:border-purple-500/40 transition-all group"
+      className="relative overflow-visible mt-4 p-5 sm:p-6 pr-6 sm:pr-8 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-4 hover:border-purple-500/40 transition-all group"
     >
       {/* Floating Offer Status Badge Overlapping Top-Right Corner (50% Overlap) */}
       {offer.status && (
@@ -98,46 +98,37 @@ export default function OfferReceivedCard({
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <div className="w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-2xl bg-gradient-to-br from-purple-900/60 to-slate-900 border border-purple-500/30 flex items-center justify-center shrink-0 shadow-lg group-hover:scale-105 transition-transform overflow-hidden">
-            {brand.logoUrl ? (
-              <img
-                src={brand.logoUrl}
-                alt={brand.companyName || 'Brand'}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <Building2 className="w-8 h-8 text-purple-300" />
-            )}
-          </div>
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-2 flex-wrap mb-0.5">
-              <span className="text-xs font-black text-purple-300">{brand.companyName || 'Verified Brand'}</span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-[10px] font-extrabold text-purple-300">
-                <CheckCircle2 className="w-3 h-3 text-purple-400" /> Verified
-              </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[10px] font-extrabold text-emerald-400">
-                <ShieldCheck className="w-3 h-3 text-emerald-400" />
-                {paymentModelLabel}
-              </span>
-            </div>
-            <h3 className="text-base sm:text-lg font-black text-white">{campaign.title || 'Brand Sponsorship'}</h3>
-            <span className="text-xs text-slate-400 font-medium">{campaign.industry || brand.industry || 'Technology & Creator'}</span>
-          </div>
+      <div className="flex items-start gap-4">
+        <div className="w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-2xl bg-gradient-to-br from-purple-900/60 to-slate-900 border border-purple-500/30 flex items-center justify-center shrink-0 shadow-lg group-hover:scale-105 transition-transform overflow-hidden">
+          {brand.logoUrl ? (
+            <img
+              src={brand.logoUrl}
+              alt={brand.companyName || 'Brand'}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <Building2 className="w-8 h-8 text-purple-300" />
+          )}
         </div>
-
-        {/* Amount Display (No Background Card) */}
-        <div className="shrink-0 text-right sm:text-right">
-          <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">
-            {payoutStr}
-          </span>
+        <div className="space-y-0.5 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+            <span className="text-xs font-black text-purple-300">{brand.companyName || 'Verified Brand'}</span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-[10px] font-extrabold text-purple-300">
+              <CheckCircle2 className="w-3 h-3 text-purple-400" /> Verified
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[10px] font-extrabold text-emerald-400">
+              <ShieldCheck className="w-3 h-3 text-emerald-400" />
+              {paymentModelLabel}
+            </span>
+          </div>
+          <h3 className="text-base sm:text-lg font-black text-white">{campaign.title || 'Brand Sponsorship'}</h3>
+          <span className="text-xs text-slate-400 font-medium">{campaign.industry || brand.industry || 'Technology & Creator'}</span>
         </div>
       </div>
 
-      {/* Middle: Campaign Description & Notes */}
-      {(campaignDetailsText || offer.customNotes) && (
-        <div className="space-y-1">
+      {/* Middle: Campaign Description & Amount (Just down to the middle of the card) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
+        <div className="space-y-1 flex-1 min-w-0 pr-0 md:pr-4">
           {campaignDetailsText && (
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed line-clamp-3">
               {campaignDetailsText}
@@ -149,10 +140,17 @@ export default function OfferReceivedCard({
             </p>
           )}
         </div>
-      )}
+
+        {/* Amount Display (White, right-aligned, aligned with top-right badge) */}
+        <div className="shrink-0 text-right self-end md:self-center">
+          <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            {payoutStr}
+          </span>
+        </div>
+      </div>
 
       {/* Footer Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-white/5">
         {/* Left: Response Due Date & Message Brand */}
         <div className="flex items-center gap-3">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300">
@@ -175,7 +173,7 @@ export default function OfferReceivedCard({
 
         {/* Right: Actions */}
         {offer.status === 'PENDING' && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
             <button
               onClick={() => onDecline(offer.id)}
               disabled={isAccepting}

@@ -76,7 +76,7 @@ export default function InvitationCardItem({ invite, onAction }: InvitationCardI
         <div className="flex sm:flex-col items-end justify-between sm:justify-center gap-1 p-3 rounded-xl bg-slate-950/60 border border-white/10 shrink-0">
           <div className="text-right">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Offered Compensation</span>
-            <span className="text-xl font-black text-emerald-400">{invite.payout}</span>
+            <span className="text-xl font-black text-white">{invite.payout}</span>
           </div>
           <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
             <Calendar className="w-3 h-3 text-slate-500" />
