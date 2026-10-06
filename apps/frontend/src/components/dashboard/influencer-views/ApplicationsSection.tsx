@@ -89,6 +89,7 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
           return {
             id: a.id,
             brand: a.campaign?.brandProfile?.companyName || 'Verified Brand',
+            brandLogo: a.campaign?.brandProfile?.logoUrl || a.campaign?.brandLogo || a.campaign?.coverImage || '',
             industry: a.campaign?.industry || a.campaign?.brandProfile?.industry || 'Technology & Creator',
             role: a.campaign?.title || 'Creator Campaign Pitch',
             appliedDate: new Date(a.submittedAt).toLocaleDateString('en-GB', {
@@ -101,7 +102,7 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
             deliveryTime: '7 Days from acceptance',
             status: statusText,
             platforms: a.campaign?.targetPlatforms || a.campaign?.platforms || ['Instagram'],
-            verifiedBrand: true,
+            verifiedBrand: Boolean(a.campaign?.brandProfile?.isVerified ?? true),
             pitchSummary: a.applicationMessage || a.contentIdea || 'Submitted pitch concept and content strategy.',
             lastViewedByBrand: 'Live status synced',
             isCounterOffer: isCounter,
@@ -489,7 +490,7 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
           </button>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-8 sm:space-y-10 pt-4">
           {filtered.map((application) => (
             <ApplicationCardItem
               key={application.id}

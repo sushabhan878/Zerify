@@ -7,15 +7,17 @@ import {
   CheckCircle2,
   Clock,
   MessageSquare,
-  FileText,
+  Sparkles,
   XCircle,
   Check,
   RefreshCw,
+  ArrowUpRight,
 } from 'lucide-react';
 
 export interface ApplicationItem {
   id: string | number;
   brand: string;
+  brandLogo?: string;
   industry: string;
   role: string;
   appliedDate: string;
@@ -50,15 +52,30 @@ export default function ApplicationCardItem({
   const getStatusBadge = (status: ApplicationItem['status']) => {
     switch (status) {
       case 'CONTRACT_SENT':
-        return { label: 'Contract Sent', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' };
+        return {
+          label: 'Contract Sent',
+          gradient: 'border-emerald-400/50 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 shadow-emerald-950/80',
+        };
       case 'SHORTLISTED':
-        return { label: 'Shortlisted', color: 'bg-purple-500/10 text-purple-300 border-purple-500/30' };
+        return {
+          label: 'Shortlisted',
+          gradient: 'border-purple-400/50 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 shadow-purple-950/80',
+        };
       case 'UNDER_REVIEW':
-        return { label: 'Under Review', color: 'bg-amber-500/10 text-amber-400 border-amber-500/30' };
+        return {
+          label: 'Under Review',
+          gradient: 'border-amber-400/50 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600 shadow-amber-950/80',
+        };
       case 'DECLINED':
-        return { label: 'Not Selected', color: 'bg-rose-500/10 text-rose-400 border-rose-500/30' };
+        return {
+          label: 'Not Selected',
+          gradient: 'border-rose-400/50 bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 shadow-rose-950/80',
+        };
       case 'COUNTER_OFFER':
-        return { label: 'Counter Offer', color: 'bg-amber-500/15 text-amber-300 border-amber-500/35' };
+        return {
+          label: 'Counter Offer',
+          gradient: 'border-amber-400/50 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 shadow-amber-950/80',
+        };
     }
   };
 
@@ -68,43 +85,61 @@ export default function ApplicationCardItem({
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative p-5 sm:p-6 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-4 hover:border-purple-500/40 transition-all group"
+      className="relative overflow-visible mt-4 p-5 sm:p-6 pr-6 sm:pr-8 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-4 hover:border-purple-500/40 transition-all"
     >
-      {/* Overlapping Counter Offer Tag on Top Left Corner */}
-      {application.isCounterOffer && (
-        <div className="absolute -top-3 left-4 sm:left-6 z-20">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white text-[10px] font-black uppercase tracking-wider shadow-lg shadow-amber-950/60 border border-amber-300/40">
+      {/* Floating Status Badge Overlapping Top-Right Corner */}
+      <div
+        className="absolute right-6 sm:right-8 z-20 pointer-events-none flex items-center gap-2"
+        style={{ top: '0px', transform: 'translateY(-50%)' }}
+      >
+        {application.isCounterOffer && (
+          <span className="px-3 py-1 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white text-[11px] font-black tracking-wide shadow-xl shadow-amber-950/80 ring-4 ring-[#080B14] flex items-center gap-1">
             <RefreshCw className="w-3 h-3 text-amber-100" />
-            <span>Counter offer</span>
+            <span>Counter Offer</span>
           </span>
-        </div>
-      )}
+        )}
+        <span
+          className={`px-3.5 sm:px-4 py-1.5 rounded-full border text-xs sm:text-sm font-black tracking-wide text-white flex items-center gap-1.5 shadow-xl ring-4 ring-[#080B14] ${badge.gradient}`}
+        >
+          <Sparkles className="w-3.5 h-3.5 text-white shrink-0" />
+          <span>{badge.label}</span>
+        </span>
+      </div>
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <div className="w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-2xl bg-gradient-to-br from-purple-900/60 to-slate-900 border border-purple-500/30 flex items-center justify-center shrink-0 shadow-lg group-hover:scale-105 transition-transform">
-            <Building2 className="w-8 h-8 text-purple-300" />
+      {/* Header Row: Company Logo covering text height (Left) and Proposed Rate (Right) */}
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex gap-3.5 sm:gap-4 items-stretch min-w-0">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 flex items-center justify-center overflow-hidden rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-900/60 to-slate-900 shadow-md">
+            {application.brandLogo ? (
+              <img
+                src={application.brandLogo}
+                alt={`${application.brand} logo`}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <Building2 className="h-7 w-7 sm:h-8 sm:w-8 text-purple-300" />
+            )}
           </div>
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-2 flex-wrap mb-0.5">
-              <span className="text-xs font-black text-purple-300">{application.brand}</span>
+          <div className="min-w-0 flex flex-col justify-between py-0.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-xs font-bold text-purple-300">{application.brand}</span>
               {application.verifiedBrand && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-[10px] font-extrabold text-purple-300">
-                  <CheckCircle2 className="w-3 h-3 text-purple-400" /> Verified
+                <span title="Verified Brand" className="inline-flex items-center text-purple-400">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
                 </span>
               )}
-              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${badge.color}`}>
-                {badge.label}
-              </span>
             </div>
-            <h3 className="text-base sm:text-lg font-black text-white">{application.role}</h3>
-            <span className="text-xs text-slate-400 font-medium">{application.industry}</span>
+            <h3 className="text-base sm:text-lg font-bold text-white truncate leading-snug">
+              {application.role}
+            </h3>
+            <p className="text-xs text-slate-400 font-medium">
+              {application.industry}
+            </p>
           </div>
         </div>
 
         {/* Amount Display */}
-        <div className="shrink-0 text-right sm:text-right">
+        <div className="shrink-0 text-right self-end sm:self-center">
           {application.isCounterOffer && application.counterRate ? (
             <div className="flex flex-col items-end">
               <span className="text-2xl sm:text-3xl font-black text-amber-400 tracking-tight">
@@ -115,12 +150,12 @@ export default function ApplicationCardItem({
               </span>
             </div>
           ) : (
-            <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">
+            <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
               {application.proposedRate}
             </span>
           )}
         </div>
-      </div>
+      </header>
 
       {/* Middle: Brand Counter Offer Details Banner if active */}
       {application.isCounterOffer && application.counterNotes && (
@@ -135,19 +170,15 @@ export default function ApplicationCardItem({
         </div>
       )}
 
-      {/* Middle: Submitted Pitch / Proposal Details */}
-      <div className="p-3.5 sm:p-4 rounded-xl bg-slate-950/60 border border-white/10 text-xs text-slate-300 space-y-1.5">
-        <div className="flex items-center gap-1.5 text-[11px] font-bold text-purple-300 uppercase tracking-wider">
-          <FileText className="w-3.5 h-3.5 text-purple-400" />
-          <span>Submitted Pitch Proposal</span>
-        </div>
-        <p className="leading-relaxed text-slate-300 line-clamp-3">
+      {/* Middle: Submitted Pitch / Proposal Details (Without background box) */}
+      <div className="space-y-1">
+        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed line-clamp-3">
           {application.pitchSummary || 'Pitch proposal submitted for brand review.'}
         </p>
       </div>
 
       {/* Footer Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-white/5">
         {/* Left: Submission Date & Message Brand */}
         <div className="flex items-center gap-3">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300">
@@ -155,47 +186,52 @@ export default function ApplicationCardItem({
             Submitted on: <strong className="text-white font-bold">{application.appliedDate}</strong>
           </span>
           <span className="text-slate-700">|</span>
-          <button className="text-xs font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors">
-            <MessageSquare className="w-3.5 h-3.5" />
+          <button className="group text-xs font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1.5 transition-colors cursor-pointer">
+            <MessageSquare className="w-3.5 h-3.5 group-hover:scale-125 transition-transform duration-200" />
             <span>Message Brand</span>
           </button>
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
           {application.isCounterOffer ? (
             <>
               <button
                 onClick={() => onDeclineOffer?.(application.offerId, application.id)}
                 type="button"
-                className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 text-xs font-bold text-slate-400 hover:text-rose-300 border border-white/10 transition-all flex items-center gap-1 cursor-pointer"
+                className="group inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-rose-950/40 to-red-950/30 hover:from-rose-900/60 hover:to-red-900/50 border border-rose-500/30 hover:border-rose-400/60 px-3.5 py-2 text-xs font-bold text-rose-200 hover:text-white shadow-md shadow-rose-950/30 hover:shadow-lg hover:shadow-rose-950/60 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
               >
-                <XCircle className="w-3.5 h-3.5" />
+                <XCircle className="w-3.5 h-3.5 text-rose-400 group-hover:text-rose-200 group-hover:scale-125 transition-transform duration-200 shrink-0" />
                 <span>Decline Counter</span>
               </button>
               <button
                 onClick={() => onAcceptOffer?.(application.offerId, application.id)}
                 type="button"
-                className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-xs font-bold text-white shadow-md shadow-amber-950/40 flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold text-white shadow-lg shadow-amber-950/50 hover:shadow-amber-900/70 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
               >
-                <Check className="w-3.5 h-3.5" />
+                <Check className="w-4 h-4 text-white group-hover:scale-125 transition-transform duration-200 shrink-0" />
                 <span>Accept Counter Offer</span>
+                <ArrowUpRight className="h-4 w-4 text-white/90 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:scale-125 transition-all duration-200 shrink-0" />
               </button>
             </>
           ) : (
             <>
               {application.status === 'CONTRACT_SENT' && (
-                <button className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-xs font-bold text-white shadow-md shadow-purple-950/40 flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5" />
+                <button
+                  type="button"
+                  className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:via-indigo-500 hover:to-pink-500 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-purple-950/50 hover:shadow-purple-900/70 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Check className="w-4 h-4 text-white group-hover:scale-125 transition-transform duration-200 shrink-0" />
                   <span>Review & Sign Contract</span>
                 </button>
               )}
               {application.status !== 'DECLINED' && (
                 <button
                   onClick={() => onWithdraw(application.id)}
-                  className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 text-xs font-bold text-slate-400 hover:text-rose-300 border border-white/10 transition-all flex items-center gap-1 cursor-pointer"
+                  type="button"
+                  className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-950/40 to-red-950/30 hover:from-rose-900/60 hover:to-red-900/50 border border-rose-500/30 hover:border-rose-400/60 px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-rose-200 hover:text-white shadow-md shadow-rose-950/30 hover:shadow-lg hover:shadow-rose-950/60 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <XCircle className="w-3.5 h-3.5" />
+                  <XCircle className="w-4 h-4 text-rose-400 group-hover:text-rose-200 group-hover:scale-125 transition-transform duration-200 shrink-0" />
                   <span>Withdraw Pitch</span>
                 </button>
               )}

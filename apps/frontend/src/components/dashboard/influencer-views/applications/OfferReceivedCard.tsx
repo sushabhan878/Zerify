@@ -177,17 +177,17 @@ export default function OfferReceivedCard({
             <button
               onClick={() => onDecline(offer.id)}
               disabled={isAccepting}
-              className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 text-xs font-bold text-slate-400 hover:text-rose-300 border border-white/10 transition-all flex items-center gap-1 disabled:opacity-50"
+              className="group px-3.5 py-2 rounded-xl bg-gradient-to-r from-rose-950/40 to-red-950/30 hover:from-rose-900/60 hover:to-red-900/50 text-xs font-bold text-rose-200 hover:text-white border border-rose-500/30 hover:border-rose-400/60 shadow-md shadow-rose-950/30 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-3.5 h-3.5 text-rose-400 group-hover:text-rose-200 group-hover:scale-125 transition-transform duration-200 shrink-0" />
               <span>Decline</span>
             </button>
             <button
               onClick={() => onAccept(offer.id)}
               disabled={isAccepting}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 hover:scale-105 text-xs font-black text-white shadow-lg shadow-emerald-950/40 transition-all flex items-center gap-1.5 disabled:opacity-50"
+              className="group px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs font-black text-white shadow-lg shadow-emerald-950/40 hover:shadow-emerald-900/60 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
             >
-              <Check className="w-4 h-4" />
+              <Check className="w-4 h-4 text-white group-hover:scale-125 transition-transform duration-200 shrink-0" />
               <span>{isAccepting ? 'Accepting...' : 'Accept & Start Project'}</span>
             </button>
           </div>

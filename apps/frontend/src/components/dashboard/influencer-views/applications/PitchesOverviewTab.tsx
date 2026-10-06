@@ -82,7 +82,7 @@ export default function PitchesOverviewTab({
 
       {/* 3. Application Cards List */}
       {filtered.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-8 sm:space-y-10 pt-4">
           {filtered.map((application) => (
             <ApplicationCardItem
               key={application.id}
