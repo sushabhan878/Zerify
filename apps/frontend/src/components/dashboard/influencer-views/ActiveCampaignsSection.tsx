@@ -337,7 +337,7 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
           </button>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-8 sm:space-y-10 pt-4">
           {filteredCampaigns.map((c) => {
             const status = reviewStatuses[String(c.id)];
             const needsReview = status && !status.hasInfluencerReview;
