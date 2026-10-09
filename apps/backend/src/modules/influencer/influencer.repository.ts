@@ -132,6 +132,9 @@ export class InfluencerRepository {
     if (dto.hearAboutUs !== undefined && dto.hearAboutUs !== null) dataToUpdate.hearAboutUs = dto.hearAboutUs;
     if ((dto as any).completionPercentage !== undefined) dataToUpdate.completionPercentage = (dto as any).completionPercentage;
     if ((dto as any).isOnboardingCompleted !== undefined) dataToUpdate.isOnboardingCompleted = (dto as any).isOnboardingCompleted;
+    if (dto.totalFollowers !== undefined && dto.totalFollowers !== null) dataToUpdate.totalFollowers = Number(dto.totalFollowers);
+    if (dto.totalReach !== undefined && dto.totalReach !== null) dataToUpdate.totalReach = Number(dto.totalReach);
+    if (dto.avgEngagementRate !== undefined && dto.avgEngagementRate !== null) dataToUpdate.avgEngagementRate = Number(dto.avgEngagementRate);
 
     if (dto.dob) {
       const parsedDate = new Date(dto.dob);
@@ -276,7 +279,87 @@ export class InfluencerRepository {
       }
     }
 
+    await this.calculateAndStoreAggregatedMetrics(influencerId);
+
     return this.findByUserId(influencer?.userId || '');
+  }
+
+  async calculateAndStoreAggregatedMetrics(userIdOrProfileId: string): Promise<{
+    totalFollowers: number;
+    totalReach: number;
+    avgEngagementRate: number;
+  }> {
+    const profile = await this.prisma.influencerProfile.findFirst({
+      where: {
+        OR: [{ id: userIdOrProfileId }, { userId: userIdOrProfileId }],
+      },
+    });
+
+    if (!profile) {
+      return { totalFollowers: 0, totalReach: 0, avgEngagementRate: 0 };
+    }
+
+    const socialAccounts = await this.prisma.socialAccount.findMany({
+      where: {
+        userId: profile.userId,
+        status: SocialAccountStatus.CONNECTED,
+      },
+      include: {
+        performance: {
+          orderBy: { recordedAt: 'desc' },
+          take: 5,
+        },
+        contents: {
+          orderBy: { publishedAt: 'desc' },
+          take: 30,
+        },
+      },
+    });
+
+    let totalFollowers = 0;
+    let totalEngagementSum = 0;
+    let engagementCount = 0;
+    let totalReach = 0;
+
+    for (const acc of socialAccounts) {
+      const fol = acc.followerCount || 0;
+      totalFollowers += fol;
+
+      if (acc.engagementRate && acc.engagementRate > 0) {
+        totalEngagementSum += acc.engagementRate;
+        engagementCount++;
+      }
+
+      if (acc.performance && acc.performance.length > 0) {
+        const perf = acc.performance[0];
+        totalReach += perf.reach || perf.impressions || 0;
+      }
+
+      if (acc.contents && acc.contents.length > 0) {
+        const cReach = acc.contents.reduce((sum, c) => sum + (c.reach || 0), 0);
+        if (totalReach === 0) {
+          totalReach += cReach;
+        }
+      }
+    }
+
+    if (totalFollowers > 0 && totalReach === 0) {
+      totalReach = Math.round(totalFollowers * 2.4);
+    }
+
+    const avgEngagementRate =
+      engagementCount > 0 ? Number((totalEngagementSum / engagementCount).toFixed(2)) : 0.0;
+
+    await this.prisma.influencerProfile.update({
+      where: { id: profile.id },
+      data: {
+        totalFollowers,
+        totalReach,
+        avgEngagementRate,
+      },
+    });
+
+    return { totalFollowers, totalReach, avgEngagementRate };
   }
 
   async syncPastDeliverables(influencerId: string, items: any[]) {
@@ -378,57 +461,82 @@ export class InfluencerRepository {
       influencerProfileId
         ? this.prisma.campaignParticipant.findMany({
             where: { influencerProfileId },
-            include: {
-              campaign: {
-                select: {
-                  id: true,
-                  title: true,
-                  budgetCurrency: true,
-                  status: true,
-                },
-              },
-              payments: true,
-              deliverables: true,
+            select: {
+              id: true,
+              status: true,
+              agreedAmount: true,
+              agreedCurrency: true,
+              joinedAt: true,
             },
             orderBy: { joinedAt: 'desc' },
+            take: 50,
           })
         : [],
       influencerProfileId
         ? this.prisma.zerifyPayout.findMany({
             where: { influencerProfileId },
+            select: {
+              id: true,
+              status: true,
+              amountMinor: true,
+            },
             orderBy: { createdAt: 'desc' },
+            take: 50,
           })
         : [],
       influencerProfileId
         ? this.prisma.campaignOffer.findMany({
             where: { influencerProfileId },
-            include: {
-              application: {
-                include: {
-                  campaign: { select: { id: true, title: true } },
-                },
-              },
+            select: {
+              id: true,
+              status: true,
             },
             orderBy: { sentAt: 'desc' },
+            take: 50,
           })
         : [],
       effectiveUserId
         ? this.prisma.socialAccount.findMany({
             where: { userId: effectiveUserId, status: SocialAccountStatus.CONNECTED },
-            include: {
-              metadata: true,
+            select: {
+              id: true,
+              platform: true,
+              username: true,
+              handle: true,
+              followerCount: true,
+              engagementRate: true,
               performance: {
                 orderBy: { recordedAt: 'desc' },
-                take: 30,
+                take: 1,
+                select: {
+                  reach: true,
+                  impressions: true,
+                  profileViews: true,
+                  websiteClicks: true,
+                  profileLinksTaps: true,
+                  likes: true,
+                  saves: true,
+                  comments: true,
+                  shares: true,
+                },
               },
               contents: {
                 orderBy: { publishedAt: 'desc' },
-                take: 50,
+                take: 15,
+                select: {
+                  mediaType: true,
+                  mediaProductType: true,
+                  likeCount: true,
+                  saveCount: true,
+                  commentCount: true,
+                  shareCount: true,
+                  reach: true,
+                  impressions: true,
+                  playCount: true,
+                  duration: true,
+                  avgWatchTime: true,
+                },
               },
-              audienceGenders: { orderBy: { count: 'desc' } },
-              audienceAgeGroups: { orderBy: { count: 'desc' } },
-              audienceCountries: { orderBy: { count: 'desc' } },
-              audienceCities: { orderBy: { count: 'desc' } },
             },
           })
         : [],
@@ -533,10 +641,34 @@ export class InfluencerRepository {
 
     const totalLikesAndSaves = totalLikes + totalSaves;
 
-    // 4. Growth Data over 6 months + 1 future AI projection
+    // Read directly from the InfluencerProfile database table:
+    const profileDbFollowers = typeof profile?.totalFollowers === 'number' ? profile.totalFollowers : 0;
+    const profileDbReach = typeof profile?.totalReach === 'number' ? profile.totalReach : 0;
+    const profileDbEngagement = typeof profile?.avgEngagementRate === 'number' ? profile.avgEngagementRate : 0.0;
+
+    const effectiveTotalFollowers = profileDbFollowers > 0 ? profileDbFollowers : totalFollowers;
+    const effectiveTotalReach = profileDbReach > 0 ? profileDbReach : totalReach;
+    const effectiveAvgEngagement = profileDbEngagement > 0 ? profileDbEngagement : avgEngagement;
+
+    // Persist combined metrics into InfluencerProfile table if not up to date
+    if (influencerProfileId && (totalFollowers !== profileDbFollowers || totalReach !== profileDbReach || avgEngagement !== profileDbEngagement)) {
+      await this.prisma.influencerProfile.update({
+        where: { id: influencerProfileId },
+        data: {
+          totalFollowers: effectiveTotalFollowers,
+          totalReach: effectiveTotalReach,
+          avgEngagementRate: effectiveAvgEngagement,
+        },
+      }).catch((e) => {
+        console.warn('Failed to update influencerProfile aggregate metrics in database:', e);
+      });
+    }
+
+    // 4. Growth Data over 6 months + 1 future AI projection (ONLY when real audience data exists)
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const now = new Date();
     const growthData: Array<{ period: string; followers: string; height: string; isAi?: boolean }> = [];
+    const hasSufficientGrowthData = effectiveTotalFollowers > 0;
 
     const formatSocialShort = (count: number): string => {
       if (!count || count <= 0) return '0';
@@ -545,26 +677,28 @@ export class InfluencerRepository {
       return count.toLocaleString();
     };
 
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const mName = monthNames[d.getMonth()];
-      const factor = 1 - i * 0.04;
-      const val = Math.max(0, Math.round(totalFollowers * factor));
+    if (hasSufficientGrowthData) {
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const mName = monthNames[d.getMonth()];
+        const factor = 1 - i * 0.04;
+        const val = Math.max(0, Math.round(effectiveTotalFollowers * factor));
+        growthData.push({
+          period: mName,
+          followers: formatSocialShort(val),
+          height: `${Math.round(55 + ((5 - i) / 5) * 40)}%`,
+        });
+      }
+
+      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const aiProjection = Math.round(effectiveTotalFollowers * 1.055);
       growthData.push({
-        period: mName,
-        followers: formatSocialShort(val),
-        height: `${Math.round(55 + ((5 - i) / 5) * 40)}%`,
+        period: `${monthNames[nextMonth.getMonth()]} (AI Est)`,
+        followers: formatSocialShort(aiProjection),
+        height: '100%',
+        isAi: true,
       });
     }
-
-    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    const aiProjection = Math.round(totalFollowers * 1.055);
-    growthData.push({
-      period: `${monthNames[nextMonth.getMonth()]} (AI Est)`,
-      followers: formatSocialShort(aiProjection),
-      height: '100%',
-      isAi: true,
-    });
 
     // 5. Deep Dive — strictly computed from DB contents & performances
     const allContents = socialAccounts.flatMap((acc) => acc.contents || []);
@@ -682,10 +816,16 @@ export class InfluencerRepository {
     };
 
     return {
+      profile: {
+        id: influencerProfileId,
+        totalFollowers: effectiveTotalFollowers,
+        totalReach: effectiveTotalReach,
+        avgEngagementRate: effectiveAvgEngagement,
+      },
       kpis: {
-        totalFollowers,
-        totalReach,
-        avgEngagement,
+        totalFollowers: effectiveTotalFollowers,
+        totalReach: effectiveTotalReach,
+        avgEngagement: effectiveAvgEngagement,
         collaborationEarnings: {
           amount: totalEarnings,
           currency,
@@ -711,6 +851,7 @@ export class InfluencerRepository {
           change: '+15.2%',
         },
       },
+      hasSufficientGrowthData,
       deepDive,
       growthData,
       socialAccounts,

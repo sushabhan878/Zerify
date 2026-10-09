@@ -60,4 +60,13 @@ export class UpdateInfluencerProfileDto {
 
   @IsOptional()
   isOnboardingCompleted?: boolean;
+
+  @IsOptional()
+  totalFollowers?: number;
+
+  @IsOptional()
+  totalReach?: number;
+
+  @IsOptional()
+  avgEngagementRate?: number;
 }

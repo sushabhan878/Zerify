@@ -18,9 +18,10 @@ export interface DeepDiveData {
 
 interface EngagementAnalyticsCardProps {
   deepDive?: DeepDiveData;
+  isLoading?: boolean;
 }
 
-export default function EngagementAnalyticsCard({ deepDive }: EngagementAnalyticsCardProps) {
+export default function EngagementAnalyticsCard({ deepDive, isLoading = false }: EngagementAnalyticsCardProps) {
   const metrics = [
     {
       label: 'Likes & Reactions',
@@ -85,34 +86,44 @@ export default function EngagementAnalyticsCard({ deepDive }: EngagementAnalytic
 
       {/* Main Metrics: Spacious grid with generous gaps */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 py-2 relative z-10">
-        {metrics.map((m, idx) => {
-          const Icon = m.icon;
-          return (
-            <div
-              key={idx}
-              className="flex items-center gap-4 group p-2 rounded-2xl hover:bg-white/[0.02] transition-colors"
-            >
-              <div
-                className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${m.badgeBg} ${m.borderColor} ${m.color} shadow-md group-hover:scale-110 transition-transform duration-200`}
-              >
-                <Icon className="w-6 h-6 shrink-0" />
-              </div>
-              <div className="min-w-0 space-y-0.5">
-                <span className="text-xs font-semibold text-slate-400 block truncate">
-                  {m.label}
-                </span>
-                <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                    {m.val}
-                  </span>
-                  <span className="text-[11px] font-bold text-emerald-400">
-                    {m.sub}
-                  </span>
+        {isLoading
+          ? [1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex items-center gap-4 p-2 rounded-2xl relative overflow-hidden">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 animate-pulse shrink-0" />
+                <div className="min-w-0 space-y-2 flex-1">
+                  <div className="h-3 w-24 bg-white/10 rounded animate-pulse" />
+                  <div className="h-6 w-16 bg-white/15 rounded animate-pulse" />
                 </div>
               </div>
-            </div>
-          );
-        })}
+            ))
+          : metrics.map((m, idx) => {
+              const Icon = m.icon;
+              return (
+                <div
+                  key={idx}
+                  className="flex items-center gap-4 group p-2 rounded-2xl hover:bg-white/[0.02] transition-colors"
+                >
+                  <div
+                    className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${m.badgeBg} ${m.borderColor} ${m.color} shadow-md group-hover:scale-110 transition-transform duration-200`}
+                  >
+                    <Icon className="w-6 h-6 shrink-0" />
+                  </div>
+                  <div className="min-w-0 space-y-0.5">
+                    <span className="text-xs font-semibold text-slate-400 block truncate">
+                      {m.label}
+                    </span>
+                    <div className="flex items-baseline gap-2 mt-0.5">
+                      <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                        {m.val}
+                      </span>
+                      <span className="text-[11px] font-bold text-emerald-400">
+                        {m.sub}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
       </div>
 
       {/* Video & Content Retention: Enhanced spacing separated by vertical lines */}
@@ -121,21 +132,33 @@ export default function EngagementAnalyticsCard({ deepDive }: EngagementAnalytic
           Video & Content Retention Metrics
         </span>
         <div className="grid grid-cols-2 sm:grid-cols-4 divide-y divide-white/10 sm:divide-y-0 sm:divide-x sm:divide-white/10 py-2">
-          {videoStats.map((vs, idx) => (
-            <div
-              key={idx}
-              className={`py-3 px-4 sm:px-6 text-center space-y-1 ${
-                idx % 2 === 1 ? 'border-l border-white/10 sm:border-l-0' : ''
-              }`}
-            >
-              <div className="text-lg sm:text-xl font-black text-white tracking-tight">
-                {vs.val}
-              </div>
-              <div className="text-xs text-slate-400 font-medium">
-                {vs.label}
-              </div>
-            </div>
-          ))}
+          {isLoading
+            ? [1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className={`py-3 px-4 sm:px-6 text-center space-y-2 ${
+                    i % 2 === 0 ? 'border-l border-white/10 sm:border-l-0' : ''
+                  }`}
+                >
+                  <div className="h-6 w-16 mx-auto bg-white/15 rounded animate-pulse" />
+                  <div className="h-3 w-20 mx-auto bg-white/10 rounded animate-pulse" />
+                </div>
+              ))
+            : videoStats.map((vs, idx) => (
+                <div
+                  key={idx}
+                  className={`py-3 px-4 sm:px-6 text-center space-y-1 ${
+                    idx % 2 === 1 ? 'border-l border-white/10 sm:border-l-0' : ''
+                  }`}
+                >
+                  <div className="text-lg sm:text-xl font-black text-white tracking-tight">
+                    {vs.val}
+                  </div>
+                  <div className="text-xs text-slate-400 font-medium">
+                    {vs.label}
+                  </div>
+                </div>
+              ))}
         </div>
       </div>
     </div>

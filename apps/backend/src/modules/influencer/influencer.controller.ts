@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Body, Req } from '@nestjs/common';
+import { Controller, Get, Put, Post, Body, Req } from '@nestjs/common';
 import { InfluencerService } from './influencer.service';
 import { NetworkService } from './network.service';
 import { UpdateInfluencerProfileDto } from './dto/update-profile.dto';
@@ -107,5 +107,14 @@ export class InfluencerController {
     const userId = this.extractUserId(req);
     return this.influencerService.getInfluencerAnalytics(userId);
   }
+
+  @Post('analytics/recalculate')
+  @ApiOperation({ summary: 'Recalculate and persist combined social metrics into influencer profile table' })
+  @ApiResponse({ status: 200, description: 'Influencer metrics recalculated and persisted successfully.' })
+  async recalculateAnalytics(@Req() req: any) {
+    const userId = this.extractUserId(req);
+    return this.influencerService.recalculateAggregatedMetrics(userId);
+  }
 }
+
 

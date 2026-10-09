@@ -39,9 +39,15 @@ interface StatisticKpiCardsProps {
   totalFollowers?: number;
   avgEngagement?: number;
   kpiData?: DynamicKpis;
+  isLoading?: boolean;
 }
 
-export default function StatisticKpiCards({ totalFollowers, avgEngagement, kpiData }: StatisticKpiCardsProps) {
+export default function StatisticKpiCards({
+  totalFollowers,
+  avgEngagement,
+  kpiData,
+  isLoading = false,
+}: StatisticKpiCardsProps) {
   const { currency, format } = useCurrency();
 
   const formatCount = (count?: number | null) => {
@@ -148,6 +154,36 @@ export default function StatisticKpiCards({ totalFollowers, avgEngagement, kpiDa
       color: 'text-rose-400',
     },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {kpis.map((kpi, idx) => {
+          const Icon = kpi.icon;
+          return (
+            <div
+              key={idx}
+              className="p-4 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl relative overflow-hidden space-y-2.5"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-400">{kpi.label}</span>
+                <div className={`p-2 rounded-xl bg-slate-950/60 border border-white/10 ${kpi.color}`}>
+                  <Icon className="w-4 h-4 opacity-50" />
+                </div>
+              </div>
+              <div className="h-7 w-24 rounded-lg bg-white/10 animate-pulse" />
+              <div className="h-3.5 w-20 rounded-md bg-white/5 animate-pulse" />
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent pointer-events-none"
+                animate={{ x: ['-100%', '100%'] }}
+                transition={{ repeat: Infinity, duration: 1.6, ease: 'linear', delay: idx * 0.08 }}
+              />
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

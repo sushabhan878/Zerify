@@ -138,7 +138,75 @@ export class SocialRepository {
       },
     });
 
+    if (account?.userId) {
+      this.syncInfluencerAggregatedMetrics(account.userId).catch(() => {});
+    }
+
     return account;
+  }
+
+  async syncInfluencerAggregatedMetrics(userId: string): Promise<void> {
+    try {
+      const influencer = await this.prisma.influencerProfile.findUnique({
+        where: { userId },
+      });
+      if (!influencer) return;
+
+      const accounts = await this.prisma.socialAccount.findMany({
+        where: {
+          userId,
+          status: SocialAccountStatus.CONNECTED,
+        },
+        include: {
+          performance: {
+            orderBy: { recordedAt: 'desc' },
+            take: 1,
+          },
+          contents: {
+            orderBy: { publishedAt: 'desc' },
+            take: 20,
+          },
+        },
+      });
+
+      let totalFollowers = 0;
+      let totalReach = 0;
+      let totalER = 0;
+      let erCount = 0;
+
+      for (const acc of accounts) {
+        const followers = acc.followerCount || 0;
+        totalFollowers += followers;
+        if (acc.engagementRate && acc.engagementRate > 0) {
+          totalER += acc.engagementRate;
+          erCount++;
+        }
+        if (acc.performance && acc.performance.length > 0) {
+          totalReach += acc.performance[0].reach || acc.performance[0].impressions || 0;
+        }
+        if (acc.contents && acc.contents.length > 0) {
+          const cReach = acc.contents.reduce((s, c) => s + (c.reach || 0), 0);
+          if (totalReach === 0) totalReach += cReach;
+        }
+      }
+
+      if (totalFollowers > 0 && totalReach === 0) {
+        totalReach = Math.round(totalFollowers * 2.4);
+      }
+
+      const avgEngagementRate = erCount > 0 ? Number((totalER / erCount).toFixed(2)) : 0.0;
+
+      await this.prisma.influencerProfile.update({
+        where: { id: influencer.id },
+        data: {
+          totalFollowers,
+          totalReach,
+          avgEngagementRate,
+        },
+      });
+    } catch (err) {
+      this.logger.warn(`Could not sync influencer aggregated metrics for user ${userId}: ${err}`);
+    }
   }
 
   async findAccountByUserAndPlatform(
@@ -192,7 +260,7 @@ export class SocialRepository {
     followerCount: number,
     engagementRate?: number | null,
   ): Promise<SocialAccount> {
-    return this.prisma.socialAccount.update({
+    const updated = await this.prisma.socialAccount.update({
       where: { id: socialAccountId },
       data: {
         followerCount,
@@ -200,19 +268,31 @@ export class SocialRepository {
         updatedAt: new Date(),
       },
     });
+
+    if (updated?.userId) {
+      this.syncInfluencerAggregatedMetrics(updated.userId).catch(() => {});
+    }
+
+    return updated;
   }
 
   async updateAccountEngagementRate(
     socialAccountId: string,
     engagementRate: number | null,
   ): Promise<SocialAccount> {
-    return this.prisma.socialAccount.update({
+    const updated = await this.prisma.socialAccount.update({
       where: { id: socialAccountId },
       data: {
         engagementRate,
         updatedAt: new Date(),
       },
     });
+
+    if (updated?.userId) {
+      this.syncInfluencerAggregatedMetrics(updated.userId).catch(() => {});
+    }
+
+    return updated;
   }
 
   async updateAccountProfile(

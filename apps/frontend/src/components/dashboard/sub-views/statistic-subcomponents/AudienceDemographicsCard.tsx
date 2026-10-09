@@ -63,6 +63,7 @@ interface AudienceDemographicsCardProps {
   demographics?: DemographicRecord[];
   accounts?: SocialAccountItem[];
   defaultPlatform?: string;
+  isLoading?: boolean;
 }
 
 const SOCIAL_LOGOS: Record<string, string> = {
@@ -123,6 +124,7 @@ export default function AudienceDemographicsCard({
   demographics = [],
   accounts = [],
   defaultPlatform = 'linkedin',
+  isLoading = false,
 }: AudienceDemographicsCardProps) {
   const platforms = ['linkedin', 'instagram', 'threads', 'twitter', 'facebook', 'youtube'];
   const [activePlatform, setActivePlatform] = useState<string>(defaultPlatform);
@@ -414,28 +416,40 @@ export default function AudienceDemographicsCard({
       {/* 2. Top 3 KPI Stats */}
       <div className="grid grid-cols-3 gap-6 max-w-lg relative z-10">
         <div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            {followerDisplay}
-          </div>
+          {isLoading ? (
+            <div className="h-8 w-20 bg-white/15 rounded animate-pulse mb-1" />
+          ) : (
+            <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              {followerDisplay}
+            </div>
+          )}
           <div className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
             {getMetricTerm(activePlatform)}
           </div>
         </div>
 
         <div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            {avgViews}
-          </div>
+          {isLoading ? (
+            <div className="h-8 w-20 bg-white/15 rounded animate-pulse mb-1" />
+          ) : (
+            <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              {avgViews}
+            </div>
+          )}
           <div className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
             Average Views
           </div>
         </div>
 
         <div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-1.5">
-            <span>{engagement}</span>
-            <Info className="w-4 h-4 text-slate-400 cursor-help" />
-          </div>
+          {isLoading ? (
+            <div className="h-8 w-20 bg-white/15 rounded animate-pulse mb-1" />
+          ) : (
+            <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-1.5">
+              <span>{engagement}</span>
+              <Info className="w-4 h-4 text-slate-400 cursor-help" />
+            </div>
+          )}
           <div className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
             Engagement Rate
           </div>
@@ -451,7 +465,13 @@ export default function AudienceDemographicsCard({
             <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
           </h3>
 
-          {locationItems.length > 0 ? (
+          {isLoading ? (
+            <div className="space-y-2.5">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-8 rounded-lg bg-white/5 animate-pulse" />
+              ))}
+            </div>
+          ) : locationItems.length > 0 ? (
             <div className="space-y-2.5">
               {locationItems.map((item, idx) => (
                 <div
@@ -528,7 +548,16 @@ export default function AudienceDemographicsCard({
             <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
           </h3>
 
-          {hasAgeData ? (
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="space-y-1">
+                  <div className="h-3.5 w-16 bg-white/10 rounded animate-pulse" />
+                  <div className="h-1.5 w-full bg-white/5 rounded-full animate-pulse" />
+                </div>
+              ))}
+            </div>
+          ) : hasAgeData ? (
             <div className="space-y-3">
               {ageItems.map((item) => (
                 <div key={item.range} className="space-y-1">
@@ -567,7 +596,15 @@ export default function AudienceDemographicsCard({
             <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
           </h3>
 
-          {genderData.hasData ? (
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center pt-2 space-y-4">
+              <div className="w-32 h-32 rounded-full border-8 border-white/10 animate-pulse" />
+              <div className="flex gap-4">
+                <div className="h-4 w-16 bg-white/10 rounded animate-pulse" />
+                <div className="h-4 w-16 bg-white/10 rounded animate-pulse" />
+              </div>
+            </div>
+          ) : genderData.hasData ? (
             <div className="flex flex-col items-center justify-center pt-2">
               {/* SVG Donut Chart */}
               <div className="relative w-36 h-36 sm:w-44 sm:h-44 shrink-0">

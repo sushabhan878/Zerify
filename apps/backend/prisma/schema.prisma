@@ -190,6 +190,11 @@ model InfluencerProfile {
   avatarUrl    String?
   pricingRange String?
 
+  // Aggregated Social Metrics (combined across Instagram, YouTube, X, Threads, LinkedIn, etc.)
+  totalFollowers    Int?      @default(0)
+  totalReach        Int?      @default(0)
+  avgEngagementRate Float?    @default(0.0)
+
   // Deliverables & Payment Relations
   pastDeliverables InfluencerPastDeliverable[]
   paymentDetails   InfluencerPaymentDetails?

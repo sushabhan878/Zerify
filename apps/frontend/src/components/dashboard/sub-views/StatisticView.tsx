@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Sparkles, Download } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Sparkles, Download, Loader2 } from 'lucide-react';
 import StatisticKpiCards from './statistic-subcomponents/StatisticKpiCards';
 import AudienceGrowthChart from './statistic-subcomponents/AudienceGrowthChart';
 import EngagementAnalyticsCard from './statistic-subcomponents/EngagementAnalyticsCard';
@@ -14,6 +15,8 @@ export default function StatisticView() {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [demographics, setDemographics] = useState<any[]>([]);
   const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -24,16 +27,20 @@ export default function StatisticView() {
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
-        const [accRes, demoRes, overviewRes] = await Promise.allSettled([
+        const [accRes, demoRes, overviewRes, profileRes] = await Promise.allSettled([
           fetch(`${apiUrl}/social/accounts`, { headers }),
           fetch(`${apiUrl}/social/user/demographics`, { headers }),
           fetch(`${apiUrl}/influencer/analytics/overview`, { headers }),
+          fetch(`${apiUrl}/influencer/profile`, { headers }),
         ]);
+
+        const cachePayload: any = { timestamp: Date.now() };
 
         if (accRes.status === 'fulfilled' && accRes.value.ok) {
           const json = await accRes.value.json();
           if (Array.isArray(json.data)) {
             setAccounts(json.data);
+            cachePayload.accounts = json.data;
           }
         }
 
@@ -41,6 +48,7 @@ export default function StatisticView() {
           const json = await demoRes.value.json();
           if (Array.isArray(json.data?.demographics)) {
             setDemographics(json.data.demographics);
+            cachePayload.demographics = json.data.demographics;
           }
         }
 
@@ -48,12 +56,46 @@ export default function StatisticView() {
           const json = await overviewRes.value.json();
           if (json && typeof json === 'object') {
             setAnalyticsData(json);
+            cachePayload.analyticsData = json;
           }
         }
+
+        if (profileRes.status === 'fulfilled' && profileRes.value.ok) {
+          const json = await profileRes.value.json();
+          if (json && typeof json === 'object') {
+            setProfileData(json);
+            cachePayload.profileData = json;
+          }
+        }
+
+        try {
+          sessionStorage.setItem('zerify_stats_cache', JSON.stringify(cachePayload));
+        } catch (e) {}
+
+        // Small smooth transition to ensure clean animation without flickering
+        await new Promise((r) => setTimeout(r, 350));
       } catch (err) {
         console.warn('Could not fetch social analytics:', err);
+      } finally {
+        setIsLoading(false);
       }
     };
+
+    // Populate initial state from cache if available, while keeping isLoading true until fresh sync
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem('zerify_stats_cache');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && Date.now() - (parsed.timestamp || 0) < 180000) {
+            if (parsed.accounts) setAccounts(parsed.accounts);
+            if (parsed.demographics) setDemographics(parsed.demographics);
+            if (parsed.analyticsData) setAnalyticsData(parsed.analyticsData);
+            if (parsed.profileData) setProfileData(parsed.profileData);
+          }
+        }
+      } catch (e) {}
+    }
 
     fetchAnalytics();
   }, []);
@@ -106,13 +148,18 @@ export default function StatisticView() {
   // Dynamically calibrate KPIs based on platform filter & database data
   const dynamicKpis = useMemo(() => {
     const base = analyticsData?.kpis;
-    if (!base) return undefined;
+    const dbFollowers = profileData?.totalFollowers ?? analyticsData?.profile?.totalFollowers ?? base?.totalFollowers;
+    const dbReach = profileData?.totalReach ?? analyticsData?.profile?.totalReach ?? base?.totalReach;
+    const dbEngagement = profileData?.avgEngagementRate ?? analyticsData?.profile?.avgEngagementRate ?? base?.avgEngagement;
+
+    if (!base && !profileData && !analyticsData) return undefined;
 
     if (selectedPlatform === 'all') {
       return {
-        ...base,
-        totalFollowers: totalFollowers > 0 ? totalFollowers : base.totalFollowers,
-        avgEngagement: avgEngagement !== undefined ? avgEngagement : base.avgEngagement,
+        ...(base || {}),
+        totalFollowers: typeof dbFollowers === 'number' && dbFollowers > 0 ? dbFollowers : (totalFollowers > 0 ? totalFollowers : undefined),
+        totalReach: typeof dbReach === 'number' && dbReach > 0 ? dbReach : (base?.totalReach ?? undefined),
+        avgEngagement: typeof dbEngagement === 'number' && dbEngagement > 0 ? dbEngagement : (avgEngagement ?? base?.avgEngagement),
       };
     }
 
@@ -151,7 +198,12 @@ export default function StatisticView() {
   }, [analyticsData, selectedPlatform, accounts, totalFollowers, avgEngagement]);
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
       {/* Filter & Action Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Platform filter pills */}
@@ -173,6 +225,13 @@ export default function StatisticView() {
 
         {/* Timeframe & Export side by side */}
         <div className="flex items-center gap-2.5 shrink-0">
+          {isLoading && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs font-semibold text-purple-300">
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400" />
+              <span className="hidden sm:inline">Syncing live statistics...</span>
+            </div>
+          )}
+
           <TimeframeDropdown
             value={selectedTimeframe}
             onChange={setSelectedTimeframe}
@@ -190,19 +249,53 @@ export default function StatisticView() {
 
       {/* 1. Overview KPIs — fully dynamic from database */}
       <StatisticKpiCards
-        totalFollowers={totalFollowers > 0 ? totalFollowers : undefined}
-        avgEngagement={avgEngagement}
+        isLoading={isLoading}
+        totalFollowers={
+          selectedPlatform === 'all'
+            ? (typeof profileData?.totalFollowers === 'number' && profileData.totalFollowers > 0
+                ? profileData.totalFollowers
+                : (typeof analyticsData?.profile?.totalFollowers === 'number' && analyticsData.profile.totalFollowers > 0
+                    ? analyticsData.profile.totalFollowers
+                    : (totalFollowers > 0 ? totalFollowers : undefined)))
+            : (totalFollowers > 0 ? totalFollowers : undefined)
+        }
+        avgEngagement={
+          selectedPlatform === 'all'
+            ? (typeof profileData?.avgEngagementRate === 'number' && profileData.avgEngagementRate > 0
+                ? profileData.avgEngagementRate
+                : (typeof analyticsData?.profile?.avgEngagementRate === 'number' && analyticsData.profile.avgEngagementRate > 0
+                    ? analyticsData.profile.avgEngagementRate
+                    : avgEngagement))
+            : avgEngagement
+        }
         kpiData={dynamicKpis}
       />
 
       {/* 2. Audience Growth & AI Forecast — dynamic from DB historical performance */}
-      <AudienceGrowthChart growthData={analyticsData?.growthData} />
+      <AudienceGrowthChart
+        isLoading={isLoading}
+        growthData={analyticsData?.growthData}
+        hasSufficientData={
+          analyticsData?.hasSufficientGrowthData !== undefined
+            ? analyticsData.hasSufficientGrowthData
+            : Boolean(
+                (profileData?.totalFollowers > 0 || analyticsData?.profile?.totalFollowers > 0 || totalFollowers > 0) &&
+                Array.isArray(analyticsData?.growthData) &&
+                analyticsData.growthData.length > 0 &&
+                analyticsData.growthData.some((g: any) => g.followers && g.followers !== '0' && g.followers !== '—')
+              )
+        }
+      />
 
       {/* 3. Engagement Deep Dive — dynamic interactions breakdown */}
-      <EngagementAnalyticsCard deepDive={analyticsData?.deepDive} />
+      <EngagementAnalyticsCard
+        isLoading={isLoading}
+        deepDive={analyticsData?.deepDive}
+      />
 
       {/* 4. Audience Demographics Analytics */}
       <AudienceDemographicsCard
+        isLoading={isLoading}
         demographics={filteredDemographics.length > 0 ? filteredDemographics : demographics}
         accounts={effectiveAccounts}
         defaultPlatform={
@@ -219,26 +312,39 @@ export default function StatisticView() {
           <span>AI Insight Engine Takeaways</span>
         </h3>
         <ul className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-300">
-          <li className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-1">
-            <span className="font-bold text-purple-300 block">Video Format Dominance</span>
-            <p className="text-[11px] text-slate-400">
-              Video posts outperform static images by 41% higher engagement on Instagram & YouTube.
-            </p>
-          </li>
-          <li className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-1">
-            <span className="font-bold text-pink-300 block">Optimal Posting Schedule</span>
-            <p className="text-[11px] text-slate-400">
-              Wednesday & Friday evenings between 7-9 PM generate 2.3x more initial reel saves.
-            </p>
-          </li>
-          <li className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-1">
-            <span className="font-bold text-emerald-300 block">High Converting Niche</span>
-            <p className="text-[11px] text-slate-400">
-              Tech review reels drive 3.8% link click conversions to brand campaign landing pages.
-            </p>
-          </li>
+          {isLoading ? (
+            [1, 2, 3].map((i) => (
+              <li key={i} className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-2">
+                <div className="h-4 w-28 bg-white/10 rounded animate-pulse" />
+                <div className="h-3 w-full bg-white/5 rounded animate-pulse" />
+                <div className="h-3 w-3/4 bg-white/5 rounded animate-pulse" />
+              </li>
+            ))
+          ) : (
+            <>
+              <li className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-1">
+                <span className="font-bold text-purple-300 block">Video Format Dominance</span>
+                <p className="text-[11px] text-slate-400">
+                  Video posts outperform static images by 41% higher engagement on Instagram & YouTube.
+                </p>
+              </li>
+              <li className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-1">
+                <span className="font-bold text-pink-300 block">Optimal Posting Schedule</span>
+                <p className="text-[11px] text-slate-400">
+                  Wednesday & Friday evenings between 7-9 PM generate 2.3x more initial reel saves.
+                </p>
+              </li>
+              <li className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-1">
+                <span className="font-bold text-emerald-300 block">High Converting Niche</span>
+                <p className="text-[11px] text-slate-400">
+                  Tech review reels drive 3.8% link click conversions to brand campaign landing pages.
+                </p>
+              </li>
+            </>
+          )}
         </ul>
       </div>
-    </div>
+    </motion.div>
   );
 }
+

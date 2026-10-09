@@ -15,8 +15,10 @@ export class InfluencerService {
     try {
       if (userId) {
         await this.cacheManager.del(`influencer:profile:${userId}`);
+        await this.cacheManager.del(`influencer:analytics:${userId}`);
       }
       await this.cacheManager.del(`influencer:profile:first`);
+      await this.cacheManager.del(`influencer:analytics:default`);
     } catch (e) {
       console.warn('Cache purge error:', e);
     }
@@ -198,7 +200,26 @@ export class InfluencerService {
   }
 
   async getInfluencerAnalytics(userId?: string) {
-    return this.influencerRepository.getInfluencerAnalyticsData(userId);
+    const cacheKey = `influencer:analytics:${userId || 'default'}`;
+    try {
+      const cached = await this.cacheManager.get(cacheKey);
+      if (cached) return cached;
+    } catch (e) {}
+
+    const data = await this.influencerRepository.getInfluencerAnalyticsData(userId);
+
+    try {
+      await this.cacheManager.set(cacheKey, data, 60 * 1000);
+    } catch (e) {}
+
+    return data;
+  }
+
+  async recalculateAggregatedMetrics(userId?: string) {
+    const profile = await this.getProfile(userId);
+    const metrics = await this.influencerRepository.calculateAndStoreAggregatedMetrics(profile.id);
+    await this.clearCache(profile.userId);
+    return metrics;
   }
 }
 
