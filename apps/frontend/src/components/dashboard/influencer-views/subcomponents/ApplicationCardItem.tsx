@@ -26,6 +26,9 @@ export interface ApplicationItem {
   appliedDate: string;
   proposedRate: string;
   proposedAmount?: number;
+  originalProposedRate?: string;
+  originalProposedAmount?: number;
+  originalCurrency?: string;
   deliveryTime: string;
   status: 'CONTRACT_SENT' | 'SHORTLISTED' | 'UNDER_REVIEW' | 'DECLINED' | 'COUNTER_OFFER';
   platforms: string[];
@@ -35,6 +38,7 @@ export interface ApplicationItem {
   isCounterOffer?: boolean;
   counterRate?: string;
   counterAmount?: number;
+  originalCounterRate?: string;
   counterNotes?: string;
   offerId?: string;
   rawApplication?: any;
@@ -153,14 +157,26 @@ export default function ApplicationCardItem({
               <span className="text-2xl sm:text-3xl font-black text-amber-400 tracking-tight">
                 {application.counterRate}
               </span>
-              <span className="text-[11px] text-slate-400 line-through">
+              {application.originalCounterRate && (
+                <span className="text-[10px] text-slate-400 font-semibold">
+                  ≈ {application.originalCounterRate}
+                </span>
+              )}
+              <span className="text-[11px] text-slate-400 line-through mt-0.5">
                 Original Pitch: {application.proposedRate}
               </span>
             </div>
           ) : (
-            <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              {application.proposedRate}
-            </span>
+            <div className="flex flex-col items-end">
+              <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                {application.proposedRate}
+              </span>
+              {application.originalProposedRate && (
+                <span className="text-[10px] text-slate-400 font-semibold">
+                  ≈ {application.originalProposedRate}
+                </span>
+              )}
+            </div>
           )}
         </div>
       </header>

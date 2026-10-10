@@ -5,13 +5,24 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, Loader2, Calendar, Sparkles } from 'lucide-react';
 import { DeliverableService, ParticipantDeliverableItem } from '@/services/deliverable.service';
 import { isComplete, nextAction } from '@/services/deliverable-workflow';
-import { formatCurrency } from '@/utils/currency';
+import { formatCurrency, convertCurrency } from '@/utils/currency';
+import { useCurrency } from '@/context/CurrencyContext';
 import DeliverableCard from './DeliverableCard';
 import SubmissionDialog from './SubmissionDialog';
 import CampaignBrief from './CampaignBrief';
 import { ActionButton, ErrorNotice, panel, StatusBadge, dateLabel } from './ExecutionUi';
+import LottieLoader from '@/components/ui/LottieLoader';
+import WorkspacePaymentEscrowCard from './WorkspacePaymentEscrowCard';
+import WorkspaceNeedClarificationCard from './WorkspaceNeedClarificationCard';
 
-export default function CampaignWorkspace({ participantId, onBack }: { participantId: string; onBack: () => void }) {
+interface CampaignWorkspaceProps {
+  participantId: string;
+  onBack: () => void;
+  onNavigate?: (routeId: string) => void;
+}
+
+export default function CampaignWorkspace({ participantId, onBack, onNavigate }: CampaignWorkspaceProps) {
+  const { currency: userCurrency, format: formatUserCurrency, rates } = useCurrency();
   const [participant, setParticipant] = useState<any>();
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -34,17 +45,28 @@ export default function CampaignWorkspace({ participantId, onBack }: { participa
   const completed = deliverables.filter(isComplete).length;
   const campaign = participant?.campaign || {};
   const action = participant ? nextAction(participant) : null;
-  const payment = participant?.payouts?.[0];
+  const rawAgreedAmount = Number(participant?.agreedAmount || 0);
+  const sourceCurrency = participant?.agreedCurrency || campaign?.budgetCurrency || 'USD';
+  const convertedAgreedAmount = convertCurrency(rawAgreedAmount, sourceCurrency, userCurrency, rates);
+  const isCrossCurrency = sourceCurrency.toUpperCase() !== userCurrency.toUpperCase();
   const milestones = [
     { title: 'Accepted', done: !!participant }, { title: 'Brief reviewed', done: !!participant?.startedAt },
     { title: 'Content submitted', done: deliverables.length > 0 && deliverables.every(d => d.version > 0) },
     { title: 'Deliverables complete', done: completed > 0 && completed === deliverables.length },
-    { title: 'Payment completed', done: payment?.status === 'COMPLETED' },
+    { title: 'Payment completed', done: participant?.payouts?.[0]?.status === 'COMPLETED' },
   ];
-  return <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-    <button onClick={onBack} className="flex items-center gap-2 text-sm text-slate-400 hover:text-white"><ArrowLeft className="h-4 w-4" />Back to campaigns</button>
-    <ErrorNotice message={error} />
-    {loading ? <div role="status" className="flex justify-center gap-2 p-12 text-slate-300"><Loader2 className="h-5 w-5 animate-spin" />Loading your workspace…</div> : !participant ? <ActionButton onClick={load}>Retry</ActionButton> : <>
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+      <button onClick={onBack} className="flex items-center gap-2 text-sm text-slate-400 hover:text-white"><ArrowLeft className="h-4 w-4" />Back to campaigns</button>
+      <ErrorNotice message={error} />
+    {loading ? (
+      <div className="p-16 flex flex-col items-center justify-center min-h-[350px]">
+        <LottieLoader size={180} message="Loading collaboration workspace..." />
+      </div>
+    ) : !participant ? (
+      <ActionButton onClick={load}>Retry</ActionButton>
+    ) : (
+      <>
       <header className={`${panel} relative overflow-visible mt-4 p-6 sm:p-7 space-y-5 group`}>
         {/* Floating Status Badge Overlapping Top-Right Corner */}
         {action && (
@@ -86,18 +108,17 @@ export default function CampaignWorkspace({ participantId, onBack }: { participa
               Agreed campaign value
             </p>
             <p className="mt-1 text-3xl sm:text-4xl lg:text-5xl font-black text-emerald-400 tracking-tight drop-shadow-md">
-              {formatCurrency(participant.agreedAmount, participant.agreedCurrency)}
+              {formatUserCurrency(convertedAgreedAmount)}
             </p>
+            {isCrossCurrency && (
+              <p className="text-xs font-semibold text-slate-400 mt-0.5">
+                ≈ {formatCurrency(rawAgreedAmount, sourceCurrency)}
+              </p>
+            )}
           </div>
         </div>
 
-        {action?.message && (
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-purple-200/90 font-medium bg-purple-950/30 border border-purple-500/20 px-3.5 py-2 rounded-xl">
-            <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse shrink-0" />
-            <span>{action.message}</span>
-          </div>
-        )}
-
+        {/* Milestone Status Stepper */}
         <ol className="mt-4 grid grid-cols-2 gap-3 border-t border-white/10 pt-5 sm:grid-cols-5">
           {milestones.map((m) => (
             <li
@@ -123,7 +144,7 @@ export default function CampaignWorkspace({ participantId, onBack }: { participa
         </p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-4">
           <CampaignBrief campaign={campaign} />
           {participant.status === 'CONFIRMED' && (
@@ -137,31 +158,25 @@ export default function CampaignWorkspace({ participantId, onBack }: { participa
           {deliverables.map(d => <DeliverableCard key={d.id} deliverable={d} disabled={participant.status !== 'PARTICIPANT_ACTIVE' || !['OPEN', 'FILLING', 'ACTIVE'].includes(campaign.status)} onSubmit={() => setSelection({ d, publication: false })} onPublish={() => setSelection({ d, publication: true })} />)}
         </div>
         <aside className="space-y-4">
-          <section id="campaign-payment" className={`${panel} space-y-3.5 p-5 sm:p-6`}>
-            <h3 className="font-extrabold text-white text-base">Payment & escrow</h3>
-            <p className="text-3xl sm:text-4xl font-black text-emerald-400 tracking-tight drop-shadow-sm">
-              {formatCurrency(participant.agreedAmount, participant.agreedCurrency)}
-            </p>
-            <div>
-              <StatusBadge status={payment?.status || 'NO_PAYOUT_YET'} />
-            </div>
-            <p className="text-xs text-slate-300/90 leading-relaxed">
-              {participant.status === 'PARTICIPANT_COMPLETED' ? 'Completion recorded for finance review. Payout depends on funding, settlement, KYC and dispute checks.' : 'Complete all required deliverables, including publication verification, to become eligible.'}
-            </p>
-            {payment?.failureReason && <ErrorNotice message={payment.failureReason} />}
-            <p className="text-[11px] text-slate-500 pt-1 border-t border-white/5">
-              Status comes from the payment system, not content approval. Manage payouts in Payments.
-            </p>
-          </section>
-          <section className={`${panel} p-5 text-xs text-slate-300 space-y-1.5`}>
-            <h3 className="mb-1.5 font-bold text-white text-sm">Need a clarification?</h3>
-            <p className="leading-relaxed">
-              Use Messages to contact your brand. Review updates are delivered to your collaboration conversation.
-            </p>
-          </section>
+          <WorkspacePaymentEscrowCard
+            agreedAmount={convertedAgreedAmount}
+            agreedCurrency={userCurrency}
+            originalAmount={rawAgreedAmount}
+            originalCurrency={sourceCurrency}
+            payouts={participant.payouts}
+            deliverables={deliverables}
+            participantStatus={participant.status}
+          />
+          <WorkspaceNeedClarificationCard
+            campaign={campaign}
+            participantCampaignId={participant?.campaignId}
+            onNavigate={onNavigate}
+          />
         </aside>
       </div>
-    </>}
+    </>
+    )}
     {selection && <SubmissionDialog deliverable={selection.d} publicationOnly={selection.publication} onClose={() => setSelection(undefined)} onSuccess={load} />}
-  </motion.div>;
+    </motion.div>
+  );
 }

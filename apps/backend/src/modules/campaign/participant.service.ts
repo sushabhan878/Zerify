@@ -37,11 +37,19 @@ export class ParticipantService {
     if (participant.influencerProfile.userId !== userId && participant.campaign.brandProfile.userId !== userId) {
       throw new ForbiddenException('You do not have access to this collaboration');
     }
-    const payouts = await this.prisma.zerifyPayout.findMany({
+    const rawPayouts = await this.prisma.zerifyPayout.findMany({
       where: { campaignId: participant.campaignId, influencerProfileId: participant.influencerProfileId },
-      select: { id: true, status: true, currency: true, failureReason: true, createdAt: true },
+      select: { id: true, status: true, currency: true, amountMinor: true, failureReason: true, createdAt: true },
       orderBy: { createdAt: 'desc' },
     });
+    const payouts = rawPayouts.map(p => ({
+      id: p.id,
+      status: p.status,
+      currency: p.currency,
+      amount: Number(p.amountMinor) / 100,
+      failureReason: p.failureReason,
+      createdAt: p.createdAt,
+    }));
     return { ...participant, payouts };
   }
 

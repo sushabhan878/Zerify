@@ -17,7 +17,7 @@ interface ActiveCampaignsSectionProps {
 }
 
 export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSectionProps) {
-  const { currency: userCurrency, format: formatUserCurrency } = useCurrency();
+  const { currency: userCurrency, format: formatUserCurrency, rates } = useCurrency();
   const [activeTab, setActiveTab] = useState<'ALL' | 'IN_PRODUCTION' | 'CONTENT_REVIEW' | 'READY_TO_PUBLISH' | 'COMPLETED'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeParticipantId, setActiveParticipantId] = useState<string | null>(null);
@@ -38,7 +38,7 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
     try {
       const data = await DeliverableService.getMyCollaborations();
       if (data && Array.isArray(data)) {
-        const formatted = data.map(mapActiveCampaign);
+        const formatted = data.map((p: any) => mapActiveCampaign(p, userCurrency, rates));
         setCampaigns(formatted);
 
         const completedCampaigns = data.filter(
@@ -66,7 +66,7 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [userCurrency, formatUserCurrency]);
+  }, [userCurrency, rates]);
 
   useEffect(() => {
     loadData();
@@ -245,6 +245,7 @@ export default function ActiveCampaignsSection({ onNavigate }: ActiveCampaignsSe
           setActiveParticipantId(null);
           loadData(true);
         }}
+        onNavigate={onNavigate}
       />
     );
   }

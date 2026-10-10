@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { Search, Sparkles, AlertCircle, Compass, ShieldCheck } from 'lucide-react';
 import OfferReceivedCard from './OfferReceivedCard';
 import { CampaignOfferItem } from '@/services/offer.service';
+import { useCurrency } from '@/context/CurrencyContext';
+import { convertCurrency } from '@/utils/currency';
 
 interface OffersOverviewTabProps {
   offers: CampaignOfferItem[];
@@ -23,13 +25,18 @@ export default function OffersOverviewTab({
   isAccepting,
   onNavigate,
 }: OffersOverviewTabProps) {
+  const { currency: userCurrency, format: formatUserCurrency, rates } = useCurrency();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'PENDING' | 'ACCEPTED' | 'DECLINED'>('PENDING');
 
   const pendingCount = offers.filter((o) => o.status === 'PENDING').length;
   const totalOfferedCash = offers
     .filter((o) => o.status === 'PENDING' || o.status === 'ACCEPTED')
-    .reduce((acc, o) => acc + (Number(o.compensationAmount) || 0), 0);
+    .reduce((acc, o) => {
+      const raw = Number(o.compensationAmount) || 0;
+      const sourceCurrency = o.compensationCurrency || o.application?.campaign?.budgetCurrency || 'USD';
+      return acc + convertCurrency(raw, sourceCurrency, userCurrency, rates);
+    }, 0);
 
   const filteredOffers = offers.filter((offer) => {
     const matchesStatus = filterStatus === 'ALL' || offer.status === filterStatus;
@@ -70,7 +77,7 @@ export default function OffersOverviewTab({
         >
           <span className="text-xs font-semibold text-slate-400 block">Total Offered Payouts</span>
           <div className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">
-            ${totalOfferedCash.toLocaleString()}
+            {formatUserCurrency(totalOfferedCash)}
           </div>
           <span className="text-[11px] font-bold text-emerald-400/80 block">100% Escrow Backed</span>
         </motion.div>

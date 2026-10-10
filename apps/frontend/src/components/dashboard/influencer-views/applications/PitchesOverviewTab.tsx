@@ -5,6 +5,8 @@ import { Search, FileText, AlertCircle, Compass } from 'lucide-react';
 import ApplicationKpiBar from '../subcomponents/ApplicationKpiBar';
 import ApplicationCardItem, { ApplicationItem } from '../subcomponents/ApplicationCardItem';
 
+import { useCurrency } from '@/context/CurrencyContext';
+
 interface PitchesOverviewTabProps {
   applications: ApplicationItem[];
   onWithdraw: (id: string | number) => void;
@@ -18,14 +20,14 @@ export default function PitchesOverviewTab({
   onNavigate,
   onMessageBrand,
 }: PitchesOverviewTabProps) {
+  const { format: formatUserCurrency } = useCurrency();
   const [activeTab, setActiveTab] = useState<'ALL' | 'CONTRACT_SENT' | 'SHORTLISTED' | 'UNDER_REVIEW' | 'DECLINED'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
   const totalProposedNumeric = applications.reduce((acc, app) => {
-    const num = parseFloat(app.proposedRate.replace(/[^0-9.]/g, '')) || 0;
-    return acc + num;
+    return acc + (app.proposedAmount || 0);
   }, 0);
-  const totalProposedStr = `$${totalProposedNumeric.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const totalProposedStr = formatUserCurrency(totalProposedNumeric);
 
   const filtered = applications.filter((app) => {
     const matchesTab = activeTab === 'ALL' || app.status === activeTab;

@@ -1,12 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, Building2, CalendarDays, Sparkles } from 'lucide-react';
+import { ArrowUpRight, Building2, CalendarDays, Loader2, Sparkles } from 'lucide-react';
 
 export interface ActiveCampaignItem {
   id: string | number; campaignId?: string; title: string; brand: string; logoUrl?: string; industry: string;
   stage: 'IN_PRODUCTION' | 'CONTENT_REVIEW' | 'READY_TO_PUBLISH' | 'COMPLETED';
-  deadline: string; payout: string; payoutAmount?: number; progress: number;
+  deadline: string; payout: string; payoutAmount?: number;
+  originalPayout?: string; originalPayoutAmount?: number; originalCurrency?: string;
+  progress: number;
   deliverables: { title: string; completed: boolean }[]; verifiedBrand: boolean; contractBrief: string;
   action?: string; message?: string; state?: string; overdue?: boolean;
 }
@@ -18,8 +21,57 @@ export default function ActiveCampaignCard({
   campaign: ActiveCampaignItem;
   onUploadSubmit: (id: string | number) => void;
 }) {
+  const [isLoading, setIsLoading] = useState(false);
   const complete = c.deliverables.filter((d) => d.completed).length;
   const isOverdue = c.overdue || c.state === 'ACTION_REQUIRED';
+
+  const handleClick = () => {
+    setIsLoading(true);
+    onUploadSubmit(c.id);
+  };
+
+  const getActionConfig = () => {
+    if (c.stage === 'COMPLETED' || c.state === 'COMPLETED') {
+      return {
+        label: 'View Brief',
+        className:
+          'bg-slate-900/90 hover:bg-purple-950/50 border border-purple-500/25 hover:border-purple-400/50 text-slate-300 hover:text-white shadow-sm hover:shadow-md hover:shadow-purple-950/40',
+        iconClass: 'text-purple-400 group-hover/action:text-purple-300',
+      };
+    }
+    if (c.stage === 'CONTENT_REVIEW' || c.state === 'UNDER_REVIEW') {
+      return {
+        label: 'View Submission',
+        className:
+          'bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:via-indigo-500 hover:to-pink-500 text-white shadow-lg shadow-purple-950/50 hover:shadow-purple-900/70',
+        iconClass: 'text-white/90',
+      };
+    }
+    if (c.stage === 'READY_TO_PUBLISH' || c.state === 'AWAITING_PUBLICATION') {
+      return {
+        label: 'Submit Published URL',
+        className:
+          'bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:via-indigo-500 hover:to-pink-500 text-white shadow-lg shadow-purple-950/50 hover:shadow-purple-900/70',
+        iconClass: 'text-white/90',
+      };
+    }
+    if (c.state === 'REVISION_REQUIRED') {
+      return {
+        label: 'Fix & Resubmit',
+        className:
+          'bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 hover:from-rose-500 hover:via-pink-500 hover:to-purple-500 text-white shadow-lg shadow-rose-950/50 hover:shadow-rose-900/70',
+        iconClass: 'text-white/90',
+      };
+    }
+    return {
+      label: 'Submit Deliverable',
+      className:
+        'bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:via-indigo-500 hover:to-pink-500 text-white shadow-lg shadow-purple-950/50 hover:shadow-purple-900/70',
+      iconClass: 'text-white/90',
+    };
+  };
+
+  const actionConfig = getActionConfig();
 
   return (
     <motion.article
@@ -76,6 +128,11 @@ export default function ActiveCampaignCard({
           <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             {c.payout}
           </span>
+          {c.originalPayout && (
+            <span className="block text-[11px] font-semibold text-slate-400">
+              ≈ {c.originalPayout}
+            </span>
+          )}
         </div>
       </header>
 
@@ -130,24 +187,24 @@ export default function ActiveCampaignCard({
             </>
           )}
         </div>
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          <button
-            type="button"
-            onClick={() => onUploadSubmit(c.id)}
-            className="group/brief inline-flex items-center gap-2 rounded-xl bg-slate-900/90 hover:bg-purple-950/50 border border-purple-500/25 hover:border-purple-400/50 px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-slate-300 hover:text-white shadow-sm hover:shadow-md hover:shadow-purple-950/40 transition-all cursor-pointer active:scale-[0.98]"
-          >
-            <span>View Brief</span>
-            <ArrowUpRight className="h-4 w-4 text-purple-400 group-hover/brief:text-purple-300 group-hover/brief:translate-x-1 group-hover/brief:-translate-y-1 group-hover/brief:scale-125 transition-all duration-200 shrink-0" />
-          </button>
-          <button
-            type="button"
-            onClick={() => onUploadSubmit(c.id)}
-            className="group/action inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:via-indigo-500 hover:to-pink-500 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-purple-950/50 hover:shadow-purple-900/70 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <span>{c.action && c.action !== 'View Campaign' ? c.action : 'Start Campaign'}</span>
-            <ArrowUpRight className="h-4 w-4 text-white/90 group-hover/action:translate-x-1 group-hover/action:-translate-y-1 group-hover/action:scale-125 transition-all duration-200 shrink-0" />
-          </button>
-        </div>
+        <button
+          type="button"
+          disabled={isLoading}
+          onClick={handleClick}
+          className={`group/action inline-flex items-center justify-center gap-2 rounded-xl px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-80 disabled:cursor-wait ${actionConfig.className}`}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin shrink-0 text-white" />
+              <span>Loading...</span>
+            </>
+          ) : (
+            <>
+              <span>{actionConfig.label}</span>
+              <ArrowUpRight className={`h-4 w-4 transition-all duration-200 shrink-0 group-hover/action:translate-x-1 group-hover/action:-translate-y-1 group-hover/action:scale-125 ${actionConfig.iconClass}`} />
+            </>
+          )}
+        </button>
       </footer>
     </motion.article>
   );

@@ -10,6 +10,7 @@ import { useMessaging } from '@/context/MessagingContext';
 import { MessagingService } from '@/services/messaging.service';
 import { useToast } from '@/components/ui/Toast';
 import { useCurrency } from '@/context/CurrencyContext';
+import { formatCurrency, convertCurrency } from '@/utils/currency';
 import LottieLoader from '@/components/ui/LottieLoader';
 
 interface ApplicationsSectionProps {
@@ -27,7 +28,7 @@ type ApplicationFilterTab =
 export default function ApplicationsSection({ onNavigate }: ApplicationsSectionProps) {
   const { setActiveConversationId, refreshConversations } = useMessaging();
   const { toastError } = useToast();
-  const { format: formatCurrency } = useCurrency();
+  const { currency: userCurrency, format: formatUserCurrency, rates } = useCurrency();
   const [activeTab, setActiveTab] = useState<ApplicationFilterTab>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -86,11 +87,30 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
             statusText = 'DECLINED';
           }
 
-          const currency = a.proposedCurrency || 'USD';
-          const sym = currency === 'INR' ? '₹' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
-          const rawAmount = Number(a.proposedAmount || 0);
-          const rateStr = rawAmount > 0 ? `${sym}${rawAmount.toLocaleString()}` : 'Fixed Barter';
-          const counterRateStr = counterAmount ? `${sym}${counterAmount.toLocaleString()}` : undefined;
+          const sourceCurrency = a.proposedCurrency || a.campaign?.budgetCurrency || 'USD';
+          const rawProposedAmount = Number(a.proposedAmount || 0);
+          const convertedProposedAmount = convertCurrency(rawProposedAmount, sourceCurrency, userCurrency, rates);
+
+          const isCrossCurrency = sourceCurrency.toUpperCase() !== userCurrency.toUpperCase();
+          const originalProposedRateStr = isCrossCurrency && rawProposedAmount > 0
+            ? formatCurrency(rawProposedAmount, sourceCurrency)
+            : undefined;
+
+          const rateStr = rawProposedAmount > 0
+            ? formatUserCurrency(convertedProposedAmount)
+            : 'Fixed Barter';
+
+          let convertedCounterAmount: number | undefined;
+          let counterRateStr: string | undefined;
+          let originalCounterRateStr: string | undefined;
+
+          if (counterAmount) {
+            convertedCounterAmount = convertCurrency(counterAmount, sourceCurrency, userCurrency, rates);
+            counterRateStr = formatUserCurrency(convertedCounterAmount);
+            if (isCrossCurrency) {
+              originalCounterRateStr = formatCurrency(counterAmount, sourceCurrency);
+            }
+          }
 
           return {
             id: a.id,
@@ -106,7 +126,10 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
               year: 'numeric',
             }),
             proposedRate: rateStr,
-            proposedAmount: isCounter && counterAmount ? counterAmount : rawAmount,
+            proposedAmount: isCounter && convertedCounterAmount ? convertedCounterAmount : convertedProposedAmount,
+            originalProposedRate: originalProposedRateStr,
+            originalProposedAmount: rawProposedAmount,
+            originalCurrency: sourceCurrency,
             deliveryTime: '7 Days from acceptance',
             status: statusText,
             platforms: a.campaign?.targetPlatforms || a.campaign?.platforms || ['Instagram'],
@@ -114,8 +137,9 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
             pitchSummary: a.applicationMessage || a.contentIdea || 'Submitted pitch concept and content strategy.',
             lastViewedByBrand: 'Live status synced',
             isCounterOffer: isCounter,
-            counterAmount,
+            counterAmount: convertedCounterAmount,
             counterRate: counterRateStr,
+            originalCounterRate: originalCounterRateStr,
             counterNotes,
             offerId,
             rawApplication: a,
@@ -131,7 +155,7 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [userCurrency, rates, formatUserCurrency]);
 
   useEffect(() => {
     loadData();
@@ -268,17 +292,17 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
         },
         {
           label: 'Counter Contract Value',
-          val: formatCurrency(totalRev),
+          val: formatUserCurrency(totalRev),
           change: count > 0 ? 'Proposed compensation' : 'No counter value',
         },
         {
           label: 'Avg. Counter Rate',
-          val: formatCurrency(avgRev),
+          val: formatUserCurrency(avgRev),
           change: 'Per counter proposal',
         },
         {
           label: 'Top Counter Offer',
-          val: formatCurrency(maxRev),
+          val: formatUserCurrency(maxRev),
           change: count > 0 ? 'Highest counter proposal' : 'No counter deals',
         },
       ];
@@ -293,17 +317,17 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
         },
         {
           label: 'Offer Contract Value',
-          val: formatCurrency(totalRev),
+          val: formatUserCurrency(totalRev),
           change: count > 0 ? 'Across received offers' : 'No contract value',
         },
         {
           label: 'Avg. Offer Rate',
-          val: formatCurrency(avgRev),
+          val: formatUserCurrency(avgRev),
           change: 'Per contract offer',
         },
         {
           label: 'Top Offer Value',
-          val: formatCurrency(maxRev),
+          val: formatUserCurrency(maxRev),
           change: count > 0 ? 'Highest contract offer' : 'No offers',
         },
       ];
@@ -318,17 +342,17 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
         },
         {
           label: 'Shortlisted Value',
-          val: formatCurrency(totalRev),
+          val: formatUserCurrency(totalRev),
           change: count > 0 ? 'High probability deals' : 'No pipeline value',
         },
         {
           label: 'Avg. Shortlist Size',
-          val: formatCurrency(avgRev),
+          val: formatUserCurrency(avgRev),
           change: 'Per shortlisted pitch',
         },
         {
           label: 'Top Shortlisted',
-          val: formatCurrency(maxRev),
+          val: formatUserCurrency(maxRev),
           change: count > 0 ? 'Highest potential deal' : 'No shortlisted deals',
         },
       ];
@@ -343,17 +367,17 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
         },
         {
           label: 'Pending Review Value',
-          val: formatCurrency(totalRev),
+          val: formatUserCurrency(totalRev),
           change: count > 0 ? 'Pipeline under evaluation' : 'No pending value',
         },
         {
           label: 'Avg. Proposed Rate',
-          val: formatCurrency(avgRev),
+          val: formatUserCurrency(avgRev),
           change: 'Per open application',
         },
         {
           label: 'Top Pending Pitch',
-          val: formatCurrency(maxRev),
+          val: formatUserCurrency(maxRev),
           change: count > 0 ? 'Largest pending proposal' : 'No pending pitches',
         },
       ];
@@ -368,17 +392,17 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
         },
         {
           label: 'Declined Volume',
-          val: formatCurrency(totalRev),
+          val: formatUserCurrency(totalRev),
           change: count > 0 ? 'Total passed value' : 'No declined value',
         },
         {
           label: 'Avg. Declined Rate',
-          val: formatCurrency(avgRev),
+          val: formatUserCurrency(avgRev),
           change: 'Per closed pitch',
         },
         {
           label: 'Highest Declined',
-          val: formatCurrency(maxRev),
+          val: formatUserCurrency(maxRev),
           change: count > 0 ? 'Largest closed proposal' : 'No closed pitches',
         },
       ];
@@ -393,12 +417,12 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
       },
       {
         label: 'Total Proposed Value',
-        val: formatCurrency(totalRev),
+        val: formatUserCurrency(totalRev),
         change: 'Combined pitch pipeline',
       },
       {
         label: 'Avg. Pitch Rate',
-        val: formatCurrency(avgRev),
+        val: formatUserCurrency(avgRev),
         change: 'Per submitted proposal',
       },
       {
@@ -407,7 +431,7 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
         change: `${shortlistedCount} of ${applications.length} progressed`,
       },
     ];
-  }, [activeTab, applications, formatCurrency]);
+  }, [activeTab, applications, formatUserCurrency]);
 
   const filtered = applications.filter((app) => {
     const matchesTab =

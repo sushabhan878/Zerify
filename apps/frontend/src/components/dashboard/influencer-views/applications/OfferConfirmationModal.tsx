@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, AlertTriangle, X, Loader2 } from 'lucide-react';
 import { CampaignOfferItem } from '@/services/offer.service';
+import { useCurrency } from '@/context/CurrencyContext';
+import { formatCurrency, convertCurrency } from '@/utils/currency';
 
 interface OfferConfirmationModalProps {
   isOpen: boolean;
@@ -23,6 +25,7 @@ export default function OfferConfirmationModal({
   onCancel,
   isProcessing = false,
 }: OfferConfirmationModalProps) {
+  const { currency: userCurrency, format: formatUserCurrency, rates } = useCurrency();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -35,9 +38,14 @@ export default function OfferConfirmationModal({
   const campaign = app.campaign || {};
   const brand = campaign.brandProfile || {};
 
-  const currency = offer.compensationCurrency || 'USD';
-  const sym = currency === 'INR' ? '₹' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
-  const payoutStr = `${sym}${Number(offer.compensationAmount).toLocaleString()} ${currency !== 'USD' && currency !== 'INR' ? currency : ''}`;
+  const rawCompensation = Number(offer.compensationAmount || 0);
+  const sourceCurrency = offer.compensationCurrency || campaign.budgetCurrency || 'USD';
+  const convertedCompensation = convertCurrency(rawCompensation, sourceCurrency, userCurrency, rates);
+  const isCrossCurrency = sourceCurrency.toUpperCase() !== userCurrency.toUpperCase();
+  const payoutStr = formatUserCurrency(convertedCompensation);
+  const originalPayoutStr = isCrossCurrency && rawCompensation > 0
+    ? formatCurrency(rawCompensation, sourceCurrency)
+    : undefined;
 
   const isAccept = type === 'ACCEPT';
 
@@ -100,7 +108,12 @@ export default function OfferConfirmationModal({
             <div className="p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/20 space-y-2 text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-slate-300 font-medium">Escrow Payout:</span>
-                <span className="font-black text-emerald-400 text-sm">{payoutStr}</span>
+                <div className="text-right">
+                  <span className="font-black text-emerald-400 text-sm block">{payoutStr}</span>
+                  {originalPayoutStr && (
+                    <span className="text-[10px] text-slate-400 font-semibold block">≈ {originalPayoutStr}</span>
+                  )}
+                </div>
               </div>
               <p className="text-slate-400 leading-relaxed text-[11px] pt-1 border-t border-emerald-500/10">
                 By accepting, you commit to delivering the content outlined in the campaign brief. Your payout will be locked in Zerify Escrow and automatically released upon brand approval.

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { CampaignOfferItem } from '@/services/offer.service';
 import { useCurrency } from '@/context/CurrencyContext';
+import { formatCurrency, convertCurrency } from '@/utils/currency';
 
 interface OfferReceivedCardProps {
   offer: CampaignOfferItem;
@@ -34,12 +35,20 @@ export default function OfferReceivedCard({
   isAccepting,
   isMessaging,
 }: OfferReceivedCardProps) {
-  const { format: formatUserCurrency } = useCurrency();
+  const { currency: userCurrency, format: formatUserCurrency, rates } = useCurrency();
   const app = offer.application || {};
   const campaign = app.campaign || {};
   const brand = campaign.brandProfile || {};
 
-  const payoutStr = formatUserCurrency(Number(offer.compensationAmount || 0));
+  const rawCompensation = Number(offer.compensationAmount || 0);
+  const sourceCurrency = offer.compensationCurrency || campaign.budgetCurrency || 'USD';
+  const convertedCompensation = convertCurrency(rawCompensation, sourceCurrency, userCurrency, rates);
+  const isCrossCurrency = sourceCurrency.toUpperCase() !== userCurrency.toUpperCase();
+
+  const payoutStr = formatUserCurrency(convertedCompensation);
+  const originalPayoutStr = isCrossCurrency && rawCompensation > 0
+    ? formatCurrency(rawCompensation, sourceCurrency)
+    : undefined;
 
   const deadlineStr = offer.responseDeadline
     ? new Date(offer.responseDeadline).toLocaleDateString('en-GB', {
@@ -149,6 +158,11 @@ export default function OfferReceivedCard({
           <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             {payoutStr}
           </span>
+          {originalPayoutStr && (
+            <span className="block text-[11px] font-semibold text-slate-400">
+              ≈ {originalPayoutStr}
+            </span>
+          )}
         </div>
       </div>
 

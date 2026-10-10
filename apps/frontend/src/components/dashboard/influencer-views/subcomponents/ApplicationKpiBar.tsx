@@ -3,6 +3,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
+import { useCurrency } from '@/context/CurrencyContext';
+
 export interface ApplicationKpiItem {
   label: string;
   val: string;
@@ -16,10 +18,11 @@ interface ApplicationKpiBarProps {
 }
 
 export default function ApplicationKpiBar({ kpis, totalCount, totalProposedValue }: ApplicationKpiBarProps) {
+  const { format: formatUserCurrency } = useCurrency();
   const items: ApplicationKpiItem[] = kpis || [
     { label: 'Applications Submitted', val: `${totalCount || 0} Pitches`, change: 'Active this month' },
     { label: 'Shortlist / Conversion', val: '0% Rate', change: 'Across pitches' },
-    { label: 'Total Proposed Value', val: totalProposedValue || '$0.00', change: 'Across open applications' },
+    { label: 'Total Proposed Value', val: totalProposedValue || formatUserCurrency(0), change: 'Across open applications' },
     { label: 'Contracts Received', val: '0 Offers Ready', change: 'Awaiting signature' },
   ];
 

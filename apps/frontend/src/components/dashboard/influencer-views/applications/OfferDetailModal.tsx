@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { X, Check, ShieldCheck, DollarSign, Calendar, Video, FileText, MessageSquare } from 'lucide-react';
 import { CampaignOfferItem } from '@/services/offer.service';
+import { useCurrency } from '@/context/CurrencyContext';
+import { formatCurrency, convertCurrency } from '@/utils/currency';
 
 interface OfferDetailModalProps {
   offer: CampaignOfferItem | null;
@@ -21,6 +23,7 @@ export default function OfferDetailModal({
   onDecline,
   onMessageBrand,
 }: OfferDetailModalProps) {
+  const { currency: userCurrency, format: formatUserCurrency, rates } = useCurrency();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -33,6 +36,15 @@ export default function OfferDetailModal({
   const campaign = app.campaign || {};
   const brand = campaign.brandProfile || {};
   const deliverables = campaign.deliverables || [];
+
+  const rawCompensation = Number(offer.compensationAmount || 0);
+  const sourceCurrency = offer.compensationCurrency || campaign.budgetCurrency || 'USD';
+  const convertedCompensation = convertCurrency(rawCompensation, sourceCurrency, userCurrency, rates);
+  const isCrossCurrency = sourceCurrency.toUpperCase() !== userCurrency.toUpperCase();
+  const payoutStr = formatUserCurrency(convertedCompensation);
+  const originalPayoutStr = isCrossCurrency && rawCompensation > 0
+    ? formatCurrency(rawCompensation, sourceCurrency)
+    : undefined;
 
   const modalContent = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
@@ -63,8 +75,13 @@ export default function OfferDetailModal({
             <div>
               <span className="text-[10px] text-emerald-400 font-bold uppercase block">Agreed Compensation</span>
               <span className="text-xl font-black text-white">
-                ${offer.compensationAmount.toLocaleString()} {offer.compensationCurrency}
+                {payoutStr}
               </span>
+              {originalPayoutStr && (
+                <span className="block text-[11px] font-semibold text-slate-400">
+                  ≈ {originalPayoutStr}
+                </span>
+              )}
             </div>
             <div className="text-right">
               <span className="text-[10px] text-slate-400 font-bold block">Escrow Protected</span>
