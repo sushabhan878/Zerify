@@ -9,6 +9,7 @@ import BrandDepositFundsModal from '../payment-views/BrandDepositFundsModal';
 import BrandWithdrawFundsModal from '../payment-views/BrandWithdrawFundsModal';
 import BrandBillingDetailsModal from '../payment-views/BrandBillingDetailsModal';
 import RaiseDisputeModal from '../payment-views/RaiseDisputeModal';
+import PaymentUnderConstructionNotice from '../payment-views/PaymentUnderConstructionNotice';
 
 export default function BrandPayoutsSection() {
   const { format } = useCurrency();
@@ -126,6 +127,9 @@ export default function BrandPayoutsSection() {
           </button>
         </div>
       </div>
+
+      {/* Production Deployment Under Construction Notice */}
+      <PaymentUnderConstructionNotice />
 
       {/* KPI Bar */}
       <BrandEscrowKpiBar

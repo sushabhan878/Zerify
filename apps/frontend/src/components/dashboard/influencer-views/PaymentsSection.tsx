@@ -9,6 +9,7 @@ import LinkPayoutCredentialsModal from '../payment-views/LinkPayoutCredentialsMo
 import ClaimPayoutModal from '../payment-views/ClaimPayoutModal';
 import RaiseDisputeModal from '../payment-views/RaiseDisputeModal';
 import DisputesListCard from '../payment-views/DisputesListCard';
+import PaymentUnderConstructionNotice from '../payment-views/PaymentUnderConstructionNotice';
 
 export default function PaymentsSection() {
   const { currency, format } = useCurrency();
@@ -175,6 +176,9 @@ export default function PaymentsSection() {
           </button>
         </div>
       </div>
+
+      {/* Production Deployment Under Construction Notice */}
+      <PaymentUnderConstructionNotice />
 
       {/* 1. Financial KPI Overview Bar */}
       <PaymentsKpiBar

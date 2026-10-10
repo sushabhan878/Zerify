@@ -6,6 +6,7 @@ import LinkedPaymentAccountCard from './subcomponents/LinkedPaymentAccountCard';
 import NoPaymentAccountsCard from './subcomponents/NoPaymentAccountsCard';
 import SupportedPayoutMethodsCard from './subcomponents/SupportedPayoutMethodsCard';
 import CashfreeNoticeBanner from './subcomponents/CashfreeNoticeBanner';
+import PaymentUnderConstructionNotice from '../payment-views/PaymentUnderConstructionNotice';
 
 interface PaymentSettingsTabProps {
   initialData?: any;
@@ -153,6 +154,7 @@ export default function PaymentSettingsTab({
   if (linkedAccounts.length === 0) {
     return (
       <div className="space-y-6">
+        <PaymentUnderConstructionNotice />
         <NoPaymentAccountsCard onAddAccount={handleRedirectToPayments} />
         <SupportedPayoutMethodsCard />
       </div>
@@ -161,6 +163,7 @@ export default function PaymentSettingsTab({
 
   return (
     <div className="space-y-6">
+      <PaymentUnderConstructionNotice />
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl">
         <div>
