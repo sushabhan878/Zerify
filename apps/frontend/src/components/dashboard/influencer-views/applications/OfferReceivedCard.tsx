@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Check,
   X,
+  Loader2,
 } from 'lucide-react';
 import { CampaignOfferItem } from '@/services/offer.service';
 import { useCurrency } from '@/context/CurrencyContext';
@@ -21,6 +22,7 @@ interface OfferReceivedCardProps {
   onViewDetails?: (offer: CampaignOfferItem) => void;
   onMessageBrand?: (offer: CampaignOfferItem) => void;
   isAccepting?: boolean;
+  isMessaging?: boolean;
 }
 
 export default function OfferReceivedCard({
@@ -30,6 +32,7 @@ export default function OfferReceivedCard({
   onViewDetails,
   onMessageBrand,
   isAccepting,
+  isMessaging,
 }: OfferReceivedCardProps) {
   const { format: formatUserCurrency } = useCurrency();
   const app = offer.application || {};
@@ -160,14 +163,19 @@ export default function OfferReceivedCard({
           <span className="text-slate-700">|</span>
           <button
             type="button"
+            disabled={isMessaging}
             onClick={(e) => {
               e.stopPropagation();
               onMessageBrand?.(offer);
             }}
-            className="text-xs font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors"
+            className="text-xs font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1.5 transition-colors disabled:opacity-50"
           >
-            <MessageSquare className="w-3.5 h-3.5" />
-            <span>Message Brand</span>
+            {isMessaging ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400" />
+            ) : (
+              <MessageSquare className="w-3.5 h-3.5" />
+            )}
+            <span>{isMessaging ? 'Opening Thread...' : 'Message Brand'}</span>
           </button>
         </div>
 

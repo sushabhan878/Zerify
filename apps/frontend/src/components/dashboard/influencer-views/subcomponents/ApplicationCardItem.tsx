@@ -12,10 +12,13 @@ import {
   Check,
   RefreshCw,
   ArrowUpRight,
+  Loader2,
 } from 'lucide-react';
 
 export interface ApplicationItem {
   id: string | number;
+  campaignId?: string;
+  brandUserId?: string;
   brand: string;
   brandLogo?: string;
   industry: string;
@@ -34,6 +37,7 @@ export interface ApplicationItem {
   counterAmount?: number;
   counterNotes?: string;
   offerId?: string;
+  rawApplication?: any;
 }
 
 interface ApplicationCardItemProps {
@@ -41,6 +45,8 @@ interface ApplicationCardItemProps {
   onWithdraw: (id: string | number) => void;
   onAcceptOffer?: (offerId?: string, appId?: string | number) => void;
   onDeclineOffer?: (offerId?: string, appId?: string | number) => void;
+  onMessageBrand?: (application: ApplicationItem) => void;
+  isMessaging?: boolean;
 }
 
 export default function ApplicationCardItem({
@@ -48,6 +54,8 @@ export default function ApplicationCardItem({
   onWithdraw,
   onAcceptOffer,
   onDeclineOffer,
+  onMessageBrand,
+  isMessaging,
 }: ApplicationCardItemProps) {
   const getStatusBadge = (status: ApplicationItem['status']) => {
     switch (status) {
@@ -186,9 +194,21 @@ export default function ApplicationCardItem({
             Submitted on: <strong className="text-white font-bold">{application.appliedDate}</strong>
           </span>
           <span className="text-slate-700">|</span>
-          <button className="group text-xs font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1.5 transition-colors cursor-pointer">
-            <MessageSquare className="w-3.5 h-3.5 group-hover:scale-125 transition-transform duration-200" />
-            <span>Message Brand</span>
+          <button
+            type="button"
+            disabled={isMessaging}
+            onClick={(e) => {
+              e.stopPropagation();
+              onMessageBrand?.(application);
+            }}
+            className="group text-xs font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+          >
+            {isMessaging ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400" />
+            ) : (
+              <MessageSquare className="w-3.5 h-3.5 group-hover:scale-125 transition-transform duration-200" />
+            )}
+            <span>{isMessaging ? 'Opening Thread...' : 'Message Brand'}</span>
           </button>
         </div>
 

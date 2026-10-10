@@ -3,7 +3,7 @@
 import { ButtonHTMLAttributes } from 'react';
 import { Loader2 } from 'lucide-react';
 
-export const panel = 'rounded-2xl border border-white/10 bg-slate-900/80 backdrop-blur-xl';
+export const panel = 'rounded-2xl border border-white/10 bg-slate-950/45 backdrop-blur-xl shadow-xl';
 export const input = 'w-full rounded-xl border border-white/10 bg-slate-950 p-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500';
 export function ActionButton({ busy, children, className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { busy?: boolean }) {
   return <button {...props} disabled={props.disabled || busy} className={`inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-300 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}>

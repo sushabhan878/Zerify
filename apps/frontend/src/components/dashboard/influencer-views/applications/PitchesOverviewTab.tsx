@@ -9,12 +9,14 @@ interface PitchesOverviewTabProps {
   applications: ApplicationItem[];
   onWithdraw: (id: string | number) => void;
   onNavigate?: (routeId: string) => void;
+  onMessageBrand?: (application: ApplicationItem) => void;
 }
 
 export default function PitchesOverviewTab({
   applications,
   onWithdraw,
   onNavigate,
+  onMessageBrand,
 }: PitchesOverviewTabProps) {
   const [activeTab, setActiveTab] = useState<'ALL' | 'CONTRACT_SENT' | 'SHORTLISTED' | 'UNDER_REVIEW' | 'DECLINED'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -88,6 +90,7 @@ export default function PitchesOverviewTab({
               key={application.id}
               application={application}
               onWithdraw={onWithdraw}
+              onMessageBrand={onMessageBrand}
             />
           ))}
         </div>

@@ -27,6 +27,7 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
   const [isLoading, setIsLoading] = useState(true);
   const [offers, setOffers] = useState<CampaignOfferItem[]>([]);
   const [selectedOffer, setSelectedOffer] = useState<CampaignOfferItem | null>(null);
+  const [messagingOfferId, setMessagingOfferId] = useState<string | null>(null);
 
   // Confirmation modal state
   const [confirmModal, setConfirmModal] = useState<{
@@ -88,23 +89,50 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
 
   const handleMessageBrand = async (offer: CampaignOfferItem) => {
     try {
-      const brandUserId = offer.application?.campaign?.brandProfile?.userId;
+      setMessagingOfferId(offer.id);
+
+      // Resolve the brand owner's userId
+      let brandUserId =
+        offer.application?.campaign?.brandProfile?.userId ||
+        offer.application?.campaign?.brandProfile?.user?.id ||
+        (offer as any)?.campaign?.brandProfile?.userId;
+
+      // If not populated in the initial list, fetch the specific offer details to get the brand profile
+      if (!brandUserId && offer.id) {
+        try {
+          const detailedOffer = await OfferService.getOfferDetails(offer.id);
+          brandUserId =
+            detailedOffer?.application?.campaign?.brandProfile?.userId ||
+            detailedOffer?.application?.campaign?.brandProfile?.user?.id;
+        } catch (detailErr) {
+          console.warn('Could not fetch offer details for brand user ID fallback:', detailErr);
+        }
+      }
+
       if (!brandUserId) {
+        toastError('Unable to locate brand details for this campaign invitation.');
         onNavigate?.('messages');
         return;
       }
+
+      // Find existing or create a dedicated message thread for this campaign
       const res = await MessagingService.createConversation({
         participantId: brandUserId,
         campaignId: offer.campaignId,
       });
+
       if (res?.conversationId) {
-        setActiveConversationId(res?.conversationId);
+        setActiveConversationId(res.conversationId);
       }
+
       await refreshConversations();
       onNavigate?.('messages');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to open message conversation with brand:', err);
+      toastError(err?.message || 'Failed to open message conversation with brand.');
       onNavigate?.('messages');
+    } finally {
+      setMessagingOfferId(null);
     }
   };
 
@@ -410,6 +438,7 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
               onViewDetails={(off) => setSelectedOffer(off)}
               onMessageBrand={handleMessageBrand}
               isAccepting={isProcessingAction && confirmModal.offer?.id === offer.id}
+              isMessaging={messagingOfferId === offer.id}
             />
           ))}
         </div>
@@ -422,6 +451,7 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
           onClose={() => setSelectedOffer(null)}
           onAccept={requestAcceptOffer}
           onDecline={requestDeclineOffer}
+          onMessageBrand={handleMessageBrand}
         />
       )}
 

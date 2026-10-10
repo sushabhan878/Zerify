@@ -100,21 +100,27 @@ export class MessagingRepository {
     return rows.map((r) => r.userId);
   }
 
-  /** Finds an existing 1:1 DIRECT/COLLABORATION conversation between two users. */
-  async findConversationBetween(userA: string, userB: string) {
+  /** Finds an existing 1:1 DIRECT/COLLABORATION/CAMPAIGN conversation between two users, optionally scoped by campaignId. */
+  async findConversationBetween(userA: string, userB: string, campaignId?: string | null) {
+    const where: any = {
+      AND: [
+        { participants: { some: { userId: userA } } },
+        { participants: { some: { userId: userB } } },
+      ],
+    };
+
+    if (campaignId !== undefined) {
+      where.campaignId = campaignId;
+    }
+
     return this.prisma.conversation.findFirst({
-      where: {
-        AND: [
-          { participants: { some: { userId: userA } } },
-          { participants: { some: { userId: userB } } },
-        ],
-      },
+      where,
       include: {
         participants: {
           include: { user: { select: { id: true, name: true, email: true, role: true } } },
         },
       },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

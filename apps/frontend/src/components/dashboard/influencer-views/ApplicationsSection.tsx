@@ -6,6 +6,9 @@ import ApplicationKpiBar from './subcomponents/ApplicationKpiBar';
 import ApplicationCardItem, { ApplicationItem } from './subcomponents/ApplicationCardItem';
 import { ApplicationService } from '@/services/application.service';
 import { OfferService } from '@/services/offer.service';
+import { useMessaging } from '@/context/MessagingContext';
+import { MessagingService } from '@/services/messaging.service';
+import { useToast } from '@/components/ui/Toast';
 import { useCurrency } from '@/context/CurrencyContext';
 import LottieLoader from '@/components/ui/LottieLoader';
 
@@ -22,11 +25,14 @@ type ApplicationFilterTab =
   | 'DECLINED';
 
 export default function ApplicationsSection({ onNavigate }: ApplicationsSectionProps) {
+  const { setActiveConversationId, refreshConversations } = useMessaging();
+  const { toastError } = useToast();
   const { format: formatCurrency } = useCurrency();
   const [activeTab, setActiveTab] = useState<ApplicationFilterTab>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [applications, setApplications] = useState<ApplicationItem[]>([]);
+  const [messagingAppId, setMessagingAppId] = useState<string | number | null>(null);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -88,6 +94,8 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
 
           return {
             id: a.id,
+            campaignId: a.campaignId || a.campaign?.id,
+            brandUserId: a.campaign?.brandProfile?.userId || a.campaign?.brandProfile?.user?.id,
             brand: a.campaign?.brandProfile?.companyName || 'Verified Brand',
             brandLogo: a.campaign?.brandProfile?.logoUrl || a.campaign?.brandLogo || a.campaign?.coverImage || '',
             industry: a.campaign?.industry || a.campaign?.brandProfile?.industry || 'Technology & Creator',
@@ -110,6 +118,7 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
             counterRate: counterRateStr,
             counterNotes,
             offerId,
+            rawApplication: a,
           };
         });
         setApplications(formatted);
@@ -190,6 +199,45 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
           )
         );
       }
+    }
+  };
+
+  const handleMessageBrand = async (app: ApplicationItem) => {
+    try {
+      setMessagingAppId(app.id);
+
+      const brandUserId =
+        app.brandUserId ||
+        app.rawApplication?.campaign?.brandProfile?.userId ||
+        app.rawApplication?.campaign?.brandProfile?.user?.id;
+
+      const campaignId =
+        app.campaignId ||
+        app.rawApplication?.campaignId ||
+        app.rawApplication?.campaign?.id;
+
+      if (!brandUserId) {
+        toastError('Unable to locate brand contact information for this application.');
+        onNavigate?.('messages');
+        return;
+      }
+
+      const res = await MessagingService.createConversation({
+        participantId: brandUserId,
+        campaignId,
+      });
+
+      if (res?.conversationId) {
+        setActiveConversationId(res.conversationId);
+      }
+      await refreshConversations();
+      onNavigate?.('messages');
+    } catch (err: any) {
+      console.error('Failed to open message conversation with brand:', err);
+      toastError(err?.message || 'Failed to open message conversation with brand.');
+      onNavigate?.('messages');
+    } finally {
+      setMessagingAppId(null);
     }
   };
 
@@ -498,6 +546,8 @@ export default function ApplicationsSection({ onNavigate }: ApplicationsSectionP
               onWithdraw={handleWithdraw}
               onAcceptOffer={handleAcceptOffer}
               onDeclineOffer={handleDeclineOffer}
+              onMessageBrand={handleMessageBrand}
+              isMessaging={messagingAppId === application.id}
             />
           ))}
         </div>

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { X, Check, ShieldCheck, DollarSign, Calendar, Video, FileText } from 'lucide-react';
+import { X, Check, ShieldCheck, DollarSign, Calendar, Video, FileText, MessageSquare } from 'lucide-react';
 import { CampaignOfferItem } from '@/services/offer.service';
 
 interface OfferDetailModalProps {
@@ -11,6 +11,7 @@ interface OfferDetailModalProps {
   onClose: () => void;
   onAccept: (offerId: string) => void;
   onDecline: (offerId: string) => void;
+  onMessageBrand?: (offer: CampaignOfferItem) => void;
 }
 
 export default function OfferDetailModal({
@@ -18,6 +19,7 @@ export default function OfferDetailModal({
   onClose,
   onAccept,
   onDecline,
+  onMessageBrand,
 }: OfferDetailModalProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -109,16 +111,31 @@ export default function OfferDetailModal({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-white/10 bg-slate-950/40 flex items-center justify-between">
-          <button
-            onClick={() => {
-              onDecline(offer.id);
-              onClose();
-            }}
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/50 hover:text-rose-400 text-xs font-bold text-slate-400 transition-colors"
-          >
-            Decline Offer
-          </button>
+        <div className="p-4 border-t border-white/10 bg-slate-950/40 flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                onDecline(offer.id);
+                onClose();
+              }}
+              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/50 hover:text-rose-400 text-xs font-bold text-slate-400 transition-colors"
+            >
+              Decline Offer
+            </button>
+            {onMessageBrand && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onMessageBrand(offer);
+                }}
+                className="px-3.5 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-xs font-bold text-purple-300 hover:text-white transition-colors flex items-center gap-1.5"
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-purple-400" />
+                <span>Message Brand</span>
+              </button>
+            )}
+          </div>
           <button
             onClick={() => {
               onAccept(offer.id);

@@ -61,7 +61,11 @@ export class ConversationService {
     if (!me) throw new ForbiddenException(MESSAGING_ERRORS.UNAUTHORIZED);
     if (!other) throw new NotFoundException(MESSAGING_ERRORS.INVALID_PARTICIPANT);
 
-    const existing = await this.repository.findConversationBetween(userId, dto.participantId);
+    const existing = await this.repository.findConversationBetween(
+      userId,
+      dto.participantId,
+      dto.campaignId ?? null,
+    );
     if (existing) {
       return { conversation: existing, created: false };
     }
@@ -98,11 +102,12 @@ export class ConversationService {
     );
     if (byApplication) return byApplication;
 
-    // Reuse an existing thread between the two users rather than opening a
-    // second one — the users experience a single continuous chat.
+    // Reuse an existing thread for this campaign between the two users rather than opening a
+    // second one.
     const existing = await this.repository.findConversationBetween(
       params.brandUserId,
       params.influencerUserId,
+      params.campaignId,
     );
     if (existing) return existing;
 
