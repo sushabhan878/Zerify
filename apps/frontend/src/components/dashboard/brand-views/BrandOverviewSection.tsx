@@ -8,6 +8,7 @@ import CampaignPerformanceTrend from './overview/CampaignPerformanceTrend';
 import AnalyticsTopCampaigns from './analytics/AnalyticsTopCampaigns';
 import AnalyticsTopInfluencers from './analytics/AnalyticsTopInfluencers';
 import RecentActivityFeed from './overview/RecentActivityFeed';
+import UnderConstructionNotice from '../common/UnderConstructionNotice';
 import { BarChart3, TrendingUp } from 'lucide-react';
 
 interface BrandOverviewSectionProps {
@@ -32,6 +33,11 @@ export default function BrandOverviewSection({
 
   return (
     <div className="space-y-6">
+      {/* Production Deployment Under Construction Notice */}
+      <UnderConstructionNotice
+        customMessage="Brand analytics, real-time campaign performance tracking, and automated ROI intelligence are currently undergoing data pipeline integration for production deployment. Full telemetry will be live soon."
+      />
+
       {/* 1. Analytics & Overview Filter Bar */}
       <AnalyticsFilterBar
         dateRange={dateRange}
