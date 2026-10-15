@@ -60,16 +60,6 @@ export default function Money({
     >
       <span className="font-semibold text-inherit">{displayString}</span>
 
-      {/* Subtle indicator if value is cross-currency converted */}
-      {!isSameCurrency && showOriginal && (
-        <span
-          className={`text-[10px] text-slate-400 font-medium tracking-tight cursor-help underline decoration-dotted decoration-purple-400/40 select-none ${subTextClassName}`}
-          title={`Original: ${originalString} (${origNorm})`}
-        >
-          ≈
-        </span>
-      )}
-
       {/* Floating Rich Tooltip (PRD §78 & §114) */}
       {!isSameCurrency && showTooltip && (
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-50 pointer-events-none min-w-[210px] p-2.5 rounded-xl bg-slate-950/95 border border-purple-500/40 shadow-2xl backdrop-blur-xl text-left animate-in fade-in zoom-in-95 duration-150">

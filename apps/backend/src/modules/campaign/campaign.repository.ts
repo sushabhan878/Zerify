@@ -248,6 +248,13 @@ export class CampaignRepository {
       where: {
         campaignId,
         ...(status ? { status } : {}),
+        NOT: {
+          OR: [
+            { reviewNotes: 'DIRECT_INVITE' },
+            { applicationMessage: 'Official brand collaboration invite' },
+            { applicationMessage: 'Direct brand invitation' },
+          ],
+        },
       },
       include: {
         influencerProfile: {
@@ -348,6 +355,9 @@ export class CampaignRepository {
             campaign: {
               include: { brandProfile: true, deliverables: true },
             },
+            influencerProfile: {
+              include: { user: true },
+            },
             socialAccount: true,
           },
         },
@@ -362,7 +372,9 @@ export class CampaignRepository {
       include: {
         application: {
           include: {
-            influencerProfile: true,
+            influencerProfile: {
+              include: { user: true },
+            },
             socialAccount: true,
           },
         },

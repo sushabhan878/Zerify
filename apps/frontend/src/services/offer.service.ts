@@ -70,4 +70,31 @@ export const OfferService = {
   async getCampaignOffers(campaignId: string): Promise<CampaignOfferItem[]> {
     return apiRequest(`/campaigns/${campaignId}/offers`);
   },
+
+  // Brand: Direct Invite Creator to Campaign
+  async inviteCreatorToCampaign(campaignId: string, data: {
+    influencerProfileId: string;
+    compensationAmount: number;
+    compensationCurrency?: string;
+    compensationPaymentModel?: string;
+    customNotes?: string;
+    startDate?: string;
+    endDate?: string;
+    responseDeadline?: string;
+  }): Promise<CampaignOfferItem> {
+    return apiRequest(`/campaigns/${campaignId}/invite`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Brand: Get list of campaign IDs where creator is already invited
+  async getInvitedCampaignIds(creatorId: string): Promise<string[]> {
+    try {
+      const res = await apiRequest(`/creators/${creatorId}/invited-campaign-ids`);
+      return Array.isArray(res) ? res : [];
+    } catch {
+      return [];
+    }
+  },
 };

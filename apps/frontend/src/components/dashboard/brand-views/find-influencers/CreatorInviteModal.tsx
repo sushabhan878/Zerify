@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Check, Loader2 } from 'lucide-react';
+import { X, Send, Check, Loader2, AlertCircle } from 'lucide-react';
 import { CreatorItem } from './CreatorCard';
 import { CampaignItem, CampaignService } from '@/services/campaign.service';
+import { OfferService } from '@/services/offer.service';
 import { useCurrency } from '@/context/CurrencyContext';
 import CampaignSelectDropdown from './invite/CampaignSelectDropdown';
 import {
@@ -30,14 +31,24 @@ export default function CreatorInviteModal({ creator, onClose }: CreatorInviteMo
   const [message, setMessage] = useState<string>('');
   const [isSending, setIsSending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
 
-  // Sync invited campaign IDs for this creator
+  // Sync invited campaign IDs for this creator from DB + localStorage
   useEffect(() => {
     if (creator?.id) {
       const persisted = getInvitedCampaignIdsForCreator(creator.id);
       const fromCreator = (creator as any).invitedCampaignIds || [];
-      const merged = Array.from(new Set([...persisted, ...fromCreator]));
-      setInvitedIds(merged);
+      const initial = Array.from(new Set([...persisted, ...fromCreator]));
+      setInvitedIds(initial);
+
+      // Fetch from database
+      OfferService.getInvitedCampaignIds(creator.id)
+        .then((dbInvited) => {
+          if (Array.isArray(dbInvited) && dbInvited.length > 0) {
+            setInvitedIds((prev) => Array.from(new Set([...prev, ...dbInvited])));
+          }
+        })
+        .catch(() => {});
     }
   }, [creator]);
 
@@ -72,14 +83,28 @@ export default function CreatorInviteModal({ creator, onClose }: CreatorInviteMo
 
   if (!creator) return null;
 
-  const handleSend = () => {
-    if (!selectedCampaign) return;
+  const handleSend = async () => {
+    if (!selectedCampaign || !creator) return;
 
     setIsSending(true);
-    setTimeout(() => {
-      // Record this invitation so this campaign cannot be selected again for this creator
+    setSendError(null);
+    try {
+      // Call backend API to persist offer in the PostgreSQL database
+      await OfferService.inviteCreatorToCampaign(selectedCampaign.id, {
+        influencerProfileId: creator.id,
+        compensationAmount: Number(proposedBudget) || 250,
+        compensationCurrency: currency || 'USD',
+        customNotes: message.trim() || undefined,
+      });
+
+      // Also record in local registry
       recordCampaignInvite(creator.id, selectedCampaign.id);
       setInvitedIds((prev) => [...prev, selectedCampaign.id]);
+
+      // Trigger instantaneous live refresh for any open campaign dashboards
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('zerify_offers_updated'));
+      }
 
       setIsSending(false);
       setIsSuccess(true);
@@ -87,7 +112,10 @@ export default function CreatorInviteModal({ creator, onClose }: CreatorInviteMo
         setIsSuccess(false);
         onClose();
       }, 1400);
-    }, 700);
+    } catch (err: any) {
+      setIsSending(false);
+      setSendError(err.message || 'Failed to send invitation. Please try again.');
+    }
   };
 
   const isSelectedAlreadyInvited = Boolean(
@@ -187,6 +215,21 @@ export default function CreatorInviteModal({ creator, onClose }: CreatorInviteMo
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-xs font-medium text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-500 resize-none transition-colors leading-relaxed"
                 />
               </div>
+
+              {/* Error Message if Send Fails */}
+              <AnimatePresence>
+                {sendError && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-center gap-2"
+                  >
+                    <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                    <span className="flex-1">{sendError}</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Action Buttons */}
               <div className="pt-1 flex items-center justify-end gap-2.5">

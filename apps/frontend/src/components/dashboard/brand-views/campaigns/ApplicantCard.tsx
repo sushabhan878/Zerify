@@ -114,10 +114,64 @@ export default function ApplicantCard({
           </div>
         </div>
 
-        {/* Right Badge: Match Score Only */}
-        <div className="flex items-center shrink-0">
-          <div className="px-3 py-1 rounded-full bg-purple-950/70 border border-purple-500/35 flex items-center gap-1.5 text-xs font-black text-purple-200 shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-purple-300 animate-pulse" />
+        {/* Right Badges: Status + Match Score */}
+        <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+          {(() => {
+            const badge = (() => {
+              switch (application.status) {
+                case 'OFFER_ACCEPTED':
+                  return {
+                    label: 'Accepted',
+                    bg: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+                    dot: 'bg-emerald-400',
+                  };
+                case 'OFFER_SENT':
+                  return {
+                    label: 'Offer Sent',
+                    bg: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30',
+                    dot: 'bg-indigo-400 animate-pulse',
+                  };
+                case 'SHORTLISTED':
+                  return {
+                    label: 'Shortlisted',
+                    bg: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+                    dot: 'bg-amber-400',
+                  };
+                case 'REJECTED':
+                case 'OFFER_DECLINED':
+                  return {
+                    label: 'Declined',
+                    bg: 'bg-rose-500/15 text-rose-400 border-rose-500/30',
+                    dot: 'bg-rose-400',
+                  };
+                case 'UNDER_REVIEW':
+                  return {
+                    label: 'Under Review',
+                    bg: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
+                    dot: 'bg-cyan-400',
+                  };
+                case 'APPLIED':
+                default:
+                  return {
+                    label: 'New Pitch',
+                    bg: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
+                    dot: 'bg-purple-400',
+                  };
+              }
+            })();
+
+            return (
+              <div
+                className={`px-2.5 py-1 rounded-full border text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm ${badge.bg}`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
+                <span>{badge.label}</span>
+              </div>
+            );
+          })()}
+
+          <div className="px-2.5 py-1 rounded-full bg-purple-950/70 border border-purple-500/35 flex items-center gap-1 text-xs font-black text-purple-200 shadow-sm">
+            <Sparkles className="w-3 h-3 text-purple-300 animate-pulse" />
             <span>{match.score || 95}% Match</span>
           </div>
         </div>
@@ -213,11 +267,43 @@ export default function ApplicantCard({
                 <span>Accept</span>
               </button>
             </>
+          ) : application.status === 'SHORTLISTED' ? (
+            <>
+              <button
+                onClick={() => onReject(application.id)}
+                type="button"
+                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 hover:text-rose-300 border border-white/5 hover:border-rose-500/30 text-xs font-bold text-slate-400 transition-all cursor-pointer"
+              >
+                Reject
+              </button>
+              <button
+                onClick={() => onSendOffer(application)}
+                type="button"
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white flex items-center gap-1.5 shadow-lg shadow-purple-950/40 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>Send Offer</span>
+              </button>
+            </>
+          ) : application.status === 'OFFER_SENT' ? (
+            <span className="px-3.5 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/25 text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+              <Send className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Offer Sent • Awaiting Response</span>
+            </span>
+          ) : application.status === 'OFFER_ACCEPTED' ? (
+            <span className="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Offer Accepted • In Collab</span>
+            </span>
+          ) : application.status === 'REJECTED' || application.status === 'OFFER_DECLINED' ? (
+            <span className="px-3.5 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/25 text-xs font-bold text-rose-400">
+              Application Declined
+            </span>
           ) : (
             <button
               onClick={() => onSendOffer(application)}
               type="button"
-              className="px-6 py-2 min-w-[140px] justify-center rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white flex items-center gap-1.5 shadow-lg shadow-purple-950/40 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white flex items-center gap-1.5 shadow-lg shadow-purple-950/40 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
               <span>Send Offer</span>

@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { OfferService } from './offer.service';
 import { CreateOfferDto } from './dto/create-offer.dto';
+import { InviteCreatorDto } from './dto/invite-creator.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
@@ -67,5 +68,28 @@ export class OfferController {
   @ApiOperation({ summary: 'List all offers sent for a campaign' })
   async listCampaignOffers(@Param('campaignId') campaignId: string) {
     return this.offerService.listOffersForCampaign(campaignId);
+  }
+
+  @Post('campaigns/:campaignId/invite')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Brand directly invites a creator to a campaign' })
+  async inviteCreator(
+    @Req() req: any,
+    @Param('campaignId') campaignId: string,
+    @Body() dto: InviteCreatorDto,
+  ) {
+    return this.offerService.inviteCreator(req.user.id, campaignId, dto);
+  }
+
+  @Get('creators/:creatorId/invited-campaign-ids')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get campaign IDs where creator is already invited' })
+  async getInvitedCampaignIds(
+    @Req() req: any,
+    @Param('creatorId') creatorId: string,
+  ) {
+    return this.offerService.getInvitedCampaignIdsForBrand(req.user.id, creatorId);
   }
 }

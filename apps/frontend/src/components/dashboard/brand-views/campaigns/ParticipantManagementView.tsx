@@ -10,23 +10,39 @@ import { isComplete } from '@/services/deliverable-workflow';
 interface ParticipantManagementViewProps {
   participants: any[];
   onRefresh: () => void;
+  onViewOffers?: () => void;
+  offersCount?: number;
 }
 
 export default function ParticipantManagementView({
   participants,
   onRefresh,
+  onViewOffers,
+  offersCount = 0,
 }: ParticipantManagementViewProps) {
   const { currency } = useCurrency();
   const [selectedParticipantId, setSelectedParticipantId] = useState<string | null>(null);
 
   if (participants.length === 0) {
     return (
-      <div className="p-12 rounded-2xl bg-slate-950/40 border border-dashed border-white/10 text-center space-y-2">
+      <div className="p-12 rounded-2xl bg-slate-950/40 border border-dashed border-white/10 text-center space-y-3">
         <Users className="w-8 h-8 text-slate-600 mx-auto" />
-        <h4 className="text-xs font-bold text-slate-300">No confirmed creators yet</h4>
-        <p className="text-[11px] text-slate-500">
-          When shortlisted influencers accept your collaboration offers, their active project workspace will appear here.
-        </p>
+        <div className="space-y-1">
+          <h4 className="text-sm font-bold text-slate-300">No active collaborations yet</h4>
+          <p className="text-xs text-slate-500 max-w-md mx-auto">
+            When shortlisted influencers accept your collaboration offers, their active workspace, deliverable drafts, and review pipeline will appear here.
+          </p>
+        </div>
+        {onViewOffers && (
+          <button
+            onClick={onViewOffers}
+            type="button"
+            className="px-3.5 py-1.5 rounded-xl bg-purple-600/20 text-purple-300 border border-purple-500/30 hover:bg-purple-600/30 text-xs font-bold transition-colors inline-flex items-center gap-1.5"
+          >
+            <span>View Sent Offers ({offersCount})</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
     );
   }

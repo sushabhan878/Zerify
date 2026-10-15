@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -52,6 +52,7 @@ export default function CampaignOverviewDashboard({
   const [offers, setOffers] = useState<CampaignOfferItem[]>([]);
   const [participants, setParticipants] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<'applicants' | 'participants' | 'offers' | 'brief'>('applicants');
 
   // Modals & In-Platform Profile state
@@ -64,31 +65,46 @@ export default function CampaignOverviewDashboard({
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewTargetInfluencer, setReviewTargetInfluencer] = useState<{ id: string; name: string } | null>(null);
 
-  const loadData = async () => {
+  const isDirectBrandInvite = (app: CampaignApplicationItem) =>
+    app.reviewNotes === 'DIRECT_INVITE' ||
+    app.applicationMessage === 'Official brand collaboration invite' ||
+    app.applicationMessage === 'Direct brand invitation';
+
+  const inboundApplications = useMemo(
+    () => applications.filter((app) => !isDirectBrandInvite(app)),
+    [applications],
+  );
+
+  const loadData = async (isManual = false) => {
+    if (isManual) setIsRefreshing(true);
     try {
-      const [campData, appData, offerData, partData] = await Promise.all([
+      const [campRes, appRes, offerRes, partRes] = await Promise.allSettled([
         CampaignService.getCampaignDetails(campaignId),
         ApplicationService.getCampaignApplications(campaignId),
         OfferService.getCampaignOffers(campaignId),
         DeliverableService.getCampaignParticipants(campaignId),
       ]);
-      setCampaign(campData);
-      setApplications(appData);
-      setOffers(offerData);
-      setParticipants(partData);
 
-      if (campData.status === 'COMPLETED' || campData.status === 'CANCELLED') {
-        try {
-          const status = await ReviewService.getReviewStatus(campaignId);
-          setReviewStatus(status);
-        } catch {
-          // Review status fetch failed silently
+      if (campRes.status === 'fulfilled' && campRes.value) {
+        setCampaign(campRes.value);
+        if (campRes.value.status === 'COMPLETED' || campRes.value.status === 'CANCELLED') {
+          ReviewService.getReviewStatus(campaignId).then(setReviewStatus).catch(() => {});
         }
+      }
+      if (appRes.status === 'fulfilled' && Array.isArray(appRes.value)) {
+        setApplications(appRes.value);
+      }
+      if (offerRes.status === 'fulfilled' && Array.isArray(offerRes.value)) {
+        setOffers(offerRes.value);
+      }
+      if (partRes.status === 'fulfilled' && Array.isArray(partRes.value)) {
+        setParticipants(partRes.value);
       }
     } catch (err) {
       console.error('Failed to load campaign data', err);
     } finally {
       setIsLoading(false);
+      if (isManual) setIsRefreshing(false);
     }
   };
 
@@ -102,6 +118,22 @@ export default function CampaignOverviewDashboard({
 
   useEffect(() => {
     loadData();
+
+    const handleUpdate = () => {
+      loadData();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('zerify_offers_updated', handleUpdate);
+      window.addEventListener('focus', handleUpdate);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('zerify_offers_updated', handleUpdate);
+        window.removeEventListener('focus', handleUpdate);
+      }
+    };
   }, [campaignId]);
 
   const handleShortlist = async (appId: string) => {
@@ -253,6 +285,7 @@ export default function CampaignOverviewDashboard({
                   <Money
                     amount={Number(campaign.budgetTotalAmount || 0)}
                     currency={campaign.budgetCurrency || currency}
+                    showOriginal={false}
                   />
                 </span>
               </div>
@@ -268,47 +301,63 @@ export default function CampaignOverviewDashboard({
           </div>
         </div>
 
-        {/* 4 Summary Stats Bar - Vertical Line Separated with Big Numbers without Headings or Horizontal Line */}
+        {/* 4 Summary Stats Bar - Vertical Line Separated with Big Numbers - Clickable Shortcuts */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-2 relative z-10">
-          <div className="space-y-1">
-            <span className="text-3xl sm:text-4xl font-black text-white tracking-tight block">
-              {applications.length}
+          <button
+            type="button"
+            onClick={() => setActiveTab('applicants')}
+            className="text-left space-y-1 group transition-transform hover:scale-[1.02] cursor-pointer"
+          >
+            <span className="text-3xl sm:text-4xl font-black text-white group-hover:text-purple-300 transition-colors tracking-tight block">
+              {inboundApplications.length}
             </span>
-            <div className="flex items-center gap-1.5 text-purple-300/80 text-xs font-bold">
+            <div className="flex items-center gap-1.5 text-purple-300/80 group-hover:text-purple-200 text-xs font-bold transition-colors">
               <Users className="w-3.5 h-3.5 text-purple-400" />
-              <span>Pitches received</span>
+              <span>Applications & Pitches</span>
             </div>
-          </div>
+          </button>
 
-          <div className="space-y-1 sm:border-l sm:border-white/10 sm:pl-6">
-            <span className="text-3xl sm:text-4xl font-black text-indigo-300 tracking-tight block">
+          <button
+            type="button"
+            onClick={() => setActiveTab('offers')}
+            className="text-left space-y-1 sm:border-l sm:border-white/10 sm:pl-6 group transition-transform hover:scale-[1.02] cursor-pointer"
+          >
+            <span className="text-3xl sm:text-4xl font-black text-indigo-300 group-hover:text-indigo-200 transition-colors tracking-tight block">
               {offers.length}
             </span>
-            <div className="flex items-center gap-1.5 text-indigo-300/80 text-xs font-bold">
+            <div className="flex items-center gap-1.5 text-indigo-300/80 group-hover:text-indigo-200 text-xs font-bold transition-colors">
               <Send className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Pending responses</span>
+              <span>Offers Sent ({offers.filter((o) => o.status === 'PENDING').length} pending)</span>
             </div>
-          </div>
+          </button>
 
-          <div className="space-y-1 sm:border-l sm:border-white/10 sm:pl-6">
-            <span className="text-3xl sm:text-4xl font-black text-emerald-400 tracking-tight block">
+          <button
+            type="button"
+            onClick={() => setActiveTab('participants')}
+            className="text-left space-y-1 sm:border-l sm:border-white/10 sm:pl-6 group transition-transform hover:scale-[1.02] cursor-pointer"
+          >
+            <span className="text-3xl sm:text-4xl font-black text-emerald-400 group-hover:text-emerald-300 transition-colors tracking-tight block">
               {participants.length}
             </span>
-            <div className="flex items-center gap-1.5 text-emerald-300/80 text-xs font-bold">
+            <div className="flex items-center gap-1.5 text-emerald-300/80 group-hover:text-emerald-200 text-xs font-bold transition-colors">
               <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Active creators</span>
+              <span>Active Collabs</span>
             </div>
-          </div>
+          </button>
 
-          <div className="space-y-1 sm:border-l sm:border-white/10 sm:pl-6">
-            <span className="text-3xl sm:text-4xl font-black text-amber-300 tracking-tight block">
+          <button
+            type="button"
+            onClick={() => setActiveTab('participants')}
+            className="text-left space-y-1 sm:border-l sm:border-white/10 sm:pl-6 group transition-transform hover:scale-[1.02] cursor-pointer"
+          >
+            <span className="text-3xl sm:text-4xl font-black text-amber-300 group-hover:text-amber-200 transition-colors tracking-tight block">
               {participants.reduce((sum, p) => sum + (p.deliverables?.length || 0), 0)}
             </span>
-            <div className="flex items-center gap-1.5 text-amber-300/80 text-xs font-bold">
+            <div className="flex items-center gap-1.5 text-amber-300/80 group-hover:text-amber-200 text-xs font-bold transition-colors">
               <Video className="w-3.5 h-3.5 text-amber-400" />
-              <span>Content deliverables</span>
+              <span>Content Deliverables</span>
             </div>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -351,7 +400,7 @@ export default function CampaignOverviewDashboard({
           </div>
         )}
 
-      {/* Navigation Sub-Tabs */}
+      {/* Navigation Tabs in Logical Lifecycle Order */}
       <div className="flex items-center gap-2 border-b border-white/10 pb-2 overflow-x-auto no-scrollbar">
         <button
           onClick={() => setActiveTab('applicants')}
@@ -362,19 +411,7 @@ export default function CampaignOverviewDashboard({
           }`}
         >
           <Users className="w-3.5 h-3.5" />
-          <span>Applicants ({applications.length})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('participants')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
-            activeTab === 'participants'
-              ? 'bg-purple-600 text-white shadow-md'
-              : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
-          }`}
-        >
-          <CheckCircle className="w-3.5 h-3.5" />
-          <span>Active Collabs ({participants.length})</span>
+          <span>Applications ({inboundApplications.length})</span>
         </button>
 
         <button
@@ -388,13 +425,25 @@ export default function CampaignOverviewDashboard({
           <Send className="w-3.5 h-3.5" />
           <span>Offers Sent ({offers.length})</span>
         </button>
+
+        <button
+          onClick={() => setActiveTab('participants')}
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
+            activeTab === 'participants'
+              ? 'bg-purple-600 text-white shadow-md'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
+          }`}
+        >
+          <CheckCircle className="w-3.5 h-3.5" />
+          <span>Active Collabs ({participants.length})</span>
+        </button>
       </div>
 
       {/* Tab Content */}
       <div>
         {activeTab === 'applicants' && (
           <ApplicationListView
-            applications={applications}
+            applications={inboundApplications}
             onViewDetails={(app) => setSelectedAppForDetail(app)}
             onViewProfile={(creator) => setSelectedCreatorForProfile(creator)}
             onShortlist={handleShortlist}
@@ -406,12 +455,21 @@ export default function CampaignOverviewDashboard({
           />
         )}
 
-        {activeTab === 'participants' && (
-          <ParticipantManagementView participants={participants} onRefresh={loadData} />
+        {activeTab === 'offers' && (
+          <OfferManagementView
+            offers={offers}
+            onRefresh={loadData}
+            onViewCollab={() => setActiveTab('participants')}
+          />
         )}
 
-        {activeTab === 'offers' && (
-          <OfferManagementView offers={offers} onRefresh={loadData} />
+        {activeTab === 'participants' && (
+          <ParticipantManagementView
+            participants={participants}
+            onRefresh={loadData}
+            onViewOffers={() => setActiveTab('offers')}
+            offersCount={offers.length}
+          />
         )}
       </div>
 
