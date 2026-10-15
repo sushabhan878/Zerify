@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import {
   Users,
   ShieldCheck,
-  ChevronRight,
   Calendar,
   Layers,
   Sparkles,
@@ -316,7 +315,7 @@ export default function BrandCampaignCard({ campaign: c, onClick }: BrandCampaig
         </div>
       </div>
 
-      {/* Row 4: Footer Meta & Manage Button */}
+      {/* Row 4: Footer Meta Dates */}
       <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
         <div className="flex items-center gap-4 text-xs text-slate-400 font-medium">
           {formattedDate && (
@@ -333,18 +332,6 @@ export default function BrandCampaignCard({ campaign: c, onClick }: BrandCampaig
             </span>
           )}
         </div>
-
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick();
-          }}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-black text-white shadow-md shadow-purple-950/40 flex items-center justify-center gap-1.5 transition-all group/btn"
-        >
-          <span>Manage Campaign</span>
-          <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
-        </button>
       </div>
     </motion.div>
   );
