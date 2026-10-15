@@ -244,21 +244,44 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
           </AnimatePresence>
         </div>
 
-        <div>
-          <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
-            Minimum Engagement Rate (%)
-          </label>
-          <input
-            type="text"
-            inputMode="decimal"
-            placeholder="e.g. 2.5"
-            value={socialReq.minEngagementRate || ''}
-            onChange={(e) => {
-              const val = e.target.value.replace(/[^0-9.]/g, '');
-              handleSocialChange('minEngagementRate', val ? Number(val) : undefined);
-            }}
-            className="w-full px-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
-          />
+        {/* Minimum Engagement Rate Slider */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider">
+              Min Engagement Rate
+            </label>
+            <span className="px-2 py-0.5 rounded-md bg-purple-500/20 border border-purple-500/40 text-purple-300 text-[11px] font-black">
+              {Number(socialReq.minEngagementRate || 0) > 0
+                ? `${Number(socialReq.minEngagementRate).toFixed(1)}%`
+                : 'Any (0%)'}
+            </span>
+          </div>
+
+          <div className="relative pt-1 pb-0.5">
+            <input
+              type="range"
+              min={0}
+              max={10}
+              step={0.5}
+              value={Number(socialReq.minEngagementRate || 0)}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                handleSocialChange('minEngagementRate', val > 0 ? val : undefined);
+              }}
+              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-400"
+              style={{
+                background: `linear-gradient(to right, #a855f7 0%, #a855f7 ${(Number(socialReq.minEngagementRate || 0) / 10) * 100}%, #1e293b ${(Number(socialReq.minEngagementRate || 0) / 10) * 100}%, #1e293b 100%)`,
+              }}
+            />
+          </div>
+
+          <div className="flex justify-between text-[10px] text-slate-400 font-semibold px-0.5 select-none">
+            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', undefined)}>Any</span>
+            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 2.5)}>2.5%</span>
+            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 5.0)}>5.0%</span>
+            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 7.5)}>7.5%</span>
+            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 10.0)}>10%</span>
+          </div>
         </div>
 
         <div className="flex items-center gap-3 pb-1">

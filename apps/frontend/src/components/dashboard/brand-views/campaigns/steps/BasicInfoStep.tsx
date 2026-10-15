@@ -255,13 +255,22 @@ export default function BasicInfoStep({ formData, onChange }: BasicInfoStepProps
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
-
             Application Deadline
           </label>
           <CustomDatePicker
             value={formData.applicationDeadline || ''}
-            onChange={(val) => onChange('applicationDeadline', val)}
+            onChange={(val) => {
+              onChange('applicationDeadline', val);
+              if (val && formData.startDate && formData.startDate < val) {
+                onChange('startDate', '');
+              }
+              if (val && formData.endDate && formData.endDate < val) {
+                onChange('endDate', '');
+              }
+            }}
             placeholder="Select deadline"
+            minDate={new Date().toLocaleDateString('en-CA')}
+            position="top"
           />
         </div>
 
@@ -271,8 +280,15 @@ export default function BasicInfoStep({ formData, onChange }: BasicInfoStepProps
           </label>
           <CustomDatePicker
             value={formData.startDate || ''}
-            onChange={(val) => onChange('startDate', val)}
+            onChange={(val) => {
+              onChange('startDate', val);
+              if (val && formData.endDate && formData.endDate < val) {
+                onChange('endDate', '');
+              }
+            }}
             placeholder="Select start date"
+            minDate={formData.applicationDeadline || new Date().toLocaleDateString('en-CA')}
+            position="top"
           />
         </div>
 
@@ -284,6 +300,9 @@ export default function BasicInfoStep({ formData, onChange }: BasicInfoStepProps
             value={formData.endDate || ''}
             onChange={(val) => onChange('endDate', val)}
             placeholder="Select end date"
+            minDate={formData.startDate || formData.applicationDeadline || new Date().toLocaleDateString('en-CA')}
+            position="top"
+            align="right"
           />
         </div>
       </div>

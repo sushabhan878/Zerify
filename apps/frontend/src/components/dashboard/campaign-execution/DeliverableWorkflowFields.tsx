@@ -1,12 +1,243 @@
 'use client';
 
-import { input } from './ExecutionUi';
+import React from 'react';
+import CustomDatePicker from '@/components/ui/CustomDatePicker';
+import {
+  Check,
+  ShieldCheck,
+  Share2,
+  Clock,
+  Calendar,
+  HardDrive,
+  Layers,
+  Image as ImageIcon,
+  Video,
+  FileText,
+} from 'lucide-react';
 
-export default function DeliverableWorkflowFields({ item, onChange }: { item: any; onChange: (field: string, value: unknown) => void }) {
-  return <fieldset className="space-y-3 rounded-xl border border-purple-500/20 p-4"><legend className="px-2 text-xs font-semibold text-purple-200">Submission & completion rules</legend>
-    <div className="grid gap-3 sm:grid-cols-2">{[['requiresPreApproval', 'Require approval before publication'], ['requiresPublication', 'Require a published social post'], ['allowLateSubmission', 'Allow late submissions (show overdue)']].map(([key, label]) => <label key={key} className="flex gap-2 text-xs text-slate-300"><input type="checkbox" checked={item[key] ?? true} onChange={e => onChange(key, e.target.checked)} />{label}</label>)}</div>
-    <div className="grid gap-3 sm:grid-cols-3"><label className="text-xs text-slate-300">Submission deadline<input className={`${input} mt-1`} type="date" value={item.dueDate?.slice(0, 10) || ''} onChange={e => onChange('dueDate', e.target.value || undefined)} /></label><label className="text-xs text-slate-300">Publication deadline<input className={`${input} mt-1`} type="date" value={item.publicationDeadline?.slice(0, 10) || ''} onChange={e => onChange('publicationDeadline', e.target.value || undefined)} /></label><label className="text-xs text-slate-300">Max file size (MB)<input className={`${input} mt-1`} type="number" min={1} max={100} value={item.maxFileSizeMb ?? 100} onChange={e => onChange('maxFileSizeMb', Number(e.target.value))} /></label></div>
-    <label className="block text-xs text-slate-300">Allowed files<select className={`${input} mt-1`} value={item.allowedMimeTypes?.every((m: string) => m.startsWith('image/')) ? 'images' : item.allowedMimeTypes?.every((m: string) => m.startsWith('video/')) ? 'videos' : 'both'} onChange={e => onChange('allowedMimeTypes', e.target.value === 'images' ? ['image/jpeg', 'image/png', 'image/webp'] : e.target.value === 'videos' ? ['video/mp4', 'video/quicktime'] : ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/quicktime'])}><option value="both">Images and video</option><option value="images">Images only</option><option value="videos">MP4 / MOV only</option></select></label>
-    <p className="text-xs text-slate-500">Each quantity becomes an independent deliverable. Accepted requirements are preserved even if the campaign is edited later.</p>
-  </fieldset>;
+interface DeliverableWorkflowFieldsProps {
+  item: any;
+  onChange: (field: string, value: unknown) => void;
+}
+
+const FILE_TYPE_OPTIONS = [
+  {
+    key: 'both',
+    title: 'Images & Video',
+    subtitle: 'JPG, PNG, WEBP, MP4, MOV',
+    icon: Layers,
+    mimes: ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/quicktime'],
+  },
+  {
+    key: 'images',
+    title: 'Images Only',
+    subtitle: 'JPG, PNG, WEBP (Stills)',
+    icon: ImageIcon,
+    mimes: ['image/jpeg', 'image/png', 'image/webp'],
+  },
+  {
+    key: 'videos',
+    title: 'MP4 / MOV Only',
+    subtitle: 'Video clips & reels',
+    icon: Video,
+    mimes: ['video/mp4', 'video/quicktime'],
+  },
+];
+
+export default function DeliverableWorkflowFields({ item, onChange }: DeliverableWorkflowFieldsProps) {
+  // Determine selected mime configuration
+  const currentFileType =
+    item.allowedMimeTypes && item.allowedMimeTypes.length > 0
+      ? item.allowedMimeTypes.every((m: string) => m.startsWith('image/'))
+        ? 'images'
+        : item.allowedMimeTypes.every((m: string) => m.startsWith('video/'))
+        ? 'videos'
+        : 'both'
+      : 'both';
+
+  const rulesConfig = [
+    {
+      key: 'requiresPreApproval',
+      label: 'Require approval before publication',
+      icon: ShieldCheck,
+      checked: item.requiresPreApproval ?? true,
+    },
+    {
+      key: 'requiresPublication',
+      label: 'Require a published social post',
+      icon: Share2,
+      checked: item.requiresPublication ?? true,
+    },
+    {
+      key: 'allowLateSubmission',
+      label: 'Allow late submissions (show overdue)',
+      icon: Clock,
+      checked: item.allowLateSubmission ?? true,
+    },
+  ];
+
+  return (
+    <div className="space-y-4 rounded-2xl border border-purple-500/25 bg-slate-950/40 p-4 backdrop-blur-md">
+      {/* Section Header */}
+      <div className="flex items-center justify-between border-b border-purple-400/15 pb-2.5">
+        <span className="text-xs font-bold text-purple-200 uppercase tracking-wider flex items-center gap-1.5">
+          <FileText className="w-3.5 h-3.5 text-purple-400" />
+          <span>Workflow & Submission Rules</span>
+        </span>
+        <span className="text-[10px] text-purple-300/70 font-medium">Standard Guidelines</span>
+      </div>
+
+      {/* Rules Toggles / Checkbox Buttons */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        {rulesConfig.map((rule) => {
+          const isChecked = rule.checked;
+          const Icon = rule.icon;
+
+          return (
+            <button
+              type="button"
+              key={rule.key}
+              onClick={() => onChange(rule.key, !isChecked)}
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                isChecked
+                  ? 'bg-purple-600/15 border-purple-400/70 text-white shadow-[0_0_12px_rgba(168,85,247,0.15)]'
+                  : 'bg-slate-900/60 border-white/10 text-slate-400 hover:border-purple-400/30 hover:bg-slate-900/90 hover:text-slate-200'
+              }`}
+            >
+              <div
+                className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-all ${
+                  isChecked
+                    ? 'bg-purple-600 border-purple-400 text-white shadow-[0_0_8px_rgba(168,85,247,0.5)]'
+                    : 'bg-slate-950 border-white/20 text-transparent hover:border-purple-400/50'
+                }`}
+              >
+                <Check className={`w-3 h-3 stroke-[3] transition-transform ${isChecked ? 'scale-100' : 'scale-0'}`} />
+              </div>
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Icon className={`w-3.5 h-3.5 shrink-0 ${isChecked ? 'text-purple-300' : 'text-slate-500'}`} />
+                <span className="text-xs font-medium leading-tight truncate">{rule.label}</span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Deadlines & File Size */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
+        <div>
+          <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-purple-400" />
+            <span>Submission Deadline</span>
+          </label>
+          <CustomDatePicker
+            value={item.dueDate ? item.dueDate.slice(0, 10) : ''}
+            onChange={(val) => {
+              onChange('dueDate', val || undefined);
+              if (val && item.publicationDeadline && item.publicationDeadline < val) {
+                onChange('publicationDeadline', '');
+              }
+            }}
+            placeholder="Select submission deadline"
+            minDate={new Date().toLocaleDateString('en-CA')}
+            position="top"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-purple-400" />
+            <span>Publication Deadline</span>
+          </label>
+          <CustomDatePicker
+            value={item.publicationDeadline ? item.publicationDeadline.slice(0, 10) : ''}
+            onChange={(val) => onChange('publicationDeadline', val || undefined)}
+            placeholder="Select publication deadline"
+            minDate={item.dueDate ? item.dueDate.slice(0, 10) : new Date().toLocaleDateString('en-CA')}
+            position="top"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+            <HardDrive className="w-3.5 h-3.5 text-purple-400" />
+            <span>Max File Size</span>
+          </label>
+          <div className="relative">
+            <input
+              type="number"
+              min={1}
+              max={500}
+              value={item.maxFileSizeMb ?? 100}
+              onChange={(e) => onChange('maxFileSizeMb', Number(e.target.value))}
+              className="w-full px-3.5 py-2.5 bg-slate-950/80 border border-white/15 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-400/80 transition-all font-semibold"
+            />
+            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-purple-300/80 pointer-events-none">
+              MB
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Allowed Files (Radio Button Cards) */}
+      <div className="pt-1">
+        <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-2 flex items-center justify-between">
+          <span>Allowed File Formats</span>
+          <span className="text-[11px] font-normal normal-case text-slate-400">Choose acceptable upload formats</span>
+        </label>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5" role="radiogroup">
+          {FILE_TYPE_OPTIONS.map((opt) => {
+            const isSelected = currentFileType === opt.key;
+            const Icon = opt.icon;
+
+            return (
+              <button
+                type="button"
+                key={opt.key}
+                role="radio"
+                aria-checked={isSelected}
+                onClick={() => onChange('allowedMimeTypes', opt.mimes)}
+                className={`relative flex items-center gap-3 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-gradient-to-br from-purple-600/20 to-indigo-600/15 border-purple-400/80 shadow-[0_0_15px_rgba(168,85,247,0.2)]'
+                    : 'bg-slate-950/60 border-white/10 hover:border-purple-400/40 hover:bg-slate-900/80 text-slate-300'
+                }`}
+              >
+                {/* Custom Radio Button Indicator */}
+                <div
+                  className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all ${
+                    isSelected
+                      ? 'border-purple-400 bg-purple-600 shadow-[0_0_8px_rgba(168,85,247,0.6)]'
+                      : 'border-white/25 bg-slate-900'
+                  }`}
+                >
+                  {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white shadow-xs" />}
+                </div>
+
+                {/* Format Icon */}
+                <div
+                  className={`p-2 rounded-lg shrink-0 transition-colors ${
+                    isSelected ? 'bg-purple-500/25 text-purple-200' : 'bg-white/5 text-slate-400'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                </div>
+
+                {/* Details */}
+                <div className="flex-1 min-w-0">
+                  <div className={`text-xs font-bold leading-tight ${isSelected ? 'text-white' : 'text-slate-200'}`}>
+                    {opt.title}
+                  </div>
+                  <div className="text-[10px] text-slate-400 truncate mt-0.5">{opt.subtitle}</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <p className="text-[11px] text-slate-400/80 pt-1 border-t border-white/5">
+        Each deliverable quantity produces an independent tracking entry. Accepted requirements are permanently preserved even if the campaign is modified later.
+      </p>
+    </div>
+  );
 }
