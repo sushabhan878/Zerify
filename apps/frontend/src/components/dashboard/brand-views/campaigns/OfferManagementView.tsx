@@ -42,37 +42,47 @@ export default function OfferManagementView({
     switch (status) {
       case 'ACCEPTED':
         return {
-          bg: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-          dot: 'bg-emerald-400',
+          gradient: 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500',
+          border: 'border-emerald-400/50',
+          shadow: 'shadow-emerald-950/80',
+          dot: 'bg-emerald-200 shadow-sm',
           label: 'Accepted',
           desc: 'Creator agreed and joined campaign',
         };
       case 'DECLINED':
         return {
-          bg: 'bg-rose-500/15 text-rose-400 border-rose-500/30',
-          dot: 'bg-rose-400',
+          gradient: 'bg-gradient-to-r from-rose-600 via-red-600 to-rose-600',
+          border: 'border-rose-400/50',
+          shadow: 'shadow-rose-950/80',
+          dot: 'bg-rose-200 shadow-sm',
           label: 'Declined',
           desc: 'Creator turned down this offer',
         };
       case 'CANCELLED':
         return {
-          bg: 'bg-slate-800 text-slate-400 border-white/10',
+          gradient: 'bg-gradient-to-r from-slate-700 via-slate-800 to-slate-700',
+          border: 'border-slate-500/50',
+          shadow: 'shadow-black/80',
           dot: 'bg-slate-400',
           label: 'Cancelled',
           desc: 'Offer withdrawn by brand',
         };
       case 'OFFER_EXPIRED':
         return {
-          bg: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-          dot: 'bg-amber-400',
+          gradient: 'bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600',
+          border: 'border-amber-400/50',
+          shadow: 'shadow-amber-950/80',
+          dot: 'bg-amber-200 shadow-sm',
           label: 'Expired',
           desc: 'Response deadline elapsed',
         };
       case 'PENDING':
       default:
         return {
-          bg: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
-          dot: 'bg-purple-400 animate-pulse',
+          gradient: 'bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600',
+          border: 'border-purple-400/50',
+          shadow: 'shadow-purple-950/80',
+          dot: 'bg-purple-200 animate-pulse shadow-sm',
           label: 'Pending Response',
           desc: 'Awaiting creator review and acceptance',
         };
@@ -94,7 +104,7 @@ export default function OfferManagementView({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-9 pt-9">
       {offers.map((offer) => {
         const app = offer.application || {};
         const profile = app.influencerProfile || {};
@@ -108,8 +118,19 @@ export default function OfferManagementView({
         return (
           <div
             key={offer.id}
-            className="p-4 sm:p-5 rounded-2xl bg-[#0b0f19]/90 border border-white/10 hover:border-purple-500/30 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg backdrop-blur-xl group"
+            className="relative p-4 sm:p-5 pt-5 rounded-2xl bg-[#0b0f19]/90 border border-white/10 hover:border-purple-500/30 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg backdrop-blur-xl group"
           >
+            {/* Floating Status Badge Overlapping Top-Right Corner - Shifted a bit more top */}
+            <div className="absolute -top-8 sm:-top-9 right-5 sm:right-6 z-30 pointer-events-none">
+              <span
+                className={`px-4 py-1.5 rounded-full ${badge.gradient} border ${badge.border} text-xs sm:text-[13px] font-black text-white flex items-center gap-1.5 shadow-xl ${badge.shadow} ring-4 ring-[#0b0f19] group-hover:scale-105 transition-all duration-300`}
+                title={badge.desc}
+              >
+                <span className={`w-2 h-2 rounded-full ${badge.dot} shrink-0`} />
+                <span>{badge.label}</span>
+              </span>
+            </div>
+
             {/* Creator Avatar & Info */}
             <div className="flex items-center gap-3.5 min-w-0">
               <div className="w-11 h-11 rounded-2xl overflow-hidden bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-black text-xs shrink-0 border border-white/10 shadow-md">
@@ -152,8 +173,8 @@ export default function OfferManagementView({
               </div>
             </div>
 
-            {/* Right Side: Compensation, Status & Actions */}
-            <div className="flex items-center justify-between md:justify-end gap-4 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-white/5">
+            {/* Right Side: Compensation & Actions */}
+            <div className="flex items-center justify-between md:justify-end gap-5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-white/5">
               <div className="text-left md:text-right">
                 <span className="text-[10px] text-slate-500 uppercase font-black tracking-wider block">
                   Offered Fee
@@ -163,41 +184,30 @@ export default function OfferManagementView({
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
-                {/* Status Badge */}
-                <div
-                  className={`px-3 py-1.5 rounded-xl text-[11px] font-black border flex items-center gap-1.5 uppercase tracking-wider ${badge.bg}`}
-                  title={badge.desc}
+              {/* Actions based on status */}
+              {offer.status === 'ACCEPTED' && onViewCollab && (
+                <button
+                  onClick={onViewCollab}
+                  type="button"
+                  className="px-3.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-black transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                  title="View active workspace and deliverables"
                 >
-                  <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
-                  <span>{badge.label}</span>
-                </div>
+                  <span>Active Collab</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </button>
+              )}
 
-                {/* Actions based on status */}
-                {offer.status === 'ACCEPTED' && onViewCollab && (
-                  <button
-                    onClick={onViewCollab}
-                    type="button"
-                    className="px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-black transition-all flex items-center gap-1 shadow-sm cursor-pointer"
-                    title="View active workspace and deliverables"
-                  >
-                    <span>Active Collab</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </button>
-                )}
-
-                {offer.status === 'PENDING' && (
-                  <button
-                    onClick={() => handleCancel(offer.id)}
-                    disabled={cancellingOfferId === offer.id}
-                    type="button"
-                    className="px-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 hover:border-rose-500/40 hover:bg-rose-950/40 hover:text-rose-300 text-xs font-bold text-slate-400 transition-all disabled:opacity-50 cursor-pointer"
-                    title="Withdraw this offer"
-                  >
-                    {cancellingOfferId === offer.id ? 'Cancelling...' : 'Cancel'}
-                  </button>
-                )}
-              </div>
+              {offer.status === 'PENDING' && (
+                <button
+                  onClick={() => handleCancel(offer.id)}
+                  disabled={cancellingOfferId === offer.id}
+                  type="button"
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-white/10 hover:border-rose-500/40 hover:bg-rose-950/40 hover:text-rose-300 text-xs font-bold text-slate-400 transition-all disabled:opacity-50 cursor-pointer shadow-sm"
+                  title="Withdraw this offer"
+                >
+                  {cancellingOfferId === offer.id ? 'Cancelling...' : 'Cancel'}
+                </button>
+              )}
             </div>
           </div>
         );

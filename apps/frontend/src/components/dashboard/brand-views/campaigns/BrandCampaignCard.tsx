@@ -34,32 +34,42 @@ export default function BrandCampaignCard({ campaign: c, onClick }: BrandCampaig
       case 'ACTIVE':
         return {
           label: 'Active & Open',
-          bg: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-          dot: 'bg-emerald-400 animate-pulse',
+          gradient: 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500',
+          border: 'border-emerald-400/60',
+          shadow: 'shadow-lg shadow-emerald-600/30',
+          dot: 'bg-emerald-200 animate-pulse shadow-sm',
         };
       case 'FILLING':
         return {
           label: 'Filling Roster',
-          bg: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
-          dot: 'bg-purple-400 animate-pulse',
+          gradient: 'bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600',
+          border: 'border-purple-400/60',
+          shadow: 'shadow-lg shadow-purple-600/30',
+          dot: 'bg-purple-200 animate-pulse shadow-sm',
         };
       case 'PAUSED':
         return {
           label: 'Paused',
-          bg: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-          dot: 'bg-amber-400',
+          gradient: 'bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600',
+          border: 'border-amber-400/60',
+          shadow: 'shadow-lg shadow-amber-600/30',
+          dot: 'bg-amber-200 shadow-sm',
         };
       case 'COMPLETED':
         return {
           label: 'Completed',
-          bg: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30',
-          dot: 'bg-indigo-400',
+          gradient: 'bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600',
+          border: 'border-blue-400/60',
+          shadow: 'shadow-lg shadow-blue-600/30',
+          dot: 'bg-blue-200 shadow-sm',
         };
       case 'DRAFT':
       default:
         return {
           label: 'Draft',
-          bg: 'bg-slate-800/80 text-slate-300 border-white/10',
+          gradient: 'bg-gradient-to-r from-slate-700 via-slate-800 to-slate-700',
+          border: 'border-slate-500/60',
+          shadow: 'shadow-lg shadow-slate-900/40',
           dot: 'bg-slate-400',
         };
     }
@@ -107,6 +117,10 @@ export default function BrandCampaignCard({ campaign: c, onClick }: BrandCampaig
     ? c.categories
     : [];
 
+  const maxVisibleObjectives = objectivesList.length <= 3 ? 3 : 2;
+  const visibleObjectives = objectivesList.slice(0, maxVisibleObjectives);
+  const hiddenObjectives = objectivesList.slice(maxVisibleObjectives);
+
   const formattedDeadline = c.applicationDeadline
     ? new Date(c.applicationDeadline).toLocaleDateString(undefined, {
         year: 'numeric',
@@ -122,45 +136,59 @@ export default function BrandCampaignCard({ campaign: c, onClick }: BrandCampaig
       whileHover={{ y: -3 }}
       transition={{ duration: 0.2 }}
       onClick={onClick}
-      className="group relative rounded-3xl bg-slate-950/45 border border-purple-500/20 hover:border-purple-500/40 p-6 backdrop-blur-2xl shadow-xl shadow-purple-950/20 hover:shadow-[0_16px_48px_rgba(168,85,247,0.18)] transition-all duration-300 cursor-pointer space-y-5 overflow-hidden"
+      className="group relative rounded-3xl bg-slate-950/45 border border-purple-500/20 hover:border-purple-500/40 px-6 pb-6 pt-3.5 sm:pt-4 backdrop-blur-2xl shadow-xl shadow-purple-950/20 hover:shadow-[0_16px_48px_rgba(168,85,247,0.18)] transition-all duration-300 cursor-pointer space-y-5"
     >
-      {/* Ambient Purplish Glow Background Aura */}
-      <div className="absolute -top-24 -right-24 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl pointer-events-none group-hover:bg-purple-600/20 transition-all duration-500" />
-      <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none group-hover:bg-indigo-600/15 transition-all duration-500" />
+      {/* Ambient Purplish Glow Background Aura Clipped */}
+      <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+        <div className="absolute -top-24 -right-24 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl group-hover:bg-purple-600/20 transition-all duration-500" />
+        <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl group-hover:bg-indigo-600/15 transition-all duration-500" />
+      </div>
+
+      {/* Floating Status Badge Overlapping Top-Right Corner - Shifted a bit more top */}
+      <div className="absolute -top-8 sm:-top-9 right-6 sm:right-8 z-30 pointer-events-none">
+        <span
+          className={`px-4 py-1.5 rounded-full ${statusConfig.gradient} border ${statusConfig.border} text-xs sm:text-sm font-black text-white flex items-center gap-1.5 shadow-xl ${statusConfig.shadow} ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300`}
+        >
+          <span className={`w-2 h-2 rounded-full ${statusConfig.dot}`} />
+          <span>{statusConfig.label}</span>
+        </span>
+      </div>
 
       {/* Row 1: Tags on Top & Prominent Large Pricing */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 relative z-10">
-        {/* Tags Cloud on Top */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Status Badge */}
-          <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border shadow-sm ${statusConfig.bg}`}
-          >
-            <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot}`} />
-            <span>{statusConfig.label}</span>
-          </span>
-
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10 min-w-0">
+        {/* Tags Cloud on Top (strictly single line, truncated with ... if more) */}
+        <div className="flex items-center gap-2 flex-nowrap overflow-hidden min-w-0 max-w-full">
           {/* Industry Tag */}
           {c.industry && (
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-950/40 border border-purple-500/20 text-purple-200 flex items-center gap-1.5">
-              <Layers className="w-3 h-3 text-purple-400" />
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-950/40 border border-purple-500/20 text-purple-200 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+              <Layers className="w-3 h-3 text-purple-400 shrink-0" />
               <span>{c.industry}</span>
             </span>
           )}
 
           {/* Objective / Goal Tags */}
-          {objectivesList.slice(0, 3).map((obj) => (
+          {visibleObjectives.map((obj) => (
             <span
               key={obj}
-              className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-purple-600/15 border border-purple-500/25 text-purple-200"
+              className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-purple-600/15 border border-purple-500/25 text-purple-200 shrink-0 whitespace-nowrap"
             >
               {obj}
             </span>
           ))}
 
+          {/* Truncated ... indicator if more objectives */}
+          {hiddenObjectives.length > 0 && (
+            <span
+              className="px-2.5 py-1 rounded-full text-[11px] font-black bg-purple-950/60 border border-purple-500/30 text-purple-300 shrink-0 whitespace-nowrap cursor-help hover:bg-purple-900/60 hover:text-white transition-colors tracking-wider"
+              title={`More tags: ${hiddenObjectives.join(', ')}`}
+            >
+              ...
+            </span>
+          )}
+
           {/* Payment Model Tag */}
           {c.budgetPaymentModel && (
-            <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-indigo-950/40 border border-indigo-400/25 text-indigo-200">
+            <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-indigo-950/40 border border-indigo-400/25 text-indigo-200 shrink-0 whitespace-nowrap">
               {formatPaymentModel(c.budgetPaymentModel)}
             </span>
           )}
@@ -187,29 +215,37 @@ export default function BrandCampaignCard({ campaign: c, onClick }: BrandCampaig
       </div>
 
       {/* Row 2: Campaign Title, Description & Platforms */}
-      <div className="space-y-2 relative z-10">
+      <div className="space-y-2 relative z-10 -mt-2 sm:-mt-2.5">
         <h3 className="text-xl sm:text-2xl font-black text-white group-hover:text-purple-200 transition-colors tracking-tight flex items-center gap-2">
           <span>{c.title}</span>
           <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-purple-300 opacity-0 group-hover:opacity-100 transition-all -translate-y-0.5 group-hover:translate-x-0.5" />
         </h3>
 
         {c.description && (
-          <p className="text-xs sm:text-sm text-slate-300 line-clamp-2 leading-relaxed font-normal">
+          <p className="text-xs sm:text-sm text-slate-300 line-clamp-2 leading-relaxed font-normal w-full max-w-full">
             {c.description}
           </p>
         )}
 
         {/* Platforms Badges */}
         {Array.isArray(c.platforms) && c.platforms.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            {c.platforms.map((p) => (
+          <div className="flex items-center gap-1.5 pt-1 flex-nowrap overflow-hidden">
+            {c.platforms.slice(0, 5).map((p) => (
               <span
                 key={p}
-                className="px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-purple-950/30 border border-purple-500/20 text-purple-200"
+                className="px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-purple-950/30 border border-purple-500/20 text-purple-200 shrink-0 uppercase tracking-wider"
               >
                 {p}
               </span>
             ))}
+            {c.platforms.length > 5 && (
+              <span
+                className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-purple-950/30 border border-purple-500/20 text-purple-300 uppercase shrink-0 cursor-help"
+                title={c.platforms.slice(5).join(', ')}
+              >
+                ...
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -232,17 +268,9 @@ export default function BrandCampaignCard({ campaign: c, onClick }: BrandCampaig
               / {targetParticipants} slots
             </span>
           </div>
-          <div className="flex items-center gap-2 max-w-xs pt-0.5">
-            <div className="w-full h-1.5 bg-slate-900/80 border border-purple-500/20 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-500"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-            <span className="text-[10px] font-bold text-purple-300 flex-shrink-0">
-              {progressPercent}%
-            </span>
-          </div>
+          <span className="text-[11px] text-purple-300/80 font-medium block">
+            {hired >= targetParticipants ? 'Roster full' : `${progressPercent}% filled`}
+          </span>
         </div>
 
         {/* Metric 2: Pitches Received */}

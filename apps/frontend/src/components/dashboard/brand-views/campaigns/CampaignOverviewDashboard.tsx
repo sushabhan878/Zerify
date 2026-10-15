@@ -16,6 +16,8 @@ import {
   Pause,
   AlertCircle,
   Star,
+  Clock,
+  ShieldCheck,
 } from 'lucide-react';
 import { CampaignItem, CampaignService } from '@/services/campaign.service';
 import { ApplicationService, CampaignApplicationItem } from '@/services/application.service';
@@ -217,11 +219,109 @@ export default function CampaignOverviewDashboard({
     );
   }
 
-  const confirmedCount = participants.length;
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'OPEN':
+      case 'ACTIVE':
+        return {
+          label: 'Active & Open',
+          gradient: 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500',
+          border: 'border-emerald-400/60',
+          shadow: 'shadow-lg shadow-emerald-600/30',
+          dot: 'bg-emerald-200 animate-pulse shadow-sm',
+        };
+      case 'FILLING':
+        return {
+          label: 'Filling Roster',
+          gradient: 'bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600',
+          border: 'border-purple-400/60',
+          shadow: 'shadow-lg shadow-purple-600/30',
+          dot: 'bg-purple-200 animate-pulse shadow-sm',
+        };
+      case 'PAUSED':
+        return {
+          label: 'Paused',
+          gradient: 'bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600',
+          border: 'border-amber-400/60',
+          shadow: 'shadow-lg shadow-amber-600/30',
+          dot: 'bg-amber-200 shadow-sm',
+        };
+      case 'COMPLETED':
+        return {
+          label: 'Completed',
+          gradient: 'bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600',
+          border: 'border-blue-400/60',
+          shadow: 'shadow-lg shadow-blue-600/30',
+          dot: 'bg-blue-200 shadow-sm',
+        };
+      case 'DRAFT':
+      default:
+        return {
+          label: 'Draft',
+          gradient: 'bg-gradient-to-r from-slate-700 via-slate-800 to-slate-700',
+          border: 'border-slate-500/60',
+          shadow: 'shadow-lg shadow-slate-900/40',
+          dot: 'bg-slate-400',
+        };
+    }
+  };
+
+  const formatPaymentModel = (model?: string) => {
+    switch (model) {
+      case 'FIXED':
+        return 'Fixed Payout';
+      case 'NEGOTIABLE':
+        return 'Pitch / Negotiable';
+      case 'RANGE':
+        return 'Budget Range';
+      case 'PERFORMANCE_BASED':
+        return 'Performance';
+      case 'BARTER':
+        return 'Product Barter';
+      case 'HYBRID':
+        return 'Hybrid';
+      default:
+        return model || 'Standard';
+    }
+  };
+
+  const statusConfig = getStatusBadge(campaign.status);
+  const hired = participants.length;
+  const targetParticipants = campaign.targetParticipants || 1;
+  const progressPercent = Math.min(100, Math.round((hired / targetParticipants) * 100));
+  const applicantsCount = inboundApplications.length;
+
+  const objectivesList: string[] = Array.isArray(campaign.objective)
+    ? campaign.objective
+    : typeof campaign.objective === 'string' && campaign.objective
+    ? [campaign.objective]
+    : Array.isArray(campaign.categories)
+    ? campaign.categories
+    : [];
+
+  const maxVisibleObjectives = objectivesList.length <= 3 ? 3 : 2;
+  const visibleObjectives = objectivesList.slice(0, maxVisibleObjectives);
+  const hiddenObjectives = objectivesList.slice(maxVisibleObjectives);
+
+  const formattedCreated = campaign.createdAt
+    ? new Date(campaign.createdAt).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    : null;
+
+  const formattedDeadline = campaign.applicationDeadline
+    ? new Date(campaign.applicationDeadline).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    : null;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Top Breadcrumb & Action Header */}
+      {/* Top Breadcrumb */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <button
           onClick={onBack}
@@ -231,133 +331,216 @@ export default function CampaignOverviewDashboard({
           <ArrowLeft className="w-4 h-4 text-purple-400 group-hover:-translate-x-0.5 transition-transform" />
           <span>Back to Campaigns</span>
         </button>
+      </div>
 
-        <div className="flex items-center gap-2">
+      {/* Main Campaign Hero Card with All Card Details */}
+      <div className="relative px-6 pb-6 pt-3.5 sm:px-8 sm:pb-8 sm:pt-4 rounded-3xl bg-slate-950/45 border border-purple-500/20 backdrop-blur-2xl shadow-2xl shadow-purple-950/20 space-y-5">
+        {/* Ambient Glow Aura */}
+        <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+        </div>
+
+        {/* Floating Status Badge Overlapping Top-Right Corner - Shifted a bit more top */}
+        <div className="absolute -top-8 sm:-top-9 right-6 sm:right-8 z-30 pointer-events-none">
+          <span
+            className={`px-4 py-1.5 rounded-full ${statusConfig.gradient} border ${statusConfig.border} text-xs sm:text-sm font-black text-white flex items-center gap-1.5 shadow-xl ${statusConfig.shadow} ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300`}
+          >
+            <span className={`w-2 h-2 rounded-full ${statusConfig.dot}`} />
+            <span>{statusConfig.label}</span>
+          </span>
+        </div>
+
+        {/* Row 1: Tags on Top & Prominent Large Pricing */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10 min-w-0">
+          {/* Tags Cloud (strictly single line, truncated with ... if more) */}
+          <div className="flex items-center gap-2 flex-nowrap overflow-hidden min-w-0 max-w-full">
+
+            {/* Industry Tag */}
+            {campaign.industry && (
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-950/40 border border-purple-500/20 text-purple-200 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+                <Layers className="w-3 h-3 text-purple-400 shrink-0" />
+                <span>{campaign.industry}</span>
+              </span>
+            )}
+
+            {/* Objective / Goal Tags */}
+            {visibleObjectives.map((obj) => (
+              <span
+                key={obj}
+                className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-purple-600/15 border border-purple-500/25 text-purple-200 shrink-0 whitespace-nowrap"
+              >
+                {obj}
+              </span>
+            ))}
+
+            {/* Truncated ... indicator if more objectives */}
+            {hiddenObjectives.length > 0 && (
+              <span
+                className="px-2.5 py-1 rounded-full text-[11px] font-black bg-purple-950/60 border border-purple-500/30 text-purple-300 shrink-0 whitespace-nowrap cursor-help hover:bg-purple-900/60 hover:text-white transition-colors tracking-widest"
+                title={`More tags: ${hiddenObjectives.join(', ')}`}
+              >
+                ...
+              </span>
+            )}
+
+            {/* Payment Model Tag */}
+            {campaign.budgetPaymentModel && (
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-indigo-950/40 border border-indigo-400/25 text-indigo-200 shrink-0 whitespace-nowrap">
+                {formatPaymentModel(campaign.budgetPaymentModel)}
+              </span>
+            )}
+          </div>
+
+          {/* Large Pricing Display */}
+          <div className="sm:text-right flex sm:flex-col items-baseline sm:items-end justify-between gap-0.5 flex-shrink-0">
+            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">
+              Total Budget
+            </span>
+            <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight leading-none flex items-baseline gap-1">
+              <span>
+                {campaign.budgetPaymentModel === 'BARTER'
+                  ? 'Product Barter'
+                  : formatCurrency(campaign.budgetTotalAmount, campaign.budgetCurrency || currency)}
+              </span>
+              {campaign.budgetPaymentModel !== 'BARTER' && (
+                <span className="text-xs font-bold text-emerald-300/70 uppercase">
+                  {campaign.budgetCurrency || currency || 'USD'}
+                </span>
+              )}
+            </span>
+          </div>
+        </div>
+
+        {/* Row 2: Campaign Title, Description & Platforms */}
+        <div className="space-y-2 relative z-10 -mt-2 sm:-mt-2.5">
+          <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
+            <span>{campaign.title}</span>
+          </h1>
+
+          {campaign.description && (
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal w-full max-w-full">
+              {campaign.description}
+            </p>
+          )}
+
+          {/* Platforms Badges */}
+          {Array.isArray(campaign.platforms) && campaign.platforms.length > 0 && (
+            <div className="flex items-center gap-1.5 pt-1 flex-nowrap overflow-hidden">
+              {campaign.platforms.slice(0, 5).map((p) => (
+                <span
+                  key={p}
+                  className="px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-purple-950/30 border border-purple-500/20 text-purple-200 uppercase tracking-wider shrink-0"
+                >
+                  {p}
+                </span>
+              ))}
+              {campaign.platforms.length > 5 && (
+                <span
+                  className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-purple-950/30 border border-purple-500/20 text-purple-300 uppercase shrink-0 cursor-help"
+                  title={campaign.platforms.slice(5).join(', ')}
+                >
+                  ...
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Row 3: Modern Direct Metrics: Creators Hired, Pitches Received, Escrow Protection */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2 relative z-10">
+          {/* Metric 1: Creators Hired */}
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
+                Creators Hired
+              </span>
+              <Users className="w-3.5 h-3.5 text-purple-400" />
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                {hired}
+              </span>
+              <span className="text-xs font-semibold text-slate-400">
+                / {targetParticipants} slots
+              </span>
+            </div>
+            <span className="text-[11px] text-purple-300/80 font-medium block">
+              {hired >= targetParticipants ? 'Roster full' : `${progressPercent}% filled`}
+            </span>
+          </div>
+
+          {/* Metric 2: Pitches Received */}
+          <div className="space-y-1.5 sm:border-l sm:border-purple-500/20 sm:pl-6">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
+                Pitches Received
+              </span>
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl sm:text-3xl font-black text-cyan-300 tracking-tight">
+                {applicantsCount}
+              </span>
+              <span className="text-xs font-semibold text-slate-400">
+                {applicantsCount === 1 ? 'pitch' : 'pitches'}
+              </span>
+            </div>
+            <span className="text-[11px] text-cyan-400/80 font-medium block">
+              {applicantsCount > 0 ? `${applicantsCount} to review` : 'Accepting pitches'}
+            </span>
+          </div>
+
+          {/* Metric 3: Escrow Status */}
+          <div className="space-y-1.5 sm:border-l sm:border-purple-500/20 sm:pl-6">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
+                Escrow Protection
+              </span>
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">
+                100%
+              </span>
+              <span className="text-xs font-semibold text-slate-400">
+                Protected
+              </span>
+            </div>
+            <span className="text-[11px] text-emerald-300/80 font-medium block">
+              Automated smart escrow
+            </span>
+          </div>
+        </div>
+
+        {/* Row 4: Footer Meta Dates & Actions */}
+        <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10 border-t border-purple-500/15">
+          <div className="flex items-center gap-4 text-xs text-slate-400 font-medium">
+            {formattedCreated && (
+              <span className="flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-purple-400" />
+                <span>Created {formattedCreated}</span>
+              </span>
+            )}
+
+            {formattedDeadline && (
+              <span className="flex items-center gap-1.5 text-slate-400">
+                <Clock className="w-3.5 h-3.5 text-amber-400" />
+                <span>Deadline: {formattedDeadline}</span>
+              </span>
+            )}
+          </div>
+
           {campaign.status === 'DRAFT' && (
             <button
               onClick={handlePublish}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black text-white flex items-center gap-1.5 shadow-md shadow-emerald-950/40 transition-all"
+              type="button"
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black text-white flex items-center gap-1.5 shadow-md shadow-emerald-950/40 transition-all cursor-pointer"
             >
               <Play className="w-3.5 h-3.5" />
               <span>Publish Campaign</span>
             </button>
           )}
-
-          <span
-            className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider border ${
-              campaign.status === 'ACTIVE'
-                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                : campaign.status === 'COMPLETED'
-                ? 'bg-blue-500/10 text-blue-400 border-blue-500/30'
-                : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-            }`}
-          >
-            {campaign.status}
-          </span>
-        </div>
-      </div>
-
-      {/* Main Campaign Hero Banner */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-[#090D16]/90 border border-white/10 backdrop-blur-xl relative overflow-hidden shadow-2xl space-y-6">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-600/15 via-indigo-600/10 to-transparent rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 space-y-4">
-          <div className="flex items-center gap-2 text-xs font-bold text-purple-400 uppercase tracking-widest">
-            <span>Campaign Management Hub</span>
-          </div>
-
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                {campaign.title}
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-                {campaign.description}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-6 sm:gap-8 shrink-0">
-              <div className="space-y-0.5 text-left sm:text-right">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">
-                  Budget
-                </span>
-                <span className="text-2xl sm:text-3xl font-black text-purple-300 tracking-tight block">
-                  <Money
-                    amount={Number(campaign.budgetTotalAmount || 0)}
-                    currency={campaign.budgetCurrency || currency}
-                    showOriginal={false}
-                  />
-                </span>
-              </div>
-              <div className="space-y-0.5 text-left sm:text-right">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">
-                  Target Creators
-                </span>
-                <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight block">
-                  {campaign.targetParticipants || 5}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 4 Summary Stats Bar - Vertical Line Separated with Big Numbers - Clickable Shortcuts */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-2 relative z-10">
-          <button
-            type="button"
-            onClick={() => setActiveTab('applicants')}
-            className="text-left space-y-1 group transition-transform hover:scale-[1.02] cursor-pointer"
-          >
-            <span className="text-3xl sm:text-4xl font-black text-white group-hover:text-purple-300 transition-colors tracking-tight block">
-              {inboundApplications.length}
-            </span>
-            <div className="flex items-center gap-1.5 text-purple-300/80 group-hover:text-purple-200 text-xs font-bold transition-colors">
-              <Users className="w-3.5 h-3.5 text-purple-400" />
-              <span>Applications & Pitches</span>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('offers')}
-            className="text-left space-y-1 sm:border-l sm:border-white/10 sm:pl-6 group transition-transform hover:scale-[1.02] cursor-pointer"
-          >
-            <span className="text-3xl sm:text-4xl font-black text-indigo-300 group-hover:text-indigo-200 transition-colors tracking-tight block">
-              {offers.length}
-            </span>
-            <div className="flex items-center gap-1.5 text-indigo-300/80 group-hover:text-indigo-200 text-xs font-bold transition-colors">
-              <Send className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Offers Sent ({offers.filter((o) => o.status === 'PENDING').length} pending)</span>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('participants')}
-            className="text-left space-y-1 sm:border-l sm:border-white/10 sm:pl-6 group transition-transform hover:scale-[1.02] cursor-pointer"
-          >
-            <span className="text-3xl sm:text-4xl font-black text-emerald-400 group-hover:text-emerald-300 transition-colors tracking-tight block">
-              {participants.length}
-            </span>
-            <div className="flex items-center gap-1.5 text-emerald-300/80 group-hover:text-emerald-200 text-xs font-bold transition-colors">
-              <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Active Collabs</span>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('participants')}
-            className="text-left space-y-1 sm:border-l sm:border-white/10 sm:pl-6 group transition-transform hover:scale-[1.02] cursor-pointer"
-          >
-            <span className="text-3xl sm:text-4xl font-black text-amber-300 group-hover:text-amber-200 transition-colors tracking-tight block">
-              {participants.reduce((sum, p) => sum + (p.deliverables?.length || 0), 0)}
-            </span>
-            <div className="flex items-center gap-1.5 text-amber-300/80 group-hover:text-amber-200 text-xs font-bold transition-colors">
-              <Video className="w-3.5 h-3.5 text-amber-400" />
-              <span>Content Deliverables</span>
-            </div>
-          </button>
         </div>
       </div>
 

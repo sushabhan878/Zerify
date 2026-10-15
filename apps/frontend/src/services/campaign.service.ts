@@ -52,6 +52,7 @@ export interface CampaignItem {
   startDate?: string;
   endDate?: string;
   publishedAt?: string;
+  createdAt?: string;
   deliverables?: CampaignDeliverable[];
   brandProfile?: {
     id: string;
