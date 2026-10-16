@@ -6,6 +6,7 @@ import InvitationKpiBar from './subcomponents/InvitationKpiBar';
 import OfferReceivedCard from './applications/OfferReceivedCard';
 import OfferDetailModal from './applications/OfferDetailModal';
 import OfferConfirmationModal from './applications/OfferConfirmationModal';
+import CounterOfferModal from './applications/CounterOfferModal';
 import { OfferService, CampaignOfferItem } from '@/services/offer.service';
 import { useMessaging } from '@/context/MessagingContext';
 import { MessagingService } from '@/services/messaging.service';
@@ -20,7 +21,7 @@ interface CampaignInvitationsSectionProps {
 export default function CampaignInvitationsSection({ onNavigate }: CampaignInvitationsSectionProps) {
   const { setActiveConversationId, refreshConversations } = useMessaging();
   const { toastSuccess, toastError } = useToast();
-  const { format: formatCurrency } = useCurrency();
+  const { format: formatCurrency, convert } = useCurrency();
 
   const [activeTab, setActiveTab] = useState<'PENDING' | 'ACCEPTED' | 'CANCELLED' | 'ALL'>('PENDING');
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,6 +29,7 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
   const [offers, setOffers] = useState<CampaignOfferItem[]>([]);
   const [selectedOffer, setSelectedOffer] = useState<CampaignOfferItem | null>(null);
   const [messagingOfferId, setMessagingOfferId] = useState<string | null>(null);
+  const [counterOfferTarget, setCounterOfferTarget] = useState<CampaignOfferItem | null>(null);
 
   // Confirmation modal state
   const [confirmModal, setConfirmModal] = useState<{
@@ -185,17 +187,22 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
     [offers]
   );
 
+  const getOfferConvertedAmount = useCallback(
+    (o: CampaignOfferItem): number => {
+      const raw = Number(o.compensationAmount) || 0;
+      const sourceCurrency =
+        o.compensationCurrency || o.application?.campaign?.budgetCurrency || 'USD';
+      return convert(raw, sourceCurrency);
+    },
+    [convert]
+  );
+
   const kpis = useMemo(() => {
     if (activeTab === 'PENDING') {
-      const totalRev = pendingOffers.reduce(
-        (acc, o) => acc + (Number(o.compensationAmount) || 0),
-        0
-      );
-      const avgRev = pendingOffers.length > 0 ? totalRev / pendingOffers.length : 0;
-      const maxRev =
-        pendingOffers.length > 0
-          ? Math.max(...pendingOffers.map((o) => Number(o.compensationAmount) || 0))
-          : 0;
+      const amounts = pendingOffers.map(getOfferConvertedAmount);
+      const totalRev = amounts.reduce((acc, val) => acc + val, 0);
+      const avgRev = amounts.length > 0 ? totalRev / amounts.length : 0;
+      const maxRev = amounts.length > 0 ? Math.max(...amounts) : 0;
 
       return [
         {
@@ -222,15 +229,10 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
     }
 
     if (activeTab === 'ACCEPTED') {
-      const totalRev = acceptedOffers.reduce(
-        (acc, o) => acc + (Number(o.compensationAmount) || 0),
-        0
-      );
-      const avgRev = acceptedOffers.length > 0 ? totalRev / acceptedOffers.length : 0;
-      const maxRev =
-        acceptedOffers.length > 0
-          ? Math.max(...acceptedOffers.map((o) => Number(o.compensationAmount) || 0))
-          : 0;
+      const amounts = acceptedOffers.map(getOfferConvertedAmount);
+      const totalRev = amounts.reduce((acc, val) => acc + val, 0);
+      const avgRev = amounts.length > 0 ? totalRev / amounts.length : 0;
+      const maxRev = amounts.length > 0 ? Math.max(...amounts) : 0;
 
       return [
         {
@@ -257,15 +259,10 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
     }
 
     if (activeTab === 'CANCELLED') {
-      const totalRev = cancelledOffers.reduce(
-        (acc, o) => acc + (Number(o.compensationAmount) || 0),
-        0
-      );
-      const avgRev = cancelledOffers.length > 0 ? totalRev / cancelledOffers.length : 0;
-      const maxRev =
-        cancelledOffers.length > 0
-          ? Math.max(...cancelledOffers.map((o) => Number(o.compensationAmount) || 0))
-          : 0;
+      const amounts = cancelledOffers.map(getOfferConvertedAmount);
+      const totalRev = amounts.reduce((acc, val) => acc + val, 0);
+      const avgRev = amounts.length > 0 ? totalRev / amounts.length : 0;
+      const maxRev = amounts.length > 0 ? Math.max(...amounts) : 0;
 
       return [
         {
@@ -292,8 +289,9 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
     }
 
     // Combined data for ALL Received
-    const totalRev = offers.reduce((acc, o) => acc + (Number(o.compensationAmount) || 0), 0);
-    const avgRev = offers.length > 0 ? totalRev / offers.length : 0;
+    const amounts = offers.map(getOfferConvertedAmount);
+    const totalRev = amounts.reduce((acc, val) => acc + val, 0);
+    const avgRev = amounts.length > 0 ? totalRev / amounts.length : 0;
     const acceptanceRate =
       offers.length > 0 ? Math.round((acceptedOffers.length / offers.length) * 100) : 0;
 
@@ -319,7 +317,15 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
         change: `${acceptedOffers.length} of ${offers.length} converted`,
       },
     ];
-  }, [activeTab, offers, pendingOffers, acceptedOffers, cancelledOffers, formatCurrency]);
+  }, [
+    activeTab,
+    offers,
+    pendingOffers,
+    acceptedOffers,
+    cancelledOffers,
+    formatCurrency,
+    getOfferConvertedAmount,
+  ]);
 
   const filteredOffers = offers.filter((offer) => {
     const matchesTab =
@@ -435,6 +441,7 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
               offer={offer}
               onAccept={requestAcceptOffer}
               onDecline={requestDeclineOffer}
+              onCounterOffer={(off) => setCounterOfferTarget(off)}
               onViewDetails={(off) => setSelectedOffer(off)}
               onMessageBrand={handleMessageBrand}
               isAccepting={isProcessingAction && confirmModal.offer?.id === offer.id}
@@ -451,7 +458,21 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
           onClose={() => setSelectedOffer(null)}
           onAccept={requestAcceptOffer}
           onDecline={requestDeclineOffer}
+          onCounterOffer={(off) => setCounterOfferTarget(off)}
           onMessageBrand={handleMessageBrand}
+        />
+      )}
+
+      {/* Counter Offer Modal */}
+      {counterOfferTarget && (
+        <CounterOfferModal
+          offer={counterOfferTarget}
+          isOpen={Boolean(counterOfferTarget)}
+          onClose={() => setCounterOfferTarget(null)}
+          onSuccess={() => {
+            setCounterOfferTarget(null);
+            loadData();
+          }}
         />
       )}
 

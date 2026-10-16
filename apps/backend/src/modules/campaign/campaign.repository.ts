@@ -49,6 +49,15 @@ export class CampaignRepository {
         },
         deliverables: true,
         applications: {
+          where: {
+            NOT: {
+              OR: [
+                { reviewNotes: 'DIRECT_INVITE' },
+                { applicationMessage: 'Official brand collaboration invite' },
+                { applicationMessage: 'Direct brand invitation' },
+              ],
+            },
+          },
           include: {
             influencerProfile: {
               include: {
@@ -57,6 +66,22 @@ export class CampaignRepository {
             },
             socialAccount: true,
             offers: true,
+          },
+        },
+        _count: {
+          select: {
+            applications: {
+              where: {
+                NOT: {
+                  OR: [
+                    { reviewNotes: 'DIRECT_INVITE' },
+                    { applicationMessage: 'Official brand collaboration invite' },
+                    { applicationMessage: 'Direct brand invitation' },
+                  ],
+                },
+              },
+            },
+            participants: true,
           },
         },
         participants: {
@@ -94,7 +119,17 @@ export class CampaignRepository {
         deliverables: true,
         _count: {
           select: {
-            applications: true,
+            applications: {
+              where: {
+                NOT: {
+                  OR: [
+                    { reviewNotes: 'DIRECT_INVITE' },
+                    { applicationMessage: 'Official brand collaboration invite' },
+                    { applicationMessage: 'Direct brand invitation' },
+                  ],
+                },
+              },
+            },
             participants: true,
           },
         },
@@ -181,7 +216,17 @@ export class CampaignRepository {
           deliverables: true,
           _count: {
             select: {
-              applications: true,
+              applications: {
+                where: {
+                  NOT: {
+                    OR: [
+                      { reviewNotes: 'DIRECT_INVITE' },
+                      { applicationMessage: 'Official brand collaboration invite' },
+                      { applicationMessage: 'Direct brand invitation' },
+                    ],
+                  },
+                },
+              },
               participants: true,
             },
           },

@@ -10,6 +10,7 @@ import {
 import { OfferService } from './offer.service';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { InviteCreatorDto } from './dto/invite-creator.dto';
+import { CounterOfferDto } from './dto/counter-offer.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
@@ -52,6 +53,18 @@ export class OfferController {
   @ApiOperation({ summary: 'Influencer declines offer' })
   async declineOffer(@Req() req: any, @Param('offerId') offerId: string) {
     return this.offerService.declineOffer(req.user.id, offerId);
+  }
+
+  @Post('offers/:offerId/counter')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Influencer submits a counter offer' })
+  async counterOffer(
+    @Req() req: any,
+    @Param('offerId') offerId: string,
+    @Body() dto: CounterOfferDto,
+  ) {
+    return this.offerService.counterOffer(req.user.id, offerId, dto);
   }
 
   @Post('offers/:offerId/cancel')

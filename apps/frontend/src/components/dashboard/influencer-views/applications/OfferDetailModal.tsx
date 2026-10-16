@@ -13,6 +13,7 @@ interface OfferDetailModalProps {
   onClose: () => void;
   onAccept: (offerId: string) => void;
   onDecline: (offerId: string) => void;
+  onCounterOffer?: (offer: CampaignOfferItem) => void;
   onMessageBrand?: (offer: CampaignOfferItem) => void;
 }
 
@@ -21,6 +22,7 @@ export default function OfferDetailModal({
   onClose,
   onAccept,
   onDecline,
+  onCounterOffer,
   onMessageBrand,
 }: OfferDetailModalProps) {
   const { currency: userCurrency, format: formatUserCurrency, rates } = useCurrency();
@@ -77,11 +79,6 @@ export default function OfferDetailModal({
               <span className="text-xl font-black text-white">
                 {payoutStr}
               </span>
-              {originalPayoutStr && (
-                <span className="block text-[11px] font-semibold text-slate-400">
-                  ≈ {originalPayoutStr}
-                </span>
-              )}
             </div>
             <div className="text-right">
               <span className="text-[10px] text-slate-400 font-bold block">Escrow Protected</span>
@@ -139,6 +136,18 @@ export default function OfferDetailModal({
             >
               Decline Offer
             </button>
+            {onCounterOffer && offer.status === 'PENDING' && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onCounterOffer(offer);
+                }}
+                className="px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-xs font-bold text-amber-300 hover:text-white transition-colors flex items-center gap-1.5"
+              >
+                <span>{offer.termsSnapshot?.isCounterOffer ? 'Edit Counter' : 'Send Counter Offer'}</span>
+              </button>
+            )}
             {onMessageBrand && (
               <button
                 type="button"

@@ -70,7 +70,8 @@ export default function CampaignOverviewDashboard({
   const isDirectBrandInvite = (app: CampaignApplicationItem) =>
     app.reviewNotes === 'DIRECT_INVITE' ||
     app.applicationMessage === 'Official brand collaboration invite' ||
-    app.applicationMessage === 'Direct brand invitation';
+    app.applicationMessage === 'Direct brand invitation' ||
+    Boolean(app.offers && app.offers.length > 0 && app.status === 'OFFER_SENT' && !app.submittedAt);
 
   const inboundApplications = useMemo(
     () => applications.filter((app) => !isDirectBrandInvite(app)),
@@ -652,6 +653,7 @@ export default function CampaignOverviewDashboard({
             onRefresh={loadData}
             onViewOffers={() => setActiveTab('offers')}
             offersCount={offers.length}
+            onViewProfile={(creator) => setSelectedCreatorForProfile(creator)}
           />
         )}
       </div>

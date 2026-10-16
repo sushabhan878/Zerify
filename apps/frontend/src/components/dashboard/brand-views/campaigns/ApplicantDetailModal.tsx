@@ -160,10 +160,30 @@ export default function ApplicantDetailModal({
         <div
           className="overflow-y-auto space-y-5 flex-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-0.5"
         >
+          {/* Counter Offer Highlight Banner */}
+          {application.reviewNotes === 'COUNTER_OFFER' && (
+            <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between gap-3">
+              <div className="space-y-0.5">
+                <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                  Creator Counter Proposal
+                </span>
+                <p className="text-xs text-slate-300">
+                  Creator proposed custom rate for this collaboration.
+                </p>
+              </div>
+              <div className="text-right">
+                <span className="text-sm sm:text-base font-black text-amber-400">
+                  {formatCurrency(application.proposedAmount, application.proposedCurrency || currency)}
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Application Pitch */}
           <div className="space-y-1">
             <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              Application Pitch
+              {application.reviewNotes === 'COUNTER_OFFER' ? 'Creator Pitch & Terms Note' : 'Application Pitch'}
             </h4>
             <p className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">
               {application.applicationMessage || 'No pitch text provided.'}

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Sparkles, AlertCircle, Compass, ShieldCheck } from 'lucide-react';
 import OfferReceivedCard from './OfferReceivedCard';
+import CounterOfferModal from './CounterOfferModal';
 import { CampaignOfferItem } from '@/services/offer.service';
 import { useCurrency } from '@/context/CurrencyContext';
 import { convertCurrency } from '@/utils/currency';
@@ -28,6 +29,7 @@ export default function OffersOverviewTab({
   const { currency: userCurrency, format: formatUserCurrency, rates } = useCurrency();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'PENDING' | 'ACCEPTED' | 'DECLINED'>('PENDING');
+  const [counterOfferTarget, setCounterOfferTarget] = useState<CampaignOfferItem | null>(null);
 
   const pendingCount = offers.filter((o) => o.status === 'PENDING').length;
   const totalOfferedCash = offers
@@ -141,6 +143,7 @@ export default function OffersOverviewTab({
               offer={offer}
               onAccept={onAccept}
               onDecline={onDecline}
+              onCounterOffer={(off) => setCounterOfferTarget(off)}
               onViewDetails={onViewDetails}
               isAccepting={isAccepting}
             />
@@ -168,6 +171,21 @@ export default function OffersOverviewTab({
             </button>
           )}
         </div>
+      )}
+
+      {/* Counter Offer Modal */}
+      {counterOfferTarget && (
+        <CounterOfferModal
+          offer={counterOfferTarget}
+          isOpen={Boolean(counterOfferTarget)}
+          onClose={() => setCounterOfferTarget(null)}
+          onSuccess={() => {
+            setCounterOfferTarget(null);
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new Event('zerify_offers_updated'));
+            }
+          }}
+        />
       )}
     </div>
   );

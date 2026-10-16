@@ -56,29 +56,23 @@ export default function CreatorInviteModal({ creator, onClose }: CreatorInviteMo
     CampaignService.getBrandCampaigns()
       .then((data) => {
         if (data && data.length > 0) {
-          setCampaigns(data);
-          // Pick the first campaign that hasn't already been invited
-          const firstAvailable = data.find((c) => !invitedIds.includes(c.id)) || null;
-          setSelectedCampaign(firstAvailable || data[0]);
+          // Strictly filter for active campaigns only (ACTIVE, OPEN, FILLING)
+          const activeCampaigns = data.filter(
+            (c) => c.status === 'ACTIVE' || c.status === 'OPEN' || c.status === 'FILLING'
+          );
+          setCampaigns(activeCampaigns);
+          // Pick the first active campaign that hasn't already been invited
+          const firstAvailable = activeCampaigns.find((c) => !invitedIds.includes(c.id)) || null;
+          setSelectedCampaign(firstAvailable || activeCampaigns[0] || null);
         } else {
-          const fallback: CampaignItem = {
-            id: 'summer-skincare',
-            title: 'Summer Skincare Launch',
-            slug: 'summer-skincare-launch',
-            objective: ['Brand Awareness'],
-            status: 'ACTIVE',
-            platforms: ['Instagram', 'YouTube'],
-            targetParticipants: 5,
-            maxParticipants: 10,
-            autoCloseWhenFilled: false,
-          };
-          setCampaigns([fallback]);
-          if (!invitedIds.includes(fallback.id)) {
-            setSelectedCampaign(fallback);
-          }
+          setCampaigns([]);
+          setSelectedCampaign(null);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setCampaigns([]);
+        setSelectedCampaign(null);
+      });
   }, [invitedIds]);
 
   if (!creator) return null;

@@ -23,7 +23,14 @@ interface BrandCampaignCardProps {
 export default function BrandCampaignCard({ campaign: c, onClick }: BrandCampaignCardProps) {
   const { currency: userCurrency } = useCurrency();
   const hired = c._count?.participants || 0;
-  const applicants = c._count?.applications || 0;
+  const applicants = Array.isArray((c as any).applications)
+    ? (c as any).applications.filter(
+        (app: any) =>
+          app.reviewNotes !== 'DIRECT_INVITE' &&
+          app.applicationMessage !== 'Official brand collaboration invite' &&
+          app.applicationMessage !== 'Direct brand invitation'
+      ).length
+    : c._count?.applications || 0;
   const targetParticipants = c.targetParticipants || 1;
   const progressPercent = Math.min(100, Math.round((hired / targetParticipants) * 100));
 

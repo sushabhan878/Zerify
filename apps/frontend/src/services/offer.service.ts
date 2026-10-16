@@ -54,6 +54,16 @@ export const OfferService = {
     });
   },
 
+  async counterOffer(
+    offerId: string,
+    data: { proposedAmount: number; proposedCurrency?: string; message?: string },
+  ): Promise<CampaignOfferItem> {
+    return apiRequest(`/offers/${offerId}/counter`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
   // Brand: Cancel
   async cancelOffer(offerId: string): Promise<{ success: boolean; message: string }> {
     return apiRequest(`/offers/${offerId}/cancel`, {

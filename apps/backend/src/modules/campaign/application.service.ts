@@ -354,6 +354,13 @@ export class ApplicationService {
           },
         },
         ...(status ? { status } : {}),
+        NOT: {
+          OR: [
+            { reviewNotes: 'DIRECT_INVITE' },
+            { applicationMessage: 'Official brand collaboration invite' },
+            { applicationMessage: 'Direct brand invitation' },
+          ],
+        },
       },
       include: {
         campaign: {

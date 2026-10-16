@@ -53,15 +53,20 @@ export default function CampaignSelectDropdown({
       {/* Dropdown Trigger Button */}
       <button
         type="button"
+        disabled={campaigns.length === 0}
         onClick={() => {
-          setIsOpen((prev) => !prev);
+          if (campaigns.length > 0) {
+            setIsOpen((prev) => !prev);
+          }
         }}
         className={`w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border transition-all duration-200 flex items-center justify-between gap-2.5 text-left text-xs font-semibold ${
           errorMessage
             ? 'border-amber-500/60 ring-2 ring-amber-500/20 bg-slate-900 text-white'
             : isOpen
             ? 'border-purple-500 ring-2 ring-purple-500/20 bg-slate-900 text-white'
-            : 'border-white/10 hover:border-purple-500/40 hover:bg-slate-900 text-white'
+            : campaigns.length === 0
+            ? 'border-white/5 bg-slate-900/40 text-slate-500 cursor-not-allowed'
+            : 'border-white/10 hover:border-purple-500/40 hover:bg-slate-900 text-white cursor-pointer'
         }`}
       >
         <div className="flex items-center gap-2.5 min-w-0">
@@ -73,7 +78,11 @@ export default function CampaignSelectDropdown({
             }`}
           />
           <span className="truncate">
-            {selectedCampaign ? selectedCampaign.title : 'Select an available campaign...'}
+            {selectedCampaign
+              ? selectedCampaign.title
+              : campaigns.length === 0
+              ? 'No active campaigns found'
+              : 'Select an active campaign...'}
           </span>
         </div>
 
@@ -162,8 +171,9 @@ export default function CampaignSelectDropdown({
                 );
               })
             ) : (
-              <div className="px-3 py-2 text-xs text-slate-400 text-center">
-                No campaigns available
+              <div className="px-3 py-3 text-xs text-slate-400 text-center space-y-1">
+                <p className="font-semibold text-slate-300">No active campaigns available</p>
+                <p className="text-[11px] text-slate-500">Only published active campaigns can receive invitations.</p>
               </div>
             )}
           </motion.div>

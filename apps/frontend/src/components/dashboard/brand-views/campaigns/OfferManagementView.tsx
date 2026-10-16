@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import {
   Send,
   CheckCircle,
-  XCircle,
-  ArrowUpRight,
   DollarSign,
   X,
   Loader2,
@@ -40,8 +38,26 @@ export default function OfferManagementView({
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
+  const getStatusBadge = (offer: CampaignOfferItem) => {
+    const isCounter =
+      offer.status === 'PENDING' &&
+      Boolean(
+        offer.termsSnapshot?.isCounterOffer ||
+        offer.application?.reviewNotes === 'COUNTER_OFFER',
+      );
+
+    if (isCounter) {
+      return {
+        gradient: 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600',
+        border: 'border-amber-400/60',
+        shadow: 'shadow-amber-950/80 shadow-[0_0_20px_rgba(245,158,11,0.4)]',
+        dot: 'bg-amber-100 animate-ping shadow-sm',
+        label: 'You Got An Offer',
+        desc: 'Creator submitted a counter offer proposal',
+      };
+    }
+
+    switch (offer.status) {
       case 'ACCEPTED':
         return {
           gradient: 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500',
@@ -114,7 +130,13 @@ export default function OfferManagementView({
         const displayName =
           profile.user?.name || app.profileSnapshot?.displayName || profile.handle || 'Creator';
         const displayHandle = (profile.handle || app.profileSnapshot?.username || 'creator').replace(/^@/, '');
-        const badge = getStatusBadge(offer.status);
+        const isCounterOffer =
+          offer.status === 'PENDING' &&
+          Boolean(
+            offer.termsSnapshot?.isCounterOffer ||
+            offer.application?.reviewNotes === 'COUNTER_OFFER',
+          );
+        const badge = getStatusBadge(offer);
         const isDirectInvite = app.applicationMessage === 'Official brand collaboration invite';
 
         return (
@@ -195,20 +217,8 @@ export default function OfferManagementView({
                 </span>
               </div>
 
-              {/* Actions based on status */}
-              {offer.status === 'ACCEPTED' && onViewCollab && (
-                <button
-                  onClick={onViewCollab}
-                  type="button"
-                  className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-black transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
-                  title="View active workspace and deliverables"
-                >
-                  <span>Active Collab</span>
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                </button>
-              )}
-
-              {offer.status === 'PENDING' && (
+              {/* Show Cancel button only when offer is pending and no counter offer has been received */}
+              {offer.status === 'PENDING' && !isCounterOffer && (
                 <button
                   onClick={() => handleCancel(offer.id)}
                   disabled={cancellingOfferId === offer.id}

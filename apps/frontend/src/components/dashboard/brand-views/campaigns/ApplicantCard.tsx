@@ -118,6 +118,13 @@ export default function ApplicantCard({
         <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
           {(() => {
             const badge = (() => {
+              if (application.reviewNotes === 'COUNTER_OFFER') {
+                return {
+                  label: 'Counter Offer',
+                  bg: 'bg-amber-500/20 text-amber-300 border-amber-400/40 shadow-[0_0_15px_rgba(245,158,11,0.25)]',
+                  dot: 'bg-amber-300 animate-ping',
+                };
+              }
               switch (application.status) {
                 case 'OFFER_ACCEPTED':
                   return {
@@ -197,9 +204,9 @@ export default function ApplicantCard({
         </div>
         <div className="px-2">
           <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-0.5">
-            Pitch Quote
+            {application.reviewNotes === 'COUNTER_OFFER' ? 'Counter Quote' : 'Pitch Quote'}
           </span>
-          <span className="text-sm sm:text-base font-black text-purple-300">
+          <span className={`text-sm sm:text-base font-black ${application.reviewNotes === 'COUNTER_OFFER' ? 'text-amber-400' : 'text-purple-300'}`}>
             {application.proposedAmount ? (
               <Money
                 amount={application.proposedAmount}
@@ -236,7 +243,9 @@ export default function ApplicantCard({
         </button>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {application.status === 'APPLIED' ? (
+          {application.status === 'APPLIED' ||
+          application.status === 'UNDER_REVIEW' ||
+          application.reviewNotes === 'COUNTER_OFFER' ? (
             <>
               {/* Option 2: Reject */}
               <button

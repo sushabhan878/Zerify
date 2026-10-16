@@ -8,7 +8,8 @@ import {
 import { CampaignRepository } from './campaign.repository';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { InviteCreatorDto } from './dto/invite-creator.dto';
-import { OfferStatus, ApplicationStatus } from '@prisma/client';
+import { CounterOfferDto } from './dto/counter-offer.dto';
+import { OfferStatus, ApplicationStatus, CampaignStatus } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { ConversationService } from '../messaging/conversation.service';
 import { MessageService } from '../messaging/message.service';
@@ -205,6 +206,92 @@ export class OfferService {
     return { success: true, message: 'Offer declined' };
   }
 
+  async counterOffer(userId: string, offerId: string, dto: CounterOfferDto) {
+    const offer = await this.repository.findOfferById(offerId);
+    if (!offer) {
+      throw new NotFoundException('Offer not found');
+    }
+
+    if (offer.application.influencerProfile.userId !== userId) {
+      throw new ForbiddenException('You can only counter offers sent to you');
+    }
+
+    if (offer.status !== OfferStatus.PENDING) {
+      throw new BadRequestException(`Cannot counter offer in ${offer.status} status`);
+    }
+
+    const existingSnapshot = (offer.termsSnapshot as Record<string, any>) || {};
+    const updatedTermsSnapshot = {
+      ...existingSnapshot,
+      isCounterOffer: true,
+      counterBy: 'INFLUENCER',
+      counterRate: dto.proposedAmount,
+      counterCurrency: dto.proposedCurrency || offer.compensationCurrency || 'USD',
+      originalRate: offer.compensationAmount,
+      counterNotes: dto.message?.trim() || '',
+      counterAt: new Date().toISOString(),
+    };
+
+    // Update CampaignOffer with counter terms
+    await this.prisma.campaignOffer.update({
+      where: { id: offerId },
+      data: {
+        termsSnapshot: updatedTermsSnapshot,
+      },
+    });
+
+    // Update CampaignApplication so it shows up in Campaign Applications & Applications counts
+    await this.prisma.campaignApplication.update({
+      where: { id: offer.applicationId },
+      data: {
+        status: ApplicationStatus.UNDER_REVIEW,
+        proposedAmount: dto.proposedAmount,
+        proposedCurrency: dto.proposedCurrency || offer.compensationCurrency || 'USD',
+        applicationMessage:
+          dto.message?.trim() ||
+          `Creator submitted counter proposal of ${dto.proposedCurrency || '$'}${dto.proposedAmount}`,
+        reviewNotes: 'COUNTER_OFFER',
+        submittedAt: new Date(),
+      },
+    });
+
+    // Notify brand via real-time system message in conversation thread
+    try {
+      const brandUserId = offer.application.campaign.brandProfile?.userId;
+      if (brandUserId) {
+        const conversation = await this.conversationService.resolveCollaborationConversation({
+          applicationId: offer.applicationId,
+          campaignId: offer.campaignId,
+          brandUserId,
+          influencerUserId: userId,
+        });
+
+        const influencerName =
+          offer.application.influencerProfile?.user?.name ||
+          offer.application.influencerProfile?.handle ||
+          'The creator';
+
+        await this.messageService.createSystemMessage({
+          conversationId: conversation.id,
+          text: `💬 ${influencerName} submitted a counter offer of ${dto.proposedCurrency || '$'}${dto.proposedAmount}${dto.message?.trim() ? ` with note: "${dto.message.trim()}"` : ''}.`,
+          systemEvent: 'COLLABORATION_COUNTER_OFFER',
+          metadata: {
+            offerId: offer.id,
+            campaignId: offer.campaignId,
+            applicationId: offer.applicationId,
+            counterRate: dto.proposedAmount,
+            counterNotes: dto.message,
+          },
+          clientMessageId: `counter_offer:${offer.id}_${Date.now()}`,
+        });
+      }
+    } catch (msgErr: any) {
+      this.logger.warn(`Could not send counter offer notification message: ${msgErr?.message}`);
+    }
+
+    return this.repository.findOfferById(offerId);
+  }
+
   async cancelOffer(userId: string, offerId: string) {
     const offer = await this.repository.findOfferById(offerId);
     if (!offer) {
@@ -255,6 +342,14 @@ export class OfferService {
     }
     if (campaign.brandProfile.userId !== userId) {
       throw new ForbiddenException('Only the campaign owner can send invitations');
+    }
+
+    if (
+      campaign.status !== CampaignStatus.ACTIVE &&
+      campaign.status !== CampaignStatus.OPEN &&
+      campaign.status !== CampaignStatus.FILLING
+    ) {
+      throw new BadRequestException('Invitations can only be sent for active campaigns');
     }
 
     // Resolve influencer profile by id or userId
