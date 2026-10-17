@@ -30,6 +30,7 @@ import SendOfferModal from './SendOfferModal';
 import CounterOfferModal from './CounterOfferModal';
 import ApplicantComparisonView from './ApplicantComparisonView';
 import ParticipantManagementView from './ParticipantManagementView';
+import ParticipantDeliverablesPage from './ParticipantDeliverablesPage';
 import OfferManagementView from './OfferManagementView';
 import CreatorProfileFullView from '../find-influencers/CreatorProfileFullView';
 import { CreatorItem } from '../find-influencers/CreatorCard';
@@ -59,6 +60,7 @@ export default function CampaignOverviewDashboard({
 
   // Modals & In-Platform Profile state
   const [selectedCreatorForProfile, setSelectedCreatorForProfile] = useState<CreatorItem | null>(null);
+  const [managingParticipant, setManagingParticipant] = useState<any | null>(null);
   const [selectedAppForDetail, setSelectedAppForDetail] = useState<CampaignApplicationItem | null>(null);
   const [selectedAppForOffer, setSelectedAppForOffer] = useState<CampaignApplicationItem | null>(null);
   const [selectedAppForCounterOffer, setSelectedAppForCounterOffer] = useState<CampaignApplicationItem | null>(null);
@@ -193,6 +195,24 @@ export default function CampaignOverviewDashboard({
       <div className="min-h-[450px] flex items-center justify-center p-12">
         <LottieLoader size={200} message="Loading campaign details..." />
       </div>
+    );
+  }
+
+  // Dedicated Participant Deliverables Management View
+  if (managingParticipant) {
+    const currentParticipant =
+      participants.find((p) => p.id === managingParticipant.id) || managingParticipant;
+    return (
+      <ParticipantDeliverablesPage
+        participant={currentParticipant}
+        campaign={campaign}
+        onBack={() => setManagingParticipant(null)}
+        onRefresh={loadData}
+        onViewProfile={(creator) => {
+          setManagingParticipant(null);
+          setSelectedCreatorForProfile(creator);
+        }}
+      />
     );
   }
 
@@ -650,10 +670,12 @@ export default function CampaignOverviewDashboard({
         {activeTab === 'participants' && (
           <ParticipantManagementView
             participants={participants}
+            campaign={campaign}
             onRefresh={loadData}
             onViewOffers={() => setActiveTab('offers')}
             offersCount={offers.length}
             onViewProfile={(creator) => setSelectedCreatorForProfile(creator)}
+            onManageDeliverables={(p) => setManagingParticipant(p)}
           />
         )}
       </div>

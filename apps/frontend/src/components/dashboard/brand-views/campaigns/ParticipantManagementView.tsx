@@ -1,29 +1,48 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Users, CheckCircle, Clock, Video, ShieldCheck, ChevronRight, ArrowUpRight } from 'lucide-react';
-import DeliverableReviewCard from './DeliverableReviewCard';
+import { Users, ChevronRight, ArrowUpRight } from 'lucide-react';
 import { useCurrency } from '@/context/CurrencyContext';
 import { formatCurrency } from '@/utils/currency';
 import { isComplete } from '@/services/deliverable-workflow';
+import ParticipantDeliverablesPage from './ParticipantDeliverablesPage';
 
 interface ParticipantManagementViewProps {
   participants: any[];
+  campaign?: any;
   onRefresh: () => void;
   onViewOffers?: () => void;
   offersCount?: number;
   onViewProfile?: (creator: any) => void;
+  onManageDeliverables?: (participant: any) => void;
 }
 
 export default function ParticipantManagementView({
   participants,
+  campaign,
   onRefresh,
   onViewOffers,
   offersCount = 0,
   onViewProfile,
+  onManageDeliverables,
 }: ParticipantManagementViewProps) {
   const { currency } = useCurrency();
-  const [selectedParticipantId, setSelectedParticipantId] = useState<string | null>(null);
+  const [localManagingParticipant, setLocalManagingParticipant] = useState<any | null>(null);
+
+  // If viewing dedicated page via local state fallback
+  if (localManagingParticipant) {
+    const currentParticipant =
+      participants.find((p) => p.id === localManagingParticipant.id) || localManagingParticipant;
+    return (
+      <ParticipantDeliverablesPage
+        participant={currentParticipant}
+        campaign={campaign}
+        onBack={() => setLocalManagingParticipant(null)}
+        onRefresh={onRefresh}
+        onViewProfile={onViewProfile}
+      />
+    );
+  }
 
   if (participants.length === 0) {
     return (
@@ -39,7 +58,7 @@ export default function ParticipantManagementView({
           <button
             onClick={onViewOffers}
             type="button"
-            className="px-3.5 py-1.5 rounded-xl bg-purple-600/20 text-purple-300 border border-purple-500/30 hover:bg-purple-600/30 text-xs font-bold transition-colors inline-flex items-center gap-1.5"
+            className="px-3.5 py-1.5 rounded-xl bg-purple-600/20 text-purple-300 border border-purple-500/30 hover:bg-purple-600/30 text-xs font-bold transition-colors inline-flex items-center gap-1.5 cursor-pointer"
           >
             <span>View Sent Offers ({offersCount})</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -48,8 +67,6 @@ export default function ParticipantManagementView({
       </div>
     );
   }
-
-  const selectedParticipant = participants.find((p) => p.id === selectedParticipantId);
 
   return (
     <div className="space-y-6">
@@ -63,7 +80,6 @@ export default function ParticipantManagementView({
           const avatarUrl = profile.avatarUrl || profile.user?.avatarUrl;
           const deliverables = p.deliverables || [];
           const completedCount = deliverables.filter(isComplete).length;
-          const isSelected = selectedParticipantId === p.id;
 
           const handleOpenProfile = (e: React.MouseEvent) => {
             if (!onViewProfile) return;
@@ -85,17 +101,20 @@ export default function ParticipantManagementView({
             });
           };
 
+          const handleOpenDeliverables = () => {
+            if (onManageDeliverables) {
+              onManageDeliverables(p);
+            } else {
+              setLocalManagingParticipant(p);
+            }
+          };
+
           return (
             <div
               key={p.id}
-              onClick={() => setSelectedParticipantId(isSelected ? null : p.id)}
-              className={`p-5 sm:p-6 rounded-3xl border transition-all duration-300 cursor-pointer space-y-4 shadow-xl backdrop-blur-xl group ${
-                isSelected
-                  ? 'bg-slate-950/90 border-purple-500 ring-2 ring-purple-500/30 shadow-[0_16px_40px_rgba(168,85,247,0.25)]'
-                  : 'bg-slate-950/75 border-purple-500/20 hover:border-purple-500/40 shadow-purple-950/20 hover:shadow-[0_16px_40px_rgba(168,85,247,0.16)]'
-              }`}
+              className="p-5 sm:p-6 rounded-3xl border transition-all duration-300 space-y-3.5 shadow-xl backdrop-blur-xl group bg-slate-950/75 border-purple-500/20 hover:border-purple-500/40 shadow-purple-950/20 hover:shadow-[0_16px_40px_rgba(168,85,247,0.16)]"
             >
-              {/* Header: Avatar, Name & Fee */}
+              {/* Header: Avatar, Name & Payout (No "FEE" text) */}
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3.5 min-w-0">
                   {/* Creator Avatar Picture */}
@@ -107,7 +126,7 @@ export default function ParticipantManagementView({
                     )}
                   </div>
 
-                  {/* Creator Name & Redirect Icon (No @ icon) */}
+                  {/* Creator Name & Redirect Icon */}
                   <div className="space-y-1 min-w-0">
                     <button
                       type="button"
@@ -124,33 +143,60 @@ export default function ParticipantManagementView({
                     </button>
 
                     <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                      <span>Joined {new Date(p.joinedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                      <span>
+                        Joined{' '}
+                        {new Date(p.joinedAt).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Fee Display Matching Other Cards */}
+                {/* Amount Display (No "FEE" label) */}
                 <div className="text-right shrink-0">
-                  <span className="text-[10px] text-slate-400 uppercase font-black tracking-widest block">
-                    FEE
-                  </span>
-                  <span className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight leading-none block pt-0.5">
+                  <span className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight leading-none block">
                     {formatCurrency(p.agreedAmount, p.agreedCurrency || currency)}
                   </span>
                 </div>
               </div>
 
-              {/* Deliverable Progress Meter - Seamless without nested card container */}
-              <div className="space-y-2 pt-1">
+              {/* Exact Deliverables Details (Quantity + Revisions) - Short & Clean */}
+              {deliverables.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 py-0.5">
+                  {deliverables.map((del: any, idx: number) => {
+                    const qty = del.quantity || 1;
+                    const type = del.type || del.title || 'Deliverable';
+                    const revLimit = del.requirements?.revisionLimit ?? del.revisionLimit ?? 2;
+                    return (
+                      <span
+                        key={del.id || idx}
+                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-purple-950/40 border border-purple-500/20 text-[11px] font-semibold text-purple-200"
+                      >
+                        <span className="font-bold text-white">{qty}x</span>
+                        <span className="truncate max-w-[130px]">{type}</span>
+                        <span className="text-slate-400 text-[10px]">
+                          · {revLimit} {revLimit === 1 ? 'rev' : 'revs'}
+                        </span>
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Deliverable Progress Meter - Sleek and Slim (h-1.5) */}
+              <div className="space-y-1.5 pt-0.5">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-slate-300">Deliverable Progress</span>
-                  <span className="font-black text-purple-300">
+                  <span className="font-semibold text-slate-400">Deliverable Progress</span>
+                  <span className="font-bold text-purple-300 text-[11px]">
                     {completedCount} / {deliverables.length} Completed
                   </span>
                 </div>
-                <div className="w-full bg-slate-900/90 h-2 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                <div className="w-full bg-slate-800/50 h-1.5 rounded-full overflow-hidden">
                   <div
-                    className="bg-gradient-to-r from-purple-600 via-indigo-500 to-emerald-500 h-full transition-all duration-500 rounded-full"
+                    className="bg-gradient-to-r from-purple-500 via-indigo-500 to-emerald-400 h-full transition-all duration-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.4)]"
                     style={{
                       width: `${deliverables.length > 0 ? (completedCount / deliverables.length) * 100 : 0}%`,
                     }}
@@ -158,78 +204,21 @@ export default function ParticipantManagementView({
                 </div>
               </div>
 
-              {/* Action Footer */}
-              <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs text-purple-400 font-bold group-hover:text-purple-300 transition-colors">
-                <span className="font-black flex items-center gap-1.5">
-                  <Video className="w-3.5 h-3.5 text-purple-400" />
-                  <span>{isSelected ? 'Hide Deliverables Workspace' : 'Inspect Deliverables'}</span>
-                </span>
-                <span className="flex items-center gap-1 text-[11px] font-bold text-slate-400 group-hover:text-white transition-colors">
-                  <span>{isSelected ? 'Close' : 'View drafts'}</span>
-                  <ChevronRight className={`w-3.5 h-3.5 transition-transform duration-300 ${isSelected ? 'rotate-90 text-purple-300' : 'group-hover:translate-x-1'}`} />
-                </span>
+              {/* Action Footer: Manage Deliverables Button */}
+              <div className="pt-2 border-t border-white/5 flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={handleOpenDeliverables}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/35 text-purple-300 hover:text-white border border-purple-500/30 hover:border-purple-400/50 text-xs font-bold transition-all duration-200 flex items-center justify-center gap-2 group/btn cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(168,85,247,0.25)]"
+                >
+                  <span>Manage Deliverables</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-purple-400 group-hover/btn:translate-x-0.5 transition-transform" />
+                </button>
               </div>
             </div>
           );
         })}
       </div>
-
-      {/* Expanded Participant Workspace */}
-      {selectedParticipant && (() => {
-        const pDeliverables = selectedParticipant.deliverables || [];
-        const isAllDone = pDeliverables.length > 0 && pDeliverables.every(isComplete);
-        const isCompleted = selectedParticipant.status === 'PARTICIPANT_COMPLETED';
-        const pProfile = selectedParticipant.influencerProfile || {};
-        const pDisplayName = pProfile.user?.name || (pProfile.handle ? pProfile.handle.replace(/^@+/, '') : 'Creator');
-
-        return (
-          <div className="p-6 rounded-3xl bg-slate-950/90 border border-purple-500/30 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
-              <div>
-                <span className="text-[10px] font-black text-purple-400 uppercase">Participant Workspace</span>
-                <h3 className="text-base font-black text-white">
-                  Deliverable Tracker: {pDisplayName}
-                </h3>
-              </div>
-              <div className="flex items-center gap-2">
-                {isCompleted ? (
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
-                    <CheckCircle className="w-3.5 h-3.5" />
-                    Collaboration Completed · Eligible for Settlement
-                  </span>
-                ) : isAllDone ? (
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      try {
-                        const { DeliverableService } = await import('@/services/deliverable.service');
-                        await DeliverableService.completeParticipant(selectedParticipant.id);
-                        onRefresh();
-                      } catch (err: any) {
-                        alert(err?.message || 'Could not complete collaboration');
-                      }
-                    }}
-                    className="px-4 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-950/40 transition flex items-center gap-1.5"
-                  >
-                    <ShieldCheck className="w-4 h-4" />
-                    Finalize Collaboration & Mark Completed
-                  </button>
-                ) : (
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-500/10 text-purple-300 border border-purple-500/30">
-                    Active in Production
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {pDeliverables.map((del: any) => (
-                <DeliverableReviewCard key={del.id} deliverable={del} onRefresh={onRefresh} />
-              ))}
-            </div>
-          </div>
-        );
-      })()}
     </div>
   );
 }
