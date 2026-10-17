@@ -58,13 +58,21 @@ export class OfferController {
   @Post('offers/:offerId/counter')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Influencer submits a counter offer' })
+  @ApiOperation({ summary: 'Submit a counter offer' })
   async counterOffer(
     @Req() req: any,
     @Param('offerId') offerId: string,
     @Body() dto: CounterOfferDto,
   ) {
     return this.offerService.counterOffer(req.user.id, offerId, dto);
+  }
+
+  @Post('offers/:offerId/cancel-counter')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Influencer cancels their counter offer' })
+  async cancelCounterOffer(@Req() req: any, @Param('offerId') offerId: string) {
+    return this.offerService.cancelCounterOffer(req.user.id, offerId);
   }
 
   @Post('offers/:offerId/cancel')

@@ -22,10 +22,12 @@ interface OfferReceivedCardProps {
   offer: CampaignOfferItem;
   onAccept: (offerId: string) => void;
   onDecline: (offerId: string) => void;
+  onCancelCounter?: (offerId: string) => void;
   onCounterOffer?: (offer: CampaignOfferItem) => void;
   onViewDetails?: (offer: CampaignOfferItem) => void;
   onMessageBrand?: (offer: CampaignOfferItem) => void;
   isAccepting?: boolean;
+  isCancellingCounter?: boolean;
   isMessaging?: boolean;
 }
 
@@ -33,10 +35,12 @@ export default function OfferReceivedCard({
   offer,
   onAccept,
   onDecline,
+  onCancelCounter,
   onCounterOffer,
   onViewDetails,
   onMessageBrand,
   isAccepting,
+  isCancellingCounter,
   isMessaging,
 }: OfferReceivedCardProps) {
   const { currency: userCurrency, format: formatUserCurrency, rates } = useCurrency();
@@ -44,8 +48,32 @@ export default function OfferReceivedCard({
   const campaign = app.campaign || {};
   const brand = campaign.brandProfile || {};
 
-  const rawCompensation = Number(offer.compensationAmount || 0);
-  const sourceCurrency = offer.compensationCurrency || campaign.budgetCurrency || 'USD';
+  const terms = (offer.termsSnapshot as Record<string, any>) || {};
+  const isCounter = Boolean(terms.isCounterOffer);
+  const counterBy = terms.counterBy || (isCounter ? 'INFLUENCER' : null);
+  const isInfluencerCounter = isCounter && counterBy === 'INFLUENCER';
+  const isBrandCounter = isCounter && counterBy === 'BRAND';
+
+  const isBrandRejectedCounter =
+    isCounter &&
+    (terms.counterStatus === 'REJECTED' ||
+      offer.status === 'DECLINED' ||
+      offer.application?.status === 'REJECTED');
+
+  const rawCompensation =
+    isInfluencerCounter && terms.counterRate
+      ? Number(terms.counterRate)
+      : isBrandCounter && terms.counterRate
+      ? Number(terms.counterRate)
+      : Number(offer.compensationAmount || 0);
+
+  const sourceCurrency =
+    (isInfluencerCounter && terms.counterCurrency) ||
+    (isBrandCounter && terms.counterCurrency) ||
+    offer.compensationCurrency ||
+    campaign.budgetCurrency ||
+    'USD';
+
   const convertedCompensation = convertCurrency(rawCompensation, sourceCurrency, userCurrency, rates);
   const isCrossCurrency = sourceCurrency.toUpperCase() !== userCurrency.toUpperCase();
 
@@ -89,15 +117,25 @@ export default function OfferReceivedCard({
               <CheckCircle2 className="w-4 h-4 text-emerald-200 shrink-0" />
               <span>Offer Accepted</span>
             </span>
+          ) : isBrandRejectedCounter ? (
+            <span className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-rose-400/50 bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 text-white text-xs sm:text-sm font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-rose-950/80 ring-4 ring-[#080B14]">
+              <X className="w-4 h-4 text-rose-200 shrink-0" />
+              <span>Brand Rejected Counter Offer</span>
+            </span>
           ) : offer.status === 'DECLINED' ? (
             <span className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-rose-400/50 bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 text-white text-xs sm:text-sm font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-rose-950/80 ring-4 ring-[#080B14]">
               <X className="w-4 h-4 text-rose-200 shrink-0" />
               <span>Offer Declined</span>
             </span>
-          ) : offer.status === 'PENDING' && offer.termsSnapshot?.isCounterOffer ? (
+          ) : offer.status === 'PENDING' && isInfluencerCounter ? (
             <span className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white text-xs sm:text-sm font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-amber-950/80 ring-4 ring-[#080B14]">
               <Sparkles className="w-4 h-4 text-amber-200 animate-pulse shrink-0" />
               <span>Counter Offer Sent</span>
+            </span>
+          ) : offer.status === 'PENDING' && isBrandCounter ? (
+            <span className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white text-xs sm:text-sm font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-amber-950/80 ring-4 ring-[#080B14]">
+              <RefreshCw className="w-4 h-4 text-amber-200 animate-spin shrink-0" />
+              <span>Counter Offer from Brand</span>
             </span>
           ) : offer.status === 'PENDING' ? (
             <span className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600 text-white text-xs sm:text-sm font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-amber-950/80 ring-4 ring-[#080B14]">
@@ -160,6 +198,26 @@ export default function OfferReceivedCard({
               &quot;{offer.customNotes}&quot;
             </p>
           )}
+
+          {/* Rejection Notification Banner */}
+          {isBrandRejectedCounter && (
+            <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-500/30 flex items-center gap-2 text-xs text-rose-300 font-medium mt-3">
+              <X className="w-4 h-4 text-rose-400 shrink-0" />
+              <span>The brand has reviewed and rejected your counter offer.</span>
+            </div>
+          )}
+
+          {/* Counter proposal notes */}
+          {isInfluencerCounter && terms.counterNotes && (
+            <p className="text-[11px] sm:text-xs text-amber-300/90 italic mt-2.5">
+              Your counter proposal note: &quot;{terms.counterNotes}&quot;
+            </p>
+          )}
+          {isBrandCounter && terms.counterNotes && (
+            <p className="text-[11px] sm:text-xs text-purple-300/90 italic mt-2.5">
+              Brand counter proposal note: &quot;{terms.counterNotes}&quot;
+            </p>
+          )}
         </div>
 
         {/* Amount Display (White, right-aligned, aligned with top-right badge) */}
@@ -167,6 +225,11 @@ export default function OfferReceivedCard({
           <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             {payoutStr}
           </span>
+          {isInfluencerCounter && (
+            <span className="block text-[10px] text-amber-400 font-semibold mt-0.5">
+              Proposed Counter Rate
+            </span>
+          )}
         </div>
       </div>
 
@@ -200,34 +263,76 @@ export default function OfferReceivedCard({
         {/* Right: Actions */}
         {offer.status === 'PENDING' && (
           <div className="flex items-center gap-2 self-end sm:self-auto shrink-0 flex-wrap">
-            <button
-              onClick={() => onDecline(offer.id)}
-              disabled={isAccepting}
-              className="group px-3.5 py-2 rounded-xl bg-gradient-to-r from-rose-950/40 to-red-950/30 hover:from-rose-900/60 hover:to-red-900/50 text-xs font-bold text-rose-200 hover:text-white border border-rose-500/30 hover:border-rose-400/60 shadow-md shadow-rose-950/30 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
-            >
-              <X className="w-3.5 h-3.5 text-rose-400 group-hover:text-rose-200 group-hover:scale-125 transition-transform duration-200 shrink-0" />
-              <span>Decline</span>
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onCounterOffer?.(offer);
-              }}
-              disabled={isAccepting}
-              className="group px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-950/40 via-orange-950/30 to-amber-950/40 hover:from-amber-900/60 hover:via-orange-900/50 hover:to-amber-900/60 text-xs font-bold text-amber-300 hover:text-white border border-amber-500/30 hover:border-amber-400/60 shadow-md shadow-amber-950/30 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
-            >
-              <RefreshCw className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-180 transition-transform duration-500 shrink-0" />
-              <span>{offer.termsSnapshot?.isCounterOffer ? 'Edit Counter' : 'Send Counter Offer'}</span>
-            </button>
-            <button
-              onClick={() => onAccept(offer.id)}
-              disabled={isAccepting}
-              className="group px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs font-black text-white shadow-lg shadow-emerald-950/40 hover:shadow-emerald-900/60 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
-            >
-              <Check className="w-4 h-4 text-white group-hover:scale-125 transition-transform duration-200 shrink-0" />
-              <span>{isAccepting ? 'Accepting...' : 'Accept & Start Project'}</span>
-            </button>
+            {isInfluencerCounter ? (
+              <>
+                {/* Cancel Counter Button (instead of decline) */}
+                <button
+                  type="button"
+                  onClick={() => (onCancelCounter ? onCancelCounter(offer.id) : onDecline(offer.id))}
+                  disabled={isAccepting || isCancellingCounter}
+                  className="group px-3.5 py-2 rounded-xl bg-gradient-to-r from-rose-950/40 to-red-950/30 hover:from-rose-900/60 hover:to-red-900/50 text-xs font-bold text-rose-200 hover:text-white border border-rose-500/30 hover:border-rose-400/60 shadow-md shadow-rose-950/30 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                >
+                  {isCancellingCounter ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-rose-400 shrink-0" />
+                  ) : (
+                    <X className="w-3.5 h-3.5 text-rose-400 group-hover:text-rose-200 group-hover:scale-125 transition-transform duration-200 shrink-0" />
+                  )}
+                  <span>{isCancellingCounter ? 'Cancelling...' : 'Cancel Counter'}</span>
+                </button>
+
+                {/* Edit Counter Button */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCounterOffer?.(offer);
+                  }}
+                  disabled={isAccepting || isCancellingCounter}
+                  className="group px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-950/40 via-orange-950/30 to-amber-950/40 hover:from-amber-900/60 hover:via-orange-900/50 hover:to-amber-900/60 text-xs font-bold text-amber-300 hover:text-white border border-amber-500/30 hover:border-amber-400/60 shadow-md shadow-amber-950/30 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-180 transition-transform duration-500 shrink-0" />
+                  <span>Edit Counter</span>
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Decline Button */}
+                <button
+                  type="button"
+                  onClick={() => onDecline(offer.id)}
+                  disabled={isAccepting}
+                  className="group px-3.5 py-2 rounded-xl bg-gradient-to-r from-rose-950/40 to-red-950/30 hover:from-rose-900/60 hover:to-red-900/50 text-xs font-bold text-rose-200 hover:text-white border border-rose-500/30 hover:border-rose-400/60 shadow-md shadow-rose-950/30 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                >
+                  <X className="w-3.5 h-3.5 text-rose-400 group-hover:text-rose-200 group-hover:scale-125 transition-transform duration-200 shrink-0" />
+                  <span>Decline</span>
+                </button>
+
+                {/* Counter Offer Button */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCounterOffer?.(offer);
+                  }}
+                  disabled={isAccepting}
+                  className="group px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-950/40 via-orange-950/30 to-amber-950/40 hover:from-amber-900/60 hover:via-orange-900/50 hover:to-amber-900/60 text-xs font-bold text-amber-300 hover:text-white border border-amber-500/30 hover:border-amber-400/60 shadow-md shadow-amber-950/30 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-180 transition-transform duration-500 shrink-0" />
+                  <span>Counter Offer</span>
+                </button>
+
+                {/* Accept & Start Project Button */}
+                <button
+                  type="button"
+                  onClick={() => onAccept(offer.id)}
+                  disabled={isAccepting}
+                  className="group px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs font-black text-white shadow-lg shadow-emerald-950/40 hover:shadow-emerald-900/60 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                >
+                  <Check className="w-4 h-4 text-white group-hover:scale-125 transition-transform duration-200 shrink-0" />
+                  <span>{isAccepting ? 'Accepting...' : 'Accept & Start Project'}</span>
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>

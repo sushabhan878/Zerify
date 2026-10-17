@@ -152,23 +152,44 @@ export default function CampaignOverviewDashboard({
 
   const handleReject = async (appId: string) => {
     try {
-      await ApplicationService.rejectApplication(appId);
+      const matchingOffer = offers.find(
+        (o) => o.applicationId === appId && o.status === 'PENDING',
+      );
+      const terms = (matchingOffer?.termsSnapshot as Record<string, any>) || {};
+      const isCreatorCounter = Boolean(terms.isCounterOffer) && terms.counterBy === 'INFLUENCER';
+
+      if (matchingOffer && isCreatorCounter) {
+        await OfferService.declineOffer(matchingOffer.id);
+      } else {
+        await ApplicationService.rejectApplication(appId);
+      }
       loadData();
     } catch (err) {
-      console.error(err);
+      console.error('Failed to reject application/counter offer:', err);
     }
   };
 
   const handleAccept = async (app: CampaignApplicationItem) => {
     try {
-      await OfferService.sendOffer(app.id, {
-        compensationAmount: app.proposedAmount || 0,
-        compensationCurrency: app.proposedCurrency || 'USD',
-        customNotes: 'Pitch accepted at proposed quote.',
-      });
+      const matchingOffer = offers.find(
+        (o) => o.applicationId === app.id && o.status === 'PENDING',
+      );
+      const terms = (matchingOffer?.termsSnapshot as Record<string, any>) || {};
+      const isCreatorCounter = Boolean(terms.isCounterOffer) && terms.counterBy === 'INFLUENCER';
+
+      if (matchingOffer && isCreatorCounter) {
+        // Brand accepts creator's counter offer directly -> immediately counts as an active collaboration!
+        await OfferService.acceptOffer(matchingOffer.id);
+      } else {
+        await OfferService.sendOffer(app.id, {
+          compensationAmount: app.proposedAmount || 0,
+          compensationCurrency: app.proposedCurrency || 'USD',
+          customNotes: 'Pitch accepted at proposed quote.',
+        });
+      }
       loadData();
     } catch (err) {
-      console.error('Failed to accept pitch offer:', err);
+      console.error('Failed to accept offer/counter offer:', err);
     }
   };
 
@@ -695,6 +716,11 @@ export default function CampaignOverviewDashboard({
           }}
           onShortlist={handleShortlist}
           onReject={handleReject}
+          onAccept={handleAccept}
+          onCounterOffer={(app) => {
+            setSelectedAppForDetail(null);
+            setSelectedAppForCounterOffer(app);
+          }}
         />
       )}
 

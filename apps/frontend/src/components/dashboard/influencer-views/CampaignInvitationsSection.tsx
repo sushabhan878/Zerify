@@ -29,6 +29,7 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
   const [offers, setOffers] = useState<CampaignOfferItem[]>([]);
   const [selectedOffer, setSelectedOffer] = useState<CampaignOfferItem | null>(null);
   const [messagingOfferId, setMessagingOfferId] = useState<string | null>(null);
+  const [cancellingOfferId, setCancellingOfferId] = useState<string | null>(null);
   const [counterOfferTarget, setCounterOfferTarget] = useState<CampaignOfferItem | null>(null);
 
   // Confirmation modal state
@@ -75,6 +76,23 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
         type: 'ACCEPT',
         offer: target,
       });
+    }
+  };
+
+  const handleCancelCounter = async (offerId: string) => {
+    try {
+      setCancellingOfferId(offerId);
+      await OfferService.cancelCounterOffer(offerId);
+      toastSuccess('Counter offer withdrawn. Restored original offer terms.');
+      await loadData();
+      if (selectedOffer?.id === offerId) {
+        setSelectedOffer(null);
+      }
+    } catch (err: any) {
+      console.error('Failed to cancel counter offer:', err);
+      toastError(err?.message || 'Failed to cancel counter offer');
+    } finally {
+      setCancellingOfferId(null);
     }
   };
 
@@ -441,10 +459,12 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
               offer={offer}
               onAccept={requestAcceptOffer}
               onDecline={requestDeclineOffer}
+              onCancelCounter={handleCancelCounter}
               onCounterOffer={(off) => setCounterOfferTarget(off)}
               onViewDetails={(off) => setSelectedOffer(off)}
               onMessageBrand={handleMessageBrand}
               isAccepting={isProcessingAction && confirmModal.offer?.id === offer.id}
+              isCancellingCounter={cancellingOfferId === offer.id}
               isMessaging={messagingOfferId === offer.id}
             />
           ))}
@@ -458,6 +478,7 @@ export default function CampaignInvitationsSection({ onNavigate }: CampaignInvit
           onClose={() => setSelectedOffer(null)}
           onAccept={requestAcceptOffer}
           onDecline={requestDeclineOffer}
+          onCancelCounter={handleCancelCounter}
           onCounterOffer={(off) => setCounterOfferTarget(off)}
           onMessageBrand={handleMessageBrand}
         />

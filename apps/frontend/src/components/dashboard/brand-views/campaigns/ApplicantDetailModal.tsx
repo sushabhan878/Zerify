@@ -25,6 +25,8 @@ interface ApplicantDetailModalProps {
   onSendOffer: (app: CampaignApplicationItem) => void;
   onShortlist: (appId: string) => void;
   onReject: (appId: string) => void;
+  onAccept?: (app: CampaignApplicationItem) => void;
+  onCounterOffer?: (app: CampaignApplicationItem) => void;
 }
 
 export default function ApplicantDetailModal({
@@ -34,6 +36,8 @@ export default function ApplicantDetailModal({
   onSendOffer,
   onShortlist,
   onReject,
+  onAccept,
+  onCounterOffer,
 }: ApplicantDetailModalProps) {
   const { currency, formatBudget } = useCurrency();
   const [mounted, setMounted] = useState(false);
@@ -57,6 +61,8 @@ export default function ApplicantDetailModal({
       onViewProfile(creatorItem);
     }
   };
+
+  const isCounter = application.reviewNotes === 'COUNTER_OFFER';
 
   const modalContent = (
     <div
@@ -260,6 +266,30 @@ export default function ApplicantDetailModal({
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Offer Accepted (Confirmed Participant)</span>
               </span>
+            ) : isCounter ? (
+              <>
+                <button
+                  onClick={() => {
+                    onReject(application.id);
+                    onClose();
+                  }}
+                  type="button"
+                  className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 hover:text-rose-400 text-xs font-bold text-slate-400 border border-white/10 hover:border-rose-500/30 transition-all cursor-pointer"
+                >
+                  Reject
+                </button>
+                <button
+                  onClick={() => {
+                    if (onCounterOffer) onCounterOffer(application);
+                    else onSendOffer(application);
+                    onClose();
+                  }}
+                  type="button"
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600/20 via-orange-600/20 to-amber-600/20 hover:from-amber-600 hover:to-orange-600 border border-amber-500/40 text-xs font-bold text-amber-200 hover:text-white transition-all cursor-pointer shadow-sm"
+                >
+                  Counter Offer
+                </button>
+              </>
             ) : (
               <>
                 <button
@@ -287,17 +317,32 @@ export default function ApplicantDetailModal({
           </div>
 
           {application.status !== 'REJECTED' && application.status !== 'OFFER_ACCEPTED' && (
-            <button
-              onClick={() => {
-                onSendOffer(application);
-                onClose();
-              }}
-              type="button"
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-black text-white flex items-center gap-2 shadow-lg shadow-purple-950/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>Send Collaboration Offer</span>
-            </button>
+            isCounter ? (
+              <button
+                onClick={() => {
+                  if (onAccept) onAccept(application);
+                  else onSendOffer(application);
+                  onClose();
+                }}
+                type="button"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs font-black text-white flex items-center gap-2 shadow-lg shadow-emerald-950/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Accept Counter Offer</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  onSendOffer(application);
+                  onClose();
+                }}
+                type="button"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-black text-white flex items-center gap-2 shadow-lg shadow-purple-950/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>Send Collaboration Offer</span>
+              </button>
+            )
           )}
         </div>
       </motion.div>

@@ -7,7 +7,7 @@ import { OfferService } from '@/services/offer.service';
 import { CreatorItem } from '../find-influencers/CreatorCard';
 import { mapApplicationToCreator } from './mapApplicationToCreator';
 import { useCurrency } from '@/context/CurrencyContext';
-
+import { formatCurrency, convertCurrency } from '@/utils/currency';
 import CustomDatePicker from '@/components/ui/CustomDatePicker';
 
 interface SendOfferModalProps {
@@ -23,11 +23,22 @@ export default function SendOfferModal({
   onSuccess,
   onViewProfile,
 }: SendOfferModalProps) {
-  const { currency, symbol } = useCurrency();
+  const { currency, symbol, rates, format } = useCurrency();
   const [mounted, setMounted] = useState(false);
-  const [compensationAmount, setCompensationAmount] = useState<number>(
-    application?.proposedAmount || (currency === 'INR' ? 25000 : 850),
-  );
+  const [hasUserEdited, setHasUserEdited] = useState(false);
+
+  const sourceAmount = Number(application?.proposedAmount || 0);
+  const sourceCurrency = application?.proposedCurrency || 'INR';
+
+  const convertedCurrentAmount = useMemo(() => {
+    if (sourceAmount > 0) {
+      const converted = convertCurrency(sourceAmount, sourceCurrency, currency, rates);
+      return converted >= 10 ? Math.round(converted) : Number(converted.toFixed(2));
+    }
+    return currency === 'INR' ? 25000 : 850;
+  }, [sourceAmount, sourceCurrency, currency, rates]);
+
+  const [compensationAmount, setCompensationAmount] = useState<number>(convertedCurrentAmount);
   const [responseDeadline, setResponseDeadline] = useState<string>('');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
@@ -40,6 +51,12 @@ export default function SendOfferModal({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!hasUserEdited && convertedCurrentAmount > 0) {
+      setCompensationAmount(convertedCurrentAmount);
+    }
+  }, [convertedCurrentAmount, hasUserEdited]);
 
   const creatorItem = useMemo(() => {
     return application ? mapApplicationToCreator(application) : null;
@@ -77,8 +94,8 @@ export default function SendOfferModal({
     setIsSending(true);
     try {
       await OfferService.sendOffer(application.id, {
-        compensationAmount,
-        compensationCurrency: application.proposedCurrency || currency || 'INR',
+        compensationAmount: Number(compensationAmount),
+        compensationCurrency: currency,
         responseDeadline: responseDeadline ? new Date(responseDeadline).toISOString() : undefined,
         startDate: startDate ? new Date(startDate).toISOString() : undefined,
         endDate: endDate ? new Date(endDate).toISOString() : undefined,
@@ -178,10 +195,27 @@ export default function SendOfferModal({
               </div>
             </button>
 
-            <span className="px-2.5 py-1 rounded-xl bg-purple-500/15 border border-purple-500/30 text-[11px] font-bold text-purple-300 flex items-center gap-1 shrink-0">
-              <Sparkles className="w-3 h-3 text-purple-400" />
-              <span>{creatorItem.matchScore}% Match</span>
-            </span>
+            <div className="flex items-center gap-3 shrink-0">
+              {sourceAmount > 0 && (
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">
+                    Pitch Quote
+                  </span>
+                  <span className="text-xs font-black text-purple-300">
+                    {format(convertedCurrentAmount)}
+                  </span>
+                  {sourceCurrency.toUpperCase() !== currency.toUpperCase() && (
+                    <span className="text-[10px] text-slate-400 font-medium block">
+                      ≈ {formatCurrency(sourceAmount, sourceCurrency)}
+                    </span>
+                  )}
+                </div>
+              )}
+              <span className="px-2.5 py-1 rounded-xl bg-purple-500/15 border border-purple-500/30 text-[11px] font-bold text-purple-300 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-purple-400" />
+                <span>{creatorItem.matchScore}% Match</span>
+              </span>
+            </div>
           </div>
 
           {/* Agreed Compensation Amount */}
@@ -195,8 +229,11 @@ export default function SendOfferModal({
                 required
                 min="1"
                 step="any"
-                value={compensationAmount}
-                onChange={(e) => setCompensationAmount(Number(e.target.value))}
+                value={compensationAmount || ''}
+                onChange={(e) => {
+                  setHasUserEdited(true);
+                  setCompensationAmount(Number(e.target.value));
+                }}
                 className="w-full pl-9 pr-4 py-3 bg-slate-900/60 border border-purple-500/20 hover:border-purple-500/40 focus:border-purple-400 focus:bg-purple-950/20 rounded-2xl text-sm font-semibold text-white placeholder:text-slate-500 focus:outline-none transition-all"
               />
               <span className="text-purple-400 font-bold text-sm absolute left-3.5 top-3.5 select-none">{symbol}</span>

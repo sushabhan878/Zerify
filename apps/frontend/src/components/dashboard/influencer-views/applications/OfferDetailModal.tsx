@@ -13,6 +13,7 @@ interface OfferDetailModalProps {
   onClose: () => void;
   onAccept: (offerId: string) => void;
   onDecline: (offerId: string) => void;
+  onCancelCounter?: (offerId: string) => void;
   onCounterOffer?: (offer: CampaignOfferItem) => void;
   onMessageBrand?: (offer: CampaignOfferItem) => void;
 }
@@ -22,6 +23,7 @@ export default function OfferDetailModal({
   onClose,
   onAccept,
   onDecline,
+  onCancelCounter,
   onCounterOffer,
   onMessageBrand,
 }: OfferDetailModalProps) {
@@ -39,8 +41,32 @@ export default function OfferDetailModal({
   const brand = campaign.brandProfile || {};
   const deliverables = campaign.deliverables || [];
 
-  const rawCompensation = Number(offer.compensationAmount || 0);
-  const sourceCurrency = offer.compensationCurrency || campaign.budgetCurrency || 'USD';
+  const terms = (offer.termsSnapshot as Record<string, any>) || {};
+  const isCounter = Boolean(terms.isCounterOffer);
+  const counterBy = terms.counterBy || (isCounter ? 'INFLUENCER' : null);
+  const isInfluencerCounter = isCounter && counterBy === 'INFLUENCER';
+  const isBrandCounter = isCounter && counterBy === 'BRAND';
+
+  const isBrandRejectedCounter =
+    isCounter &&
+    (terms.counterStatus === 'REJECTED' ||
+      offer.status === 'DECLINED' ||
+      offer.application?.status === 'REJECTED');
+
+  const rawCompensation =
+    isInfluencerCounter && terms.counterRate
+      ? Number(terms.counterRate)
+      : isBrandCounter && terms.counterRate
+      ? Number(terms.counterRate)
+      : Number(offer.compensationAmount || 0);
+
+  const sourceCurrency =
+    (isInfluencerCounter && terms.counterCurrency) ||
+    (isBrandCounter && terms.counterCurrency) ||
+    offer.compensationCurrency ||
+    campaign.budgetCurrency ||
+    'USD';
+
   const convertedCompensation = convertCurrency(rawCompensation, sourceCurrency, userCurrency, rates);
   const isCrossCurrency = sourceCurrency.toUpperCase() !== userCurrency.toUpperCase();
   const payoutStr = formatUserCurrency(convertedCompensation);
@@ -59,7 +85,13 @@ export default function OfferDetailModal({
         <div className="p-6 border-b border-white/10 flex items-center justify-between bg-slate-950/40">
           <div>
             <span className="text-[10px] font-black text-purple-400 uppercase tracking-wider">
-              Offer Contract Scope
+              {isBrandRejectedCounter
+                ? 'Counter Offer Rejected'
+                : isInfluencerCounter
+                ? 'Your Proposed Counter Terms'
+                : isBrandCounter
+                ? 'Brand Counter Offer'
+                : 'Offer Contract Scope'}
             </span>
             <h3 className="text-base font-black text-white">{campaign.title}</h3>
           </div>
@@ -72,10 +104,20 @@ export default function OfferDetailModal({
         </div>
 
         <div className="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
+          {/* Rejection Notice Banner */}
+          {isBrandRejectedCounter && (
+            <div className="p-3.5 rounded-2xl bg-rose-950/40 border border-rose-500/30 flex items-center gap-2.5 text-xs text-rose-300 font-medium">
+              <X className="w-4 h-4 text-rose-400 shrink-0" />
+              <span>The brand has reviewed and rejected your counter offer proposal.</span>
+            </div>
+          )}
+
           {/* Compensation Card */}
           <div className="p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 flex items-center justify-between">
             <div>
-              <span className="text-[10px] text-emerald-400 font-bold uppercase block">Agreed Compensation</span>
+              <span className="text-[10px] text-emerald-400 font-bold uppercase block">
+                {isInfluencerCounter ? 'Your Counter Rate' : 'Agreed Compensation'}
+              </span>
               <span className="text-xl font-black text-white">
                 {payoutStr}
               </span>
@@ -111,6 +153,29 @@ export default function OfferDetailModal({
             </div>
           </div>
 
+          {/* Counter proposal notes */}
+          {isInfluencerCounter && terms.counterNotes && (
+            <div className="space-y-1">
+              <h4 className="font-bold text-amber-400 uppercase tracking-wider text-[11px]">
+                Your Counter Note
+              </h4>
+              <p className="p-3 rounded-xl bg-amber-950/30 border border-amber-500/20 text-amber-200 italic">
+                {terms.counterNotes}
+              </p>
+            </div>
+          )}
+
+          {isBrandCounter && terms.counterNotes && (
+            <div className="space-y-1">
+              <h4 className="font-bold text-purple-400 uppercase tracking-wider text-[11px]">
+                Brand Counter Note
+              </h4>
+              <p className="p-3 rounded-xl bg-purple-950/30 border border-purple-500/20 text-purple-200 italic">
+                {terms.counterNotes}
+              </p>
+            </div>
+          )}
+
           {/* Notes */}
           {offer.customNotes && (
             <div className="space-y-1">
@@ -127,26 +192,59 @@ export default function OfferDetailModal({
         {/* Footer */}
         <div className="p-4 border-t border-white/10 bg-slate-950/40 flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                onDecline(offer.id);
-                onClose();
-              }}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/50 hover:text-rose-400 text-xs font-bold text-slate-400 transition-colors"
-            >
-              Decline Offer
-            </button>
-            {onCounterOffer && offer.status === 'PENDING' && (
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  onCounterOffer(offer);
-                }}
-                className="px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-xs font-bold text-amber-300 hover:text-white transition-colors flex items-center gap-1.5"
-              >
-                <span>{offer.termsSnapshot?.isCounterOffer ? 'Edit Counter' : 'Send Counter Offer'}</span>
-              </button>
+            {offer.status === 'PENDING' && (
+              <>
+                {isInfluencerCounter ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        if (onCancelCounter) onCancelCounter(offer.id);
+                        else onDecline(offer.id);
+                        onClose();
+                      }}
+                      className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/50 hover:text-rose-400 text-xs font-bold text-slate-400 transition-colors"
+                    >
+                      Cancel Counter
+                    </button>
+                    {onCounterOffer && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          onCounterOffer(offer);
+                        }}
+                        className="px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-xs font-bold text-amber-300 hover:text-white transition-colors flex items-center gap-1.5"
+                      >
+                        <span>Edit Counter</span>
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => {
+                        onDecline(offer.id);
+                        onClose();
+                      }}
+                      className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/50 hover:text-rose-400 text-xs font-bold text-slate-400 transition-colors"
+                    >
+                      Decline Offer
+                    </button>
+                    {onCounterOffer && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          onCounterOffer(offer);
+                        }}
+                        className="px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-xs font-bold text-amber-300 hover:text-white transition-colors flex items-center gap-1.5"
+                      >
+                        <span>Counter Offer</span>
+                      </button>
+                    )}
+                  </>
+                )}
+              </>
             )}
             {onMessageBrand && (
               <button
@@ -162,16 +260,18 @@ export default function OfferDetailModal({
               </button>
             )}
           </div>
-          <button
-            onClick={() => {
-              onAccept(offer.id);
-              onClose();
-            }}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:scale-105 text-xs font-black text-white shadow-md transition-all flex items-center gap-1.5"
-          >
-            <Check className="w-4 h-4" />
-            <span>Accept Contract</span>
-          </button>
+          {offer.status === 'PENDING' && !isInfluencerCounter && (
+            <button
+              onClick={() => {
+                onAccept(offer.id);
+                onClose();
+              }}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:scale-105 text-xs font-black text-white shadow-md transition-all flex items-center gap-1.5"
+            >
+              <Check className="w-4 h-4" />
+              <span>Accept Contract</span>
+            </button>
+          )}
         </div>
       </motion.div>
     </div>

@@ -64,6 +64,12 @@ export const OfferService = {
     });
   },
 
+  async cancelCounterOffer(offerId: string): Promise<CampaignOfferItem> {
+    return apiRequest(`/offers/${offerId}/cancel-counter`, {
+      method: 'POST',
+    });
+  },
+
   // Brand: Cancel
   async cancelOffer(offerId: string): Promise<{ success: boolean; message: string }> {
     return apiRequest(`/offers/${offerId}/cancel`, {
