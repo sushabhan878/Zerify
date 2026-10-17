@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, CheckCircle2, FileVideo, ExternalLink } from 'lucide-react';
+import { Check, CheckCircle2, FileVideo, ExternalLink, Clock, Sparkles, X } from 'lucide-react';
 import { DeliverableService, ParticipantDeliverableItem } from '@/services/deliverable.service';
 import SubmissionHistory from './SubmissionHistory';
 import { ActionButton, ErrorNotice, input, panel, StatusBadge, dateLabel } from './ExecutionUi';
@@ -16,6 +16,45 @@ const REVISION_CATEGORIES = [
   'Technical Issue',
   'Other',
 ];
+
+function FloatingDeliverableBadge({ status }: { status: string }) {
+  const norm = (status || '').toUpperCase();
+  const isApproved = /VERIFIED|COMPLETED|APPROVED/.test(norm);
+  const isRevision = /REVISION|REJECT|CANCEL|FAIL/.test(norm);
+  const isSubmitted = /SUBMITTED|IN_REVIEW|REVIEW/.test(norm);
+
+  if (isApproved) {
+    return (
+      <span className="px-4 py-1.5 rounded-full border border-emerald-400/50 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white text-xs sm:text-[13px] font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-emerald-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
+        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-200 shrink-0" />
+        <span>Approved</span>
+      </span>
+    );
+  }
+  if (isRevision) {
+    return (
+      <span className="px-4 py-1.5 rounded-full border border-rose-400/50 bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 text-white text-xs sm:text-[13px] font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-rose-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
+        <X className="w-3.5 h-3.5 text-rose-200 shrink-0" />
+        <span>{norm === 'REVISION_REQUESTED' ? 'Revision Requested' : 'Rejected'}</span>
+      </span>
+    );
+  }
+  if (isSubmitted) {
+    return (
+      <span className="px-4 py-1.5 rounded-full border border-purple-400/50 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 text-white text-xs sm:text-[13px] font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-purple-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
+        <Sparkles className="w-3.5 h-3.5 text-purple-200 animate-pulse shrink-0" />
+        <span>Ready for Review</span>
+      </span>
+    );
+  }
+  // PENDING or default
+  return (
+    <span className="px-4 py-1.5 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600 text-white text-xs sm:text-[13px] font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-amber-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
+      <Clock className="w-3.5 h-3.5 text-amber-200 animate-pulse shrink-0" />
+      <span>Pending</span>
+    </span>
+  );
+}
 
 export default function BrandReviewCard({ deliverable: d, onRefresh }: { deliverable: ParticipantDeliverableItem; onRefresh: () => void }) {
   const [feedback, setFeedback] = useState('');
@@ -61,98 +100,114 @@ export default function BrandReviewCard({ deliverable: d, onRefresh }: { deliver
     finally { setBusy(false); }
   };
 
-  return <article className={`${panel} space-y-4 p-5`}>
-    <header className="flex flex-wrap justify-between gap-3">
-      <div>
-        <h4 className="font-bold text-white text-base">{d.title || d.type}</h4>
-        <p className="mt-1 text-xs text-slate-400">
-          {d.platform} · Current v{d.version} · Due {dateLabel(d.dueDate)}
+  return (
+    <article className="relative overflow-visible mt-4 p-5 sm:p-6 pr-6 sm:pr-8 rounded-2xl bg-slate-950/60 border border-purple-500/20 hover:border-purple-500/40 backdrop-blur-2xl shadow-xl shadow-purple-950/20 hover:shadow-[0_16px_40px_rgba(168,85,247,0.16)] transition-all duration-300 space-y-4 group">
+      {/* Ambient Background Aura Clipped */}
+      <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+        <div className="absolute -top-16 -right-16 w-56 h-56 bg-purple-600/10 rounded-full blur-2xl group-hover:bg-purple-600/20 transition-all duration-500" />
+        <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-indigo-600/10 rounded-full blur-2xl group-hover:bg-indigo-600/15 transition-all duration-500" />
+      </div>
+
+      {/* Floating Status Badge Overlapping Top-Right Corner - Shifted higher */}
+      <div
+        className="absolute right-5 sm:right-7 z-30 pointer-events-none"
+        style={{ top: '-10px', transform: 'translateY(-50%)' }}
+      >
+        <FloatingDeliverableBadge status={d.status} />
+      </div>
+
+      <header className="flex flex-wrap justify-between gap-3 relative z-10">
+        <div>
+          <h4 className="font-bold text-white text-base sm:text-lg">{d.title || d.type}</h4>
+          <p className="mt-0.5 text-xs text-slate-400">
+            {d.platform} · Current v{d.version} · Due {dateLabel(d.dueDate)}
+          </p>
+        </div>
+      </header>
+
+      <ErrorNotice message={error} />
+
+      {/* Latest Submission Highlights */}
+      {latest && (
+        <div className="rounded-xl border border-purple-500/20 bg-slate-950/70 p-4 space-y-3 relative z-10">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-xs font-semibold text-purple-300">
+              Latest Submission: v{latest.version} ({latest.isFinal ? 'Final Content' : 'Draft for Review'})
+            </span>
+            <span className="text-xs text-slate-400">{dateLabel(latest.createdAt)}</span>
+          </div>
+
+          {latest.assetIds && latest.assetIds.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {latest.assetIds.map((assetId, idx) => (
+                <button
+                  key={assetId}
+                  type="button"
+                  disabled={previewingAssetId === assetId}
+                  onClick={() => handleOpenAsset(assetId)}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-xs font-medium text-purple-200 hover:bg-purple-500/20 transition disabled:opacity-50"
+                >
+                  <FileVideo className="h-3.5 w-3.5" />
+                  {previewingAssetId === assetId ? 'Opening preview…' : `Preview Submitted File ${idx + 1}`}
+                  <ExternalLink className="h-3 w-3 opacity-60" />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {latest.notes && (
+            <div className="text-xs text-slate-300 bg-white/5 rounded-lg p-2.5">
+              <strong className="text-purple-300">Creator Note:</strong> {latest.notes}
+            </div>
+          )}
+          {latest.caption && (
+            <div className="text-xs text-slate-300 bg-white/5 rounded-lg p-2.5">
+              <strong className="text-purple-300">Caption & Tags:</strong> {latest.caption}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Campaign Requirements Checklist (Integrated cleanly without extra nested card) */}
+      <div className="space-y-1.5 text-xs text-slate-300 pt-1 relative z-10">
+        <p className="font-bold text-white uppercase tracking-wider text-[11px] text-purple-300/90">
+          Campaign Requirements Checklist
         </p>
-      </div>
-      <StatusBadge status={d.status} />
-    </header>
-
-    <ErrorNotice message={error} />
-
-    {/* Latest Submission Highlights */}
-    {latest && (
-      <div className="rounded-xl border border-purple-500/20 bg-slate-950/70 p-4 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-xs font-semibold text-purple-300">
-            Latest Submission: v{latest.version} ({latest.isFinal ? 'Final Content' : 'Draft for Review'})
-          </span>
-          <span className="text-xs text-slate-400">{dateLabel(latest.createdAt)}</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
+          <div className="flex items-center gap-1.5 text-slate-300">
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+            <span>Type: {d.platform} {d.type}</span>
+          </div>
+          {d.requirements?.mandatoryMentions && d.requirements.mandatoryMentions.length > 0 && (
+            <div className="flex items-center gap-1.5 text-slate-300">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+              <span>Mentions: {d.requirements.mandatoryMentions.join(' ')}</span>
+            </div>
+          )}
+          {d.requirements?.mandatoryHashtags && d.requirements.mandatoryHashtags.length > 0 && (
+            <div className="flex items-center gap-1.5 text-slate-300">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+              <span>Hashtags: {d.requirements.mandatoryHashtags.join(' ')}</span>
+            </div>
+          )}
+          {d.requirements?.requiredCta && (
+            <div className="flex items-center gap-1.5 text-slate-300">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+              <span>CTA: {d.requirements.requiredCta}</span>
+            </div>
+          )}
         </div>
-
-        {latest.assetIds && latest.assetIds.length > 0 && (
-          <div className="flex flex-wrap gap-2 pt-1">
-            {latest.assetIds.map((assetId, idx) => (
-              <button
-                key={assetId}
-                type="button"
-                disabled={previewingAssetId === assetId}
-                onClick={() => handleOpenAsset(assetId)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-xs font-medium text-purple-200 hover:bg-purple-500/20 transition disabled:opacity-50"
-              >
-                <FileVideo className="h-3.5 w-3.5" />
-                {previewingAssetId === assetId ? 'Opening preview…' : `Preview Submitted File ${idx + 1}`}
-                <ExternalLink className="h-3 w-3 opacity-60" />
-              </button>
-            ))}
-          </div>
-        )}
-
-        {latest.notes && (
-          <div className="text-xs text-slate-300 bg-white/5 rounded-lg p-2.5">
-            <strong className="text-purple-300">Creator Note:</strong> {latest.notes}
-          </div>
-        )}
-        {latest.caption && (
-          <div className="text-xs text-slate-300 bg-white/5 rounded-lg p-2.5">
-            <strong className="text-purple-300">Caption & Tags:</strong> {latest.caption}
-          </div>
-        )}
       </div>
-    )}
-
-    {/* Campaign Requirements Checklist */}
-    <div className="rounded-xl bg-slate-950/60 p-3.5 text-xs text-slate-300 space-y-2 border border-white/5">
-      <p className="font-semibold text-white">Campaign Requirements Checklist</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-        <div className="flex items-center gap-1.5 text-slate-300">
-          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-          <span>Type: {d.platform} {d.type}</span>
-        </div>
-        {d.requirements?.mandatoryMentions && d.requirements.mandatoryMentions.length > 0 && (
-          <div className="flex items-center gap-1.5 text-slate-300">
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-            <span>Mentions: {d.requirements.mandatoryMentions.join(' ')}</span>
-          </div>
-        )}
-        {d.requirements?.mandatoryHashtags && d.requirements.mandatoryHashtags.length > 0 && (
-          <div className="flex items-center gap-1.5 text-slate-300">
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-            <span>Hashtags: {d.requirements.mandatoryHashtags.join(' ')}</span>
-          </div>
-        )}
-        {d.requirements?.requiredCta && (
-          <div className="flex items-center gap-1.5 text-slate-300">
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-            <span>CTA: {d.requirements.requiredCta}</span>
-          </div>
-        )}
-      </div>
-    </div>
 
     {d.publishedUrl && /^https:\/\//i.test(d.publishedUrl) && (
-      <a className="inline-flex items-center gap-1.5 text-sm text-purple-300 hover:underline" href={d.publishedUrl} target="_blank" rel="noopener noreferrer">
+      <a className="inline-flex items-center gap-1.5 text-sm text-purple-300 hover:underline relative z-10" href={d.publishedUrl} target="_blank" rel="noopener noreferrer">
         <ExternalLink className="h-4 w-4" /> Open submitted live post for verification
       </a>
     )}
 
     {/* Brand Review Section */}
     {d.status === 'SUBMITTED' && (
-      <div className="space-y-3 border-t border-white/10 pt-4">
+      <div className="space-y-3 border-t border-white/10 pt-4 relative z-10">
         <div>
           <label className="block text-sm font-medium text-slate-200">
             Feedback (required for revisions or rejection)
@@ -207,7 +262,7 @@ export default function BrandReviewCard({ deliverable: d, onRefresh }: { deliver
 
     {/* Brand Verification for Live Published Post */}
     {d.status === 'PUBLISHED' && (
-      <div className="space-y-3 rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4">
+      <div className="space-y-3 rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4 relative z-10">
         <p className="text-sm text-indigo-200 font-medium">
           Manual verification required. Open the live post and verify that it is public, belongs to the assigned creator, and satisfies the required content, captions, mentions, and hashtags from the brief.
         </p>
@@ -248,7 +303,10 @@ export default function BrandReviewCard({ deliverable: d, onRefresh }: { deliver
       </div>
     )}
 
-    <SubmissionHistory deliverable={d} />
-  </article>;
+    <div className="relative z-10">
+      <SubmissionHistory deliverable={d} />
+    </div>
+  </article>
+  );
 }
 

@@ -100,8 +100,32 @@ export default function ParticipantDeliverablesPage({
       </div>
 
       {/* Collaboration Overview Banner */}
-      <div className="relative p-6 sm:p-7 rounded-3xl bg-slate-950/75 border border-purple-500/25 backdrop-blur-2xl shadow-2xl shadow-purple-950/20 space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 border-b border-white/10 pb-5">
+      <div className="relative overflow-visible mt-4 p-5 sm:p-6 pr-6 sm:pr-8 rounded-2xl bg-slate-950/60 border border-purple-500/20 hover:border-purple-500/40 backdrop-blur-2xl shadow-xl shadow-purple-950/20 hover:shadow-[0_16px_40px_rgba(168,85,247,0.16)] transition-all duration-300 space-y-4 group">
+        {/* Ambient Background Aura Clipped */}
+        <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+          <div className="absolute -top-16 -right-16 w-56 h-56 bg-purple-600/10 rounded-full blur-2xl group-hover:bg-purple-600/20 transition-all duration-500" />
+          <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-indigo-600/10 rounded-full blur-2xl group-hover:bg-indigo-600/15 transition-all duration-500" />
+        </div>
+
+        {/* Floating Status Badge Overlapping Top-Right Corner - Shifted higher */}
+        <div
+          className="absolute right-5 sm:right-7 z-30 pointer-events-none"
+          style={{ top: '-10px', transform: 'translateY(-50%)' }}
+        >
+          {isCompleted ? (
+            <span className="px-4 py-1.5 rounded-full border border-emerald-400/50 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white text-xs sm:text-[13px] font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-emerald-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
+              <CheckCircle className="w-3.5 h-3.5 text-emerald-200 shrink-0" />
+              <span>Completed</span>
+            </span>
+          ) : (
+            <span className="px-4 py-1.5 rounded-full border border-purple-400/50 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 text-white text-xs sm:text-[13px] font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-purple-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
+              <Sparkles className="w-3.5 h-3.5 text-purple-200 animate-pulse shrink-0" />
+              <span>In Production</span>
+            </span>
+          )}
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 border-b border-white/10 pb-5 relative z-10">
           {/* Creator Profile */}
           <div className="flex items-center gap-4 min-w-0">
             <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-tr from-purple-600 via-indigo-600 to-purple-500 flex items-center justify-center text-white font-black text-base shrink-0 border border-purple-400/30 shadow-lg shadow-purple-950/40">
@@ -141,28 +165,14 @@ export default function ParticipantDeliverablesPage({
             </div>
           </div>
 
-          {/* Agreed Amount & Status */}
-          <div className="flex items-center sm:items-end justify-between sm:justify-end gap-5">
-            <div className="text-left sm:text-right">
-              <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight leading-none block">
-                {formatCurrency(participant.agreedAmount, participant.agreedCurrency || currency)}
-              </span>
-              <span className="text-[11px] text-slate-400 font-semibold block pt-1">
-                Agreed Collaboration Fee
-              </span>
-            </div>
-
-            {isCompleted ? (
-              <span className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
-                <CheckCircle className="w-4 h-4" />
-                Completed
-              </span>
-            ) : (
-              <span className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-purple-500/10 text-purple-300 border border-purple-500/30 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                In Production
-              </span>
-            )}
+          {/* Agreed Amount */}
+          <div className="text-left sm:text-right shrink-0">
+            <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight leading-none block">
+              {formatCurrency(participant.agreedAmount, participant.agreedCurrency || currency)}
+            </span>
+            <span className="text-[11px] text-slate-400 font-semibold block pt-1">
+              Agreed Collaboration Fee
+            </span>
           </div>
         </div>
 
@@ -233,7 +243,7 @@ export default function ParticipantDeliverablesPage({
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-8 sm:space-y-10 pt-3">
             {deliverables.map((del: any) => (
               <DeliverableReviewCard key={del.id} deliverable={del} onRefresh={onRefresh} />
             ))}

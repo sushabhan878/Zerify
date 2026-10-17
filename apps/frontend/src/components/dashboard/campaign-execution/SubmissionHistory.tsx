@@ -16,7 +16,7 @@ export default function SubmissionHistory({ deliverable }: { deliverable: Partic
     finally { setBusy(undefined); }
   };
   const safeUrl = (url: string) => /^https:\/\//i.test(url);
-  return <details className="rounded-xl border border-white/10 bg-slate-950/50 p-4" open={deliverable.status === 'SUBMITTED'}>
+  return <details className="rounded-xl border border-purple-500/20 bg-slate-950/60 hover:border-purple-500/30 p-4 transition-colors" open={deliverable.status === 'SUBMITTED'}>
     <summary className="cursor-pointer text-sm font-semibold text-purple-200"><History className="mr-2 inline h-4 w-4" />Submission history · {deliverable.revisions?.length || 0} versions</summary>
     <ErrorNotice message={error} />
     <div className="mt-4 space-y-4">
