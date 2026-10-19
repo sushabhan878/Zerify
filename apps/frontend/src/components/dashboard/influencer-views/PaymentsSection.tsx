@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { DollarSign, Search, Download, CreditCard, Loader2 } from 'lucide-react';
+import LottieLoader from '@/components/ui/LottieLoader';
 import PaymentsKpiBar from './subcomponents/PaymentsKpiBar';
 import TransactionCardItem, { TransactionItem } from './subcomponents/TransactionCardItem';
 import { useCurrency } from '@/context/CurrencyContext';
@@ -29,6 +30,7 @@ export default function PaymentsSection() {
   const [lifetimeEarnings, setLifetimeEarnings] = useState(0);
   const [payouts, setPayouts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPageLoading, setIsPageLoading] = useState(true);
 
   const fetchPayoutData = async () => {
     try {
@@ -141,6 +143,14 @@ export default function PaymentsSection() {
       tx.id.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[500px] h-full flex flex-col items-center justify-center py-28 animate-in fade-in duration-300">
+        <LottieLoader size={160} message="Loading Zerify Earnings & Escrow..." />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

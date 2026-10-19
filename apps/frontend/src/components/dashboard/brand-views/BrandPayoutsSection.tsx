@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, Download, Plus, ArrowDownLeft } from 'lucide-react';
 import { useCurrency } from '@/context/CurrencyContext';
+import LottieLoader from '@/components/ui/LottieLoader';
 import BrandEscrowKpiBar from '../payment-views/BrandEscrowKpiBar';
 import BrandEscrowTransactionList, { BrandEscrowTransaction } from '../payment-views/BrandEscrowTransactionList';
 import BrandDepositFundsModal from '../payment-views/BrandDepositFundsModal';
@@ -28,6 +29,7 @@ export default function BrandPayoutsSection() {
   const [hasBillingDetails, setHasBillingDetails] = useState(false);
   const [transactions, setTransactions] = useState<BrandEscrowTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPageLoading, setIsPageLoading] = useState(true);
 
   // Check cached brand billing details on mount
   useEffect(() => {
@@ -120,6 +122,14 @@ export default function BrandPayoutsSection() {
     setSelectedTxForAction({ id: txId, campaign: 'Escrow Refund', amount });
     setIsWithdrawOpen(true);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[500px] h-full flex flex-col items-center justify-center py-28 animate-in fade-in duration-300">
+        <LottieLoader size={160} message="Loading Zerify Payments & Escrow..." />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
