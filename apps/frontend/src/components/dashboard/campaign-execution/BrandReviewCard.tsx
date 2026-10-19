@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, CheckCircle2, FileVideo, ExternalLink, Clock, Sparkles, X } from 'lucide-react';
+import { Check, CheckCircle2, ExternalLink, Clock, Sparkles, X } from 'lucide-react';
 import { DeliverableService, ParticipantDeliverableItem } from '@/services/deliverable.service';
 import SubmissionHistory from './SubmissionHistory';
-import { ActionButton, ErrorNotice, input, panel, StatusBadge, dateLabel } from './ExecutionUi';
+import { ActionButton, ErrorNotice, input, StatusBadge, dateLabel } from './ExecutionUi';
 
 const REVISION_CATEGORIES = [
   'Content Quality',
@@ -61,24 +61,7 @@ export default function BrandReviewCard({ deliverable: d, onRefresh }: { deliver
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [confirmed, setConfirmed] = useState(false);
-  const [previewingAssetId, setPreviewingAssetId] = useState<string | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
   const latest = d.revisions?.[0];
-
-  const handleOpenAsset = async (assetId: string) => {
-    setPreviewingAssetId(assetId);
-    setError('');
-    try {
-      const res = await DeliverableService.getAssetUrl(d.id, assetId);
-      setPreviewUrl(res.url);
-      window.open(res.url, '_blank', 'noopener,noreferrer');
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not open media preview');
-    } finally {
-      setPreviewingAssetId(null);
-    }
-  };
 
   const handleSelectCategory = (category: string) => {
     const prefix = `[${category}]: `;
@@ -127,49 +110,8 @@ export default function BrandReviewCard({ deliverable: d, onRefresh }: { deliver
 
       <ErrorNotice message={error} />
 
-      {/* Latest Submission Highlights */}
-      {latest && (
-        <div className="rounded-xl border border-purple-500/20 bg-slate-950/70 p-4 space-y-3 relative z-10">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-purple-300">
-              Latest Submission: v{latest.version} ({latest.isFinal ? 'Final Content' : 'Draft for Review'})
-            </span>
-            <span className="text-xs text-slate-400">{dateLabel(latest.createdAt)}</span>
-          </div>
-
-          {latest.assetIds && latest.assetIds.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-1">
-              {latest.assetIds.map((assetId, idx) => (
-                <button
-                  key={assetId}
-                  type="button"
-                  disabled={previewingAssetId === assetId}
-                  onClick={() => handleOpenAsset(assetId)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-xs font-medium text-purple-200 hover:bg-purple-500/20 transition disabled:opacity-50"
-                >
-                  <FileVideo className="h-3.5 w-3.5" />
-                  {previewingAssetId === assetId ? 'Opening preview…' : `Preview Submitted File ${idx + 1}`}
-                  <ExternalLink className="h-3 w-3 opacity-60" />
-                </button>
-              ))}
-            </div>
-          )}
-
-          {latest.notes && (
-            <div className="text-xs text-slate-300 bg-white/5 rounded-lg p-2.5">
-              <strong className="text-purple-300">Creator Note:</strong> {latest.notes}
-            </div>
-          )}
-          {latest.caption && (
-            <div className="text-xs text-slate-300 bg-white/5 rounded-lg p-2.5">
-              <strong className="text-purple-300">Caption & Tags:</strong> {latest.caption}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Campaign Requirements Checklist (Integrated cleanly without extra nested card) */}
-      <div className="space-y-1.5 text-xs text-slate-300 pt-1 relative z-10">
+      {/* Campaign Requirements Checklist (Positioned on top before latest submission) */}
+      <div className="space-y-1.5 text-xs text-slate-300 pt-0.5 relative z-10">
         <p className="font-bold text-white uppercase tracking-wider text-[11px] text-purple-300/90">
           Campaign Requirements Checklist
         </p>
@@ -197,6 +139,11 @@ export default function BrandReviewCard({ deliverable: d, onRefresh }: { deliver
             </div>
           )}
         </div>
+      </div>
+
+      {/* Submission History directly after Campaign Requirements Checklist */}
+      <div className="relative z-10 pt-1">
+        <SubmissionHistory deliverable={d} />
       </div>
 
     {d.publishedUrl && /^https:\/\//i.test(d.publishedUrl) && (
@@ -302,10 +249,6 @@ export default function BrandReviewCard({ deliverable: d, onRefresh }: { deliver
         </div>
       </div>
     )}
-
-    <div className="relative z-10">
-      <SubmissionHistory deliverable={d} />
-    </div>
   </article>
   );
 }

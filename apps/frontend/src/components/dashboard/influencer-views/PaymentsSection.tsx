@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Search, Download } from 'lucide-react';
+import { DollarSign, Search, Download, CreditCard, Loader2 } from 'lucide-react';
 import PaymentsKpiBar from './subcomponents/PaymentsKpiBar';
 import TransactionCardItem, { TransactionItem } from './subcomponents/TransactionCardItem';
 import { useCurrency } from '@/context/CurrencyContext';
@@ -24,12 +24,15 @@ export default function PaymentsSection() {
 
   // Beneficiary credentials & balances state
   const [beneficiary, setBeneficiary] = useState<any>(null);
-  const [availableBalance, setAvailableBalance] = useState(705575);
-  const [inEscrow, setInEscrow] = useState(1135600);
-  const [lifetimeEarnings, setLifetimeEarnings] = useState(4084000);
+  const [availableBalance, setAvailableBalance] = useState(0);
+  const [inEscrow, setInEscrow] = useState(0);
+  const [lifetimeEarnings, setLifetimeEarnings] = useState(0);
+  const [payouts, setPayouts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchPayoutData = async () => {
     try {
+      setIsLoading(true);
       const token = localStorage.getItem('zerify_token');
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
@@ -52,13 +55,44 @@ export default function PaymentsSection() {
       if (pRes.ok) {
         const pData = await pRes.json();
         if (pData?.payableBalance !== undefined) {
-          setAvailableBalance(pData.payableBalance);
+          setAvailableBalance(Number(pData.payableBalance) || 0);
         }
       }
+
+      // 3. Fetch payouts history from backend
+      const txRes = await fetch(`${apiUrl}/payouts`, {
+        headers: { Authorization: token ? `Bearer ${token}` : '' },
+      });
+      if (txRes.ok) {
+        const txData = await txRes.json();
+        if (Array.isArray(txData)) {
+          setPayouts(txData);
+          const totalEarned = txData
+            .filter((p: any) => p.status === 'COMPLETED')
+            .reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0);
+          const pendingEscrow = txData
+            .filter((p: any) => p.status === 'PENDING' || p.status === 'PROCESSING')
+            .reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0);
+          setLifetimeEarnings(totalEarned);
+          setInEscrow(pendingEscrow);
+        } else {
+          setPayouts([]);
+          setLifetimeEarnings(0);
+          setInEscrow(0);
+        }
+      } else {
+        setPayouts([]);
+        setLifetimeEarnings(0);
+        setInEscrow(0);
+      }
     } catch (e) {
-      // Local storage fallback
+      setPayouts([]);
+      setLifetimeEarnings(0);
+      setInEscrow(0);
       const cached = localStorage.getItem('zerify_beneficiary_details');
       if (cached) setBeneficiary(JSON.parse(cached));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -75,58 +109,20 @@ export default function PaymentsSection() {
     } catch (e) {}
   }, []);
 
-  const rawTx = [
-    {
-      id: 'TX-90214',
-      brand: 'Sony Audio Systems',
-      campaign: 'WH-1000XM5 Wireless Headphones Launch',
-      usdAmount: 3500,
-      inrAmount: 292250,
-      date: 'Jul 26, 2026',
-      type: 'PAYOUT_RELEASE' as const,
-      status: 'COMPLETED' as const,
-    },
-    {
-      id: 'TX-89420',
-      brand: 'Gymshark Apparel',
-      campaign: 'Summer Activewear Story Feature',
-      usdAmount: 1500,
-      inrAmount: 125250,
-      date: 'Jul 14, 2026',
-      type: 'PAYOUT_RELEASE' as const,
-      status: 'COMPLETED' as const,
-    },
-    {
-      id: 'TX-88105',
-      brand: 'FlexiSpot Official',
-      campaign: 'Ergonomic Desk Setup Showcase',
-      usdAmount: 2800,
-      inrAmount: 233800,
-      date: 'Locked in Escrow',
-      type: 'ESCROW_DEPOSIT' as const,
-      status: 'PENDING_APPROVAL' as const,
-    },
-    {
-      id: 'TX-87410',
-      brand: 'NordVPN Security',
-      campaign: 'Tech Sponsorship Integration',
-      usdAmount: 1800,
-      inrAmount: 150300,
-      date: 'Jul 02, 2026',
-      type: 'PAYOUT_RELEASE' as const,
-      status: 'COMPLETED' as const,
-    },
-  ];
-
-  const transactions: TransactionItem[] = rawTx.map((t) => ({
-    id: t.id,
-    brand: t.brand,
-    campaign: t.campaign,
-    amount: `+${format(currency === 'INR' ? t.inrAmount : t.usdAmount, { showDecimals: true })}`,
-    date: t.date,
-    type: t.type,
-    status: t.status,
-  }));
+  const transactions: TransactionItem[] = payouts.map((t: any) => {
+    const rawAmt = Number(t.amount) || 0;
+    return {
+      id: t.id ? (t.id.startsWith('TX-') ? t.id : `TX-${t.id.slice(0, 8).toUpperCase()}`) : 'TX-UNKNOWN',
+      brand: t.brandName || (t.campaignTitle ? `Campaign: ${t.campaignTitle}` : 'Brand Partner'),
+      campaign: t.campaignTitle || (t.campaignId ? `Campaign #${t.campaignId.slice(0, 8)}` : 'Campaign Payout'),
+      amount: `+${format(rawAmt, { showDecimals: true })}`,
+      date: t.createdAt
+        ? new Date(t.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        : 'Recent',
+      type: (t.status === 'COMPLETED' ? 'PAYOUT_RELEASE' : 'ESCROW_DEPOSIT') as TransactionItem['type'],
+      status: (t.status === 'COMPLETED' ? 'COMPLETED' : 'PENDING_APPROVAL') as TransactionItem['status'],
+    };
+  });
 
   const availableBalanceStr = format(currency === 'INR' ? availableBalance : availableBalance / 83.5, { showDecimals: true });
   const inEscrowStr = format(currency === 'INR' ? inEscrow : inEscrow / 83.5, { showDecimals: true });
@@ -234,7 +230,40 @@ export default function PaymentsSection() {
           />
         ) : (
           <div className="space-y-3">
-            {filteredTransactions.length > 0 ? (
+            {isLoading ? (
+              <div className="py-14 flex flex-col items-center justify-center space-y-3">
+                <Loader2 className="w-7 h-7 text-purple-400 animate-spin" />
+                <p className="text-xs text-slate-400 font-medium">Checking payout and payment records...</p>
+              </div>
+            ) : transactions.length === 0 ? (
+              <div className="py-12 px-6 rounded-xl border border-white/5 bg-slate-900/30 text-center space-y-3">
+                <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto text-purple-400">
+                  <CreditCard className="w-7 h-7" />
+                </div>
+                <div className="max-w-md mx-auto space-y-1">
+                  <h3 className="text-base font-bold text-white">No Payment History Available</h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    No payment or payout transactions were found in the backend. When your completed campaign deliverables are approved by brands and payouts are disbursed, your transaction history will appear here.
+                  </p>
+                </div>
+                {!beneficiary && (
+                  <div className="pt-2">
+                    <button
+                      onClick={() => setIsLinkModalOpen(true)}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md shadow-purple-600/20"
+                    >
+                      <span>Link Payout Account</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : filteredTransactions.length === 0 ? (
+              <div className="py-10 text-center space-y-2">
+                <Search className="w-8 h-8 text-slate-500 mx-auto" />
+                <h3 className="text-sm font-bold text-white">No Matching Transactions</h3>
+                <p className="text-xs text-slate-400">No payment records match your search criteria.</p>
+              </div>
+            ) : (
               filteredTransactions.map((tx) => (
                 <TransactionCardItem
                   key={tx.id}
@@ -243,12 +272,6 @@ export default function PaymentsSection() {
                   onRaiseDispute={handleOpenDispute}
                 />
               ))
-            ) : (
-              <div className="p-8 text-center space-y-2">
-                <DollarSign className="w-8 h-8 text-slate-500 mx-auto" />
-                <h3 className="text-sm font-bold text-white">No Transactions Found</h3>
-                <p className="text-xs text-slate-400">No payment records match your search criteria.</p>
-              </div>
             )}
           </div>
         )}

@@ -1,8 +1,8 @@
 import { ArrayMaxSize, Equals, IsArray, IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, IsUrl, MaxLength, Min } from 'class-validator';
 
 export class SubmitDeliverableDto {
-  @IsIn(['FILE', 'PUBLISHED_URL'])
-  submissionType: 'FILE' | 'PUBLISHED_URL';
+  @IsIn(['FILE', 'PUBLISHED_URL', 'LINK'])
+  submissionType: 'FILE' | 'PUBLISHED_URL' | 'LINK';
 
   @IsBoolean()
   isFinal: boolean;
@@ -23,6 +23,10 @@ export class SubmitDeliverableDto {
   @IsOptional()
   @IsUrl({ protocols: ['https'], require_protocol: true })
   publishedUrl?: string;
+
+  @IsOptional()
+  @IsUrl({ protocols: ['https'], require_protocol: true })
+  contentUrl?: string;
 
   @IsOptional()
   @IsString()

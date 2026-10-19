@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { DollarSign, Search, ShieldCheck, CheckCircle2, Lock, AlertTriangle, ArrowDownLeft, Download, Check } from 'lucide-react';
+import { DollarSign, Search, ShieldCheck, CheckCircle2, Lock, AlertTriangle, ArrowDownLeft, Download, Check, CreditCard, Loader2 } from 'lucide-react';
 import DisputesListCard from './DisputesListCard';
 
 export interface BrandEscrowTransaction {
@@ -9,6 +9,7 @@ export interface BrandEscrowTransaction {
   creator: string;
   campaign: string;
   amount: string;
+  rawAmount?: number;
   date: string;
   status: 'IN_ESCROW' | 'COMPLETED' | 'DISPUTED';
   milestoneTitle?: string;
@@ -16,18 +17,22 @@ export interface BrandEscrowTransaction {
 
 interface BrandEscrowTransactionListProps {
   transactions: BrandEscrowTransaction[];
+  isLoading?: boolean;
   onApproveRelease: (txId: string) => void;
   onRaiseDispute: (txId: string, campaign: string) => void;
   onWithdrawRefund: (txId: string, amount: string) => void;
   onExportInvoices: () => void;
+  onDeposit?: () => void;
 }
 
 export default function BrandEscrowTransactionList({
   transactions,
+  isLoading = false,
   onApproveRelease,
   onRaiseDispute,
   onWithdrawRefund,
   onExportInvoices,
+  onDeposit,
 }: BrandEscrowTransactionListProps) {
   const [activeTab, setActiveTab] = useState<'ALL' | 'IN_ESCROW' | 'COMPLETED' | 'DISPUTES'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -89,7 +94,40 @@ export default function BrandEscrowTransactionList({
         />
       ) : (
         <div className="space-y-3">
-          {filtered.length > 0 ? (
+          {isLoading ? (
+            <div className="py-14 flex flex-col items-center justify-center space-y-3">
+              <Loader2 className="w-7 h-7 text-purple-400 animate-spin" />
+              <p className="text-xs text-slate-400 font-medium">Checking payment and escrow records...</p>
+            </div>
+          ) : transactions.length === 0 ? (
+            <div className="py-12 px-6 rounded-xl border border-white/5 bg-slate-900/30 text-center space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto text-purple-400">
+                <CreditCard className="w-7 h-7" />
+              </div>
+              <div className="max-w-md mx-auto space-y-1">
+                <h3 className="text-base font-bold text-white">No Payment History Available</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  No payment or escrow transactions were found in your backend account. Once you fund a campaign or process a payout, your transaction logs will appear here.
+                </p>
+              </div>
+              {onDeposit && (
+                <div className="pt-2">
+                  <button
+                    onClick={onDeposit}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md shadow-purple-600/20"
+                  >
+                    <span>Deposit Funds</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="py-10 text-center space-y-2">
+              <Search className="w-8 h-8 text-slate-500 mx-auto" />
+              <h3 className="text-sm font-bold text-white">No Matching Records</h3>
+              <p className="text-xs text-slate-400">No payment records match your search or filter selection.</p>
+            </div>
+          ) : (
             filtered.map((tx) => (
               <div
                 key={tx.id}
@@ -183,12 +221,6 @@ export default function BrandEscrowTransactionList({
                 </div>
               </div>
             ))
-          ) : (
-            <div className="p-8 text-center space-y-2">
-              <DollarSign className="w-8 h-8 text-slate-500 mx-auto" />
-              <h3 className="text-sm font-bold text-white">No Escrow Activity Found</h3>
-              <p className="text-xs text-slate-400">No payment records match your filters.</p>
-            </div>
           )}
         </div>
       )}

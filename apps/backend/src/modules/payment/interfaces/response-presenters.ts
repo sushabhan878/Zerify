@@ -9,6 +9,7 @@ export interface PaymentResponse {
   amount: string;
   currency: string;
   campaignId: string | null;
+  campaignTitle?: string | null;
   provider: string;
   paymentSessionId: string | null;
   providerOrderId: string | null;
@@ -28,6 +29,8 @@ export interface PayoutResponse {
   currency: string;
   influencerProfileId: string;
   campaignId: string | null;
+  campaignTitle?: string | null;
+  brandName?: string | null;
   provider: string;
   failureReason: string | null;
   createdAt: Date;
@@ -52,6 +55,7 @@ export function presentPayment(payment: any, currency: string): PaymentResponse 
     amount: (Number(payment.amountMinor) / 100).toFixed(2),
     currency,
     campaignId: payment.campaignId ?? null,
+    campaignTitle: payment.campaign?.title ?? null,
     provider: payment.provider,
     paymentSessionId: payment.providerSessionId ?? null,
     providerOrderId: payment.providerOrderId ?? null,
@@ -75,6 +79,8 @@ export function presentPayout(payout: any, currency: string): PayoutResponse {
     currency,
     influencerProfileId: payout.influencerProfileId,
     campaignId: payout.campaignId ?? null,
+    campaignTitle: payout.campaign?.title ?? null,
+    brandName: payout.campaign?.brandProfile?.companyName ?? null,
     provider: payout.provider,
     failureReason: payout.failureReason ?? null,
     createdAt: payout.createdAt,

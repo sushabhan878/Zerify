@@ -117,6 +117,14 @@ export class PaymentRepository {
         ...(options.campaignId ? { campaignId: options.campaignId } : {}),
         ...(options.status ? { status: options.status } : {}),
       },
+      include: {
+        campaign: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
       take: options.take ?? 50,
     });
@@ -355,6 +363,19 @@ export class PaymentRepository {
       where: {
         influencerProfileId,
         ...(options.status ? { status: options.status } : {}),
+      },
+      include: {
+        campaign: {
+          select: {
+            id: true,
+            title: true,
+            brandProfile: {
+              select: {
+                companyName: true,
+              },
+            },
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
       take: options.take ?? 50,

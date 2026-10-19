@@ -100,9 +100,12 @@ export class PayoutController {
   @Get('payouts')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'List the authenticated influencer\u2019s payouts' })
+  @ApiOperation({ summary: 'List the authenticated influencer’s payouts' })
   async listMyPayouts(@Req() req: any, @Query() query: ListPayoutsQueryDto) {
-    const profile = await this.resolveInfluencerProfile(req.user.id);
+    const profile = await this.repository.findInfluencerProfileByUser(req.user.id);
+    if (!profile) {
+      return [];
+    }
     const payouts = await this.payoutService.listPayouts(profile.id, query.status);
     return payouts.map((p) => presentPayout(p, p.currency));
   }

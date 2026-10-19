@@ -22,10 +22,12 @@ export default function BrandPayoutsSection() {
   const [selectedTxForAction, setSelectedTxForAction] = useState<{ id: string; campaign: string; amount: string } | null>(null);
 
   // Brand data state
-  const [availableBalance, setAvailableBalance] = useState(1845000); // in paise/cents or INR standard
-  const [inEscrow, setInEscrow] = useState(570000);
-  const [totalSettled, setTotalSettled] = useState(6420000);
+  const [availableBalance, setAvailableBalance] = useState(0);
+  const [inEscrow, setInEscrow] = useState(0);
+  const [totalSettled, setTotalSettled] = useState(0);
   const [hasBillingDetails, setHasBillingDetails] = useState(false);
+  const [transactions, setTransactions] = useState<BrandEscrowTransaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Check cached brand billing details on mount
   useEffect(() => {
@@ -40,40 +42,62 @@ export default function BrandPayoutsSection() {
     } catch (e) {}
   }, []);
 
-  const [transactions, setTransactions] = useState<BrandEscrowTransaction[]>([
-    {
-      id: 'ESC-4012',
-      creator: 'Sarah Jenkins',
-      campaign: 'YouTube Video Integration & Product Unboxing',
-      amount: format(35000, { showDecimals: true }),
-      date: 'Jul 22, 2026',
-      status: 'IN_ESCROW',
-    },
-    {
-      id: 'ESC-3910',
-      creator: 'Marcus Vance',
-      campaign: 'Desk Showcase & Reel Promotion',
-      amount: format(22000, { showDecimals: true }),
-      date: 'Jul 18, 2026',
-      status: 'IN_ESCROW',
-    },
-    {
-      id: 'SET-1002',
-      creator: 'Priya Sharma',
-      campaign: 'Instagram Carousel Feature Launch',
-      amount: format(45000, { showDecimals: true }),
-      date: 'Jul 10, 2026',
-      status: 'COMPLETED',
-    },
-    {
-      id: 'SET-0941',
-      creator: 'Alex Rivera',
-      campaign: 'Tech Podcast Audio Sponsorship Integration',
-      amount: format(28000, { showDecimals: true }),
-      date: 'Jun 28, 2026',
-      status: 'COMPLETED',
-    },
-  ]);
+  const fetchBrandPayments = async () => {
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem('zerify_token');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
+      const res = await fetch(`${apiUrl}/payments/me`, {
+        headers: { Authorization: token ? `Bearer ${token}` : '' },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped: BrandEscrowTransaction[] = data.map((p: any) => {
+            const raw = Number(p.amount) || 0;
+            return {
+              id: p.id ? (p.id.length > 12 ? `ESC-${p.id.slice(0, 8).toUpperCase()}` : p.id) : 'ESC-UNKNOWN',
+              creator: p.creator || p.creatorName || (p.campaignTitle ? `Campaign: ${p.campaignTitle}` : 'Zerify Escrow'),
+              campaign: p.campaignTitle || (p.campaignId ? `Campaign #${p.campaignId.slice(0, 8)}` : 'Platform Escrow Deposit'),
+              amount: format(raw, { showDecimals: true }),
+              rawAmount: raw,
+              date: p.createdAt
+                ? new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                : 'Recent',
+              status: p.status === 'SUCCESSFUL' ? 'COMPLETED' : (p.status === 'REFUNDED' || p.status === 'FAILED' ? 'DISPUTED' : 'IN_ESCROW'),
+              milestoneTitle: p.milestoneTitle,
+            };
+          });
+          setTransactions(mapped);
+
+          const settledSum = mapped.filter((t) => t.status === 'COMPLETED').reduce((acc, t) => acc + (t.rawAmount || 0), 0);
+          const escrowSum = mapped.filter((t) => t.status === 'IN_ESCROW').reduce((acc, t) => acc + (t.rawAmount || 0), 0);
+          setTotalSettled(settledSum);
+          setInEscrow(escrowSum);
+        } else {
+          setTransactions([]);
+          setTotalSettled(0);
+          setInEscrow(0);
+        }
+      } else {
+        setTransactions([]);
+        setTotalSettled(0);
+        setInEscrow(0);
+      }
+    } catch (e) {
+      setTransactions([]);
+      setTotalSettled(0);
+      setInEscrow(0);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBrandPayments();
+  }, []);
 
   const handleApproveRelease = (txId: string) => {
     const target = transactions.find((t) => t.id === txId);
@@ -82,8 +106,8 @@ export default function BrandPayoutsSection() {
       setTransactions((prev) =>
         prev.map((t) => (t.id === txId ? { ...t, status: 'COMPLETED' as const } : t))
       );
-      setInEscrow((prev) => Math.max(0, prev - 30000));
-      setTotalSettled((prev) => prev + 30000);
+      setInEscrow((prev) => Math.max(0, prev - (target.rawAmount || 0)));
+      setTotalSettled((prev) => prev + (target.rawAmount || 0));
     }
   };
 
@@ -149,10 +173,12 @@ export default function BrandPayoutsSection() {
       {/* Escrow Activity List */}
       <BrandEscrowTransactionList
         transactions={transactions}
+        isLoading={isLoading}
         onApproveRelease={handleApproveRelease}
         onRaiseDispute={handleOpenDispute}
         onWithdrawRefund={handleOpenWithdraw}
         onExportInvoices={() => alert('Downloading tax invoice...')}
+        onDeposit={() => setIsDepositOpen(true)}
       />
 
       {/* Modals */}
@@ -163,6 +189,7 @@ export default function BrandPayoutsSection() {
           if (depositedAmount) {
             setAvailableBalance((prev) => prev + depositedAmount);
           }
+          fetchBrandPayments();
         }}
       />
 

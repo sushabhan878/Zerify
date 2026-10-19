@@ -69,6 +69,8 @@ export default function BrandDashboardView({
       case 'brand-messages':
         return <BrandMessagesSection />;
       case 'payouts-escrow':
+      case 'payments':
+      case 'payouts':
         return <BrandPayoutsSection />;
       case 'brand-settings':
         return (

@@ -25,9 +25,29 @@ export default function SubmissionHistory({ deliverable }: { deliverable: Partic
         <div className="flex flex-wrap items-center gap-2"><strong className="text-white">v{v.version}{v.version === deliverable.version ? ' · Current' : ''}</strong><span className="text-slate-400">{v.isFinal ? 'Final' : 'Draft'} · {dateLabel(v.createdAt)}</span><StatusBadge status={v.status} /></div>
         <p className="break-all text-xs text-slate-500">Submission {v.id}</p>
         <div className="flex flex-wrap gap-2">{v.assetIds?.map((id, index) => <ActionButton key={id} busy={busy === id} onClick={() => openAsset(id)}><FileVideo className="h-4 w-4" />Preview file {index + 1}</ActionButton>)}</div>
-        {[v.publishedUrl, ...(v.files || [])].filter((u): u is string => !!u && safeUrl(u)).map(url => <a className="block break-all text-purple-300 hover:underline" key={url} href={url} target="_blank" rel="noopener noreferrer"><ExternalLink className="mr-1 inline h-3 w-3" />{url}</a>)}
-        {v.caption && <p className="whitespace-pre-wrap text-slate-300">Caption: {v.caption}</p>}
-        {v.notes && <p className="whitespace-pre-wrap text-slate-400">Creator note: {v.notes}</p>}
+        {[v.publishedUrl, ...(v.files || [])].filter((u): u is string => !!u && safeUrl(u)).map((url, index) => (
+          <div key={url} className="pt-0.5">
+            <a
+              className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-600/20 hover:bg-purple-600/35 px-3.5 py-1.5 text-xs font-semibold text-purple-200 hover:text-white transition shadow-sm"
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="h-3.5 w-3.5 text-purple-300" />
+              <span>Open Deliverable Link {index > 0 ? `#${index + 1}` : ''}</span>
+            </a>
+          </div>
+        ))}
+        {v.notes && (
+          <div className="text-xs text-slate-300 bg-white/5 rounded-lg p-2.5">
+            <strong className="text-purple-300">Creator Note:</strong> {v.notes}
+          </div>
+        )}
+        {v.caption && (
+          <div className="text-xs text-slate-300 bg-white/5 rounded-lg p-2.5">
+            <strong className="text-purple-300">Caption & Tags:</strong> {v.caption}
+          </div>
+        )}
         {v.reviewComments && <p className="rounded-lg bg-purple-500/10 p-3 text-purple-100">Brand feedback: {v.reviewComments}</p>}
       </article>)}
     </div>

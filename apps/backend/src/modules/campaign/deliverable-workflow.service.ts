@@ -51,10 +51,28 @@ export class DeliverableWorkflowService {
       if (!rules.allowLateSubmission && d.dueDate && new Date() > d.dueDate) throw new BadRequestException('The submission deadline has passed');
       let publishedUrl: string | undefined;
       const assetIds = [...new Set(dto.assetIds || [])];
+      let filesList: string[] = [];
+      const incomingUrl = dto.contentUrl || dto.publishedUrl;
+
       if (dto.submissionType === 'PUBLISHED_URL') {
         if (!dto.isFinal || !dto.publishedUrl || assetIds.length) throw new BadRequestException('Published posts must be final URL-only submissions');
         if (rules.requiresPreApproval) throw new BadRequestException('This deliverable needs file approval before publication');
         publishedUrl = await this.checkUrl(tx, d, dto.publishedUrl);
+      } else if (dto.submissionType === 'LINK') {
+        if (!incomingUrl) throw new BadRequestException('Enter a valid deliverables link (e.g. Google Drive, Dropbox, Frame.io)');
+        try {
+          const parsed = new URL(incomingUrl);
+          if (parsed.protocol !== 'https:') throw new Error();
+        } catch {
+          throw new BadRequestException('Use a valid HTTPS link for the deliverable content');
+        }
+        filesList = [incomingUrl];
+        // If it happens to be a live social URL and submitted as final, also link it
+        const host = new URL(incomingUrl).hostname.toLowerCase();
+        const isSocial = /instagram\.com|youtube\.com|youtu\.be|tiktok\.com|twitter\.com|x\.com|linkedin\.com/.test(host);
+        if (dto.isFinal && isSocial && !rules.requiresPreApproval) {
+          publishedUrl = await this.checkUrl(tx, d, incomingUrl);
+        }
       } else {
         if (!assetIds.length || dto.publishedUrl) throw new BadRequestException('Upload at least one file before submitting');
         const assets = await tx.deliverableAsset.findMany({ where: { id: { in: assetIds }, deliverableId: id, uploadedBy: userId } });
@@ -65,10 +83,14 @@ export class DeliverableWorkflowService {
       const version = d.version + 1;
       const revision = await tx.deliverableRevision.create({ data: {
         deliverableId: id, version, submittedBy: userId, submissionType: dto.submissionType,
-        isFinal: dto.isFinal, assetIds, publishedUrl, notes: dto.notes, caption: dto.caption,
+        isFinal: dto.isFinal, assetIds, publishedUrl,
+        files: filesList,
+        notes: dto.notes, caption: dto.caption,
       } });
       await tx.participantDeliverable.update({ where: { id }, data: {
-        version, status: 'SUBMITTED', contentUrls: [], submissionNotes: dto.notes, submittedAt: new Date(),
+        version, status: 'SUBMITTED',
+        contentUrls: filesList,
+        submissionNotes: dto.notes, submittedAt: new Date(),
         reviewStatus: 'PENDING', reviewComments: null, reviewedBy: null, reviewedAt: null,
         publishedUrl: publishedUrl || null, publishedAt: null, verifiedAt: null, verifiedBy: null,
         verificationStatus: publishedUrl ? 'MANUAL_REVIEW_REQUIRED' : null,

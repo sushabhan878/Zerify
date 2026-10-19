@@ -50,9 +50,9 @@ export const DeliverableService = {
   },
 
   async submitDraft(deliverableId: string, data: {
-    submissionType: 'FILE' | 'PUBLISHED_URL'; isFinal: boolean;
+    submissionType: 'FILE' | 'PUBLISHED_URL' | 'LINK'; isFinal: boolean;
     expectedVersion: number; confirmed: boolean; assetIds?: string[];
-    publishedUrl?: string; caption?: string; notes?: string;
+    publishedUrl?: string; contentUrl?: string; caption?: string; notes?: string;
   }): Promise<ParticipantDeliverableItem> {
     return apiRequest(`/deliverables/${deliverableId}/submit`, { method: 'POST', body: JSON.stringify(data) });
   },

@@ -60,6 +60,8 @@ export default function InfluencerDashboardView({
       case 'my-network':
         return <MyNetworkSection />;
       case 'payments':
+      case 'payouts':
+      case 'payouts-escrow':
         return <PaymentsSection />;
       case 'settings':
         return (

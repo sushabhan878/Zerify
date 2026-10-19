@@ -3,19 +3,31 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle2, X } from 'lucide-react';
+import { Check, CheckCircle2, X, Sparkles, Cloud, Globe, ExternalLink, Link2 } from 'lucide-react';
 import { DeliverableService, ParticipantDeliverableItem } from '@/services/deliverable.service';
 import { ActionButton, ErrorNotice, input } from './ExecutionUi';
 import SubmissionMediaInput from './SubmissionMediaInput';
+import ExecutionDropdown, { DropdownOption } from './ExecutionDropdown';
 
-interface Props { deliverable: ParticipantDeliverableItem | null; onClose: () => void; onSuccess: () => void; publicationOnly?: boolean }
-export default function SubmissionDialog({ deliverable: d, onClose, onSuccess, publicationOnly = false }: Props) {
+interface Props {
+  deliverable: ParticipantDeliverableItem | null;
+  onClose: () => void;
+  onSuccess: () => void;
+  publicationOnly?: boolean;
+}
+
+export default function SubmissionDialog({
+  deliverable: d,
+  onClose,
+  onSuccess,
+  publicationOnly = false,
+}: Props) {
   const [step, setStep] = useState(1);
-  const [method, setMethod] = useState<'FILE' | 'PUBLISHED_URL'>(publicationOnly ? 'PUBLISHED_URL' : 'FILE');
-  const [isFinal, setFinal] = useState(true);
+  const [method, setMethod] = useState<'LINK' | 'PUBLISHED_URL'>(
+    publicationOnly ? 'PUBLISHED_URL' : 'LINK'
+  );
+  const [isFinal, setFinal] = useState(publicationOnly ? true : false);
   const [url, setUrl] = useState('');
-  const [file, setFile] = useState<File>();
-  const [asset, setAsset] = useState<{ id: string; filename: string; size: number; duration?: number }>();
   const [caption, setCaption] = useState('');
   const [notes, setNotes] = useState('');
   const [confirmed, setConfirmed] = useState(false);
@@ -23,89 +35,357 @@ export default function SubmissionDialog({ deliverable: d, onClose, onSuccess, p
   const [error, setError] = useState('');
   const [receipt, setReceipt] = useState<ParticipantDeliverableItem>();
   const dialog = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const previous = document.activeElement as HTMLElement;
     dialog.current?.focus();
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && !busy) onClose();
       if (event.key !== 'Tab') return;
-      const nodes = dialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input, select, textarea, a[href]');
+      const nodes = dialog.current?.querySelectorAll<HTMLElement>(
+        'button:not(:disabled), input, select, textarea, a[href]'
+      );
       if (!nodes?.length) return;
-      const first = nodes[0], last = nodes[nodes.length - 1];
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      const first = nodes[0],
+        last = nodes[nodes.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      }
+      if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener('keydown', handleKey);
-    return () => { document.removeEventListener('keydown', handleKey); previous?.focus(); };
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      previous?.focus();
+    };
   }, [busy, onClose]);
+
   if (!d) return null;
+
+  const stageOptions: DropdownOption[] = [
+    {
+      value: 'draft',
+      label: 'Draft for approval',
+      description: 'Brand reviews your draft before publication',
+      icon: <Sparkles className="w-3.5 h-3.5" />,
+    },
+    {
+      value: 'final',
+      label: 'Final content',
+      description: 'Final polished deliverable for approval/release',
+      icon: <CheckCircle2 className="w-3.5 h-3.5" />,
+    },
+  ];
+
+  const methodOptions: DropdownOption[] = [
+    {
+      value: 'LINK',
+      label: 'Cloud Deliverable Link',
+      description: 'Google Drive, Dropbox, Frame.io, Loom, etc.',
+      icon: <Cloud className="w-3.5 h-3.5" />,
+    },
+    ...(d.requirements?.requiresPreApproval === false
+      ? [
+          {
+            value: 'PUBLISHED_URL',
+            label: 'Published Social Post URL',
+            description: 'Direct live public post link',
+            icon: <Globe className="w-3.5 h-3.5" />,
+          },
+        ]
+      : []),
+  ];
+
   const prepare = async () => {
-    setBusy(true); setError('');
+    setError('');
+    const cleanUrl = url.trim();
+    if (!cleanUrl) {
+      setError('Please enter a deliverable content link.');
+      return;
+    }
     try {
-      if (method === 'FILE') {
-        if (!file) throw new Error('Choose a file to upload.');
-        if (!asset) setAsset(await DeliverableService.upload(d.id, file));
-      } else {
-        const parsed = new URL(url);
-        if (parsed.protocol !== 'https:') throw new Error('Use an HTTPS social post URL.');
+      const parsed = new URL(cleanUrl);
+      if (parsed.protocol !== 'https:') {
+        throw new Error('Please enter a secure HTTPS link (e.g. Google Drive, Dropbox, Frame.io, Loom).');
       }
       setStep(2);
-    } catch (e) { setError(e instanceof Error ? e.message : 'Upload failed. Please retry.'); }
-    finally { setBusy(false); }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Please enter a valid HTTPS URL.');
+    }
   };
+
   const submit = async () => {
-    setBusy(true); setError('');
+    setBusy(true);
+    setError('');
+    const cleanUrl = url.trim();
     try {
       const result = publicationOnly
-        ? await DeliverableService.publishDeliverable(d.id, { publishedUrl: url, expectedVersion: d.version })
+        ? await DeliverableService.publishDeliverable(d.id, {
+            publishedUrl: cleanUrl,
+            expectedVersion: d.version,
+          })
         : await DeliverableService.submitDraft(d.id, {
-          submissionType: method, isFinal: method === 'PUBLISHED_URL' || isFinal, expectedVersion: d.version,
-          confirmed, assetIds: method === 'FILE' && asset ? [asset.id] : undefined,
-          publishedUrl: method === 'PUBLISHED_URL' ? url : undefined, caption, notes,
-        });
-      setReceipt(result); onSuccess();
-    } catch (e) { setError(e instanceof Error ? e.message : 'Submission failed. Please retry.'); }
-    finally { setBusy(false); }
+            submissionType: method === 'PUBLISHED_URL' ? 'PUBLISHED_URL' : 'LINK',
+            isFinal: method === 'PUBLISHED_URL' || isFinal,
+            expectedVersion: d.version,
+            confirmed,
+            contentUrl: cleanUrl,
+            publishedUrl: method === 'PUBLISHED_URL' ? cleanUrl : undefined,
+            caption,
+            notes,
+          });
+      setReceipt(result);
+      onSuccess();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Submission failed. Please retry.');
+    } finally {
+      setBusy(false);
+    }
   };
-  return createPortal(<div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-md">
-    <motion.div ref={dialog} role="dialog" aria-modal="true" aria-labelledby="submission-title" tabIndex={-1} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-white/10 bg-slate-900 p-6 shadow-2xl">
-      <header className="mb-5 flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-widest text-purple-300">{receipt ? 'Submission received' : `Step ${step} of 2 · ${step === 1 ? 'Prepare' : 'Review'}`}</p><h2 id="submission-title" className="mt-1 text-xl font-bold text-white">{d.title || d.type}</h2></div><button aria-label="Close submission" disabled={busy} onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white disabled:opacity-50"><X className="h-5 w-5" /></button></header>
-      {error && (
-        <div role="alert" className="mb-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-200 space-y-2">
-          <div className="font-semibold text-rose-100 flex items-center justify-between">
-            <span>{error.toLowerCase().includes('already been submitted') ? 'Duplicate Submission' : error.toLowerCase().includes('url') || error.toLowerCase().includes('post') ? 'URL Verification Failed' : 'Submission / Upload Error'}</span>
-            <button onClick={() => setError('')} className="text-rose-300 hover:text-white text-xs underline">Dismiss</button>
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-md">
+      <motion.div
+        ref={dialog}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="submission-title"
+        tabIndex={-1}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-purple-500/20 bg-slate-950/95 p-6 shadow-2xl shadow-purple-950/40 backdrop-blur-2xl"
+      >
+        <header className="mb-5 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-purple-300">
+              {receipt
+                ? 'Submission received'
+                : `Step ${step} of 2 · ${step === 1 ? 'Prepare' : 'Review'}`}
+            </p>
+            <h2 id="submission-title" className="mt-1 text-xl font-bold text-white">
+              {d.title || d.type}
+            </h2>
           </div>
-          <p>{error}</p>
-          {error.toLowerCase().includes('already been submitted') && (
-            <div className="pt-1">
-              <button type="button" onClick={onClose} className="rounded-lg bg-rose-600/30 px-3 py-1 font-semibold text-rose-200 hover:bg-rose-600/50">
-                View Existing Submission
+          <button
+            aria-label="Close submission"
+            disabled={busy}
+            onClick={onClose}
+            className="rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white transition disabled:opacity-50 cursor-pointer"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </header>
+
+        {error && (
+          <div
+            role="alert"
+            className="mb-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-200 space-y-2"
+          >
+            <div className="font-semibold text-rose-100 flex items-center justify-between">
+              <span>Submission Error</span>
+              <button
+                onClick={() => setError('')}
+                className="text-rose-300 hover:text-white text-xs underline cursor-pointer"
+              >
+                Dismiss
               </button>
             </div>
-          )}
-          {(error.toLowerCase().includes('url') || error.toLowerCase().includes('post')) && !error.toLowerCase().includes('already been submitted') && (
-            <ul className="list-disc list-inside text-[11px] text-rose-300/90 space-y-0.5 pt-1">
-              <li>Check that the URL is a direct HTTPS public post link.</li>
-              <li>Ensure the post is not private or restricted.</li>
-              <li>Verify that the platform matches the deliverable requirements.</li>
-            </ul>
-          )}
-        </div>
-      )}
-      {receipt ? <div role="status" className="space-y-4 py-6 text-center"><CheckCircle2 className="mx-auto h-12 w-12 text-emerald-400" /><h3 className="text-lg font-bold text-white">{publicationOnly ? 'Published URL received' : 'Submitted for brand review'}</h3><p className="text-sm text-slate-300">Version {receipt.version} · {new Date(receipt.submittedAt || Date.now()).toLocaleString()}</p><p className="break-all text-xs text-slate-500">{receipt.revisions?.[0]?.id || receipt.id}</p><p className="text-sm text-slate-400">{publicationOnly ? 'The brand will manually verify the post and connected account.' : 'We’ll notify you in Messages when the brand responds.'}</p><ActionButton onClick={onClose}>View submission</ActionButton></div> : <div className="space-y-4">
-        {step === 1 ? <>
-          {!publicationOnly && <div className="grid grid-cols-2 gap-3"><label className="text-sm text-slate-300">Submission stage<select className={`${input} mt-1`} value={isFinal ? 'final' : 'draft'} onChange={e => setFinal(e.target.value === 'final')} disabled={busy || method === 'PUBLISHED_URL'}><option value="draft">Draft for approval</option><option value="final">Final content</option></select></label><label className="text-sm text-slate-300">Method<select className={`${input} mt-1`} value={method} disabled={busy} onChange={e => setMethod(e.target.value as typeof method)}><option value="FILE">Upload file</option>{d.requirements?.requiresPreApproval === false && <option value="PUBLISHED_URL">Published social URL</option>}</select></label></div>}
-          <SubmissionMediaInput deliverable={d} method={method} file={file} url={url} busy={busy} onFile={value => { setFile(value); setAsset(undefined); }} onUrl={setUrl} />
-          {!publicationOnly && <><label className="block text-sm text-slate-300">Caption / hashtags / mentions<textarea className={`${input} mt-1`} value={caption} maxLength={5000} onChange={e => setCaption(e.target.value)} /></label><label className="block text-sm text-slate-300">Note for the brand<textarea className={`${input} mt-1`} value={notes} maxLength={5000} onChange={e => setNotes(e.target.value)} /></label></>}
-          <ActionButton busy={busy} onClick={prepare}>{busy ? 'Uploading securely…' : 'Continue to review'}</ActionButton>
-        </> : <>
-          <SubmissionMediaInput deliverable={d} method={method} file={file} url={url} busy readOnly onFile={() => {}} onUrl={() => {}} />
-          <div className="space-y-2 rounded-xl bg-slate-950/60 p-4 text-sm text-slate-300"><p>{publicationOnly ? 'Publication verification' : isFinal || method === 'PUBLISHED_URL' ? 'Final content' : 'Draft for approval'}</p>{asset && <p>{asset.filename} · {(asset.size / 1024 / 1024).toFixed(1)} MB{asset.duration ? ` · ${Math.round(asset.duration)} seconds` : ''}</p>}{caption && <p className="whitespace-pre-wrap">Caption: {caption}</p>}{notes && <p className="whitespace-pre-wrap">Note: {notes}</p>}</div>
-          <label className="flex gap-3 text-sm text-slate-300"><input type="checkbox" checked={confirmed} onChange={e => setConfirmed(e.target.checked)} />I confirm this content follows the campaign requirements and belongs to my assigned account.</label>
-          <div className="flex justify-between gap-3"><button disabled={busy} onClick={() => setStep(1)} className="text-sm text-slate-400 hover:text-white">Back to edit</button><ActionButton disabled={!confirmed} busy={busy} onClick={submit}>{publicationOnly ? 'Submit URL for verification' : 'Submit for brand review'}</ActionButton></div>
-        </>}
-      </div>}
-    </motion.div>
-  </div>, document.body);
+            <p>{error}</p>
+          </div>
+        )}
+
+        {receipt ? (
+          <div role="status" className="space-y-4 py-6 text-center">
+            <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-400" />
+            <h3 className="text-lg font-bold text-white">
+              {publicationOnly ? 'Published URL received' : 'Submitted for brand review'}
+            </h3>
+            <p className="text-sm text-slate-300">
+              Version {receipt.version} ·{' '}
+              {new Date(receipt.submittedAt || Date.now()).toLocaleString()}
+            </p>
+            <p className="text-sm text-slate-400">
+              {publicationOnly
+                ? 'The brand will manually verify the post and connected account.'
+                : 'We’ll notify you when the brand responds to your submission.'}
+            </p>
+            <ActionButton onClick={onClose}>Done</ActionButton>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {step === 1 ? (
+              <>
+                {!publicationOnly && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {/* Custom Styled Submission Stage Dropdown */}
+                    <ExecutionDropdown
+                      label="Submission stage"
+                      options={stageOptions}
+                      value={isFinal ? 'final' : 'draft'}
+                      onChange={(val) => setFinal(val === 'final')}
+                      disabled={busy || method === 'PUBLISHED_URL'}
+                    />
+
+                    {/* Custom Styled Method / Source Dropdown */}
+                    <ExecutionDropdown
+                      label="Deliverable type"
+                      options={methodOptions}
+                      value={method}
+                      onChange={(val) => setMethod(val as typeof method)}
+                      disabled={busy}
+                    />
+                  </div>
+                )}
+
+                {/* Deliverable Link Input Component */}
+                <SubmissionMediaInput
+                  deliverable={d}
+                  url={url}
+                  busy={busy}
+                  onUrl={setUrl}
+                />
+
+                {!publicationOnly && (
+                  <>
+                    <label className="block text-xs font-bold text-slate-200">
+                      Caption / hashtags / mentions
+                      <textarea
+                        className={`${input} mt-1`}
+                        rows={2}
+                        value={caption}
+                        placeholder="Add planned caption, mentions or hashtags…"
+                        maxLength={5000}
+                        onChange={(e) => setCaption(e.target.value)}
+                      />
+                    </label>
+
+                    <label className="block text-xs font-bold text-slate-200">
+                      Note for the brand
+                      <textarea
+                        className={`${input} mt-1`}
+                        rows={2}
+                        value={notes}
+                        placeholder="Any notes or context for the brand reviewer…"
+                        maxLength={5000}
+                        onChange={(e) => setNotes(e.target.value)}
+                      />
+                    </label>
+                  </>
+                )}
+
+                <ActionButton busy={busy} onClick={prepare} className="w-full">
+                  Continue to review
+                </ActionButton>
+              </>
+            ) : (
+              <>
+                {/* Step 2 Review */}
+                <SubmissionMediaInput
+                  deliverable={d}
+                  url={url}
+                  busy={busy}
+                  readOnly
+                  onUrl={() => {}}
+                />
+
+                <div className="space-y-2 rounded-2xl bg-slate-950/70 border border-white/10 p-4 text-xs text-slate-300">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-purple-300">
+                      {publicationOnly
+                        ? 'Publication verification'
+                        : isFinal || method === 'PUBLISHED_URL'
+                        ? 'Final Content Submission'
+                        : 'Draft for Review'}
+                    </span>
+                    <span className="text-[11px] text-slate-400">
+                      Target v{d.version + 1}
+                    </span>
+                  </div>
+
+                  {caption && (
+                    <p className="whitespace-pre-wrap bg-white/5 p-2 rounded-lg">
+                      <strong className="text-purple-300">Caption:</strong> {caption}
+                    </p>
+                  )}
+                  {notes && (
+                    <p className="whitespace-pre-wrap bg-white/5 p-2 rounded-lg">
+                      <strong className="text-purple-300">Note:</strong> {notes}
+                    </p>
+                  )}
+                </div>
+
+                {/* Polished Interactive Confirmation Card */}
+                <div
+                  onClick={() => setConfirmed(!confirmed)}
+                  role="checkbox"
+                  aria-checked={confirmed}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === ' ' || e.key === 'Enter') {
+                      e.preventDefault();
+                      setConfirmed(!confirmed);
+                    }
+                  }}
+                  className={`group relative p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex items-start gap-3.5 select-none ${
+                    confirmed
+                      ? 'bg-purple-950/30 border-purple-500/50 shadow-lg shadow-purple-950/40 ring-1 ring-purple-500/30'
+                      : 'bg-slate-950/60 border-white/10 hover:border-purple-500/30 hover:bg-slate-950/80'
+                  }`}
+                >
+                  {/* Custom Checkbox Indicator */}
+                  <div
+                    className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-200 shrink-0 mt-0.5 ${
+                      confirmed
+                        ? 'bg-gradient-to-tr from-purple-600 to-pink-600 border border-purple-400 text-white shadow-md shadow-purple-950/60 scale-105'
+                        : 'border-2 border-white/20 bg-slate-900 group-hover:border-purple-400/60 group-hover:bg-slate-800'
+                    }`}
+                  >
+                    {confirmed ? (
+                      <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
+                    ) : (
+                      <div className="w-1.5 h-1.5 rounded-full bg-transparent group-hover:bg-purple-400/40 transition-colors" />
+                    )}
+                  </div>
+
+                  <div className="space-y-0.5 min-w-0">
+                    <p
+                      className={`text-xs font-bold transition-colors ${
+                        confirmed ? 'text-white' : 'text-slate-200 group-hover:text-white'
+                      }`}
+                    >
+                      I confirm this link contains my original work
+                    </p>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Follows all campaign requirements, belongs to my assigned account, and is fully accessible to the brand without access restrictions.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-3 pt-2">
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => setStep(1)}
+                    className="text-xs font-bold text-slate-400 hover:text-white transition cursor-pointer"
+                  >
+                    Back to edit
+                  </button>
+                  <ActionButton disabled={!confirmed} busy={busy} onClick={submit}>
+                    {publicationOnly
+                      ? 'Submit URL for verification'
+                      : 'Submit for brand review'}
+                  </ActionButton>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </motion.div>
+    </div>,
+    document.body
+  );
 }
