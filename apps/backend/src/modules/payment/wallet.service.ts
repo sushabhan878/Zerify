@@ -161,7 +161,11 @@ export class WalletService {
       );
 
     const customerId = `cust_${brandProfile.id.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 30)}`;
-    const customerPhone = '9999999999';
+    const customerPhone =
+      (brandProfile as any).contactPhone ||
+      (brandProfile as any).phone ||
+      (brandProfile.user as any)?.phone ||
+      '9999999999';
     const customerEmail = brandProfile.user?.email || 'billing@zerify.in';
     const customerName = brandProfile.companyName || brandProfile.user?.name || 'Zerify Brand';
 
@@ -201,29 +205,56 @@ export class WalletService {
       `Initialized AddMoneyPayment ${payment.id} (Order: ${cfOrder.providerOrderId}) for ₹${dto.amount}`,
     );
 
-    // If UPI ID was provided, trigger direct UPI collect request to user's UPI app!
     let upiCollectInitiated = false;
+    let qrCodeData: string | null = null;
     let upiCollectResponse: any = null;
 
-    if (dto.upiId && dto.upiId.trim() && cfOrder.paymentSessionId) {
-      const cleanUpi = dto.upiId.trim();
+    if (cfOrder.paymentSessionId) {
+      const isSandbox = this.configService.get<string>('CASHFREE_ENVIRONMENT', 'sandbox') === 'sandbox';
 
-      // If requested, save UPI ID for future quick payments
-      if (dto.saveUpiId) {
-        await this.persistSavedUpiId(brandProfile.id, cleanUpi);
+      // 1. Dynamic QR Code flow
+      if (dto.channel === 'qrcode') {
+        try {
+          const qrResponse: any = await this.cashfreeProvider.paySession(cfOrder.paymentSessionId, {
+            upi: { channel: 'qrcode' },
+          });
+          qrCodeData = qrResponse?.data?.payload?.qrcode || null;
+          this.logger.log(`Generated dynamic Cashfree QR Code for order ${payment.id}`);
+        } catch (err: any) {
+          this.logger.warn(`Cashfree QR generation note: ${err.message}`);
+        }
       }
+      // 2. UPI VPA Collect request flow
+      else if (dto.upiId && dto.upiId.trim()) {
+        const cleanUpi = dto.upiId.trim();
 
-      try {
-        upiCollectResponse = await this.cashfreeProvider.paySession(cfOrder.paymentSessionId, {
-          upi: {
-            channel: 'collect',
-            upi_id: cleanUpi,
-          },
-        });
-        upiCollectInitiated = true;
-        this.logger.log(`Initiated UPI collect request to ${cleanUpi} for payment ${payment.id}`);
-      } catch (err: any) {
-        this.logger.warn(`Direct UPI collect session call note: ${err.message}`);
+        // If requested, save UPI ID for future quick payments
+        if (dto.saveUpiId) {
+          await this.persistSavedUpiId(brandProfile.id, cleanUpi);
+        }
+
+        try {
+          upiCollectResponse = await this.cashfreeProvider.paySession(cfOrder.paymentSessionId, {
+            upi: {
+              channel: 'collect',
+              upi_id: cleanUpi,
+            },
+          });
+          upiCollectInitiated = true;
+          this.logger.log(`Initiated UPI collect request to ${cleanUpi} for payment ${payment.id}`);
+
+          // In sandbox environment only, simulate test approval
+          const cfPaymentId = upiCollectResponse?.cf_payment_id ? String(upiCollectResponse.cf_payment_id) : null;
+          if (isSandbox && cfPaymentId) {
+            const simStatus = cleanUpi.toLowerCase().includes('fail') ? 'FAILED' : 'SUCCESS';
+            await this.cashfreeProvider.simulatePayment(cfPaymentId, simStatus).catch((err) => {
+              this.logger.warn(`Sandbox simulate notice: ${err.message}`);
+            });
+            this.logger.log(`Sandbox: Simulated payment status ${simStatus} for payment ID ${cfPaymentId}`);
+          }
+        } catch (err: any) {
+          this.logger.warn(`Direct UPI collect session call note: ${err.message}`);
+        }
       }
     }
 
@@ -237,6 +268,7 @@ export class WalletService {
       status: payment.status,
       upiCollectInitiated,
       upiId: dto.upiId || undefined,
+      qrCode: qrCodeData,
     };
   }
 

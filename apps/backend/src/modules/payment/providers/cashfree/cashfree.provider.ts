@@ -236,6 +236,28 @@ export class CashfreePaymentProvider implements PaymentProvider {
   }
 
   /**
+   * In sandbox mode, simulates payment completion so test transactions can complete
+   * without physical banking hardware.
+   */
+  async simulatePayment(cfPaymentId: string, status: 'SUCCESS' | 'FAILED' = 'SUCCESS'): Promise<any> {
+    const environment = this.configService.get<string>('CASHFREE_ENVIRONMENT', 'sandbox');
+    if (environment !== 'sandbox') {
+      return null;
+    }
+    return this.request<any>(`${this.baseUrl}/simulate`, {
+      method: 'POST',
+      headers: this.pgHeaders(),
+      body: JSON.stringify({
+        entity: 'PAYMENTS',
+        entity_id: cfPaymentId,
+        entity_simulation: {
+          payment_status: status,
+        },
+      }),
+    });
+  }
+
+  /**
    * Resolves an order's true state from Cashfree.
    *
    * Cashfree reports status at two levels: a coarse `order_status` and a list
@@ -252,11 +274,13 @@ export class CashfreePaymentProvider implements PaymentProvider {
     const orderAmountMinor =
       order?.order_amount !== undefined ? Math.round(Number(order.order_amount) * 100) : undefined;
 
-    // A paid order is unambiguous — no need to inspect individual payments.
-    if (orderStatus === ORDER_STATUS_PAID) {
-      const payments = await this.getOrderPayments(providerOrderId);
-      const successful = payments.find((p) => p.payment_status === PAYMENT_STATUS_SUCCESS);
+    // Check individual payments first: if ANY attempt succeeded, the transaction is SUCCESSFUL
+    const payments = await this.getOrderPayments(providerOrderId).catch(() => []);
+    const successful = Array.isArray(payments)
+      ? payments.find((p) => p.payment_status === PAYMENT_STATUS_SUCCESS)
+      : null;
 
+    if (orderStatus === ORDER_STATUS_PAID || successful) {
       return {
         providerOrderId,
         providerPaymentId: successful?.cf_payment_id

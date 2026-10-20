@@ -17,6 +17,7 @@ interface UpiPaymentTabProps {
   showQrCode: boolean;
   setShowQrCode: (show: boolean) => void;
   amountFormatted: string;
+  qrCodeImage?: string | null;
 }
 
 export default function UpiPaymentTab({
@@ -33,6 +34,7 @@ export default function UpiPaymentTab({
   showQrCode,
   setShowQrCode,
   amountFormatted,
+  qrCodeImage,
 }: UpiPaymentTabProps) {
   const hasSaved = savedUpiIds && savedUpiIds.length > 0;
 
@@ -64,14 +66,22 @@ export default function UpiPaymentTab({
       {showQrCode ? (
         <div className="p-4 rounded-xl bg-purple-50/60 border border-purple-100 flex flex-col items-center text-center space-y-2.5">
           <div className="p-2.5 bg-white rounded-xl shadow-sm border border-slate-200">
-            <div className="w-32 h-32 bg-gradient-to-br from-purple-900 to-indigo-950 p-2 rounded-lg flex flex-col items-center justify-center text-white relative">
-              <QrCode className="w-24 h-24 text-white stroke-[1.5]" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="px-2 py-0.5 rounded bg-purple-600 text-[10px] font-black uppercase tracking-wider text-white border border-white shadow">
-                  ₹ {amountFormatted}
-                </span>
+            {qrCodeImage ? (
+              <img
+                src={qrCodeImage}
+                alt="Cashfree Dynamic UPI QR Code"
+                className="w-32 h-32 object-contain rounded-lg"
+              />
+            ) : (
+              <div className="w-32 h-32 bg-gradient-to-br from-purple-900 to-indigo-950 p-2 rounded-lg flex flex-col items-center justify-center text-white relative">
+                <QrCode className="w-24 h-24 text-white stroke-[1.5]" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="px-2 py-0.5 rounded bg-purple-600 text-[10px] font-black uppercase tracking-wider text-white border border-white shadow">
+                    ₹ {amountFormatted}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
           <div>
             <p className="text-xs font-bold text-slate-800">Scan with any UPI App to Pay</p>

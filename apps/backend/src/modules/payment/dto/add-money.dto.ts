@@ -45,4 +45,13 @@ export class AddMoneyDto {
   })
   @IsOptional()
   saveUpiId?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'UPI channel type: collect (VPA push) or qrcode (dynamic on-screen QR)',
+    enum: ['collect', 'qrcode'],
+    default: 'collect',
+  })
+  @IsOptional()
+  @IsString()
+  channel?: 'collect' | 'qrcode';
 }
