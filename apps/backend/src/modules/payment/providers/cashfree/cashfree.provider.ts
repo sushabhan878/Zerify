@@ -323,7 +323,7 @@ export class CashfreePaymentProvider implements PaymentProvider {
     };
   }
 
-  private async getOrderPayments(providerOrderId: string): Promise<any[]> {
+  async getOrderPayments(providerOrderId: string): Promise<any[]> {
     const payments = await this.request<any[]>(
       `${this.baseUrl}/orders/${providerOrderId}/payments`,
       { method: 'GET', headers: this.pgHeaders() },

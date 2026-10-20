@@ -44,6 +44,15 @@ export class WalletController {
     return this.walletService.verifyAddMoneyPayment(req.user.id, paymentId);
   }
 
+  @Post('add-money/:paymentId/simulate')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Simulate successful payment for testing QR / UPI in sandbox' })
+  async simulatePayment(@Req() req: any, @Param('paymentId') paymentId: string) {
+    return this.walletService.simulateAddMoneyPayment(req.user.id, paymentId);
+  }
+
   @Get('transactions')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

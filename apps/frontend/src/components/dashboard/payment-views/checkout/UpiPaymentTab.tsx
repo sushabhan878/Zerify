@@ -18,6 +18,8 @@ interface UpiPaymentTabProps {
   setShowQrCode: (show: boolean) => void;
   amountFormatted: string;
   qrCodeImage?: string | null;
+  isGeneratingQr?: boolean;
+  onRetryGenerateQr?: () => void;
 }
 
 export default function UpiPaymentTab({
@@ -35,6 +37,8 @@ export default function UpiPaymentTab({
   setShowQrCode,
   amountFormatted,
   qrCodeImage,
+  isGeneratingQr = false,
+  onRetryGenerateQr,
 }: UpiPaymentTabProps) {
   const hasSaved = savedUpiIds && savedUpiIds.length > 0;
 
@@ -65,28 +69,49 @@ export default function UpiPaymentTab({
 
       {showQrCode ? (
         <div className="p-4 rounded-xl bg-purple-50/60 border border-purple-100 flex flex-col items-center text-center space-y-2.5">
-          <div className="p-2.5 bg-white rounded-xl shadow-sm border border-slate-200">
-            {qrCodeImage ? (
-              <img
-                src={qrCodeImage}
-                alt="Cashfree Dynamic UPI QR Code"
-                className="w-32 h-32 object-contain rounded-lg"
-              />
+          <div className="p-2.5 bg-white rounded-xl shadow-sm border border-slate-200 min-h-[150px] flex items-center justify-center">
+            {isGeneratingQr ? (
+              <div className="w-36 h-36 flex flex-col items-center justify-center gap-2 text-purple-600">
+                <span className="w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
+                <span className="text-[11px] font-bold text-slate-700">Generating live QR...</span>
+              </div>
+            ) : qrCodeImage ? (
+              <div className="relative">
+                <img
+                  src={qrCodeImage}
+                  alt="Cashfree Dynamic UPI QR Code"
+                  className="w-36 h-36 object-contain rounded-lg shadow-xs"
+                />
+                <div className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-emerald-600 text-[9px] font-black uppercase text-white shadow-sm flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                  Live QR
+                </div>
+              </div>
             ) : (
-              <div className="w-32 h-32 bg-gradient-to-br from-purple-900 to-indigo-950 p-2 rounded-lg flex flex-col items-center justify-center text-white relative">
-                <QrCode className="w-24 h-24 text-white stroke-[1.5]" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="px-2 py-0.5 rounded bg-purple-600 text-[10px] font-black uppercase tracking-wider text-white border border-white shadow">
-                    ₹ {amountFormatted}
-                  </span>
+              <div className="w-36 h-36 bg-gradient-to-br from-purple-900 to-indigo-950 p-2 rounded-lg flex flex-col items-center justify-center text-white relative">
+                <QrCode className="w-20 h-20 text-white/80 stroke-[1.5]" />
+                <div className="mt-1">
+                  {onRetryGenerateQr ? (
+                    <button
+                      type="button"
+                      onClick={onRetryGenerateQr}
+                      className="px-2 py-1 rounded-md bg-purple-600 hover:bg-purple-500 text-[10px] font-bold text-white shadow transition-all"
+                    >
+                      Generate QR
+                    </button>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded bg-purple-600 text-[10px] font-black uppercase tracking-wider text-white border border-white/40 shadow">
+                      ₹ {amountFormatted}
+                    </span>
+                  )}
                 </div>
               </div>
             )}
           </div>
-          <div>
-            <p className="text-xs font-bold text-slate-800">Scan with any UPI App to Pay</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">
-              Supports Google Pay, PhonePe, Paytm, Cred, BHIM & all Indian Bank UPI apps.
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-slate-900">Scan to Pay {amountFormatted}</p>
+            <p className="text-[10px] text-slate-500">
+              Supports Google Pay, PhonePe, Paytm, Cred, BHIM & all UPI apps.
             </p>
           </div>
         </div>

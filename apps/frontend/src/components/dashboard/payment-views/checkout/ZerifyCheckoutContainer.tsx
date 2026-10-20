@@ -127,6 +127,8 @@ export default function ZerifyCheckoutContainer({
   const [verifiedOrderId, setVerifiedOrderId] = useState<string | null>(null);
   const [timeLeftSeconds, setTimeLeftSeconds] = useState(300);
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
+  const [isGeneratingQr, setIsGeneratingQr] = useState(false);
+  const [activeQrPaymentId, setActiveQrPaymentId] = useState<string | null>(null);
 
   const pollingIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
   const timerIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -152,6 +154,143 @@ export default function ZerifyCheckoutContainer({
 
   // 0% platform fee, zero GST for adding funds (Amount entered is 100% credited)
   const totalAmountToPay = effectiveAmount;
+
+  // Background polling for Dynamic QR Code payments
+  const startQrPolling = React.useCallback((paymentId: string) => {
+    if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+    const token = localStorage.getItem('zerify_token');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Authorization: token ? `Bearer ${token}` : '',
+    };
+    const isWalletTopup = !campaignId;
+    const verifyEndpoint = isWalletTopup
+      ? `${apiUrl}/wallet/add-money/${paymentId}/verify`
+      : `${apiUrl}/payments/${paymentId}/verify`;
+
+    pollingIntervalRef.current = setInterval(async () => {
+      try {
+        const vRes = await fetch(verifyEndpoint, { method: 'POST', headers }).catch(() => null);
+        if (vRes && vRes.ok) {
+          const vData = await vRes.json();
+          if (vData.status === 'PAID') {
+            clearTimers();
+            setVerifiedOrderId(vData.providerOrderId || paymentId);
+            setCheckoutStatus('SUCCESS');
+            toastSuccess(
+              isWalletTopup
+                ? `Successfully added ${format(totalAmountToPay, { showDecimals: true })} to your Zerify Wallet!`
+                : `Deposited ${format(totalAmountToPay, { showDecimals: true })} to Campaign Escrow!`
+            );
+            onSuccess?.(totalAmountToPay);
+          }
+        }
+      } catch (err) {
+        console.warn('QR polling error:', err);
+      }
+    }, 2500);
+  }, [campaignId, apiUrl, totalAmountToPay, format, toastSuccess, onSuccess]);
+
+  const qrGeneratedForAmountRef = React.useRef<number | null>(null);
+  const isGeneratingQrRef = React.useRef(false);
+  const qrCodeDataRef = React.useRef<string | null>(null);
+  qrCodeDataRef.current = qrCodeData;
+
+  // Auto-generate dynamic QR code as soon as user opens the QR Code tab
+  const fetchDynamicQr = React.useCallback(async (force = false) => {
+    if (isGeneratingQrRef.current) return;
+    if (!force && qrCodeDataRef.current && qrGeneratedForAmountRef.current === totalAmountToPay) {
+      return;
+    }
+    isGeneratingQrRef.current = true;
+    setIsGeneratingQr(true);
+
+    try {
+      const token = localStorage.getItem('zerify_token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Authorization: token ? `Bearer ${token}` : '',
+      };
+      const isWalletTopup = !campaignId;
+      const endpoint = isWalletTopup
+        ? `${apiUrl}/wallet/add-money`
+        : `${apiUrl}/campaigns/${campaignId}/payments`;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        signal: controller.signal,
+        body: JSON.stringify({
+          amount: totalAmountToPay,
+          currency: 'INR',
+          idempotencyKey: `dep-qr-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          returnUrl: `${window.location.origin}/dashboard?tab=payments&status=success`,
+          channel: 'qrcode',
+        }),
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.qrCode) {
+          setQrCodeData(data.qrCode);
+          qrGeneratedForAmountRef.current = totalAmountToPay;
+        }
+        if (data.id) {
+          setActiveQrPaymentId(data.id);
+          startQrPolling(data.id);
+        }
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        console.error('Dynamic QR generation error:', res.status, errorData);
+        toastError(errorData.message || 'Failed to generate dynamic QR code');
+      }
+    } catch (err: any) {
+      console.error('Failed to generate dynamic QR:', err);
+      toastError(err?.message || 'Error connecting to payment gateway for QR code');
+    } finally {
+      isGeneratingQrRef.current = false;
+      setIsGeneratingQr(false);
+    }
+  }, [campaignId, apiUrl, totalAmountToPay, startQrPolling, toastError]);
+
+  // Trigger QR generation whenever user switches to Dynamic QR mode
+  React.useEffect(() => {
+    if (activeTab === 'UPI' && showQrCode) {
+      if (!qrCodeDataRef.current || qrGeneratedForAmountRef.current !== totalAmountToPay) {
+        fetchDynamicQr();
+      }
+    }
+  }, [activeTab, showQrCode, totalAmountToPay, fetchDynamicQr]);
+
+  // Instant simulator for test scans in sandbox mode
+  const handleSimulateQrPayment = async () => {
+    if (!activeQrPaymentId) return;
+    try {
+      const token = localStorage.getItem('zerify_token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Authorization: token ? `Bearer ${token}` : '',
+      };
+      const res = await fetch(`${apiUrl}/wallet/add-money/${activeQrPaymentId}/simulate`, {
+        method: 'POST',
+        headers,
+      });
+      if (res.ok) {
+        const vData = await res.json();
+        clearTimers();
+        setVerifiedOrderId(vData.providerOrderId || activeQrPaymentId);
+        setCheckoutStatus('SUCCESS');
+        toastSuccess(`Successfully added ${format(totalAmountToPay, { showDecimals: true })} to your Zerify Wallet!`);
+        onSuccess?.(totalAmountToPay);
+      }
+    } catch (err) {
+      console.error('Simulation error:', err);
+    }
+  };
 
   const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,6 +319,34 @@ export default function ZerifyCheckoutContainer({
       };
 
       const isWalletTopup = !campaignId;
+
+      // If user clicked "I've Paid" while on QR code mode with active QR order
+      if (activeTab === 'UPI' && showQrCode && activeQrPaymentId) {
+        const verifyEndpoint = isWalletTopup
+          ? `${apiUrl}/wallet/add-money/${activeQrPaymentId}/verify`
+          : `${apiUrl}/payments/${activeQrPaymentId}/verify`;
+
+        const vRes = await fetch(verifyEndpoint, { method: 'POST', headers }).catch(() => null);
+        if (vRes && vRes.ok) {
+          const vData = await vRes.json();
+          if (vData.status === 'PAID') {
+            setVerifiedOrderId(vData.providerOrderId || activeQrPaymentId);
+            setCheckoutStatus('SUCCESS');
+            toastSuccess(
+              isWalletTopup
+                ? `Successfully added ${format(totalAmountToPay, { showDecimals: true })} to your Zerify Wallet!`
+                : `Deposited ${format(totalAmountToPay, { showDecimals: true })} to Campaign Escrow!`
+            );
+            onSuccess?.(totalAmountToPay);
+            return;
+          } else {
+            setCheckoutStatus('IDLE');
+            toastError('Payment not received yet. Please scan the QR code with your UPI app to complete payment.');
+            return;
+          }
+        }
+      }
+
       const endpoint = isWalletTopup
         ? `${apiUrl}/wallet/add-money`
         : `${apiUrl}/campaigns/${campaignId}/payments`;
@@ -469,6 +636,8 @@ export default function ZerifyCheckoutContainer({
                 setShowQrCode={setShowQrCode}
                 amountFormatted={format(totalAmountToPay)}
                 qrCodeImage={qrCodeData}
+                isGeneratingQr={isGeneratingQr}
+                onRetryGenerateQr={() => fetchDynamicQr(true)}
               />
             )}
 
@@ -501,6 +670,11 @@ export default function ZerifyCheckoutContainer({
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span>Processing Checkout...</span>
+                </>
+              ) : showQrCode ? (
+                <>
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>I&apos;ve Paid • Verify Now</span>
                 </>
               ) : (
                 <>

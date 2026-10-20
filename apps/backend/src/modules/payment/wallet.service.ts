@@ -363,6 +363,47 @@ export class WalletService {
   }
 
   /**
+   * Simulates a successful payment for testing QR / UPI in sandbox mode.
+   */
+  async simulateAddMoneyPayment(userId: string, paymentIdentifier: string) {
+    const isSandbox = this.configService.get<string>('CASHFREE_ENVIRONMENT', 'sandbox') === 'sandbox';
+    if (!isSandbox) {
+      throw new BadRequestException('Payment simulation is only available in sandbox mode');
+    }
+
+    const brandProfile = await this.prisma.brandProfile.findUnique({
+      where: { userId },
+    });
+    if (!brandProfile) {
+      throw new NotFoundException('Brand profile not found');
+    }
+
+    const payment = await this.prisma.addMoneyPayment.findFirst({
+      where: {
+        brandId: brandProfile.id,
+        OR: [{ id: paymentIdentifier }, { providerOrderId: paymentIdentifier }],
+      },
+    });
+    if (!payment) {
+      throw new NotFoundException(`Payment record '${paymentIdentifier}' not found`);
+    }
+
+    // Retrieve order payments to find cf_payment_id
+    const payments = await this.cashfreeProvider.getOrderPayments(payment.providerOrderId).catch(() => []);
+    const pendingPayment = Array.isArray(payments) && payments.length > 0 ? payments[0] : null;
+    const cfPaymentId = pendingPayment?.cf_payment_id ? String(pendingPayment.cf_payment_id) : null;
+
+    if (cfPaymentId) {
+      await this.cashfreeProvider.simulatePayment(cfPaymentId, 'SUCCESS').catch((err) => {
+        this.logger.warn(`Simulation notice: ${err.message}`);
+      });
+      this.logger.log(`Simulated payment SUCCESS for cf_payment_id ${cfPaymentId}`);
+    }
+
+    return this.verifyAddMoneyPayment(userId, payment.id);
+  }
+
+  /**
    * Internal atomic operation to credit wallet and log transaction.
    * Safe against concurrent calls / duplicate webhook deliveries.
    */
