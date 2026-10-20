@@ -1,5 +1,28 @@
-import { IsNumber, IsString, IsOptional, Min } from 'class-validator';
+import { IsNumber, IsString, IsOptional, Min, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export class CardPaymentDetailsDto {
+  @ApiProperty({ description: '15-16 digit card number', example: '4706131211212123' })
+  @IsString()
+  cardNumber: string;
+
+  @ApiProperty({ description: 'Cardholder name', example: 'Test Customer' })
+  @IsString()
+  cardHolderName: string;
+
+  @ApiProperty({ description: 'Expiry month (2 digits)', example: '12' })
+  @IsString()
+  cardExpiryMm: string;
+
+  @ApiProperty({ description: 'Expiry year (2 digits)', example: '28' })
+  @IsString()
+  cardExpiryYy: string;
+
+  @ApiProperty({ description: 'CVV security code (3 or 4 digits)', example: '123' })
+  @IsString()
+  cardCvv: string;
+}
 
 export class AddMoneyDto {
   @ApiProperty({
@@ -33,6 +56,14 @@ export class AddMoneyDto {
   returnUrl?: string;
 
   @ApiPropertyOptional({
+    description: 'Payment method type: upi, card, or netbanking',
+    enum: ['upi', 'card', 'netbanking'],
+  })
+  @IsOptional()
+  @IsString()
+  paymentMethod?: 'upi' | 'card' | 'netbanking';
+
+  @ApiPropertyOptional({
     description: 'Customer Virtual Payment Address (UPI ID) for direct UPI collect',
     example: 'success@upi',
   })
@@ -54,4 +85,14 @@ export class AddMoneyDto {
   @IsOptional()
   @IsString()
   channel?: 'collect' | 'qrcode';
+
+  @ApiPropertyOptional({
+    description: 'Card details for direct card payments',
+    type: CardPaymentDetailsDto,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CardPaymentDetailsDto)
+  card?: CardPaymentDetailsDto;
 }
+

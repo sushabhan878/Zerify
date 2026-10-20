@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import TestCardsSelector, { TestCard } from './TestCardsSelector';
 
 interface CardPaymentTabProps {
   cardNumber: string;
@@ -25,6 +26,7 @@ export default function CardPaymentTab({
   setCvv,
 }: CardPaymentTabProps) {
   const [showCardNumber, setShowCardNumber] = useState(false);
+  const [isTestMode, setIsTestMode] = useState(true);
 
   // Format card number with spaces (#### #### #### ####)
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,8 +55,23 @@ export default function CardPaymentTab({
 
   const brand = detectBrand();
 
+  const handleSelectTestCard = (card: TestCard) => {
+    setCardNumber(card.number);
+    setCardHolderName(card.name);
+    setExpiryDate(card.expiry);
+    setCvv(card.cvv);
+  };
+
   return (
     <div className="space-y-2.5 text-left">
+      {/* Test Mode Cards Selector */}
+      <TestCardsSelector
+        selectedCardNumber={cardNumber}
+        onSelectCard={handleSelectTestCard}
+        isTestMode={isTestMode}
+        setIsTestMode={setIsTestMode}
+      />
+
       {/* Card Number Field */}
       <div>
         <label className="block text-[11px] font-semibold text-slate-700 mb-1">
@@ -65,14 +82,25 @@ export default function CardPaymentTab({
             type={showCardNumber ? 'text' : 'password'}
             value={cardNumber}
             onChange={handleCardNumberChange}
-            placeholder="5678  ****  ****  1267"
-            className="w-full h-9 px-3 pr-16 rounded-lg bg-slate-50 border border-slate-200 text-xs font-mono font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-1 focus:ring-purple-600/20 transition-all"
+            placeholder="4706 1312 1121 2123"
+            className="w-full h-9 px-3 pr-20 rounded-lg bg-slate-50 border border-slate-200 text-xs font-mono font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-1 focus:ring-purple-600/20 transition-all"
             required
           />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-            {brand && (
-              <span className="px-1 py-0.2 rounded bg-purple-50 text-[9px] font-black text-purple-700 border border-purple-200 uppercase">
-                {brand}
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+            {brand === 'VISA' && (
+              <span className="px-1.5 py-0.5 rounded bg-blue-600 text-white font-extrabold italic text-[9px]">
+                VISA
+              </span>
+            )}
+            {brand === 'MASTERCARD' && (
+              <div className="flex items-center -space-x-1 px-1 py-0.5 rounded bg-slate-900 shadow-xs">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500 opacity-90" />
+                <div className="w-2.5 h-2.5 rounded-full bg-amber-400 opacity-90" />
+              </div>
+            )}
+            {brand === 'RUPAY' && (
+              <span className="px-1.5 py-0.5 rounded bg-emerald-700 text-white font-black text-[9px]">
+                RuPay
               </span>
             )}
             <button
@@ -96,8 +124,8 @@ export default function CardPaymentTab({
           type="text"
           value={cardHolderName}
           onChange={(e) => setCardHolderName(e.target.value)}
-          placeholder="Cameron Williamson"
-          className="w-full h-9 px-3 rounded-lg bg-slate-50 border border-purple-400 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-1 focus:ring-purple-600/20 transition-all"
+          placeholder="Cardholder Name"
+          className="w-full h-9 px-3 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-1 focus:ring-purple-600/20 transition-all"
           required
         />
       </div>
@@ -112,7 +140,8 @@ export default function CardPaymentTab({
             type="text"
             value={expiryDate}
             onChange={handleExpiryChange}
-            placeholder="mm / yy"
+            placeholder="MM / YY"
+            maxLength={7}
             className="w-full h-9 px-3 rounded-lg bg-slate-50 border border-slate-200 text-xs font-mono font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-1 focus:ring-purple-600/20 transition-all text-center"
             required
           />
@@ -120,7 +149,7 @@ export default function CardPaymentTab({
 
         <div>
           <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-            CVV/CVV2 <span className="text-purple-600 font-bold">*</span>
+            CVV / CVC <span className="text-purple-600 font-bold">*</span>
           </label>
           <div className="relative">
             <input
@@ -128,15 +157,10 @@ export default function CardPaymentTab({
               maxLength={4}
               value={cvv}
               onChange={(e) => setCvv(e.target.value.replace(/\D/g, ''))}
-              placeholder="xxx"
-              className="w-full h-9 px-3 pr-10 rounded-lg bg-slate-50 border border-slate-200 text-xs font-mono font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-1 focus:ring-purple-600/20 transition-all text-center"
+              placeholder="123"
+              className="w-full h-9 px-3 rounded-lg bg-slate-50 border border-slate-200 text-xs font-mono font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-1 focus:ring-purple-600/20 transition-all text-center"
               required
             />
-            {/* Mastercard / Security Badge */}
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center -space-x-1">
-              <div className="w-3 h-3 rounded-full bg-red-500 opacity-90 shadow-sm" />
-              <div className="w-3 h-3 rounded-full bg-amber-400 opacity-90 shadow-sm" />
-            </div>
           </div>
         </div>
       </div>

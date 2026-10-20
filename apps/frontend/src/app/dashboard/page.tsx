@@ -81,8 +81,38 @@ function DashboardContent() {
   useEffect(() => {
     const loadUser = () => {
       try {
-        const storedUser = localStorage.getItem('zerify_user');
-        const storedToken = localStorage.getItem('zerify_token');
+        let storedToken = localStorage.getItem('zerify_token') || localStorage.getItem('token');
+        if (!storedToken) {
+          const cookieMatch = document.cookie.match(/(?:^|;\s*)(?:zerify_token|token)=([^;]*)/);
+          if (cookieMatch) {
+            storedToken = decodeURIComponent(cookieMatch[1]);
+            localStorage.setItem('zerify_token', storedToken);
+          }
+        }
+
+        let storedUser = localStorage.getItem('zerify_user');
+        if (!storedUser && storedToken) {
+          try {
+            const base64Url = storedToken.split('.')[1];
+            if (base64Url) {
+              const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+              const jsonPayload = decodeURIComponent(
+                atob(base64)
+                  .split('')
+                  .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                  .join('')
+              );
+              const decoded = JSON.parse(jsonPayload);
+              const userObj = {
+                id: decoded.sub,
+                email: decoded.email,
+                role: decoded.role || 'BRAND',
+              };
+              storedUser = JSON.stringify(userObj);
+              localStorage.setItem('zerify_user', storedUser);
+            }
+          } catch {}
+        }
 
         if (!storedUser || !storedToken) {
           router.push('/login');
@@ -156,7 +186,13 @@ function DashboardContent() {
 
         // Fetch Brand Profile
         fetch(`${apiUrl}/brand/profile`, { headers })
-          .then((res) => (res.ok ? res.json() : null))
+          .then((res) => {
+            if (res.status === 401) {
+              handleLogout();
+              return null;
+            }
+            return res.ok ? res.json() : null;
+          })
           .then((data) => {
             if (data) {
               setBrandProfile(data);

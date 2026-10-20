@@ -256,6 +256,39 @@ export class WalletService {
           this.logger.warn(`Direct UPI collect session call note: ${err.message}`);
         }
       }
+      // 3. Card payment flow
+      else if (dto.paymentMethod === 'card' && dto.card) {
+        try {
+          const cleanCardNumber = dto.card.cardNumber.replace(/\D/g, '');
+          const cardPayload = {
+            card: {
+              channel: 'link',
+              card_number: cleanCardNumber,
+              card_holder_name: dto.card.cardHolderName || 'Zerify Customer',
+              card_expiry_mm: dto.card.cardExpiryMm.padStart(2, '0'),
+              card_expiry_yy: dto.card.cardExpiryYy.slice(-2),
+              card_cvv: dto.card.cardCvv,
+            },
+          };
+
+          const cardResponse: any = await this.cashfreeProvider.paySession(cfOrder.paymentSessionId, cardPayload);
+          this.logger.log(`Initiated Card payment for order ${payment.id} (card: ****${cleanCardNumber.slice(-4)})`);
+
+          const cfPaymentId = cardResponse?.cf_payment_id ? String(cardResponse.cf_payment_id) : null;
+          if (isSandbox && cfPaymentId) {
+            // Determine success or fail based on card number (e.g. failure test cards)
+            const isFailureCard = cleanCardNumber.endsWith('0005') || cleanCardNumber.endsWith('1112');
+            const simStatus = isFailureCard ? 'FAILED' : 'SUCCESS';
+            await this.cashfreeProvider.simulatePayment(cfPaymentId, simStatus).catch((err) => {
+              this.logger.warn(`Sandbox simulate card notice: ${err.message}`);
+            });
+            this.logger.log(`Sandbox: Simulated Card payment status ${simStatus} for payment ID ${cfPaymentId}`);
+          }
+        } catch (err: any) {
+          this.logger.error(`Cashfree Card payment error: ${err.message}`);
+          throw new BadRequestException(err.message || 'Card payment processing failed');
+        }
+      }
     }
 
     return {
