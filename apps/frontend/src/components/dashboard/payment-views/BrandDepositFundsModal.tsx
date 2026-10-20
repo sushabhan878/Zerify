@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import ZerifyCheckoutContainer from './checkout/ZerifyCheckoutContainer';
-import LottieLoader from '@/components/ui/LottieLoader';
+import BrandTopupAmountStep from './BrandTopupAmountStep';
 
 interface BrandDepositFundsModalProps {
   isOpen: boolean;
@@ -11,6 +11,7 @@ interface BrandDepositFundsModalProps {
   onSuccess?: (amount?: number) => void;
   campaignId?: string;
   campaignTitle?: string;
+  initialAmount?: number;
 }
 
 export default function BrandDepositFundsModal({
@@ -19,9 +20,13 @@ export default function BrandDepositFundsModal({
   onSuccess,
   campaignId,
   campaignTitle,
+  initialAmount = 5000,
 }: BrandDepositFundsModalProps) {
   const [mounted, setMounted] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  // If campaignId is provided (escrow deposit for specific campaign), go straight to checkout.
+  // Otherwise, start at SELECT_AMOUNT step for wallet top-up.
+  const [step, setStep] = useState<'SELECT_AMOUNT' | 'CHECKOUT'>('SELECT_AMOUNT');
+  const [selectedAmount, setSelectedAmount] = useState<number>(initialAmount);
 
   useEffect(() => {
     setMounted(true);
@@ -29,15 +34,14 @@ export default function BrandDepositFundsModal({
 
   useEffect(() => {
     if (isOpen) {
-      setIsLoading(true);
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 2400); // 2-3 sec loading animation as requested
-      return () => clearTimeout(timer);
-    } else {
-      setIsLoading(true);
+      if (campaignId) {
+        setStep('CHECKOUT');
+      } else {
+        setStep('SELECT_AMOUNT');
+      }
+      setSelectedAmount(initialAmount);
     }
-  }, [isOpen]);
+  }, [isOpen, campaignId, initialAmount]);
 
   if (!isOpen || !mounted) return null;
 
@@ -47,11 +51,15 @@ export default function BrandDepositFundsModal({
       <div className="fixed top-1/4 left-1/4 w-96 h-96 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
       <div className="fixed bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
-      {isLoading ? (
-        <div className="relative z-10 flex flex-col items-center justify-center text-center animate-in fade-in duration-300 pointer-events-none">
-          <LottieLoader size={200} message="Loading Payment Checkout..." />
-          <p className="mt-1 text-xs text-purple-200/60 font-medium">Initializing secure payment gateway & channels...</p>
-        </div>
+      {step === 'SELECT_AMOUNT' ? (
+        <BrandTopupAmountStep
+          initialAmount={selectedAmount}
+          onContinue={(chosenAmount) => {
+            setSelectedAmount(chosenAmount);
+            setStep('CHECKOUT');
+          }}
+          onClose={onClose}
+        />
       ) : (
         /* Modal Container constrained to fixed height */
         <div className="relative z-10 w-full max-w-4xl h-[560px] max-h-[88vh] flex items-center justify-center my-auto animate-in fade-in zoom-in-95 duration-300">
@@ -60,6 +68,8 @@ export default function BrandDepositFundsModal({
             onSuccess={onSuccess}
             campaignId={campaignId}
             campaignTitle={campaignTitle}
+            fixedAmount={selectedAmount}
+            onChangeAmount={() => setStep('SELECT_AMOUNT')}
           />
         </div>
       )}

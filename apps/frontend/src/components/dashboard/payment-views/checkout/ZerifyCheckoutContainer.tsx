@@ -17,6 +17,8 @@ export interface ZerifyCheckoutContainerProps {
   campaignId?: string;
   campaignTitle?: string;
   initialAmount?: number;
+  fixedAmount?: number;
+  onChangeAmount?: () => void;
 }
 
 export default function ZerifyCheckoutContainer({
@@ -25,14 +27,18 @@ export default function ZerifyCheckoutContainer({
   campaignId,
   campaignTitle,
   initialAmount = 1000,
+  fixedAmount,
+  onChangeAmount,
 }: ZerifyCheckoutContainerProps) {
   const { format } = useCurrency();
   const { toastSuccess, toastError } = useToast();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
+  // Amount is strictly locked from pre-selection
+  const effectiveAmount = fixedAmount ?? initialAmount;
+
   // State
   const [activeTab, setActiveTab] = useState<'CARD' | 'UPI' | 'NETBANKING'>('UPI');
-  const [campaignAmount, setCampaignAmount] = useState<number>(initialAmount);
   const [showQrCode, setShowQrCode] = useState(false);
 
   // Card details state
@@ -145,11 +151,11 @@ export default function ZerifyCheckoutContainer({
   };
 
   // 0% platform fee, zero GST for adding funds (Amount entered is 100% credited)
-  const totalAmountToPay = campaignAmount;
+  const totalAmountToPay = effectiveAmount;
 
   const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (campaignAmount < 100) {
+    if (totalAmountToPay < 100) {
       toastError('Minimum deposit amount is ₹100');
       return;
     }
@@ -254,10 +260,10 @@ export default function ZerifyCheckoutContainer({
                 setCheckoutStatus('SUCCESS');
                 toastSuccess(
                   isWalletTopup
-                    ? `Successfully added ${format(campaignAmount, { showDecimals: true })} to your Zerify Wallet!`
-                    : `Deposited ${format(campaignAmount, { showDecimals: true })} to Campaign Escrow!`
+                    ? `Successfully added ${format(totalAmountToPay, { showDecimals: true })} to your Zerify Wallet!`
+                    : `Deposited ${format(totalAmountToPay, { showDecimals: true })} to Campaign Escrow!`
                 );
-                onSuccess?.(campaignAmount);
+                onSuccess?.(totalAmountToPay);
                 return true;
               } else if (vData.status === 'FAILED') {
                 clearTimers();
@@ -285,10 +291,10 @@ export default function ZerifyCheckoutContainer({
                 setCheckoutStatus('SUCCESS');
                 toastSuccess(
                   isWalletTopup
-                    ? `Successfully added ${format(campaignAmount, { showDecimals: true })} to your Zerify Wallet!`
-                    : `Deposited ${format(campaignAmount, { showDecimals: true })} to Campaign Escrow!`
+                    ? `Successfully added ${format(totalAmountToPay, { showDecimals: true })} to your Zerify Wallet!`
+                    : `Deposited ${format(totalAmountToPay, { showDecimals: true })} to Campaign Escrow!`
                 );
-                onSuccess?.(campaignAmount);
+                onSuccess?.(totalAmountToPay);
               } else if (vData.status === 'FAILED') {
                 clearTimers();
                 setCheckoutStatus('FAILURE');
@@ -319,10 +325,10 @@ export default function ZerifyCheckoutContainer({
         setCheckoutStatus('SUCCESS');
         toastSuccess(
           isWalletTopup
-            ? `Successfully added ${format(campaignAmount, { showDecimals: true })} to your Zerify Wallet!`
-            : `Deposited ${format(campaignAmount, { showDecimals: true })} to Campaign Escrow!`
+            ? `Successfully added ${format(totalAmountToPay, { showDecimals: true })} to your Zerify Wallet!`
+            : `Deposited ${format(totalAmountToPay, { showDecimals: true })} to Campaign Escrow!`
         );
-        onSuccess?.(campaignAmount);
+        onSuccess?.(totalAmountToPay);
       }
     } catch (err: any) {
       clearTimers();
@@ -472,9 +478,9 @@ export default function ZerifyCheckoutContainer({
 
             {/* Campaign Escrow Breakdown */}
             <OrderSummaryBreakdown
-              campaignAmount={campaignAmount}
-              setCampaignAmount={setCampaignAmount}
+              campaignAmount={totalAmountToPay}
               campaignTitle={campaignTitle}
+              onChangeAmount={onChangeAmount}
             />
 
             {/* Total Amount Row */}
@@ -488,7 +494,7 @@ export default function ZerifyCheckoutContainer({
             {/* Vibrant Purple Pay Now Button */}
             <button
               type="submit"
-              disabled={checkoutStatus === 'PROCESSING' || checkoutStatus === 'AWAITING_APPROVAL' || campaignAmount < 100}
+              disabled={checkoutStatus === 'PROCESSING' || checkoutStatus === 'AWAITING_APPROVAL' || totalAmountToPay < 100}
               className="w-full h-10 rounded-xl bg-[#8b5cf6] hover:bg-[#7c3aed] active:bg-[#6d28d9] text-white font-extrabold text-xs sm:text-sm shadow-md shadow-purple-600/30 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               {checkoutStatus === 'PROCESSING' || checkoutStatus === 'AWAITING_APPROVAL' ? (
