@@ -8,6 +8,9 @@ import { AuditService } from './audit.service';
 import { PaymentProviderFactory } from './providers/payment-provider.factory';
 import { PAYMENT_PROVIDER, PaymentProvider } from './payment-provider.interface';
 
+import { PrismaService } from '../../database/prisma.service';
+import { WalletService } from './wallet.service';
+
 export interface WebhookRequest {
   /** Raw, byte-for-byte request body. Signature verification depends on it. */
   rawBody: string;
@@ -34,8 +37,10 @@ export class WebhookService {
 
   constructor(
     private readonly repository: PaymentRepository,
+    private readonly prisma: PrismaService,
     private readonly paymentService: PaymentService,
     private readonly payoutService: PayoutService,
+    private readonly walletService: WalletService,
     private readonly audit: AuditService,
     private readonly providerFactory: PaymentProviderFactory,
     @Inject(PAYMENT_PROVIDER) private readonly provider: PaymentProvider,
@@ -99,6 +104,18 @@ export class WebhookService {
       signatureValid: true,
     });
 
+    // Also persist into dedicated CashfreeWebhookEvent table
+    await this.prisma.cashfreeWebhookEvent.create({
+      data: {
+        provider: providerId.toLowerCase(),
+        eventKey: eventHash,
+        eventType,
+        payloadHash: this.hash(request.rawBody),
+        payload: event as unknown as Prisma.InputJsonValue,
+        processedAt: new Date(),
+      },
+    }).catch((err) => this.logger.warn(`CashfreeWebhookEvent record skipped: ${err.message}`));
+
     return this.process(stored);
   }
 
@@ -146,8 +163,27 @@ export class WebhookService {
     switch (type) {
       case 'PAYMENT_SUCCESS':
       case 'PAYMENT_SUCCESSFUL':
-      case 'PAYMENT_FAILED': {
+      case 'PAYMENT_SUCCESS_WEBHOOK':
+      case 'ORDER_PAID_SUCCESS':
+      case 'PAYMENT_FAILED':
+      case 'PAYMENT_FAILED_WEBHOOK': {
         const providerOrderId = payload?.data?.order?.order_id ?? payload?.data?.order_id;
+        const cfPaymentId = payload?.data?.payment?.cf_payment_id
+          ? String(payload.data.payment.cf_payment_id)
+          : undefined;
+
+        // 1. Check if this order is a Brand Wallet Add Money payment
+        if (providerOrderId && (type.includes('SUCCESS') || type.includes('PAID'))) {
+          const addMoneyResult = await this.walletService.processWebhookPayment(
+            providerOrderId,
+            cfPaymentId,
+          );
+          if (addMoneyResult) {
+            this.logger.log(`Webhook: Successfully credited BrandWallet for order ${providerOrderId}`);
+            return { status: 'PROCESSED_WALLET_TOPUP', orderId: providerOrderId };
+          }
+        }
+
         const payment = providerOrderId
           ? await this.repository.findPaymentByProviderOrderId(providerOrderId)
           : null;

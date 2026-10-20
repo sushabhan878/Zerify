@@ -171,11 +171,24 @@ export class CashfreePaymentProvider implements PaymentProvider {
    * storing a second identifier.
    */
   async createOrder(input: CreateOrderInput): Promise<CreateOrderResult> {
+    const customerId = input.customer?.customerId
+      ? input.customer.customerId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 50)
+      : `cust_${input.paymentId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 30)}`;
+    const customerPhone = input.customer?.customerPhone?.replace(/\D/g, '').slice(-10) || '9999999999';
+    const customerEmail = input.customer?.customerEmail || 'billing@zerify.in';
+    const customerName = input.customer?.customerName || 'Zerify Customer';
+
     const body = {
       order_id: input.paymentId,
       order_amount: Number((input.amountMinor / 100).toFixed(2)),
       order_currency: input.currency,
       order_note: input.orderDescription ?? undefined,
+      customer_details: {
+        customer_id: customerId,
+        customer_phone: customerPhone.length === 10 ? customerPhone : '9999999999',
+        customer_email: customerEmail,
+        customer_name: customerName,
+      },
       order_meta: {
         return_url: input.returnUrl || this.returnUrl,
       },
@@ -202,6 +215,24 @@ export class CashfreePaymentProvider implements PaymentProvider {
       // Cashfree's JS SDK consumes payment_session_id; no redirect URL needed.
       paymentUrl: undefined,
     };
+  }
+
+  /**
+   * Directly initiates a payment on a session using Cashfree /pg/orders/sessions
+   * (e.g. for custom UPI Collect or custom NetBanking/Card submission).
+   */
+  async paySession(paymentSessionId: string, paymentMethod: any): Promise<any> {
+    return this.request<any>(`${this.baseUrl}/orders/sessions`, {
+      method: 'POST',
+      headers: {
+        'x-api-version': this.apiVersion,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        payment_session_id: paymentSessionId,
+        payment_method: paymentMethod,
+      }),
+    });
   }
 
   /**

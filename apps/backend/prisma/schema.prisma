@@ -126,6 +126,9 @@ model BrandProfile {
   // Brand partners in creators network
   influencerPartners InfluencerBrandPartner[]
 
+  // Brand Wallet
+  wallet BrandWallet?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -1839,3 +1842,102 @@ model ExchangeRate {
   @@index([rateTimestamp], map: "idx_exchange_rates_timestamp")
   @@map("exchange_rates")
 }
+
+// ============================================================================
+// Brand Wallet & Add Money Payment Gateway Models (Cashfree Integration)
+// ============================================================================
+
+enum AddMoneyPaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+  REFUND_PENDING
+  REFUNDED
+}
+
+enum WalletTransactionType {
+  TOPUP
+  CAMPAIGN_DEBIT
+  REFUND
+  ADJUSTMENT
+}
+
+enum WalletTransactionStatus {
+  COMPLETED
+  PENDING
+  FAILED
+}
+
+model BrandWallet {
+  id           String              @id @default(cuid())
+  brandId      String              @unique
+  brand        BrandProfile        @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  currency     String              @default("INR")
+  balancePaise BigInt              @default(0)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  transactions WalletTransaction[]
+  payments     AddMoneyPayment[]
+
+  @@map("brand_wallets")
+}
+
+model AddMoneyPayment {
+  id                String                @id @default(cuid())
+  brandId           String
+  walletId          String
+  provider          String                @default("cashfree")
+  providerOrderId   String                @unique
+  providerPaymentId String?
+  providerSessionId String?
+  paymentUrl        String?
+  amountPaise       BigInt
+  currency          String                @default("INR")
+  status            AddMoneyPaymentStatus @default(PENDING)
+  creditedAt        DateTime?
+  idempotencyKey    String
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  wallet            BrandWallet           @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  transaction       WalletTransaction?
+
+  @@unique([brandId, idempotencyKey])
+  @@index([brandId, createdAt])
+  @@index([status, createdAt])
+  @@map("add_money_payments")
+}
+
+model WalletTransaction {
+  id          String                  @id @default(cuid())
+  walletId    String
+  paymentId   String?                 @unique
+  type        WalletTransactionType
+  status      WalletTransactionStatus @default(COMPLETED)
+  amountPaise BigInt
+  currency    String                  @default("INR")
+  description String?
+  createdAt   DateTime                @default(now())
+
+  wallet      BrandWallet             @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  payment     AddMoneyPayment?        @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([walletId, createdAt])
+  @@map("wallet_transactions")
+}
+
+model CashfreeWebhookEvent {
+  id          String    @id @default(cuid())
+  provider    String    @default("cashfree")
+  eventKey    String    @unique
+  eventType   String
+  payloadHash String
+  payload     Json?
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@map("cashfree_webhook_events")
+}
+

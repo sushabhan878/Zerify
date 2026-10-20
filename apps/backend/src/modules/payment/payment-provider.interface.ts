@@ -19,6 +19,13 @@ export interface CreateOrderInput {
   returnUrl: string;
   /** ISO-8601 timestamp after which the order should expire. */
   expiresAt?: string;
+  /** Customer details required by PG providers like Cashfree. */
+  customer?: {
+    customerId?: string;
+    customerPhone?: string;
+    customerEmail?: string;
+    customerName?: string;
+  };
 }
 
 export interface CreateOrderResult {

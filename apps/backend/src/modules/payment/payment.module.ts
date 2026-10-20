@@ -29,12 +29,14 @@ import { PaymentOwnerGuard } from './guards/payment-owner.guard';
 import { CampaignBrandGuard } from './guards/campaign-brand.guard';
 import { PayoutAccessGuard } from './guards/payout-access.guard';
 import { DisputeAccessGuard } from './guards/dispute-access.guard';
+import { WalletController } from './wallet.controller';
+import { WalletService } from './wallet.service';
 
 /**
  * Payments & financials domain (TRD, PRD Zerify_Payment_Escrow_Architecture).
  *
  * The module owns collection, ledger, fees, campaign finance, payouts,
- * refunds, disputes, webhooks, audit, and the provider abstraction. All
+ * refunds, disputes, webhooks, audit, brand wallets, and the provider abstraction. All
  * money movement flows through the services here; controllers are thin and
  * guarded.
  */
@@ -42,6 +44,7 @@ import { DisputeAccessGuard } from './guards/dispute-access.guard';
   imports: [PrismaModule, ConfigModule, AuthModule],
   controllers: [
     PaymentController,
+    WalletController,
     PayoutController,
     DisputeController,
     WebhookController,
@@ -49,6 +52,7 @@ import { DisputeAccessGuard } from './guards/dispute-access.guard';
   ],
   providers: [
     PaymentRepository,
+    WalletService,
     LedgerService,
     FeeEngine,
     AuditService,
@@ -73,6 +77,7 @@ import { DisputeAccessGuard } from './guards/dispute-access.guard';
   ],
   exports: [
     PaymentRepository,
+    WalletService,
     PaymentService,
     PayoutService,
     CampaignFinanceService,

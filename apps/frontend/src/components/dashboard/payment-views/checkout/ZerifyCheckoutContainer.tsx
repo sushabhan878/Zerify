@@ -44,8 +44,77 @@ export default function ZerifyCheckoutContainer({
 
   // UPI & NetBanking state
   const [upiId, setUpiId] = useState('');
+  const [savedUpiIds, setSavedUpiIds] = useState<string[]>([]);
+  const [saveUpiChoice, setSaveUpiChoice] = useState(true);
+  const [isEnteringNewUpi, setIsEnteringNewUpi] = useState(false);
   const [selectedUpiApp, setSelectedUpiApp] = useState('gpay');
   const [selectedBank, setSelectedBank] = useState('HDFC');
+
+  // Load saved UPI IDs from local cache and backend on mount
+  React.useEffect(() => {
+    try {
+      const cached = localStorage.getItem('zerify_saved_upi_ids');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSavedUpiIds(parsed);
+          setUpiId(parsed[0]);
+          setIsEnteringNewUpi(false);
+        } else {
+          setIsEnteringNewUpi(true);
+        }
+      } else {
+        setIsEnteringNewUpi(true);
+      }
+    } catch {
+      setIsEnteringNewUpi(true);
+    }
+
+    const token = localStorage.getItem('zerify_token');
+    if (token) {
+      fetch(`${apiUrl}/wallet`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && Array.isArray(data.savedUpiIds) && data.savedUpiIds.length > 0) {
+            setSavedUpiIds(data.savedUpiIds);
+            localStorage.setItem('zerify_saved_upi_ids', JSON.stringify(data.savedUpiIds));
+            setUpiId((prev) => prev || data.savedUpiIds[0]);
+            setIsEnteringNewUpi(false);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [apiUrl]);
+
+  const handleDeleteSavedUpi = async (idToDelete: string) => {
+    const nextList = savedUpiIds.filter((id) => id !== idToDelete);
+    setSavedUpiIds(nextList);
+    try {
+      localStorage.setItem('zerify_saved_upi_ids', JSON.stringify(nextList));
+      const token = localStorage.getItem('zerify_token');
+      if (token) {
+        await fetch(`${apiUrl}/wallet/saved-upi/delete`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ upiId: idToDelete }),
+        });
+      }
+    } catch {}
+
+    if (upiId === idToDelete) {
+      if (nextList.length > 0) {
+        setUpiId(nextList[0]);
+      } else {
+        setUpiId('');
+        setIsEnteringNewUpi(true);
+      }
+    }
+  };
 
   // Checkout flow state
   const [checkoutStatus, setCheckoutStatus] = useState<'IDLE' | 'PROCESSING' | 'SUCCESS' | 'FAILURE'>('IDLE');
@@ -62,6 +131,13 @@ export default function ZerifyCheckoutContainer({
       return;
     }
 
+    if (activeTab === 'UPI' && !showQrCode) {
+      if (!upiId || !upiId.trim() || !upiId.includes('@')) {
+        toastError('Please enter a valid UPI ID (e.g. yourname@okhdfcbank or success@upi)');
+        return;
+      }
+    }
+
     setCheckoutStatus('PROCESSING');
     setStatusError(null);
 
@@ -72,9 +148,10 @@ export default function ZerifyCheckoutContainer({
         Authorization: token ? `Bearer ${token}` : '',
       };
 
-      const endpoint = campaignId
-        ? `${apiUrl}/campaigns/${campaignId}/payments`
-        : `${apiUrl}/payments/orders`;
+      const isWalletTopup = !campaignId;
+      const endpoint = isWalletTopup
+        ? `${apiUrl}/wallet/add-money`
+        : `${apiUrl}/campaigns/${campaignId}/payments`;
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -84,6 +161,8 @@ export default function ZerifyCheckoutContainer({
           currency: 'INR',
           idempotencyKey: `dep-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
           returnUrl: `${window.location.origin}/dashboard?tab=payments&status=success`,
+          upiId: activeTab === 'UPI' && !showQrCode ? upiId.trim() : undefined,
+          saveUpiId: activeTab === 'UPI' && !showQrCode ? saveUpiChoice : false,
         }),
       });
 
@@ -96,7 +175,20 @@ export default function ZerifyCheckoutContainer({
       const paymentId = orderData.id;
       const paymentSessionId = orderData.paymentSessionId;
 
-      if (paymentSessionId) {
+      // Update local saved UPI IDs cache if user selected to save
+      if (activeTab === 'UPI' && !showQrCode && saveUpiChoice && upiId.trim()) {
+        const clean = upiId.trim();
+        if (!savedUpiIds.includes(clean)) {
+          const updated = [...savedUpiIds, clean];
+          setSavedUpiIds(updated);
+          try {
+            localStorage.setItem('zerify_saved_upi_ids', JSON.stringify(updated));
+          } catch {}
+        }
+      }
+
+      // If user is paying via Card, NetBanking, or QR: use Cashfree JS SDK checkout modal
+      if (paymentSessionId && (!orderData.upiCollectInitiated || showQrCode || activeTab !== 'UPI')) {
         try {
           const cashfree = await loadCashfreeSDK(
             process.env.NEXT_PUBLIC_CASHFREE_MODE === 'production' ? 'production' : 'sandbox'
@@ -110,7 +202,11 @@ export default function ZerifyCheckoutContainer({
       }
 
       if (paymentId) {
-        const verifyRes = await fetch(`${apiUrl}/payments/${paymentId}/verify`, { method: 'POST', headers }).catch(() => null);
+        const verifyEndpoint = isWalletTopup
+          ? `${apiUrl}/wallet/add-money/${paymentId}/verify`
+          : `${apiUrl}/payments/${paymentId}/verify`;
+
+        const verifyRes = await fetch(verifyEndpoint, { method: 'POST', headers }).catch(() => null);
         if (verifyRes && verifyRes.ok) {
           const verifyData = await verifyRes.json();
           setVerifiedOrderId(verifyData.providerOrderId || paymentId);
@@ -120,7 +216,13 @@ export default function ZerifyCheckoutContainer({
       }
 
       setCheckoutStatus('SUCCESS');
-      toastSuccess(`Deposited ${format(campaignAmount, { showDecimals: true })} to Campaign Escrow!`);
+      toastSuccess(
+        orderData.upiCollectInitiated
+          ? `UPI Collect sent to ${upiId}! ₹${campaignAmount} credited to Zerify Wallet.`
+          : isWalletTopup
+          ? `Successfully added ${format(campaignAmount, { showDecimals: true })} to your Zerify Wallet!`
+          : `Deposited ${format(campaignAmount, { showDecimals: true })} to Campaign Escrow!`
+      );
       onSuccess?.(campaignAmount);
     } catch (err: any) {
       console.error('Checkout error:', err);
@@ -245,6 +347,17 @@ export default function ZerifyCheckoutContainer({
               <UpiPaymentTab
                 upiId={upiId}
                 setUpiId={setUpiId}
+                savedUpiIds={savedUpiIds}
+                selectedSavedUpi={upiId}
+                onSelectSavedUpi={(id) => {
+                  setUpiId(id);
+                  setIsEnteringNewUpi(false);
+                }}
+                isEnteringNewUpi={isEnteringNewUpi}
+                setIsEnteringNewUpi={setIsEnteringNewUpi}
+                saveUpiChoice={saveUpiChoice}
+                setSaveUpiChoice={setSaveUpiChoice}
+                onDeleteSavedUpi={handleDeleteSavedUpi}
                 showQrCode={showQrCode}
                 setShowQrCode={setShowQrCode}
                 amountFormatted={format(totalAmountToPay)}

@@ -49,15 +49,40 @@ export default function BrandPayoutsSection() {
       setIsLoading(true);
       const token = localStorage.getItem('zerify_token');
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+      const headers = { Authorization: token ? `Bearer ${token}` : '' };
 
-      const res = await fetch(`${apiUrl}/payments/me`, {
-        headers: { Authorization: token ? `Bearer ${token}` : '' },
-      });
+      const [paymentsRes, walletRes] = await Promise.all([
+        fetch(`${apiUrl}/payments/me`, { headers }).catch(() => null),
+        fetch(`${apiUrl}/wallet`, { headers }).catch(() => null),
+      ]);
 
-      if (res.ok) {
-        const data = await res.json();
+      let walletTxList: BrandEscrowTransaction[] = [];
+
+      if (walletRes && walletRes.ok) {
+        const walletData = await walletRes.json();
+        const walletBal = Number(walletData.balance) || 0;
+        setAvailableBalance(walletBal);
+
+        if (Array.isArray(walletData.transactions)) {
+          walletTxList = walletData.transactions.map((tx: any) => ({
+            id: tx.id ? (tx.id.length > 12 ? `WAL-${tx.id.slice(-8).toUpperCase()}` : tx.id) : 'WAL-TOPUP',
+            creator: 'Zerify Wallet (Self Top-up)',
+            campaign: tx.description || 'Wallet Deposit',
+            amount: format(Number(tx.amount) || 0, { showDecimals: true }),
+            rawAmount: Number(tx.amount) || 0,
+            date: tx.createdAt
+              ? new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+              : 'Recent',
+            status: 'COMPLETED' as const,
+          }));
+        }
+      }
+
+      let escrowMapped: BrandEscrowTransaction[] = [];
+      if (paymentsRes && paymentsRes.ok) {
+        const data = await paymentsRes.json();
         if (Array.isArray(data) && data.length > 0) {
-          const mapped: BrandEscrowTransaction[] = data.map((p: any) => {
+          escrowMapped = data.map((p: any) => {
             const raw = Number(p.amount) || 0;
             return {
               id: p.id ? (p.id.length > 12 ? `ESC-${p.id.slice(0, 8).toUpperCase()}` : p.id) : 'ESC-UNKNOWN',
@@ -72,26 +97,20 @@ export default function BrandPayoutsSection() {
               milestoneTitle: p.milestoneTitle,
             };
           });
-          setTransactions(mapped);
 
-          const settledSum = mapped.filter((t) => t.status === 'COMPLETED').reduce((acc, t) => acc + (t.rawAmount || 0), 0);
-          const escrowSum = mapped.filter((t) => t.status === 'IN_ESCROW').reduce((acc, t) => acc + (t.rawAmount || 0), 0);
+          const settledSum = escrowMapped.filter((t) => t.status === 'COMPLETED').reduce((acc, t) => acc + (t.rawAmount || 0), 0);
+          const escrowSum = escrowMapped.filter((t) => t.status === 'IN_ESCROW').reduce((acc, t) => acc + (t.rawAmount || 0), 0);
           setTotalSettled(settledSum);
           setInEscrow(escrowSum);
         } else {
-          setTransactions([]);
           setTotalSettled(0);
           setInEscrow(0);
         }
-      } else {
-        setTransactions([]);
-        setTotalSettled(0);
-        setInEscrow(0);
       }
+
+      setTransactions([...walletTxList, ...escrowMapped]);
     } catch (e) {
-      setTransactions([]);
-      setTotalSettled(0);
-      setInEscrow(0);
+      console.error('Failed to load wallet & payments:', e);
     } finally {
       setIsLoading(false);
     }
