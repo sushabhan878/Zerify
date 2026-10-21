@@ -79,7 +79,7 @@ export default function GstVerificationManager() {
       return;
     }
 
-    const businessName = businessNameInput.trim() || profile.legalName || 'Enterprise Partner';
+    const businessName = businessNameInput.trim() || undefined;
     setActionLoading(true);
     setFeedback(null);
 
@@ -310,6 +310,7 @@ export default function GstVerificationManager() {
       <GstMismatchModal
         isOpen={Boolean(mismatchTarget)}
         registration={mismatchTarget}
+        profileLegalName={profile?.legalName}
         onClose={() => setMismatchTarget(null)}
         onResolve={handleResolveMismatch}
       />

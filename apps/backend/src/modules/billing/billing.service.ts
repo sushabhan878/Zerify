@@ -281,20 +281,34 @@ export class BillingService {
       if (!isGstActive) {
         internalStatus = GstVerificationStatus.INACTIVE;
       } else {
-        // Compare user entered name with provider returned names
-        const nameEval = evaluateNameMatch(
-          businessNameToVerify,
-          result.legalName,
-          result.tradeName,
-        );
+        // Evaluate name matching only if the user entered an explicit custom business name.
+        // If no custom name was entered (or generic defaults like 'Zerify', 'Brand', 'Enterprise Partner'),
+        // we accept the official registered legal name from the GST portal as authoritative and verified.
+        const trimmedManual = manualBusinessName?.trim();
+        const isGenericDefault = !trimmedManual || 
+          ['zerify', 'brand', 'creator', 'enterprise partner', 'enterprise'].includes(trimmedManual.toLowerCase()) ||
+          trimmedManual.toLowerCase() === profile.legalName?.toLowerCase() && ['zerify', 'brand', 'creator'].includes(profile.legalName?.toLowerCase());
 
-        nameMatchScore = nameEval.score;
-        isNameMatched = nameEval.isMatched;
+        if (!isGenericDefault && trimmedManual) {
+          const nameEval = evaluateNameMatch(
+            trimmedManual,
+            result.legalName,
+            result.tradeName,
+          );
 
-        if (nameEval.isMatched) {
-          internalStatus = GstVerificationStatus.VERIFIED;
+          nameMatchScore = nameEval.score;
+          isNameMatched = nameEval.isMatched;
+
+          if (nameEval.isMatched) {
+            internalStatus = GstVerificationStatus.VERIFIED;
+          } else {
+            internalStatus = GstVerificationStatus.MISMATCH;
+          }
         } else {
-          internalStatus = GstVerificationStatus.MISMATCH;
+          // Direct GST lookup / registration: Government registered legal name is accepted
+          nameMatchScore = 1.0;
+          isNameMatched = true;
+          internalStatus = GstVerificationStatus.VERIFIED;
         }
       }
     } else {
@@ -336,6 +350,19 @@ export class BillingService {
       },
     });
 
+    // Also auto-update default/placeholder profile legal name with the official verified name
+    if (internalStatus === GstVerificationStatus.VERIFIED && result.legalName) {
+      if (!profile.legalName || ['zerify', 'brand', 'creator', 'enterprise partner'].includes(profile.legalName.toLowerCase())) {
+        await this.prisma.billingProfile.update({
+          where: { id: profile.id },
+          data: {
+            legalName: result.legalName,
+            tradeName: result.tradeName || profile.tradeName,
+          },
+        });
+      }
+    }
+
     return {
       registration: updated,
       verification: {
@@ -359,7 +386,7 @@ export class BillingService {
     registrationId: string,
     dto: ConfirmMismatchDto,
   ) {
-    await this.assertProfileAccess(userId, profileId);
+    const profile = await this.assertProfileAccess(userId, profileId);
 
     const registration = await this.prisma.gstRegistration.findUnique({
       where: { id: registrationId },
@@ -370,7 +397,7 @@ export class BillingService {
     }
 
     if (dto.acceptProviderName) {
-      return this.prisma.gstRegistration.update({
+      const updated = await this.prisma.gstRegistration.update({
         where: { id: registrationId },
         data: {
           internalVerificationStatus: GstVerificationStatus.VERIFIED,
@@ -379,6 +406,18 @@ export class BillingService {
           verifiedAt: new Date(),
         },
       });
+
+      if (registration.legalName) {
+        await this.prisma.billingProfile.update({
+          where: { id: profileId },
+          data: {
+            legalName: registration.legalName,
+            tradeName: registration.tradeName || profile.tradeName,
+          },
+        });
+      }
+
+      return updated;
     }
 
     if (dto.updatedBusinessName) {

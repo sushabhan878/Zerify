@@ -7,9 +7,10 @@ export class CreateGstRegistrationDto {
   })
   gstin: string;
 
+  @IsOptional()
   @IsString()
   @MaxLength(200, { message: 'Business name cannot exceed 200 characters.' })
-  businessName: string;
+  businessName?: string;
 
   @IsOptional()
   @IsString()

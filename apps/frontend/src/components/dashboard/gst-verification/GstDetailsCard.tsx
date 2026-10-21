@@ -50,7 +50,7 @@ export default function GstDetailsCard({
       {/* Top Header Row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 pb-3 border-b border-white/10">
         <div className="flex items-start sm:items-center gap-3">
-          <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/10 border border-purple-500/30 text-purple-300 shadow-inner shrink-0">
+          <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-slate-800/40 border border-indigo-500/30 text-indigo-300 shadow-inner shrink-0">
             <Building2 className="w-5 h-5" />
           </div>
 
@@ -58,7 +58,7 @@ export default function GstDetailsCard({
             {/* GSTIN Pill & Status */}
             <div className="flex flex-wrap items-center gap-2">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-slate-950/80 border border-white/10">
-                <span className="font-mono text-xs font-bold tracking-wider text-purple-200">
+                <span className="font-mono text-xs font-bold tracking-wider text-slate-200">
                   {registration.gstin}
                 </span>
                 <button
@@ -81,16 +81,11 @@ export default function GstDetailsCard({
               />
             </div>
 
-            {/* Legal Entity & Trade Name */}
-            <div className="flex flex-wrap items-center gap-2">
+            {/* Legal Entity */}
+            <div>
               <h4 className="text-sm sm:text-base font-extrabold text-white tracking-tight">
                 {registration.legalName || 'Registered Legal Entity'}
               </h4>
-              {registration.tradeName && (
-                <span className="px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[10px] font-semibold">
-                  Trade: {registration.tradeName}
-                </span>
-              )}
             </div>
           </div>
         </div>
@@ -143,7 +138,7 @@ export default function GstDetailsCard({
         {/* Taxpayer */}
         <div className="px-3 py-1 space-y-0.5">
           <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Tag className="w-3 h-3 text-purple-400" />
+            <Tag className="w-3 h-3 text-sky-400" />
             Taxpayer Type
           </span>
           <p className="text-xs font-semibold text-slate-200">

@@ -9,6 +9,7 @@ import { GstRegistration } from './types';
 interface GstMismatchModalProps {
   isOpen: boolean;
   registration: GstRegistration | null;
+  profileLegalName?: string;
   onClose: () => void;
   onResolve: (acceptProviderName: boolean, updatedName?: string) => Promise<void>;
 }
@@ -16,6 +17,7 @@ interface GstMismatchModalProps {
 export default function GstMismatchModal({
   isOpen,
   registration,
+  profileLegalName,
   onClose,
   onResolve,
 }: GstMismatchModalProps) {
@@ -29,8 +31,8 @@ export default function GstMismatchModal({
 
   if (!isOpen || !registration || !mounted) return null;
 
-  const userEnteredName = registration.legalName || 'User Submitted Business Name';
-  const providerLegalName = registration.legalName || 'Provider Returned Legal Name';
+  const officialLegalName = registration.legalName || 'Official Registered Legal Name';
+  const accountProfileName = profileLegalName || 'Zerify Account Name';
   const providerTradeName = registration.tradeName;
 
   const handleAcceptLegalName = async () => {
@@ -73,7 +75,7 @@ export default function GstMismatchModal({
               <div>
                 <h3 className="text-base font-black text-white">Business Name Mismatch</h3>
                 <p className="text-xs text-slate-400">
-                  Government GST record does not precisely match your entered name
+                  Government GST record does not match your Zerify profile name
                 </p>
               </div>
             </div>
@@ -87,12 +89,12 @@ export default function GstMismatchModal({
 
           {/* Comparison Cards */}
           <div className="space-y-3">
-            <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-white/10 space-y-1">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">
+            <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-emerald-500/20 space-y-1">
+              <span className="text-[10px] uppercase font-bold text-emerald-400 block tracking-wider">
                 Official Registered Name on GSTIN ({registration.gstin})
               </span>
-              <p className="text-sm font-bold text-emerald-400 font-mono">
-                {providerLegalName}
+              <p className="text-sm font-bold text-emerald-300 font-mono">
+                {officialLegalName}
               </p>
               {providerTradeName && (
                 <p className="text-xs text-slate-400">
@@ -102,11 +104,11 @@ export default function GstMismatchModal({
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-white/5 space-y-1">
-              <span className="text-[10px] uppercase font-bold text-slate-500 block">
-                Name You Entered in Zerify
+              <span className="text-[10px] uppercase font-bold text-amber-400/80 block tracking-wider">
+                Current Zerify Profile Name
               </span>
               <p className="text-sm font-semibold text-slate-300">
-                {userEnteredName}
+                {accountProfileName}
               </p>
             </div>
           </div>
