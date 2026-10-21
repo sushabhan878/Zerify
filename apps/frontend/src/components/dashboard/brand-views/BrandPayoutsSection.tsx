@@ -64,17 +64,33 @@ export default function BrandPayoutsSection() {
         setAvailableBalance(walletBal);
 
         if (Array.isArray(walletData.transactions)) {
-          walletTxList = walletData.transactions.map((tx: any) => ({
-            id: tx.id ? (tx.id.length > 12 ? `WAL-${tx.id.slice(-8).toUpperCase()}` : tx.id) : 'WAL-TOPUP',
-            creator: 'Zerify Wallet (Self Top-up)',
-            campaign: tx.description || 'Wallet Deposit',
-            amount: format(Number(tx.amount) || 0, { showDecimals: true }),
-            rawAmount: Number(tx.amount) || 0,
-            date: tx.createdAt
-              ? new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-              : 'Recent',
-            status: 'COMPLETED' as const,
-          }));
+          walletTxList = walletData.transactions.map((tx: any) => {
+            const desc = (tx.description || '').toLowerCase();
+            const isWithdrawal =
+              tx.type === 'REFUND' ||
+              desc.includes('withdrawal') ||
+              desc.includes('payout');
+            const isCampaignDebit =
+              tx.type === 'CAMPAIGN_DEBIT' ||
+              desc.includes('campaign') ||
+              desc.includes('allocation');
+
+            const rawAmt = Number(tx.amount) || (tx.amountPaise ? Number(tx.amountPaise) / 100 : 0);
+            const formattedAmt = `₹${rawAmt.toLocaleString('en-IN')}`;
+
+            return {
+              id: tx.id ? (tx.id.length > 12 ? `WAL-${tx.id.slice(-8).toUpperCase()}` : tx.id) : 'WAL-TOPUP',
+              creator: isWithdrawal ? 'Wallet Withdrawal' : 'Zerify Wallet (Self Top-up)',
+              campaign: tx.description || (isWithdrawal ? 'Funds transfer to bank / UPI' : 'Wallet Top-up via Cashfree'),
+              amount: formattedAmt,
+              rawAmount: rawAmt,
+              date: tx.createdAt
+                ? new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                : 'Recent',
+              status: 'COMPLETED' as const,
+              category: isWithdrawal ? 'WITHDRAWAL' as const : (isCampaignDebit ? 'CAMPAIGN_ALLOCATION' as const : 'WALLET_TOPUP' as const),
+            };
+          });
         }
       }
 
@@ -84,17 +100,26 @@ export default function BrandPayoutsSection() {
         if (Array.isArray(data) && data.length > 0) {
           escrowMapped = data.map((p: any) => {
             const raw = Number(p.amount) || 0;
+            const formattedAmt = `₹${raw.toLocaleString('en-IN')}`;
+            const isSettled = p.status === 'SUCCESSFUL' || p.status === 'RELEASED';
+            const isDisputed = p.status === 'REFUNDED' || p.status === 'FAILED' || p.status === 'DISPUTED';
+
+            const creatorName = p.creator || p.creatorName || (p.campaignTitle ? `Campaign: ${p.campaignTitle}` : 'Zerify Escrow');
+            const campaignName = p.campaignTitle || (p.campaignId ? `Campaign #${p.campaignId.slice(0, 8)}` : 'Platform Escrow Deposit');
+
             return {
               id: p.id ? (p.id.length > 12 ? `ESC-${p.id.slice(0, 8).toUpperCase()}` : p.id) : 'ESC-UNKNOWN',
-              creator: p.creator || p.creatorName || (p.campaignTitle ? `Campaign: ${p.campaignTitle}` : 'Zerify Escrow'),
-              campaign: p.campaignTitle || (p.campaignId ? `Campaign #${p.campaignId.slice(0, 8)}` : 'Platform Escrow Deposit'),
-              amount: format(raw, { showDecimals: true }),
+              creator: creatorName,
+              campaign: campaignName,
+              campaignTitle: p.campaignTitle,
+              amount: formattedAmt,
               rawAmount: raw,
               date: p.createdAt
                 ? new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                 : 'Recent',
-              status: p.status === 'SUCCESSFUL' ? 'COMPLETED' : (p.status === 'REFUNDED' || p.status === 'FAILED' ? 'DISPUTED' : 'IN_ESCROW'),
+              status: isSettled ? 'COMPLETED' as const : (isDisputed ? 'DISPUTED' as const : 'IN_ESCROW' as const),
               milestoneTitle: p.milestoneTitle,
+              category: isSettled ? 'CREATOR_SETTLEMENT' as const : (isDisputed ? 'DISPUTE' as const : 'CAMPAIGN_ALLOCATION' as const),
             };
           });
 
