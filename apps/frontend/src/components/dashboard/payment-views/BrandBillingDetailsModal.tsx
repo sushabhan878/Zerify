@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Building2, Mail, FileText, CheckCircle2, Loader2, Sparkles, ShieldCheck } from 'lucide-react';
 import GstVerificationManager from '../gst-verification/GstVerificationManager';
@@ -16,6 +17,7 @@ export default function BrandBillingDetailsModal({
   onClose,
   onSaved,
 }: BrandBillingDetailsModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<'basic' | 'gstin'>('gstin');
   const [billingName, setBillingName] = useState('');
   const [billingEmail, setBillingEmail] = useState('');
@@ -24,6 +26,10 @@ export default function BrandBillingDetailsModal({
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -93,21 +99,21 @@ export default function BrandBillingDetailsModal({
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-slate-950/95 border border-white/10 shadow-2xl p-6 space-y-4"
+          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-slate-950/95 border border-white/10 shadow-2xl p-6 space-y-4"
         >
           {/* Header */}
           <div className="flex items-start justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
+              <div className="p-2.5 rounded-2xl bg-purple-500/15 border border-purple-500/25 text-purple-400">
                 <Building2 className="w-5 h-5" />
               </div>
               <div>
@@ -119,19 +125,19 @@ export default function BrandBillingDetailsModal({
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Mode Tabs */}
-          <div className="flex items-center gap-2 p-1 bg-slate-900 rounded-xl border border-white/5">
+          <div className="flex items-center gap-1.5 p-1 bg-slate-900/90 rounded-2xl border border-white/5">
             <button
               type="button"
               onClick={() => setActiveTab('gstin')}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer ${
-                activeTab === 'gstin' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'
+              className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                activeTab === 'gstin' ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30' : 'text-slate-400 hover:text-white'
               }`}
             >
               <ShieldCheck className="w-4 h-4" />
@@ -140,8 +146,8 @@ export default function BrandBillingDetailsModal({
             <button
               type="button"
               onClick={() => setActiveTab('basic')}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer ${
-                activeTab === 'basic' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'
+              className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                activeTab === 'basic' ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30' : 'text-slate-400 hover:text-white'
               }`}
             >
               <FileText className="w-4 h-4" />
@@ -254,6 +260,7 @@ export default function BrandBillingDetailsModal({
           )}
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

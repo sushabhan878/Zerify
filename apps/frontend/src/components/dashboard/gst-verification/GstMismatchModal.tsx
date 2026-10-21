@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, AlertTriangle, Check, ArrowRight, Loader2, Sparkles } from 'lucide-react';
 import { GstRegistration } from './types';
@@ -18,10 +19,15 @@ export default function GstMismatchModal({
   onClose,
   onResolve,
 }: GstMismatchModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [correctName, setCorrectName] = useState('');
 
-  if (!isOpen || !registration) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !registration || !mounted) return null;
 
   const userEnteredName = registration.legalName || 'User Submitted Business Name';
   const providerLegalName = registration.legalName || 'Provider Returned Legal Name';
@@ -49,19 +55,19 @@ export default function GstMismatchModal({
     }
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-slate-950/95 border border-amber-500/30 shadow-2xl p-6 space-y-5"
+          className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-slate-950/95 border border-amber-500/30 shadow-2xl p-6 space-y-5"
         >
           {/* Header */}
           <div className="flex items-start justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+              <div className="p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div>
@@ -73,7 +79,7 @@ export default function GstMismatchModal({
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -81,7 +87,7 @@ export default function GstMismatchModal({
 
           {/* Comparison Cards */}
           <div className="space-y-3">
-            <div className="p-3.5 rounded-xl bg-slate-900/80 border border-white/10 space-y-1">
+            <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-white/10 space-y-1">
               <span className="text-[10px] uppercase font-bold text-slate-400 block">
                 Official Registered Name on GSTIN ({registration.gstin})
               </span>
@@ -95,7 +101,7 @@ export default function GstMismatchModal({
               )}
             </div>
 
-            <div className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5 space-y-1">
+            <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-white/5 space-y-1">
               <span className="text-[10px] uppercase font-bold text-slate-500 block">
                 Name You Entered in Zerify
               </span>
@@ -149,6 +155,7 @@ export default function GstMismatchModal({
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

@@ -1,12 +1,31 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { ShieldCheck, Plus, AlertCircle, Loader2 } from 'lucide-react';
+import { FileText, Plus, AlertCircle, Loader2, Sparkles, MapPin, CheckCircle2 } from 'lucide-react';
 import { BillingProfile, GstRegistration } from './types';
 import GstDetailsCard from './GstDetailsCard';
-import GstVerificationForm from './GstVerificationForm';
 import GstMismatchModal from './GstMismatchModal';
 import GstHistoryModal from './GstHistoryModal';
+
+const GST_STATE_PREFIXES: Record<string, string> = {
+  '01': 'Jammu & Kashmir',
+  '02': 'Himachal Pradesh',
+  '03': 'Punjab',
+  '06': 'Haryana',
+  '07': 'Delhi',
+  '08': 'Rajasthan',
+  '09': 'Uttar Pradesh',
+  '19': 'West Bengal',
+  '24': 'Gujarat',
+  '27': 'Maharashtra',
+  '29': 'Karnataka',
+  '33': 'Tamil Nadu',
+  '36': 'Telangana',
+  '37': 'Andhra Pradesh',
+  '32': 'Kerala',
+};
+
+const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 
 export default function GstVerificationManager() {
   const [profile, setProfile] = useState<BillingProfile | null>(null);
@@ -15,13 +34,22 @@ export default function GstVerificationManager() {
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Quick input bar state
+  const [gstinInput, setGstinInput] = useState('');
+  const [businessNameInput, setBusinessNameInput] = useState('');
+  const [showBusinessNamePrompt, setShowBusinessNamePrompt] = useState(false);
+
   // Modals state
-  const [showAddForm, setShowAddForm] = useState(false);
   const [mismatchTarget, setMismatchTarget] = useState<GstRegistration | null>(null);
   const [historyTargetId, setHistoryTargetId] = useState<string | null>(null);
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('zerify_token') : '';
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
+  const cleanGstin = gstinInput.trim().replace(/[\s-]/g, '').toUpperCase();
+  const isValidFormat = GST_REGEX.test(cleanGstin);
+  const stateCode = cleanGstin.slice(0, 2);
+  const detectedState = GST_STATE_PREFIXES[stateCode];
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -43,8 +71,15 @@ export default function GstVerificationManager() {
     fetchProfile();
   }, [fetchProfile]);
 
-  const handleAddGstin = async ({ gstin, businessName }: { gstin: string; businessName: string }) => {
+  const handleAddGstin = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!profile) return;
+    if (!isValidFormat) {
+      setFeedback({ type: 'error', text: 'Please enter a valid 15-character GSTIN format.' });
+      return;
+    }
+
+    const businessName = businessNameInput.trim() || profile.legalName || 'Enterprise Partner';
     setActionLoading(true);
     setFeedback(null);
 
@@ -55,7 +90,7 @@ export default function GstVerificationManager() {
           'Content-Type': 'application/json',
           Authorization: token ? `Bearer ${token}` : '',
         },
-        body: JSON.stringify({ gstin, businessName, autoVerify: true }),
+        body: JSON.stringify({ gstin: cleanGstin, businessName, autoVerify: true }),
       });
 
       const data = await res.json();
@@ -64,8 +99,10 @@ export default function GstVerificationManager() {
       }
 
       await fetchProfile();
-      setShowAddForm(false);
-      setFeedback({ type: 'success', text: `GSTIN ${gstin} submitted and verified successfully!` });
+      setGstinInput('');
+      setBusinessNameInput('');
+      setShowBusinessNamePrompt(false);
+      setFeedback({ type: 'success', text: `GSTIN ${cleanGstin} added and verified successfully!` });
     } catch (err: any) {
       setFeedback({ type: 'error', text: err.message || 'Error adding GSTIN.' });
     } finally {
@@ -149,7 +186,7 @@ export default function GstVerificationManager() {
     return (
       <div className="p-8 text-center text-slate-400 flex items-center justify-center gap-2">
         <Loader2 className="w-5 h-5 animate-spin text-purple-400" />
-        <span className="text-xs font-semibold">Loading GST and Billing Details...</span>
+        <span className="text-xs font-semibold">Loading GST Details...</span>
       </div>
     );
   }
@@ -160,7 +197,7 @@ export default function GstVerificationManager() {
     <div className="space-y-4">
       {feedback && (
         <div
-          className={`p-3.5 rounded-xl text-xs font-semibold flex items-center justify-between ${
+          className={`p-3 rounded-xl text-xs font-semibold flex items-center justify-between ${
             feedback.type === 'success'
               ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
               : 'bg-rose-500/10 border border-rose-500/30 text-rose-300'
@@ -170,51 +207,88 @@ export default function GstVerificationManager() {
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{feedback.text}</span>
           </div>
-          <button onClick={() => setFeedback(null)} className="text-slate-400 hover:text-white text-xs">
+          <button onClick={() => setFeedback(null)} className="text-slate-400 hover:text-white text-xs cursor-pointer">
             ✕
           </button>
         </div>
       )}
 
-      {/* Header bar */}
-      <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-slate-950 to-indigo-950/40 border border-purple-500/30 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-purple-500/20 text-purple-400 shrink-0">
-            <ShieldCheck className="w-5 h-5" />
+      {/* Sleek Text Box with "Add GSTIN" Button on the right side */}
+      <form onSubmit={handleAddGstin} className="space-y-2">
+        <div className="relative flex items-center rounded-2xl bg-slate-900/90 border border-white/10 hover:border-purple-500/40 focus-within:border-purple-500 transition-all p-1.5 shadow-lg backdrop-blur-xl">
+          <div className="pl-3 pr-2 text-slate-500">
+            <FileText className="w-4 h-4 text-purple-400" />
           </div>
-          <div>
-            <h4 className="text-xs font-bold text-white flex items-center gap-2">
-              <span>Government GSTIN Verification Suite</span>
-              <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-extrabold border border-purple-500/40">
-                CASHFREE
-              </span>
-            </h4>
-            <p className="text-[11px] text-slate-300 mt-0.5">
-              Multi-state GST verification & automated business tax invoice compliance (PRD FR-01–FR-09)
-            </p>
-          </div>
+
+          <input
+            type="text"
+            value={gstinInput}
+            onChange={(e) => {
+              setGstinInput(e.target.value.toUpperCase());
+              if (!showBusinessNamePrompt && e.target.value.length > 2) {
+                setShowBusinessNamePrompt(true);
+              }
+            }}
+            placeholder="Enter 15-digit GSTIN (e.g. 29AAICP2912R1ZR)..."
+            maxLength={15}
+            className="flex-1 bg-transparent px-2 py-2 text-xs font-mono font-medium text-white placeholder-slate-500 focus:outline-none uppercase"
+          />
+
+          {/* Right side Add GSTIN button */}
+          <button
+            type="submit"
+            disabled={!cleanGstin || actionLoading}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md shadow-purple-600/20 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+          >
+            {actionLoading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Plus className="w-3.5 h-3.5" />
+            )}
+            <span>Add GSTIN</span>
+          </button>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-md shadow-purple-600/20 cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>{showAddForm ? 'Close Form' : 'Add GSTIN'}</span>
-        </button>
-      </div>
+        {/* Live Detected Info & Optional Entity Input */}
+        {cleanGstin.length > 0 && (
+          <div className="px-2 flex flex-wrap items-center justify-between gap-2 text-[11px] animate-fadeIn">
+            <div className="flex items-center gap-2">
+              {detectedState && (
+                <span className="text-emerald-400 font-medium flex items-center gap-1 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                  <MapPin className="w-3 h-3" />
+                  {detectedState} ({stateCode})
+                </span>
+              )}
+              {cleanGstin.length === 15 && isValidFormat && (
+                <span className="text-emerald-400 flex items-center gap-1 text-[11px]">
+                  <CheckCircle2 className="w-3 h-3" /> Valid format
+                </span>
+              )}
+            </div>
 
-      {/* Form accordion */}
-      {showAddForm && <GstVerificationForm onSubmit={handleAddGstin} isLoading={actionLoading} />}
+            {showBusinessNamePrompt && (
+              <div className="flex items-center gap-2 w-full sm:w-auto mt-1 sm:mt-0">
+                <input
+                  type="text"
+                  value={businessNameInput}
+                  onChange={(e) => setBusinessNameInput(e.target.value)}
+                  placeholder={`Legal name (default: ${profile?.legalName || 'Company'})`}
+                  maxLength={100}
+                  className="px-2.5 py-1 rounded-lg bg-slate-950/80 border border-white/10 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </form>
 
       {/* Registrations List */}
-      <div className="space-y-3">
+      <div className="space-y-3 pt-1">
         {registrations.length === 0 ? (
-          <div className="p-8 text-center rounded-2xl bg-slate-900/30 border border-white/5 space-y-2">
-            <p className="text-xs text-slate-400 font-medium">No GST registrations associated with this billing profile yet.</p>
-            <p className="text-[11px] text-slate-500">
-              Click &quot;Add GSTIN&quot; above to verify your business details via Cashfree.
+          <div className="py-8 px-4 text-center rounded-2xl bg-slate-900/20 border border-dashed border-white/10 space-y-1.5">
+            <p className="text-xs font-semibold text-slate-300">No GSTIN registrations linked yet</p>
+            <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+              Type your 15-digit GSTIN in the bar above and click &quot;Add GSTIN&quot; to verify and auto-populate your verified tax details.
             </p>
           </div>
         ) : (

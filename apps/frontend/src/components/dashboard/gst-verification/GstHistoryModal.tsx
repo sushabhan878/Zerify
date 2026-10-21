@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, History, Loader2, Calendar } from 'lucide-react';
 import { GstVerificationAttempt } from './types';
@@ -19,9 +20,14 @@ export default function GstHistoryModal({
   profileId,
   onClose,
 }: GstHistoryModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [history, setHistory] = useState<GstVerificationAttempt[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isOpen || !registrationId || !profileId) return;
@@ -58,21 +64,21 @@ export default function GstHistoryModal({
     fetchHistory();
   }, [isOpen, registrationId, profileId]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-slate-950/95 border border-white/10 shadow-2xl p-6 space-y-4 max-h-[85vh] flex flex-col"
+          className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-slate-950/95 border border-white/10 shadow-2xl p-6 space-y-4 max-h-[85vh] flex flex-col"
         >
           {/* Header */}
           <div className="flex items-start justify-between pb-3 border-b border-white/10 shrink-0">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
+              <div className="p-2.5 rounded-2xl bg-purple-500/15 border border-purple-500/25 text-purple-400">
                 <History className="w-5 h-5" />
               </div>
               <div>
@@ -84,7 +90,7 @@ export default function GstHistoryModal({
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -109,7 +115,7 @@ export default function GstHistoryModal({
               history.map((attempt) => (
                 <div
                   key={attempt.id}
-                  className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5 space-y-2 hover:border-white/10 transition-colors"
+                  className="p-3.5 rounded-2xl bg-slate-900/60 border border-white/5 space-y-2 hover:border-white/10 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <GstStatusBadge status={attempt.status} />
@@ -134,6 +140,7 @@ export default function GstHistoryModal({
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
