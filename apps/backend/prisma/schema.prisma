@@ -129,6 +129,9 @@ model BrandProfile {
   // Brand Wallet
   wallet BrandWallet?
 
+  // Billing Profiles & GST Registrations
+  billingProfiles BillingProfile[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -221,6 +224,9 @@ model InfluencerProfile {
 
   // Payouts
   payoutBeneficiary PayoutBeneficiary?
+
+  // Billing Profiles & GST Registrations
+  billingProfiles BillingProfile[]
 
   // Onboarding status & progress
   completionPercentage  Int     @default(0)
@@ -1940,4 +1946,103 @@ model CashfreeWebhookEvent {
 
   @@map("cashfree_webhook_events")
 }
+
+// ============================================================================
+// Billing Profile & GSTIN Verification Models (Cashfree Verification Suite)
+// ============================================================================
+
+enum BillingProfileOwnerType {
+  BRAND
+  CREATOR
+}
+
+enum GstVerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  INACTIVE
+  MISMATCH
+  FAILED
+  REVIEW_REQUIRED
+}
+
+model BillingProfile {
+  id                  String                  @id @default(uuid())
+  ownerType           BillingProfileOwnerType
+  brandProfileId      String?
+  brandProfile        BrandProfile?           @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+  influencerProfileId String?
+  influencerProfile   InfluencerProfile?      @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+  legalName           String
+  tradeName           String?
+  billingEmail        String?
+  billingPhone        String?
+  billingAddress      String?
+  stateCode           String?
+  stateName           String?
+  countryCode         String                  @default("IN")
+  isDefault           Boolean                 @default(true)
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+
+  gstRegistrations    GstRegistration[]
+
+  @@index([brandProfileId])
+  @@index([influencerProfileId])
+  @@map("billing_profiles")
+}
+
+model GstRegistration {
+  id                         String                  @id @default(uuid())
+  billingProfileId           String
+  billingProfile             BillingProfile          @relation(fields: [billingProfileId], references: [id], onDelete: Cascade)
+  gstin                      String
+  legalName                  String?
+  tradeName                  String?
+  providerGstStatus          String?
+  taxpayerType               String?
+  businessConstitution       String?
+  registrationDate           String?
+  lastProviderUpdateDate     String?
+  principalPlaceAddress      String?
+  principalPlaceAddressJson  Json?
+  stateJurisdiction          String?
+  centerJurisdiction         String?
+  internalVerificationStatus GstVerificationStatus   @default(UNVERIFIED)
+  providerReferenceId        String?
+  nameMatchScore             Float?
+  isNameMatched              Boolean                 @default(false)
+  verifiedAt                 DateTime?
+  lastAttemptAt              DateTime?
+  createdAt                  DateTime                @default(now())
+  updatedAt                  DateTime                @updatedAt
+
+  verificationAttempts       GstVerificationAttempt[]
+
+  @@unique([billingProfileId, gstin])
+  @@index([gstin])
+  @@index([internalVerificationStatus])
+  @@map("gst_registrations")
+}
+
+model GstVerificationAttempt {
+  id                  String                @id @default(uuid())
+  gstRegistrationId   String
+  gstRegistration     GstRegistration       @relation(fields: [gstRegistrationId], references: [id], onDelete: Cascade)
+  provider            String                @default("CASHFREE")
+  providerReferenceId String?
+  status              GstVerificationStatus
+  failureCode         String?
+  sanitizedMessage    String?
+  responseMetadata    Json?
+  initiatedByUserId   String?
+  startedAt           DateTime              @default(now())
+  completedAt         DateTime?
+  createdAt           DateTime              @default(now())
+
+  @@index([gstRegistrationId])
+  @@index([status])
+  @@map("gst_verification_attempts")
+}
+
 

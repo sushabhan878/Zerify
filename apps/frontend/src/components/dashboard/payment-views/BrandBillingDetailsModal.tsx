@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Building2, Mail, FileText, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
+import { X, Building2, Mail, FileText, CheckCircle2, Loader2, Sparkles, ShieldCheck } from 'lucide-react';
+import GstVerificationManager from '../gst-verification/GstVerificationManager';
 
 interface BrandBillingDetailsModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export default function BrandBillingDetailsModal({
   onClose,
   onSaved,
 }: BrandBillingDetailsModalProps) {
+  const [activeTab, setActiveTab] = useState<'basic' | 'gstin'>('gstin');
   const [billingName, setBillingName] = useState('');
   const [billingEmail, setBillingEmail] = useState('');
   const [taxId, setTaxId] = useState('');
@@ -23,8 +25,7 @@ export default function BrandBillingDetailsModal({
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Read existing cached profile if any
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       try {
         const cached = localStorage.getItem('zerify_brand_profile_cache');
@@ -66,7 +67,6 @@ export default function BrandBillingDetailsModal({
       });
 
       if (!res.ok) {
-        // Fallback to local storage persistence if brand service is offline
         const localDetails = { billingName, billingEmail, taxId, address };
         localStorage.setItem('zerify_brand_billing_details', JSON.stringify(localDetails));
       } else {
@@ -81,7 +81,6 @@ export default function BrandBillingDetailsModal({
         onClose();
       }, 1200);
     } catch (err: any) {
-      // Local fallback
       localStorage.setItem('zerify_brand_billing_details', JSON.stringify({ billingName, billingEmail, taxId, address }));
       setSuccess(true);
       onSaved?.({ billingName, billingEmail, taxId });
@@ -103,35 +102,58 @@ export default function BrandBillingDetailsModal({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-slate-950/95 border border-white/10 shadow-2xl p-6"
+          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-slate-950/95 border border-white/10 shadow-2xl p-6 space-y-4"
         >
           {/* Header */}
-          <div className="flex items-start justify-between pb-4 border-b border-white/10">
+          <div className="flex items-start justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
                 <Building2 className="w-5 h-5" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-black text-white">Company Billing Details</h3>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-white/5">
-                    Optional
-                  </span>
-                </div>
+                <h3 className="text-base font-black text-white">Business Billing & GSTIN Verification</h3>
                 <p className="text-xs text-slate-400">
-                  Not required to run campaigns, but helpful for automated GST/Tax invoices
+                  Manage corporate tax identity, multi-state GSTINs, and Cashfree invoice validation
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {success ? (
+          {/* Mode Tabs */}
+          <div className="flex items-center gap-2 p-1 bg-slate-900 rounded-xl border border-white/5">
+            <button
+              type="button"
+              onClick={() => setActiveTab('gstin')}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer ${
+                activeTab === 'gstin' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>Government GSTIN Suite (Cashfree)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('basic')}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer ${
+                activeTab === 'basic' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              <span>Basic Billing Profile</span>
+            </button>
+          </div>
+
+          {activeTab === 'gstin' ? (
+            <div className="pt-1">
+              <GstVerificationManager />
+            </div>
+          ) : success ? (
             <div className="py-8 text-center space-y-3">
               <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-6 h-6" />
@@ -140,7 +162,7 @@ export default function BrandBillingDetailsModal({
               <p className="text-xs text-slate-400">Your invoices will now automatically include these credentials.</p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 pt-2">
               {error && (
                 <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300">
                   {error}
@@ -215,17 +237,17 @@ export default function BrandBillingDetailsModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white shadow-lg shadow-purple-600/20 flex items-center gap-2 disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white shadow-lg shadow-purple-600/20 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  <span>Save Details</span>
+                  <span>Save Basic Details</span>
                 </button>
               </div>
             </form>

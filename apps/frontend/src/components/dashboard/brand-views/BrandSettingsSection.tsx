@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings, Building2, Target, ShoppingBag, Users, CreditCard, Sparkles, Loader2 } from 'lucide-react';
+import { Settings, Building2, Target, ShoppingBag, Users, CreditCard, Sparkles, Loader2, FileCheck } from 'lucide-react';
 import BrandCompanyInfoTab from '../brand-settings/BrandCompanyInfoTab';
 import BrandCampaignGoalsTab from '../brand-settings/BrandCampaignGoalsTab';
 import BrandProductServicesTab from '../brand-settings/BrandProductServicesTab';
 import BrandTargetInfluencersTab from '../brand-settings/BrandTargetInfluencersTab';
 import BrandPaymentsEscrowTab from '../brand-settings/BrandPaymentsEscrowTab';
+import GstVerificationManager from '../gst-verification/GstVerificationManager';
 
 interface BrandSettingsSectionProps {
   userName?: string;
@@ -18,9 +19,9 @@ interface BrandSettingsSectionProps {
   initialData?: any;
 }
 
-type BrandTabType = 'info' | 'goals' | 'products' | 'creators' | 'escrow';
+type BrandTabType = 'info' | 'goals' | 'products' | 'creators' | 'escrow' | 'gstin';
 
-const BRAND_TAB_ORDER: BrandTabType[] = ['info', 'goals', 'products', 'creators', 'escrow'];
+const BRAND_TAB_ORDER: BrandTabType[] = ['info', 'goals', 'products', 'creators', 'escrow', 'gstin'];
 
 export default function BrandSettingsSection({
   companyName,
@@ -109,6 +110,7 @@ export default function BrandSettingsSection({
     { id: 'products', label: 'Products & Services', icon: ShoppingBag },
     { id: 'creators', label: 'Target Influencers', icon: Users },
     { id: 'escrow', label: 'Payments & Escrow', icon: CreditCard },
+    { id: 'gstin', label: 'Business & Tax (GSTIN)', icon: FileCheck },
   ];
 
   const changeTab = (newTab: BrandTabType) => {
@@ -229,6 +231,11 @@ export default function BrandSettingsSection({
                 initialData={profileData}
                 onSaveSuccess={() => handleTabSave()}
               />
+            )}
+            {activeTab === 'gstin' && (
+              <div className="p-1">
+                <GstVerificationManager />
+              </div>
             )}
           </motion.div>
         </AnimatePresence>

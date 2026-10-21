@@ -15,6 +15,7 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { ReviewModule } from './modules/review/review.module';
 import { CurrencyModule } from './modules/currency/currency.module';
 import { MailModule } from './modules/mail/mail.module';
+import { BillingModule } from './modules/billing/billing.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { MailModule } from './modules/mail/mail.module';
     ReviewModule,
     CurrencyModule,
     MailModule,
+    BillingModule,
   ],
   controllers: [AppController],
   providers: [],
