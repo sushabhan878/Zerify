@@ -13,6 +13,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { WalletService } from './wallet.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AddMoneyDto } from './dto/add-money.dto';
+import { WithdrawMoneyDto } from './dto/withdraw-money.dto';
 
 @ApiTags('wallet')
 @Controller('wallet')
@@ -51,6 +52,15 @@ export class WalletController {
   @ApiOperation({ summary: 'Simulate successful payment for testing QR / UPI in sandbox' })
   async simulatePayment(@Req() req: any, @Param('paymentId') paymentId: string) {
     return this.walletService.simulateAddMoneyPayment(req.user.id, paymentId);
+  }
+
+  @Post('withdraw')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Withdraw funds from Zerify wallet to Bank Account or UPI' })
+  async withdrawMoney(@Req() req: any, @Body() dto: WithdrawMoneyDto) {
+    return this.walletService.withdrawMoney(req.user.id, dto);
   }
 
   @Get('transactions')

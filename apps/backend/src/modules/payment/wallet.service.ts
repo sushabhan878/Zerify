@@ -15,6 +15,7 @@ import {
   Prisma,
 } from '@prisma/client';
 import { AddMoneyDto } from './dto/add-money.dto';
+import { WithdrawMoneyDto } from './dto/withdraw-money.dto';
 import { resolveCashfreeBankCode } from './utils/cashfree-banks';
 
 @Injectable()
@@ -68,6 +69,7 @@ export class WalletService {
     const balance = balancePaise / 100;
     const escrowSetup = (brandProfile.escrowSetup as any) || {};
     const savedUpiIds: string[] = Array.isArray(escrowSetup.savedUpiIds) ? escrowSetup.savedUpiIds : [];
+    const savedBankAccounts: any[] = Array.isArray(escrowSetup.savedBankAccounts) ? escrowSetup.savedBankAccounts : [];
 
     return {
       id: wallet.id,
@@ -76,6 +78,7 @@ export class WalletService {
       balancePaise: wallet.balancePaise.toString(),
       balance,
       savedUpiIds,
+      savedBankAccounts,
       createdAt: wallet.createdAt,
       updatedAt: wallet.updatedAt,
       transactions: wallet.transactions.map((tx) => ({
@@ -739,5 +742,187 @@ export class WalletService {
     });
 
     return { savedUpiIds: updated };
+  }
+
+  /**
+   * Withdraws funds from BrandWallet to Bank Account (IMPS/NEFT) or UPI VPA via Cashfree.
+   */
+  async withdrawMoney(userId: string, dto: WithdrawMoneyDto) {
+    const brandProfile = await this.prisma.brandProfile.findUnique({
+      where: { userId },
+      include: { user: true },
+    });
+
+    if (!brandProfile) {
+      throw new NotFoundException('Brand profile not found for this user account');
+    }
+
+    const wallet = await this.prisma.brandWallet.findUnique({
+      where: { brandId: brandProfile.id },
+    });
+
+    if (!wallet) {
+      throw new NotFoundException('Brand wallet not found');
+    }
+
+    const amountInRupees = Number(dto.amount);
+    if (isNaN(amountInRupees) || amountInRupees < 100) {
+      throw new BadRequestException('Minimum withdrawal amount is ₹100');
+    }
+
+    const amountPaise = BigInt(Math.round(amountInRupees * 100));
+
+    if (wallet.balancePaise < amountPaise) {
+      throw new BadRequestException(
+        `Insufficient wallet balance. Available: ₹${(Number(wallet.balancePaise) / 100).toFixed(2)}, Requested: ₹${amountInRupees}`,
+      );
+    }
+
+    if (dto.payoutMethod === 'bank_transfer' || dto.payoutMethod === 'netbanking') {
+      if (!dto.bankAccount?.accountNumber && !dto.bankCode) {
+        throw new BadRequestException('Bank account details or bank selection is required');
+      }
+    } else if (dto.payoutMethod === 'card') {
+      if (!dto.card?.cardNumber || !dto.card.cardNumber.replace(/\D/g, '')) {
+        throw new BadRequestException('A valid 15 or 16-digit card number is required for Card withdrawal');
+      }
+    } else if (dto.payoutMethod === 'upi') {
+      if (!dto.upiId || !dto.upiId.trim() || !dto.upiId.includes('@')) {
+        throw new BadRequestException('A valid UPI ID (e.g. name@okhdfcbank) is required for UPI payout');
+      }
+    } else {
+      throw new BadRequestException('Invalid payout method. Supported methods: upi, card, netbanking, bank_transfer');
+    }
+
+    const transferId = `wd_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const beneficiaryName =
+      dto.payoutMethod === 'card'
+        ? dto.card?.cardHolderName?.trim() || brandProfile.companyName || brandProfile.user?.name || 'Zerify Customer'
+        : dto.payoutMethod === 'bank_transfer' || dto.payoutMethod === 'netbanking'
+        ? dto.bankAccount?.accountHolderName?.trim() || brandProfile.companyName || brandProfile.user?.name || 'Zerify Brand'
+        : brandProfile.companyName || brandProfile.user?.name || 'Zerify Brand';
+
+    const beneficiaryPhone =
+      (brandProfile as any).contactPhone ||
+      (brandProfile as any).phone ||
+      (brandProfile.user as any)?.phone ||
+      '9999999999';
+
+    const beneficiaryEmail = brandProfile.user?.email || 'billing@zerify.in';
+    const cleanCard = dto.card?.cardNumber ? dto.card.cardNumber.replace(/\D/g, '') : undefined;
+
+    let payoutResult: { status: string; referenceId: string; raw?: any };
+
+    try {
+      payoutResult = await this.cashfreeProvider.directPayoutTransfer({
+        transferId,
+        amount: amountInRupees,
+        transferMode: dto.payoutMethod === 'upi' ? 'upi' : dto.payoutMethod === 'card' ? 'card' : 'banktransfer',
+        beneficiaryName,
+        beneficiaryPhone,
+        beneficiaryEmail,
+        accountNumber: dto.bankAccount?.accountNumber?.replace(/\s+/g, '') || (dto.bankCode ? `99990000${dto.bankCode}` : undefined),
+        ifsc: dto.bankAccount?.ifscCode?.trim()?.toUpperCase() || `${dto.bankCode || 'HDFC'}0000123`,
+        vpa: dto.upiId?.trim(),
+        cardNumber: cleanCard,
+      });
+    } catch (payoutErr: any) {
+      this.logger.error(`Cashfree withdrawal failure: ${payoutErr.message}`);
+      throw new BadRequestException(payoutErr.message || 'Failed to process payout via Cashfree');
+    }
+
+    // Atomic transaction: Deduct balance & create WalletTransaction
+    const updatedWallet = await this.prisma.$transaction(async (tx) => {
+      // Re-verify balance within transaction
+      const freshWallet = await tx.brandWallet.findUniqueOrThrow({
+        where: { id: wallet.id },
+      });
+
+      if (freshWallet.balancePaise < amountPaise) {
+        throw new BadRequestException('Insufficient wallet balance');
+      }
+
+      const decWallet = await tx.brandWallet.update({
+        where: { id: wallet.id },
+        data: {
+          balancePaise: { decrement: amountPaise },
+        },
+      });
+
+      const destLabel =
+        dto.payoutMethod === 'upi'
+          ? `UPI (${dto.upiId?.trim()})`
+          : dto.payoutMethod === 'card'
+          ? `Card (••••${cleanCard?.slice(-4) || 'CARD'})`
+          : `Net Banking (${dto.bankCode || dto.bankAccount?.bankName || 'Bank'})`;
+
+      await tx.walletTransaction.create({
+        data: {
+          walletId: wallet.id,
+          type: WalletTransactionType.REFUND,
+          status: WalletTransactionStatus.COMPLETED,
+          amountPaise: amountPaise,
+          currency: wallet.currency,
+          description: `Withdrawal to ${destLabel} [Ref: ${payoutResult.referenceId}]`,
+        },
+      });
+
+      // Optionally save destination
+      if (dto.saveDestination) {
+        const currentEscrow = (brandProfile.escrowSetup as any) || {};
+        if (dto.payoutMethod === 'upi' && dto.upiId?.trim()) {
+          const currentUpis: string[] = Array.isArray(currentEscrow.savedUpiIds) ? currentEscrow.savedUpiIds : [];
+          if (!currentUpis.includes(dto.upiId.trim())) {
+            await tx.brandProfile.update({
+              where: { id: brandProfile.id },
+              data: {
+                escrowSetup: {
+                  ...currentEscrow,
+                  savedUpiIds: [dto.upiId.trim(), ...currentUpis].slice(0, 5),
+                },
+              },
+            });
+          }
+        } else if (dto.payoutMethod === 'bank_transfer' && dto.bankAccount) {
+          const currentBanks: any[] = Array.isArray(currentEscrow.savedBankAccounts) ? currentEscrow.savedBankAccounts : [];
+          const cleanAcc = dto.bankAccount.accountNumber.replace(/\s+/g, '');
+          const exists = currentBanks.some((b: any) => b.accountNumber === cleanAcc);
+          if (!exists) {
+            const bankToSave = {
+              accountNumber: cleanAcc,
+              ifscCode: dto.bankAccount.ifscCode.trim().toUpperCase(),
+              accountHolderName: dto.bankAccount.accountHolderName.trim(),
+              bankName: dto.bankAccount.bankName?.trim() || 'Bank',
+            };
+            await tx.brandProfile.update({
+              where: { id: brandProfile.id },
+              data: {
+                escrowSetup: {
+                  ...currentEscrow,
+                  savedBankAccounts: [bankToSave, ...currentBanks].slice(0, 5),
+                },
+              },
+            });
+          }
+        }
+      }
+
+      return decWallet;
+    });
+
+    this.logger.log(
+      `Processed withdrawal of ₹${amountInRupees} for brand ${brandProfile.id} [Ref: ${payoutResult.referenceId}]. New balance: ₹${Number(updatedWallet.balancePaise) / 100}`,
+    );
+
+    return {
+      success: true,
+      transferId,
+      referenceId: payoutResult.referenceId,
+      amount: amountInRupees,
+      currency: wallet.currency,
+      payoutMethod: dto.payoutMethod,
+      newBalance: Number(updatedWallet.balancePaise) / 100,
+      message: `Successfully processed withdrawal of ₹${amountInRupees} via ${dto.payoutMethod === 'upi' ? 'UPI' : 'Bank Transfer'}.`,
+    };
   }
 }

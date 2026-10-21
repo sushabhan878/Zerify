@@ -226,11 +226,11 @@ export default function BrandPayoutsSection() {
         isOpen={isWithdrawOpen}
         onClose={() => setIsWithdrawOpen(false)}
         availableBalance={availableBalance}
-        paymentId={selectedTxForAction?.id}
         onSuccess={(amount) => {
           if (amount) {
             setAvailableBalance((prev) => Math.max(0, prev - amount));
           }
+          fetchBrandPayments();
         }}
       />
 

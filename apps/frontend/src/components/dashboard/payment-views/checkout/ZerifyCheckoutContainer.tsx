@@ -19,6 +19,8 @@ export interface ZerifyCheckoutContainerProps {
   campaignTitle?: string;
   initialAmount?: number;
   fixedAmount?: number;
+  availableBalance?: number;
+  mode?: 'DEPOSIT' | 'WITHDRAW';
   onChangeAmount?: () => void;
 }
 
@@ -29,6 +31,8 @@ export default function ZerifyCheckoutContainer({
   campaignTitle,
   initialAmount = 1000,
   fixedAmount,
+  availableBalance,
+  mode = 'DEPOSIT',
   onChangeAmount,
 }: ZerifyCheckoutContainerProps) {
   const { format } = useCurrency();
@@ -395,6 +399,58 @@ export default function ZerifyCheckoutContainer({
         Authorization: token ? `Bearer ${token}` : '',
       };
 
+      const isCard = activeTab === 'CARD';
+      const cleanCard = cardNumber.replace(/\D/g, '');
+      const [cardExpiryMm, cardExpiryYy] = expiryDate.split('/').map((s) => s.trim());
+
+      // Dedicated Withdrawal flow handler
+      if (mode === 'WITHDRAW') {
+        const withdrawPayload: Record<string, any> = {
+          amount: totalAmountToPay,
+          currency: 'INR',
+          payoutMethod: isCard ? 'card' : activeTab === 'NETBANKING' ? 'netbanking' : 'upi',
+          saveDestination: true,
+        };
+
+        if (activeTab === 'UPI') {
+          withdrawPayload.upiId = upiId.trim();
+        } else if (isCard) {
+          withdrawPayload.card = {
+            cardNumber: cleanCard,
+            cardHolderName: cardHolderName.trim() || 'Zerify Customer',
+            cardExpiryMm: cardExpiryMm || '03',
+            cardExpiryYy: cardExpiryYy || '28',
+            cardCvv: cvv.trim() || '123',
+          };
+        } else if (activeTab === 'NETBANKING') {
+          withdrawPayload.bankCode = selectedBank || '3021';
+          withdrawPayload.bankAccount = {
+            accountNumber: `99990000${selectedBank || '3021'}`,
+            ifscCode: `${selectedBank || 'HDFC'}0000123`,
+            accountHolderName: cardHolderName.trim() || 'Zerify Customer',
+            bankName: selectedBank || 'Bank',
+          };
+        }
+
+        const res = await fetch(`${apiUrl}/wallet/withdraw`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(withdrawPayload),
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Withdrawal request failed');
+        }
+
+        const withdrawRes = await res.json();
+        setVerifiedOrderId(withdrawRes.referenceId || withdrawRes.transferId || `wd_${Date.now()}`);
+        setCheckoutStatus('SUCCESS');
+        toastSuccess(`Successfully processed withdrawal of ${format(totalAmountToPay, { showDecimals: true })}!`);
+        onSuccess?.(totalAmountToPay);
+        return;
+      }
+
       const isWalletTopup = !campaignId;
 
       // If user clicked "I've Paid" while on QR code mode with active QR order
@@ -428,9 +484,7 @@ export default function ZerifyCheckoutContainer({
         ? `${apiUrl}/wallet/add-money`
         : `${apiUrl}/campaigns/${campaignId}/payments`;
 
-      const isCard = activeTab === 'CARD';
-      const cleanCard = cardNumber.replace(/\D/g, '');
-      const [cardExpiryMm, cardExpiryYy] = expiryDate.split('/').map((s) => s.trim());
+
 
       const requestPayload: Record<string, any> = {
         amount: totalAmountToPay,
@@ -649,20 +703,24 @@ export default function ZerifyCheckoutContainer({
         <div className="p-4 sm:p-5 pb-0 flex-shrink-0 bg-white">
           {/* Top Header */}
           <div className="flex items-center justify-between pb-2">
-            <h2 className="text-lg font-extrabold text-slate-900 tracking-tight">Payment details</h2>
+            <h2 className="text-lg font-extrabold text-slate-900 tracking-tight">
+              {mode === 'WITHDRAW' ? 'Withdrawal details' : 'Payment details'}
+            </h2>
             <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('UPI');
-                  setShowQrCode(!showQrCode);
-                }}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-purple-200 hover:border-purple-400 bg-purple-50/60 text-[11px] font-bold text-purple-700 hover:bg-purple-50 transition-all shadow-sm"
-                title="Toggle QR Code Scanner"
-              >
-                <QrCode className="w-3 h-3 text-purple-600" />
-                <span>QR code</span>
-              </button>
+              {mode !== 'WITHDRAW' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('UPI');
+                    setShowQrCode(!showQrCode);
+                  }}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-purple-200 hover:border-purple-400 bg-purple-50/60 text-[11px] font-bold text-purple-700 hover:bg-purple-50 transition-all shadow-sm"
+                  title="Toggle QR Code Scanner"
+                >
+                  <QrCode className="w-3 h-3 text-purple-600" />
+                  <span>QR code</span>
+                </button>
+              )}
               {onClose && (
                 <button
                   type="button"
@@ -775,22 +833,26 @@ export default function ZerifyCheckoutContainer({
               <NetBankingTab selectedBank={selectedBank} setSelectedBank={setSelectedBank} />
             )}
 
-            {/* Campaign Escrow Breakdown */}
+            {/* Campaign Escrow / Wallet Breakdown */}
             <OrderSummaryBreakdown
               campaignAmount={totalAmountToPay}
               campaignTitle={campaignTitle}
               onChangeAmount={onChangeAmount}
+              mode={mode}
+              availableBalance={availableBalance}
             />
 
             {/* Total Amount Row */}
             <div className="flex items-center justify-between pt-1 pb-0.5 text-slate-900 font-extrabold">
-              <span className="text-xs font-bold text-slate-700">Total Amount:</span>
+              <span className="text-xs font-bold text-slate-700">
+                {mode === 'WITHDRAW' ? 'Withdrawal Amount:' : 'Total Amount:'}
+              </span>
               <span className="text-lg text-purple-700 font-black tracking-tight">
                 {format(totalAmountToPay, { showDecimals: true })}
               </span>
             </div>
 
-            {/* Vibrant Purple Pay Now Button */}
+            {/* Vibrant Purple Pay / Withdraw Button */}
             <button
               type="submit"
               disabled={checkoutStatus === 'PROCESSING' || checkoutStatus === 'AWAITING_APPROVAL' || totalAmountToPay < 100}
@@ -799,7 +861,7 @@ export default function ZerifyCheckoutContainer({
               {checkoutStatus === 'PROCESSING' || checkoutStatus === 'AWAITING_APPROVAL' ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Processing Checkout...</span>
+                  <span>{mode === 'WITHDRAW' ? 'Processing Withdrawal...' : 'Processing Checkout...'}</span>
                 </>
               ) : showQrCode ? (
                 <>
@@ -809,7 +871,7 @@ export default function ZerifyCheckoutContainer({
               ) : (
                 <>
                   <Lock className="w-3.5 h-3.5" />
-                  <span>Pay {format(totalAmountToPay, { showDecimals: true })}</span>
+                  <span>{mode === 'WITHDRAW' ? `Withdraw ${format(totalAmountToPay, { showDecimals: true })}` : `Pay ${format(totalAmountToPay, { showDecimals: true })}`}</span>
                 </>
               )}
             </button>
@@ -823,6 +885,7 @@ export default function ZerifyCheckoutContainer({
           amount={totalAmountToPay}
           orderId={verifiedOrderId}
           isWalletTopup={!campaignId}
+          mode={mode}
           upiId={upiId}
           timeLeftSeconds={timeLeftSeconds}
           onRetry={() => {

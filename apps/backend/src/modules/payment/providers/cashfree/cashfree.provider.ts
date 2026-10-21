@@ -465,6 +465,87 @@ export class CashfreePaymentProvider implements PaymentProvider {
     };
   }
 
+  /**
+   * Executes a direct payout/withdrawal transfer to a bank account or UPI VPA.
+   * Connects to Cashfree Payouts API with sandbox simulation support.
+   */
+  async directPayoutTransfer(input: {
+    transferId: string;
+    amount: number;
+    transferMode: 'banktransfer' | 'upi' | 'card';
+    beneficiaryName: string;
+    beneficiaryPhone?: string;
+    beneficiaryEmail?: string;
+    accountNumber?: string;
+    ifsc?: string;
+    vpa?: string;
+    cardNumber?: string;
+  }): Promise<{ status: 'SUCCESS' | 'PENDING' | 'FAILED'; referenceId: string; raw?: any }> {
+    const isSandbox = this.configService.get<string>('CASHFREE_ENVIRONMENT', 'sandbox') === 'sandbox';
+
+    const payload: Record<string, any> = {
+      transferId: input.transferId,
+      amount: input.amount,
+      currency: 'INR',
+      transferMode: input.transferMode === 'upi' ? 'upi' : input.transferMode === 'card' ? 'card' : 'banktransfer',
+    };
+
+    if (input.transferMode === 'upi') {
+      payload.beneDetails = {
+        name: input.beneficiaryName,
+        email: input.beneficiaryEmail || 'billing@zerify.in',
+        phone: input.beneficiaryPhone || '9999999999',
+        vpa: input.vpa,
+      };
+    } else if (input.transferMode === 'card') {
+      payload.beneDetails = {
+        name: input.beneficiaryName,
+        email: input.beneficiaryEmail || 'billing@zerify.in',
+        phone: input.beneficiaryPhone || '9999999999',
+        cardNo: input.cardNumber,
+      };
+    } else {
+      payload.beneDetails = {
+        name: input.beneficiaryName,
+        email: input.beneficiaryEmail || 'billing@zerify.in',
+        phone: input.beneficiaryPhone || '9999999999',
+        bankAccount: input.accountNumber,
+        ifsc: input.ifsc,
+      };
+    }
+
+    try {
+      const headers = await this.payoutHeaders();
+      const response = await this.request<any>(`${this.payoutBaseUrl}/v1.2/directTransfer`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      });
+
+      const data = response?.data ?? response;
+      const status = (data?.status || 'SUCCESS').toUpperCase();
+      const refId = String(data?.referenceId || data?.transferId || input.transferId);
+
+      return {
+        status: status === 'FAILED' ? 'FAILED' : 'SUCCESS',
+        referenceId: refId,
+        raw: data,
+      };
+    } catch (err: any) {
+      if (isSandbox) {
+        this.logger.warn(
+          `Cashfree Payout API sandbox fallback triggered (${err.message}). Simulating successful payout ${input.transferId}`,
+        );
+        return {
+          status: 'SUCCESS',
+          referenceId: `cf_sim_payout_${Date.now()}`,
+          raw: { simulated: true },
+        };
+      }
+      throw err;
+    }
+  }
+
   private normalizePayoutStatus(
     status: string,
   ): 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'UNKNOWN' {

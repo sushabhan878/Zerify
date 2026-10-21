@@ -11,6 +11,7 @@ interface CheckoutStatusModalProps {
   amount: number;
   orderId?: string | null;
   isWalletTopup?: boolean;
+  mode?: 'DEPOSIT' | 'WITHDRAW';
   upiId?: string;
   timeLeftSeconds?: number;
   onRetry: () => void;
@@ -23,6 +24,7 @@ export default function CheckoutStatusModal({
   amount,
   orderId,
   isWalletTopup = true,
+  mode = 'DEPOSIT',
   upiId,
   timeLeftSeconds = 300,
   onRetry,
@@ -123,10 +125,16 @@ export default function CheckoutStatusModal({
             <CheckCircle2 className="w-9 h-9" />
           </div>
           <div>
-            <h3 className="text-lg font-black text-slate-900">Payment Verified!</h3>
+            <h3 className="text-lg font-black text-slate-900">
+              {mode === 'WITHDRAW' ? 'Withdrawal Completed!' : 'Payment Verified!'}
+            </h3>
             <p className="text-xs text-slate-500 mt-1">
               {format(amount, { showDecimals: true })} has been successfully{' '}
-              {isWalletTopup ? 'added to your Zerify Wallet.' : 'deposited into Campaign Escrow.'}
+              {mode === 'WITHDRAW'
+                ? 'withdrawn from your Zerify Wallet.'
+                : isWalletTopup
+                ? 'added to your Zerify Wallet.'
+                : 'deposited into Campaign Escrow.'}
             </p>
           </div>
 
