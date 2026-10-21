@@ -3,101 +3,24 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Building2, Mail, FileText, CheckCircle2, Loader2, Sparkles, ShieldCheck } from 'lucide-react';
+import { X, ShieldCheck } from 'lucide-react';
 import GstVerificationManager from '../gst-verification/GstVerificationManager';
 
 interface BrandBillingDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSaved?: (details: { billingName: string; billingEmail: string; taxId: string }) => void;
+  onSaved?: (details: any) => void;
 }
 
 export default function BrandBillingDetailsModal({
   isOpen,
   onClose,
-  onSaved,
 }: BrandBillingDetailsModalProps) {
   const [mounted, setMounted] = useState(false);
-  const [activeTab, setActiveTab] = useState<'basic' | 'gstin'>('gstin');
-  const [billingName, setBillingName] = useState('');
-  const [billingEmail, setBillingEmail] = useState('');
-  const [taxId, setTaxId] = useState('');
-  const [address, setAddress] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      try {
-        const cached = localStorage.getItem('zerify_brand_profile_cache');
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          const escrow = parsed?.escrowSetup || {};
-          if (escrow.billingEmail) setBillingEmail(escrow.billingEmail);
-          if (escrow.taxId) setTaxId(escrow.taxId);
-          if (parsed.companyName) setBillingName(parsed.companyName);
-        }
-      } catch (e) {}
-    }
-  }, [isOpen]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const token = localStorage.getItem('zerify_token');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
-
-      const res = await fetch(`${apiUrl}/brand/escrow-setup`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-        body: JSON.stringify({
-          escrowSetup: {
-            billingName,
-            billingEmail,
-            taxId,
-            address,
-            escrowEnabled: true,
-          },
-        }),
-      });
-
-      if (!res.ok) {
-        const localDetails = { billingName, billingEmail, taxId, address };
-        localStorage.setItem('zerify_brand_billing_details', JSON.stringify(localDetails));
-      } else {
-        const data = await res.json();
-        localStorage.setItem('zerify_brand_profile_cache', JSON.stringify(data));
-      }
-
-      setSuccess(true);
-      onSaved?.({ billingName, billingEmail, taxId });
-      setTimeout(() => {
-        setSuccess(false);
-        onClose();
-      }, 1200);
-    } catch (err: any) {
-      localStorage.setItem('zerify_brand_billing_details', JSON.stringify({ billingName, billingEmail, taxId, address }));
-      setSuccess(true);
-      onSaved?.({ billingName, billingEmail, taxId });
-      setTimeout(() => {
-        setSuccess(false);
-        onClose();
-      }, 1200);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (!isOpen || !mounted) return null;
 
@@ -114,10 +37,10 @@ export default function BrandBillingDetailsModal({
           <div className="flex items-start justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-purple-500/15 border border-purple-500/25 text-purple-400">
-                <Building2 className="w-5 h-5" />
+                <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-black text-white">Business Billing & GSTIN Verification</h3>
+                <h3 className="text-base font-black text-white">Business GSTIN Verification</h3>
                 <p className="text-xs text-slate-400">
                   Manage corporate tax identity, multi-state GSTINs, and Cashfree invoice validation
                 </p>
@@ -131,133 +54,10 @@ export default function BrandBillingDetailsModal({
             </button>
           </div>
 
-          {/* Mode Tabs */}
-          <div className="flex items-center gap-1.5 p-1 bg-slate-900/90 rounded-2xl border border-white/5">
-            <button
-              type="button"
-              onClick={() => setActiveTab('gstin')}
-              className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                activeTab === 'gstin' ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Government GSTIN Suite (Cashfree)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('basic')}
-              className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                activeTab === 'basic' ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <FileText className="w-4 h-4" />
-              <span>Basic Billing Profile</span>
-            </button>
+          {/* GSTIN Verification Manager Body */}
+          <div className="pt-1">
+            <GstVerificationManager />
           </div>
-
-          {activeTab === 'gstin' ? (
-            <div className="pt-1">
-              <GstVerificationManager />
-            </div>
-          ) : success ? (
-            <div className="py-8 text-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
-              <h4 className="text-sm font-bold text-white">Billing Information Saved!</h4>
-              <p className="text-xs text-slate-400">Your invoices will now automatically include these credentials.</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-              {error && (
-                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300">
-                  {error}
-                </div>
-              )}
-
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Company / Entity Legal Name</label>
-                  <input
-                    type="text"
-                    value={billingName}
-                    onChange={(e) => setBillingName(e.target.value)}
-                    placeholder="e.g. Acme Technologies Private Limited"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Accounts / Finance Email</label>
-                  <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
-                    <input
-                      type="email"
-                      value={billingEmail}
-                      onChange={(e) => setBillingEmail(e.target.value)}
-                      placeholder="billing@acme.com"
-                      className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">GSTIN / VAT ID</label>
-                    <div className="relative">
-                      <FileText className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
-                      <input
-                        type="text"
-                        value={taxId}
-                        onChange={(e) => setTaxId(e.target.value)}
-                        placeholder="27AAAAA0000A1Z5"
-                        className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 uppercase"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Country / Jurisdiction</label>
-                    <input
-                      type="text"
-                      defaultValue="India (Cashfree Payments)"
-                      disabled
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/50 border border-white/5 text-xs text-slate-400 cursor-not-allowed"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Registered Address (Optional)</label>
-                  <textarea
-                    rows={2}
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Suite 400, Innovation Tower, Cyber City, Bangalore - 560103"
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-900/80 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-3 flex items-center justify-end gap-3 border-t border-white/10">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white shadow-lg shadow-purple-600/20 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
-                >
-                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  <span>Save Basic Details</span>
-                </button>
-              </div>
-            </form>
-          )}
         </motion.div>
       </div>
     </AnimatePresence>,
