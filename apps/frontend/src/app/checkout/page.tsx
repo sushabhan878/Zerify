@@ -1,11 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import ZerifyCheckoutContainer from '@/components/dashboard/payment-views/checkout/ZerifyCheckoutContainer';
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -48,5 +48,19 @@ export default function CheckoutPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen w-full flex items-center justify-center bg-slate-50">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+        </div>
+      }
+    >
+      <CheckoutContent />
+    </Suspense>
   );
 }

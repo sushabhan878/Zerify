@@ -59,6 +59,10 @@ export class PaymentController {
       currency: dto.currency,
       idempotencyKey: dto.idempotencyKey,
       returnUrl: dto.returnUrl,
+      paymentMethod: dto.paymentMethod,
+      card: dto.card,
+      upiId: dto.upiId,
+      bankCode: dto.bankCode,
     });
     return presentPayment(payment, dto.currency ?? 'INR');
   }
@@ -76,6 +80,10 @@ export class PaymentController {
       currency: dto.currency,
       idempotencyKey: dto.idempotencyKey,
       returnUrl: dto.returnUrl,
+      paymentMethod: dto.paymentMethod,
+      card: dto.card,
+      upiId: dto.upiId,
+      bankCode: dto.bankCode,
     });
     return presentPayment(payment, dto.currency ?? 'INR');
   }

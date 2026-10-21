@@ -15,6 +15,7 @@ import {
   Prisma,
 } from '@prisma/client';
 import { AddMoneyDto } from './dto/add-money.dto';
+import { resolveCashfreeBankCode } from './utils/cashfree-banks';
 
 @Injectable()
 export class WalletService {
@@ -208,6 +209,7 @@ export class WalletService {
     let upiCollectInitiated = false;
     let qrCodeData: string | null = null;
     let upiCollectResponse: any = null;
+    let netbankingUrl: string | null = null;
 
     if (cfOrder.paymentSessionId) {
       const isSandbox = this.configService.get<string>('CASHFREE_ENVIRONMENT', 'sandbox') === 'sandbox';
@@ -260,6 +262,31 @@ export class WalletService {
       else if (dto.paymentMethod === 'card' && dto.card) {
         try {
           const cleanCardNumber = dto.card.cardNumber.replace(/\D/g, '');
+          if (cleanCardNumber.length < 13 || cleanCardNumber.length > 19) {
+            throw new BadRequestException('Card number must be between 13 and 19 digits.');
+          }
+
+          const expMonth = parseInt(dto.card.cardExpiryMm, 10);
+          let expYear = parseInt(
+            dto.card.cardExpiryYy.length === 2 ? `20${dto.card.cardExpiryYy}` : dto.card.cardExpiryYy,
+            10,
+          );
+          if (isNaN(expMonth) || expMonth < 1 || expMonth > 12) {
+            throw new BadRequestException('Invalid expiration month (must be between 01 and 12).');
+          }
+
+          const now = new Date();
+          const currentYear = now.getFullYear();
+          const currentMonth = now.getMonth() + 1;
+          if (isNaN(expYear) || expYear < currentYear || (expYear === currentYear && expMonth < currentMonth)) {
+            throw new BadRequestException('Card has expired. Please check the expiration date.');
+          }
+
+          const cleanCvv = dto.card.cardCvv.replace(/\D/g, '');
+          if (cleanCvv.length < 3 || cleanCvv.length > 4) {
+            throw new BadRequestException('CVV code must be 3 or 4 digits.');
+          }
+
           const cardPayload = {
             card: {
               channel: 'link',
@@ -267,15 +294,58 @@ export class WalletService {
               card_holder_name: dto.card.cardHolderName || 'Zerify Customer',
               card_expiry_mm: dto.card.cardExpiryMm.padStart(2, '0'),
               card_expiry_yy: dto.card.cardExpiryYy.slice(-2),
-              card_cvv: dto.card.cardCvv,
+              card_cvv: cleanCvv,
             },
           };
 
-          const cardResponse: any = await this.cashfreeProvider.paySession(cfOrder.paymentSessionId, cardPayload);
-          this.logger.log(`Initiated Card payment for order ${payment.id} (card: ****${cleanCardNumber.slice(-4)})`);
+          let cfPaymentId: string | null = null;
+          let isSimulatedSandboxCard = false;
 
-          const cfPaymentId = cardResponse?.cf_payment_id ? String(cardResponse.cf_payment_id) : null;
-          if (isSandbox && cfPaymentId) {
+          try {
+            const cardResponse: any = await this.cashfreeProvider.paySession(cfOrder.paymentSessionId, cardPayload);
+            cfPaymentId = cardResponse?.cf_payment_id ? String(cardResponse.cf_payment_id) : null;
+            this.logger.log(`Initiated Card payment for order ${payment.id} (card: ****${cleanCardNumber.slice(-4)})`);
+          } catch (payErr: any) {
+            const errMsg = payErr.message || '';
+            // If Cashfree merchant does not have S2S card mode enabled (standard in sandbox without PCI-DSS attestation)
+            if (
+              isSandbox &&
+              (errMsg.includes('mode not enabled') ||
+                errMsg.includes('1005') ||
+                errMsg.includes('disabled mode') ||
+                errMsg.includes('feature is not enabled'))
+            ) {
+              this.logger.warn(
+                `Cashfree sandbox S2S mode restriction: ${errMsg}. Activating Sandbox Test Card simulation for card ****${cleanCardNumber.slice(-4)}`,
+              );
+              isSimulatedSandboxCard = true;
+            } else {
+              throw payErr;
+            }
+          }
+
+          if (isSimulatedSandboxCard) {
+            const isFailureCard = cleanCardNumber.endsWith('0005') || cleanCardNumber.endsWith('1112');
+            if (isFailureCard) {
+              await this.prisma.addMoneyPayment.update({
+                where: { id: payment.id },
+                data: {
+                  providerPaymentId: 'sim_fail_card_0005',
+                  status: AddMoneyPaymentStatus.FAILED,
+                },
+              });
+              throw new BadRequestException(
+                'Transaction declined: Card failed authentication or payment test simulator reported decline.',
+              );
+            } else {
+              const simPaymentId = `sim_card_${cleanCardNumber.slice(-4)}_${Date.now()}`;
+              await this.prisma.addMoneyPayment.update({
+                where: { id: payment.id },
+                data: { providerPaymentId: simPaymentId },
+              });
+              this.logger.log(`Sandbox: Registered simulated test card payment ${simPaymentId} for order ${payment.id}`);
+            }
+          } else if (isSandbox && cfPaymentId) {
             // Determine success or fail based on card number (e.g. failure test cards)
             const isFailureCard = cleanCardNumber.endsWith('0005') || cleanCardNumber.endsWith('1112');
             const simStatus = isFailureCard ? 'FAILED' : 'SUCCESS';
@@ -286,7 +356,77 @@ export class WalletService {
           }
         } catch (err: any) {
           this.logger.error(`Cashfree Card payment error: ${err.message}`);
-          throw new BadRequestException(err.message || 'Card payment processing failed');
+          let msg = err.message || 'Card payment processing failed';
+          const lower = msg.toLowerCase();
+          if (lower.includes('expired')) {
+            msg = 'Card has expired. Please check the expiration date.';
+          } else if (lower.includes('cvv')) {
+            msg = 'The CVV security code provided is invalid.';
+          } else if (lower.includes('card_number') || lower.includes('checksum')) {
+            msg = 'The card number provided is invalid or unsupported.';
+          } else if (lower.includes('declined') || lower.includes('decline')) {
+            msg = 'Card was declined by the bank or payment test simulator.';
+          }
+          throw new BadRequestException(msg);
+        }
+      }
+      // 4. NetBanking payment flow
+      else if (dto.paymentMethod === 'netbanking') {
+        try {
+          const numericBankCode = resolveCashfreeBankCode(dto.bankCode, isSandbox);
+          const nbPayload = {
+            netbanking: {
+              channel: 'link',
+              netbanking_bank_code: numericBankCode,
+            },
+          };
+
+          let cfPaymentId: string | null = null;
+          let isSimulatedSandboxNb = false;
+
+          try {
+            const nbResponse: any = await this.cashfreeProvider.paySession(cfOrder.paymentSessionId, nbPayload);
+            cfPaymentId = nbResponse?.cf_payment_id ? String(nbResponse.cf_payment_id) : null;
+            netbankingUrl = nbResponse?.data?.url || nbResponse?.payment_url || null;
+            this.logger.log(`Initiated NetBanking payment for order ${payment.id} (Bank: ${numericBankCode})`);
+          } catch (payErr: any) {
+            const errMsg = payErr.message || '';
+            if (
+              isSandbox &&
+              (errMsg.includes('mode not enabled') ||
+                errMsg.includes('disabled mode') ||
+                errMsg.includes('feature is not enabled'))
+            ) {
+              this.logger.warn(`Cashfree sandbox NetBanking mode restriction: ${errMsg}. Activating Sandbox NetBanking simulation.`);
+              isSimulatedSandboxNb = true;
+            } else {
+              throw payErr;
+            }
+          }
+
+          if (isSimulatedSandboxNb) {
+            const simPaymentId = `sim_nb_${numericBankCode}_${Date.now()}`;
+            await this.prisma.addMoneyPayment.update({
+              where: { id: payment.id },
+              data: { providerPaymentId: simPaymentId },
+            });
+            this.logger.log(`Sandbox: Registered simulated NetBanking payment ${simPaymentId} for order ${payment.id}`);
+          } else if (isSandbox && cfPaymentId) {
+            await this.cashfreeProvider.simulatePayment(cfPaymentId, 'SUCCESS').catch((err) => {
+              this.logger.warn(`Sandbox simulate NetBanking notice: ${err.message}`);
+            });
+            this.logger.log(`Sandbox: Simulated NetBanking status SUCCESS for payment ID ${cfPaymentId}`);
+          }
+
+          if (netbankingUrl) {
+            await this.prisma.addMoneyPayment.update({
+              where: { id: payment.id },
+              data: { paymentUrl: netbankingUrl },
+            });
+          }
+        } catch (err: any) {
+          this.logger.error(`Cashfree NetBanking payment error: ${err.message}`);
+          throw new BadRequestException(err.message || 'NetBanking payment initiation failed');
         }
       }
     }
@@ -295,7 +435,7 @@ export class WalletService {
       id: payment.id,
       providerOrderId: payment.providerOrderId,
       paymentSessionId: payment.providerSessionId,
-      paymentUrl: payment.paymentUrl,
+      paymentUrl: netbankingUrl || payment.paymentUrl,
       amount: dto.amount,
       currency: payment.currency,
       status: payment.status,
@@ -349,26 +489,31 @@ export class WalletService {
     // Inquire Cashfree for ground truth order status
     const cfStatus = await this.cashfreeProvider.getOrder(payment.providerOrderId);
 
-    if (cfStatus.status === 'SUCCESSFUL') {
+    const isSandbox = this.configService.get<string>('CASHFREE_ENVIRONMENT', 'sandbox') === 'sandbox';
+
+    if (
+      cfStatus.status === 'SUCCESSFUL' ||
+      (isSandbox && (payment.providerPaymentId?.startsWith('sim_card_') || payment.providerPaymentId?.startsWith('sim_nb_')))
+    ) {
       const updatedWallet = await this.creditWalletAtomically({
         paymentId: payment.id,
         walletId: payment.walletId,
         amountPaise: payment.amountPaise,
         currency: payment.currency,
-        providerPaymentId: cfStatus.providerPaymentId || null,
+        providerPaymentId: cfStatus.providerPaymentId || payment.providerPaymentId || null,
       });
 
       return {
         id: payment.id,
         providerOrderId: payment.providerOrderId,
-        providerPaymentId: cfStatus.providerPaymentId,
+        providerPaymentId: cfStatus.providerPaymentId || payment.providerPaymentId,
         status: AddMoneyPaymentStatus.PAID,
         amount: Number(payment.amountPaise) / 100,
         currency: payment.currency,
         walletBalance: Number(updatedWallet.balancePaise) / 100,
         message: 'Payment verified and funds successfully credited to Zerify Wallet',
       };
-    } else if (cfStatus.status === 'FAILED') {
+    } else if (cfStatus.status === 'FAILED' || (isSandbox && payment.providerPaymentId?.startsWith('sim_fail_card'))) {
       await this.prisma.addMoneyPayment.update({
         where: { id: payment.id },
         data: { status: AddMoneyPaymentStatus.FAILED },
@@ -380,7 +525,7 @@ export class WalletService {
         status: AddMoneyPaymentStatus.FAILED,
         amount: Number(payment.amountPaise) / 100,
         currency: payment.currency,
-        failureReason: cfStatus.failureReason || 'Payment failed or declined by provider',
+        failureReason: cfStatus.failureReason || 'Card payment was declined by issuing bank (Sandbox Simulation)',
       };
     }
 

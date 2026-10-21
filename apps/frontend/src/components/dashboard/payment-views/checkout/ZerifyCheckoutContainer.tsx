@@ -10,6 +10,7 @@ import UpiPaymentTab from './UpiPaymentTab';
 import NetBankingTab from './NetBankingTab';
 import OrderSummaryBreakdown from './OrderSummaryBreakdown';
 import CheckoutStatusModal from './CheckoutStatusModal';
+import { isSandboxEnvironment } from '@/utils/payment-env';
 
 export interface ZerifyCheckoutContainerProps {
   onClose?: () => void;
@@ -62,11 +63,21 @@ export default function ZerifyCheckoutContainer({
   const [activeTab, setActiveTab] = useState<'CARD' | 'UPI' | 'NETBANKING'>('UPI');
   const [showQrCode, setShowQrCode] = useState(false);
 
-  // Card details state (pre-loaded with official Cashfree sandbox test card)
+  // Card details state (pre-loaded with official Cashfree sandbox test card in development/sandbox)
   const [cardNumber, setCardNumber] = useState('4706 1312 1121 2123');
-  const [cardHolderName, setCardHolderName] = useState('Alex Morgan');
-  const [expiryDate, setExpiryDate] = useState('12 / 28');
+  const [cardHolderName, setCardHolderName] = useState('Test');
+  const [expiryDate, setExpiryDate] = useState('03 / 28');
   const [cvv, setCvv] = useState('123');
+
+  // Clear card details in production on mount
+  React.useEffect(() => {
+    if (!isSandboxEnvironment()) {
+      setCardNumber('');
+      setCardHolderName('');
+      setExpiryDate('');
+      setCvv('');
+    }
+  }, []);
 
   // UPI & NetBanking state
   const [upiId, setUpiId] = useState('');
@@ -348,8 +359,26 @@ export default function ZerifyCheckoutContainer({
         toastError('Please enter a valid expiry date in MM / YY format');
         return;
       }
+
+      // Validate expiration date is not in the past
+      const month = parseInt(expiryParts[0], 10);
+      let year = parseInt(expiryParts[1], 10);
+      if (year < 100) year += 2000;
+      const now = new Date();
+      if (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1)) {
+        toastError('This card has expired. Please check the expiration date.');
+        return;
+      }
+
       if (!cvv || cvv.length < 3 || cvv.length > 4) {
         toastError('Please enter a valid 3 or 4-digit CVV');
+        return;
+      }
+    }
+
+    if (activeTab === 'NETBANKING') {
+      if (!selectedBank || !selectedBank.trim()) {
+        toastError('Please select a bank for Net Banking');
         return;
       }
     }
@@ -418,11 +447,13 @@ export default function ZerifyCheckoutContainer({
       } else if (isCard) {
         requestPayload.card = {
           cardNumber: cleanCard,
-          cardHolderName: cardHolderName.trim() || 'Alex Morgan',
-          cardExpiryMm: cardExpiryMm || '12',
+          cardHolderName: cardHolderName.trim() || 'Test',
+          cardExpiryMm: cardExpiryMm || '03',
           cardExpiryYy: cardExpiryYy || '28',
           cardCvv: cvv.trim() || '123',
         };
+      } else if (activeTab === 'NETBANKING') {
+        requestPayload.bankCode = selectedBank.trim();
       }
 
       const res = await fetch(endpoint, {
@@ -433,7 +464,18 @@ export default function ZerifyCheckoutContainer({
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to initialize payment order');
+        let errMsg = errorData.message || 'Failed to initialize payment order';
+        const lower = errMsg.toLowerCase();
+        if (lower.includes('expired')) {
+          errMsg = 'Card has expired. Please check the expiration date.';
+        } else if (lower.includes('cvv')) {
+          errMsg = 'Invalid CVV security code provided.';
+        } else if (lower.includes('card_number') || lower.includes('checksum')) {
+          errMsg = 'Invalid card number or network unsupported.';
+        } else if (lower.includes('declined') || lower.includes('decline')) {
+          errMsg = 'Card was declined by the bank or payment test simulator.';
+        }
+        throw new Error(errMsg);
       }
 
       const orderData = await res.json();
@@ -543,7 +585,12 @@ export default function ZerifyCheckoutContainer({
         let verified = false;
         let finalOrderId = paymentId;
 
-        for (let attempt = 0; attempt < 4; attempt++) {
+        // If Cashfree returned a NetBanking payment redirect URL, open it in a new window/tab
+        if (activeTab === 'NETBANKING' && orderData.paymentUrl && typeof window !== 'undefined') {
+          window.open(orderData.paymentUrl, '_blank', 'noopener,noreferrer');
+        }
+
+        for (let attempt = 0; attempt < 5; attempt++) {
           const verifyRes = await fetch(verifyEndpoint, { method: 'POST', headers }).catch(() => null);
           if (verifyRes) {
             if (!verifyRes.ok) {
@@ -551,15 +598,24 @@ export default function ZerifyCheckoutContainer({
               throw new Error(errBody.message || 'Payment verification failed');
             }
             const verifyData = await verifyRes.json();
-            if (verifyData.status === 'PAID') {
+            if (verifyData.status === 'PAID' || verifyData.status === 'SUCCESSFUL') {
               finalOrderId = verifyData.providerOrderId || paymentId;
               verified = true;
               break;
             } else if (verifyData.status === 'FAILED') {
-              throw new Error(verifyData.failureReason || 'Card payment declined or failed');
+              throw new Error(
+                verifyData.failureReason ||
+                  `${activeTab === 'CARD' ? 'Card' : 'NetBanking'} payment declined or failed`,
+              );
             }
           }
           await new Promise((r) => setTimeout(r, 800));
+        }
+
+        if (!verified) {
+          throw new Error(
+            `${activeTab === 'CARD' ? 'Card' : 'NetBanking'} payment verification timed out. Please try again.`,
+          );
         }
 
         setVerifiedOrderId(finalOrderId);

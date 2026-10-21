@@ -70,6 +70,9 @@ export default function NetBankingTab({ selectedBank, setSelectedBank }: NetBank
       { code: 'FINO', name: 'Fino Payments Bank', keywords: ['fino'] },
       { code: 'JIOB', name: 'Jio Payments Bank', keywords: ['jio'] },
 
+      // Cashfree Sandbox Simulator Bank
+      { code: '3333', name: 'Cashfree Sandbox Test Bank', keywords: ['sandbox', 'test', 'cashfree', '3333'] },
+
       // Foreign & MNC Banks Operating in India
       { code: 'SCBL', name: 'Standard Chartered Bank', keywords: ['standard chartered', 'stan chart', 'scb'] },
       { code: 'HSBC', name: 'HSBC Bank India', keywords: ['hsbc', 'hongkong shanghai'] },
@@ -97,7 +100,7 @@ export default function NetBankingTab({ selectedBank, setSelectedBank }: NetBank
     if (!selectedBank) return null;
     return allBanks.find((b) => b.code === selectedBank) || {
       code: selectedBank,
-      name: selectedBank.replace(/_/g, ' '),
+      name: selectedBank === '3333' ? 'Cashfree Sandbox Test Bank' : selectedBank.replace(/_/g, ' '),
     };
   }, [allBanks, selectedBank]);
 
@@ -135,9 +138,48 @@ export default function NetBankingTab({ selectedBank, setSelectedBank }: NetBank
   };
 
   return (
-    <div className="space-y-2 text-left" ref={containerRef}>
+    <div className="space-y-3 text-left" ref={containerRef}>
+      {/* Quick Select Popular Banks */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-semibold text-slate-600">Quick Select Bank</span>
+          <span className="text-[10px] text-purple-600 font-medium bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">
+            Cashfree Verified
+          </span>
+        </div>
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
+          {[
+            { code: 'HDFC', label: 'HDFC' },
+            { code: 'SBIN', label: 'SBI' },
+            { code: 'ICIC', label: 'ICICI' },
+            { code: 'UTIB', label: 'Axis' },
+            { code: 'KKBK', label: 'Kotak' },
+            { code: '3333', label: '🧪 Test Bank' },
+          ].map((item) => {
+            const isSelected = selectedBank === item.code;
+            return (
+              <button
+                key={item.code}
+                type="button"
+                onClick={() => {
+                  setSelectedBank(item.code);
+                  setIsOpen(false);
+                }}
+                className={`px-2 py-1.5 rounded-lg text-xs font-semibold border transition-all text-center truncate ${
+                  isSelected
+                    ? 'bg-purple-50 border-purple-600 text-purple-700 shadow-sm ring-1 ring-purple-600'
+                    : 'bg-white border-slate-200 text-slate-700 hover:border-purple-300 hover:bg-purple-50/40'
+                }`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <label className="block text-xs font-semibold text-slate-700">
-        Select Bank <span className="text-purple-600 font-bold">*</span>
+        All Banks <span className="text-purple-600 font-bold">*</span>
       </label>
 
       {/* Search Input Bar with click-to-open Dropdown */}

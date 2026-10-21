@@ -94,5 +94,13 @@ export class AddMoneyDto {
   @ValidateNested()
   @Type(() => CardPaymentDetailsDto)
   card?: CardPaymentDetailsDto;
+
+  @ApiPropertyOptional({
+    description: 'Bank code for NetBanking transactions (e.g. HDFC, SBIN, ICIC, UTIB, 3021, or 3333)',
+    example: 'HDFC',
+  })
+  @IsOptional()
+  @IsString()
+  bankCode?: string;
 }
 

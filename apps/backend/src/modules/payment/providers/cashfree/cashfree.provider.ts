@@ -295,6 +295,25 @@ export class CashfreePaymentProvider implements PaymentProvider {
       };
     }
 
+    const failed = Array.isArray(payments)
+      ? payments.find((p) => p.payment_status === 'FAILED' || p.payment_status === 'CANCELLED' || p.payment_status === 'FLAGGED')
+      : null;
+
+    if (!successful && failed) {
+      return {
+        providerOrderId,
+        providerPaymentId: failed?.cf_payment_id ? String(failed.cf_payment_id) : undefined,
+        status: 'FAILED',
+        amountMinor: orderAmountMinor,
+        currency: order?.order_currency,
+        failureCode: failed?.payment_status_description || 'PAYMENT_FAILED',
+        failureReason:
+          failed?.payment_message ||
+          failed?.payment_status_description ||
+          'Payment declined by card issuer or test sandbox simulation',
+      };
+    }
+
     if (orderStatus === ORDER_STATUS_ACTIVE) {
       return {
         providerOrderId,
