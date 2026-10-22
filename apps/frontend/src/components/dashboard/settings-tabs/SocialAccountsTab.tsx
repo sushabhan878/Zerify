@@ -166,8 +166,8 @@ function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): Social
       const followers =
         rawFollowers !== null && rawFollowers !== undefined
           ? (isLinkedInAcc && (rawFollowers === 500 || rawFollowers === 0)
-              ? '500+'
-              : Number(rawFollowers).toLocaleString())
+            ? '500+'
+            : Number(rawFollowers).toLocaleString())
           : (isLinkedInAcc ? '500+' : acc.followers);
       const dbId = matched?.id || profileMatch?.id;
 

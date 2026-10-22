@@ -6,16 +6,16 @@ export interface CampaignApplicationItem {
   influencerProfileId: string;
   socialAccountId: string;
   status:
-    | 'APPLIED'
-    | 'UNDER_REVIEW'
-    | 'SHORTLISTED'
-    | 'REJECTED'
-    | 'WITHDRAWN'
-    | 'EXPIRED'
-    | 'OFFER_SENT'
-    | 'OFFER_ACCEPTED'
-    | 'OFFER_DECLINED'
-    | 'OFFER_EXPIRED';
+  | 'APPLIED'
+  | 'UNDER_REVIEW'
+  | 'SHORTLISTED'
+  | 'REJECTED'
+  | 'WITHDRAWN'
+  | 'EXPIRED'
+  | 'OFFER_SENT'
+  | 'OFFER_ACCEPTED'
+  | 'OFFER_DECLINED'
+  | 'OFFER_EXPIRED';
   applicationMessage?: string;
   proposedAmount?: number;
   proposedCurrency?: string;
@@ -48,7 +48,7 @@ export interface CampaignApplicationItem {
 export const ApplicationService = {
   // Influencer Apply
   async applyToCampaign(campaignId: string, data: {
-    socialAccountId: string;
+    socialAccountId?: string;
     applicationMessage?: string;
     proposedAmount?: number;
     proposedCurrency?: string;

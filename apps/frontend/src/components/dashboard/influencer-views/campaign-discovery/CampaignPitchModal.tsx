@@ -99,14 +99,40 @@ export default function CampaignPitchModal({
         try {
           const accounts = JSON.parse(cached);
           if (Array.isArray(accounts) && accounts.length > 0) {
-            socialAccountId = accounts[0].id;
+            const campaignPlatforms = (campaign?.targetPlatforms || []).map((p: string) => p.toUpperCase());
+            const matched = accounts.find((a: any) => campaignPlatforms.includes(String(a.platform).toUpperCase()));
+            socialAccountId = matched ? matched.id : accounts[0].id;
           }
-        } catch (_) {}
+        } catch (_) { }
+      }
+
+      // If not in cache, silently fetch from API
+      if (!socialAccountId) {
+        try {
+          const token = typeof window !== 'undefined' ? localStorage.getItem('zerify_token') : null;
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+          const res = await fetch(`${apiUrl}/social/accounts`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data?.data) && data.data.length > 0) {
+              const campaignPlatforms = (campaign?.targetPlatforms || []).map((p: string) => p.toUpperCase());
+              const matched = data.data.find((a: any) => campaignPlatforms.includes(String(a.platform).toUpperCase()));
+              socialAccountId = matched ? matched.id : data.data[0].id;
+              if (typeof window !== 'undefined') {
+                try {
+                  localStorage.setItem('zerify_social_accounts_cache', JSON.stringify(data.data));
+                } catch (_) { }
+              }
+            }
+          }
+        } catch (_) { }
       }
 
       const { ApplicationService } = await import('@/services/application.service');
       await ApplicationService.applyToCampaign(campaign.id, {
-        socialAccountId: socialAccountId || '00000000-0000-0000-0000-000000000000',
+        socialAccountId: socialAccountId || undefined as any,
         proposedAmount: Number(proposedRate) || undefined,
         applicationMessage: pitchMessage.slice(0, 300),
         contentIdea: contentIdea.slice(0, 300) || pitchMessage.slice(0, 300),
@@ -281,11 +307,10 @@ export default function CampaignPitchModal({
                           setTurnaroundDays(opt.value);
                           setIsTimelineDropdownOpen(false);
                         }}
-                        className={`w-full px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between transition-colors ${
-                          turnaroundDays === opt.value
+                        className={`w-full px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between transition-colors ${turnaroundDays === opt.value
                             ? 'bg-purple-500/20 text-purple-200 font-bold border border-purple-500/30'
                             : 'text-slate-300 hover:bg-slate-900 hover:text-white'
-                        }`}
+                          }`}
                       >
                         <span>{opt.label}</span>
                         {turnaroundDays === opt.value && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
@@ -300,19 +325,17 @@ export default function CampaignPitchModal({
             {campaign.hasFreeProduct && (
               <div
                 onClick={() => setNeedsShipping(!needsShipping)}
-                className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start gap-3.5 select-none ${
-                  needsShipping
+                className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start gap-3.5 select-none ${needsShipping
                     ? 'bg-purple-950/30 border-purple-500/40 shadow-sm'
                     : 'bg-slate-900/40 border-purple-500/15 hover:border-purple-500/30'
-                }`}
+                  }`}
               >
                 {/* Custom Checkbox Indicator */}
                 <div
-                  className={`w-5 h-5 rounded-lg border shrink-0 mt-0.5 flex items-center justify-center transition-colors ${
-                    needsShipping
+                  className={`w-5 h-5 rounded-lg border shrink-0 mt-0.5 flex items-center justify-center transition-colors ${needsShipping
                       ? 'bg-gradient-to-tr from-purple-600 to-indigo-600 border-purple-400 text-white shadow-sm'
                       : 'border-slate-600 bg-slate-900'
-                  }`}
+                    }`}
                 >
                   {needsShipping && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                 </div>

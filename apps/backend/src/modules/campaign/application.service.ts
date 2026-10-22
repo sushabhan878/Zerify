@@ -21,7 +21,7 @@ export class ApplicationService {
     private readonly repository: CampaignRepository,
     private readonly prisma: PrismaService,
     private readonly outbox: OutboxService,
-  ) {}
+  ) { }
 
   /**
    * Collects the brand/creator identities a system message needs.
@@ -128,8 +128,8 @@ export class ApplicationService {
       throw new BadRequestException('Applications for this campaign have been closed');
     }
 
-    // Verify social account belongs to this user
-    const socialAccount = await this.prisma.socialAccount.findFirst({
+    // Verify or resolve social account for this user
+    let socialAccount = await this.prisma.socialAccount.findFirst({
       where: {
         id: dto.socialAccountId,
         userId,
@@ -140,13 +140,30 @@ export class ApplicationService {
     });
 
     if (!socialAccount) {
-      throw new ForbiddenException('Invalid social account or account does not belong to you');
+      const userAccounts = await this.prisma.socialAccount.findMany({
+        where: { userId },
+        include: { metadata: true },
+      });
+
+      if (!userAccounts || userAccounts.length === 0) {
+        throw new BadRequestException(
+          'You do not have any connected social accounts. Please connect a social media account (Instagram, YouTube, etc.) in Settings before applying to campaigns.',
+        );
+      }
+
+      // Match target campaign platform if possible
+      const campaignPlatforms = (campaign.platforms || []).map((p: string) => p.toUpperCase());
+      const platformMatch = userAccounts.find((acc) =>
+        campaignPlatforms.includes(acc.platform.toUpperCase()),
+      );
+
+      socialAccount = platformMatch || userAccounts[0];
     }
 
     // Check duplicate
     const existing = await this.repository.findApplicationByCampaignAndAccount(
       campaignId,
-      dto.socialAccountId,
+      socialAccount.id,
     );
 
     if (existing && existing.status !== ApplicationStatus.WITHDRAWN) {
@@ -180,50 +197,57 @@ export class ApplicationService {
 
     const brandUserId = (campaign as any).brandProfile?.userId;
 
-    // Create the application and enqueue its system message atomically.
-    return this.prisma.$transaction(async (tx) => {
-      const application = await tx.campaignApplication.create({
-        data: {
-          campaign: { connect: { id: campaignId } },
-          influencerProfile: { connect: { id: influencerProfile.id } },
-          socialAccount: { connect: { id: dto.socialAccountId } },
-          status: ApplicationStatus.APPLIED,
-          applicationMessage: dto.applicationMessage,
-          proposedAmount: dto.proposedAmount,
-          proposedCurrency: dto.proposedCurrency || 'USD',
-          contentIdea: dto.contentIdea,
-          portfolioUrls: dto.portfolioUrls || [],
-          matchSnapshot: matchData as any,
-          profileSnapshot: profileSnapshot as any,
-          submittedAt: new Date(),
-        },
-        include: {
-          campaign: { include: { brandProfile: true } },
-          influencerProfile: true,
-          socialAccount: true,
-        },
-      });
-
-      if (brandUserId) {
-        await this.outbox.enqueue(
-          tx,
-          OUTBOX_EVENTS.COLLABORATION_REQUEST_CREATED,
-          application.id,
-          {
-            applicationId: application.id,
-            campaignId,
-            campaignTitle: campaign.title,
-            brandUserId,
-            brandName: (campaign as any).brandProfile?.companyName ?? null,
-            influencerUserId: userId,
-            influencerName: influencerProfile.user?.name ?? influencerProfile.handle ?? null,
-            actor: 'INFLUENCER',
+    // Create the application and enqueue its system message atomically with generous timeout for Neon.
+    return this.prisma.$transaction(
+      async (tx) => {
+        const application = await tx.campaignApplication.create({
+          data: {
+            campaign: { connect: { id: campaignId } },
+            influencerProfile: { connect: { id: influencerProfile.id } },
+            socialAccount: { connect: { id: socialAccount.id } },
+            status: ApplicationStatus.APPLIED,
+            applicationMessage: dto.applicationMessage,
+            proposedAmount: dto.proposedAmount,
+            proposedCurrency: dto.proposedCurrency || 'USD',
+            contentIdea: dto.contentIdea,
+            portfolioUrls: dto.portfolioUrls || [],
+            matchSnapshot: matchData as any,
+            profileSnapshot: profileSnapshot as any,
+            submittedAt: new Date(),
           },
-        );
-      }
+          include: {
+            campaign: { include: { brandProfile: true } },
+            influencerProfile: true,
+            socialAccount: true,
+          },
+        });
 
-      return application;
-    });
+        if (brandUserId) {
+          try {
+            await this.outbox.enqueue(
+              tx,
+              OUTBOX_EVENTS.COLLABORATION_REQUEST_CREATED,
+              application.id,
+              {
+                applicationId: application.id,
+                campaignId,
+                campaignTitle: campaign.title,
+                brandUserId,
+                brandName: (campaign as any).brandProfile?.companyName ?? null,
+                influencerUserId: userId,
+                influencerName: influencerProfile.user?.name ?? influencerProfile.handle ?? null,
+                actor: 'INFLUENCER',
+              },
+            );
+          } catch (outboxErr) {
+            console.warn('Could not enqueue outbox event:', outboxErr);
+          }
+        }
+
+        return application;
+      },
+      { maxWait: 15000, timeout: 30000 },
+    );
   }
 
   private calculateMatch(campaign: any, influencer: any, socialAccount: any) {
