@@ -22,6 +22,8 @@ export interface ZerifyCheckoutContainerProps {
   availableBalance?: number;
   mode?: 'DEPOSIT' | 'WITHDRAW';
   onChangeAmount?: () => void;
+  grossAmount?: number;
+  zerifyFee?: number;
 }
 
 export default function ZerifyCheckoutContainer({
@@ -34,6 +36,8 @@ export default function ZerifyCheckoutContainer({
   availableBalance,
   mode = 'DEPOSIT',
   onChangeAmount,
+  grossAmount,
+  zerifyFee,
 }: ZerifyCheckoutContainerProps) {
   const { format } = useCurrency();
   const { toastSuccess, toastError } = useToast();
@@ -407,6 +411,8 @@ export default function ZerifyCheckoutContainer({
       if (mode === 'WITHDRAW') {
         const withdrawPayload: Record<string, any> = {
           amount: totalAmountToPay,
+          grossAmount: grossAmount ?? totalAmountToPay,
+          zerifyFee: zerifyFee ?? 0,
           currency: 'INR',
           payoutMethod: isCard ? 'card' : activeTab === 'NETBANKING' ? 'netbanking' : 'upi',
           saveDestination: true,
@@ -840,12 +846,16 @@ export default function ZerifyCheckoutContainer({
               onChangeAmount={onChangeAmount}
               mode={mode}
               availableBalance={availableBalance}
+              grossAmount={grossAmount}
+              zerifyFee={zerifyFee}
             />
 
             {/* Total Amount Row */}
             <div className="flex items-center justify-between pt-1 pb-0.5 text-slate-900 font-extrabold">
               <span className="text-xs font-bold text-slate-700">
-                {mode === 'WITHDRAW' ? 'Withdrawal Amount:' : 'Total Amount:'}
+                {mode === 'WITHDRAW'
+                  ? (zerifyFee && zerifyFee > 0 ? 'Net Amount to Receive:' : 'Withdrawal Amount:')
+                  : 'Total Amount:'}
               </span>
               <span className="text-lg text-purple-700 font-black tracking-tight">
                 {format(totalAmountToPay, { showDecimals: true })}

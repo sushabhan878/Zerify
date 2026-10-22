@@ -66,10 +66,14 @@ export class PayoutController {
   @ApiOperation({ summary: 'Influencer\u2019s current payable balance' })
   async getMyPayable(@Req() req: any, @Query('currency') currency?: string) {
     const profile = await this.resolveInfluencerProfile(req.user.id);
-    return this.campaignFinanceService.getInfluencerPayable(
+    const result = await this.campaignFinanceService.getInfluencerPayable(
       profile.id,
       (currency ?? 'INR').toUpperCase(),
     );
+    return {
+      ...result,
+      payableBalance: result.payableAmount,
+    };
   }
 
   @Post('payouts')

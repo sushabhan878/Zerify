@@ -56,8 +56,9 @@ export default function PaymentsSection() {
       });
       if (pRes.ok) {
         const pData = await pRes.json();
-        if (pData?.payableBalance !== undefined) {
-          setAvailableBalance(Number(pData.payableBalance) || 0);
+        const bal = pData?.payableBalance ?? pData?.payableAmount;
+        if (bal !== undefined) {
+          setAvailableBalance(Number(bal) || 0);
         }
       }
 

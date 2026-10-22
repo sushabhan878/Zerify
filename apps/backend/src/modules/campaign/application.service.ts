@@ -5,7 +5,7 @@ import {
   ForbiddenException,
   ConflictException,
 } from '@nestjs/common';
-import { CampaignRepository } from './campaign.repository';
+import { CampaignRepository, INBOUND_APPLICATIONS_WHERE } from './campaign.repository';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { ApplicationStatus, CampaignStatus, ParticipantStatus, OfferStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
@@ -378,13 +378,7 @@ export class ApplicationService {
           },
         },
         ...(status ? { status } : {}),
-        NOT: {
-          OR: [
-            { reviewNotes: 'DIRECT_INVITE' },
-            { applicationMessage: 'Official brand collaboration invite' },
-            { applicationMessage: 'Direct brand invitation' },
-          ],
-        },
+        ...INBOUND_APPLICATIONS_WHERE,
       },
       include: {
         campaign: {

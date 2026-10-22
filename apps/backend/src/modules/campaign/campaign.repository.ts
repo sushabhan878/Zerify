@@ -15,6 +15,25 @@ import {
   Prisma,
 } from '@prisma/client';
 
+export const INBOUND_APPLICATIONS_WHERE = {
+  OR: [
+    { reviewNotes: null },
+    { reviewNotes: { not: 'DIRECT_INVITE' } },
+  ],
+  AND: [
+    {
+      OR: [
+        { applicationMessage: null },
+        {
+          applicationMessage: {
+            notIn: ['Official brand collaboration invite', 'Direct brand invitation'],
+          },
+        },
+      ],
+    },
+  ],
+};
+
 @Injectable()
 export class CampaignRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -50,13 +69,7 @@ export class CampaignRepository {
         deliverables: true,
         applications: {
           where: {
-            NOT: {
-              OR: [
-                { reviewNotes: 'DIRECT_INVITE' },
-                { applicationMessage: 'Official brand collaboration invite' },
-                { applicationMessage: 'Direct brand invitation' },
-              ],
-            },
+            ...INBOUND_APPLICATIONS_WHERE,
           },
           include: {
             influencerProfile: {
@@ -72,13 +85,7 @@ export class CampaignRepository {
           select: {
             applications: {
               where: {
-                NOT: {
-                  OR: [
-                    { reviewNotes: 'DIRECT_INVITE' },
-                    { applicationMessage: 'Official brand collaboration invite' },
-                    { applicationMessage: 'Direct brand invitation' },
-                  ],
-                },
+                ...INBOUND_APPLICATIONS_WHERE,
               },
             },
             participants: true,
@@ -121,13 +128,7 @@ export class CampaignRepository {
           select: {
             applications: {
               where: {
-                NOT: {
-                  OR: [
-                    { reviewNotes: 'DIRECT_INVITE' },
-                    { applicationMessage: 'Official brand collaboration invite' },
-                    { applicationMessage: 'Direct brand invitation' },
-                  ],
-                },
+                ...INBOUND_APPLICATIONS_WHERE,
               },
             },
             participants: true,
@@ -218,13 +219,7 @@ export class CampaignRepository {
             select: {
               applications: {
                 where: {
-                  NOT: {
-                    OR: [
-                      { reviewNotes: 'DIRECT_INVITE' },
-                      { applicationMessage: 'Official brand collaboration invite' },
-                      { applicationMessage: 'Direct brand invitation' },
-                    ],
-                  },
+                  ...INBOUND_APPLICATIONS_WHERE,
                 },
               },
               participants: true,
@@ -293,13 +288,7 @@ export class CampaignRepository {
       where: {
         campaignId,
         ...(status ? { status } : {}),
-        NOT: {
-          OR: [
-            { reviewNotes: 'DIRECT_INVITE' },
-            { applicationMessage: 'Official brand collaboration invite' },
-            { applicationMessage: 'Direct brand invitation' },
-          ],
-        },
+        ...INBOUND_APPLICATIONS_WHERE,
       },
       include: {
         influencerProfile: {

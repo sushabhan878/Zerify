@@ -102,4 +102,14 @@ export class WithdrawMoneyDto {
   @IsOptional()
   @IsString()
   reason?: string;
+
+  @ApiPropertyOptional({ example: 5000, description: 'Gross withdrawal amount before platform fee' })
+  @IsOptional()
+  @IsNumber()
+  grossAmount?: number;
+
+  @ApiPropertyOptional({ example: 350, description: 'Zerify 7% platform fee' })
+  @IsOptional()
+  @IsNumber()
+  zerifyFee?: number;
 }
