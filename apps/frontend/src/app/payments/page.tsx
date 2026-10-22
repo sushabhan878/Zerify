@@ -8,7 +8,7 @@ export default function PaymentsRedirectPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/dashboard?tab=payments');
+    router.replace('/dashboard/payments');
   }, [router]);
 
   return (

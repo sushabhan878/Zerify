@@ -263,7 +263,7 @@ export default function ZerifyCheckoutContainer({
           amount: totalAmountToPay,
           currency: 'INR',
           idempotencyKey: `dep-qr-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-          returnUrl: `${window.location.origin}/dashboard?tab=payments&status=success`,
+          returnUrl: `${window.location.origin}/dashboard/payments?status=success`,
           channel: 'qrcode',
         }),
       });
@@ -490,7 +490,7 @@ export default function ZerifyCheckoutContainer({
         amount: totalAmountToPay,
         currency: 'INR',
         idempotencyKey: `dep-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-        returnUrl: `${window.location.origin}/dashboard?tab=payments&status=success`,
+        returnUrl: `${window.location.origin}/dashboard/payments?status=success`,
         paymentMethod: isCard ? 'card' : activeTab === 'NETBANKING' ? 'netbanking' : 'upi',
       };
 

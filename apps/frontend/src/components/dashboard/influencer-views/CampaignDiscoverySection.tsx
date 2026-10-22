@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { slugify } from '@/utils/dashboardRoutes';
 import CampaignSearchBar from './campaign-discovery/CampaignSearchBar';
 import CampaignQuickFilters, {
   CampaignQuickFilterState,
@@ -116,7 +118,7 @@ function normalizePlatform(p: string): 'Instagram' | 'YouTube' | 'TikTok' | 'Lin
   return 'Instagram';
 }
 
-function mapDbCampaignToItem(c: any, userCurrency = 'INR'): CampaignItem {
+export function mapDbCampaignToItem(c: any, userCurrency = 'INR'): CampaignItem {
   const currencyCode = c.budgetCurrency || userCurrency || 'INR';
   const sym = getCurrencySymbol(currencyCode);
 
@@ -240,6 +242,7 @@ function mapDbCampaignToItem(c: any, userCurrency = 'INR'): CampaignItem {
 }
 
 export default function CampaignDiscoverySection() {
+  const router = useRouter();
   const { currency: userCurrency } = useCurrency();
   const [searchQuery, setSearchQuery] = useState('');
   const [quickFilters, setQuickFilters] = useState<CampaignQuickFilterState>({
@@ -706,8 +709,7 @@ export default function CampaignDiscoverySection() {
               isSaved={savedCampaignIds.has(camp.id)}
               onToggleSave={handleToggleSaveCampaign}
               onViewBrief={(item) => {
-                setSelectedCampaignForDetail(item);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                router.push(`/dashboard/campaign-discovery/${slugify(item.title) || item.id}`);
               }}
               onApply={(item) => setSelectedCampaignForPitch(item)}
             />

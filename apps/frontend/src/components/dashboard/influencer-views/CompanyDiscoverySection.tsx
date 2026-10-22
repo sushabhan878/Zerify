@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { slugify } from '@/utils/dashboardRoutes';
 import CompanySearchBar from './company-discovery/CompanySearchBar';
 import CompanyQuickFilters, { QuickFilterState } from './company-discovery/CompanyQuickFilters';
 import CompanyActiveFilterChips from './company-discovery/CompanyActiveFilterChips';
@@ -435,6 +437,7 @@ const FALLBACK_COMPANIES: CompanyItem[] = [
 ];
 
 export default function CompanyDiscoverySection() {
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<AdvancedFilterState>(INITIAL_FILTERS);
   const [sortBy, setSortBy] = useState('matchScore');
@@ -879,7 +882,7 @@ export default function CompanyDiscoverySection() {
               <CompanyCard
                 key={company.id}
                 company={company}
-                onViewDetails={setDetailCompany}
+                onViewDetails={(c) => router.push(`/dashboard/company-discovery/${slugify(c.companyName) || c.id}`)}
                 onPitchBrand={setPitchCompany}
                 viewMode={viewMode}
               />

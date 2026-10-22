@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { Users, RotateCcw } from 'lucide-react';
+import { getCreatorSlug } from '@/utils/dashboardRoutes';
 import CreatorSearchBar from './find-influencers/CreatorSearchBar';
 import CreatorQuickFilters from './find-influencers/CreatorQuickFilters';
 import CreatorActiveFilterChips from './find-influencers/CreatorActiveFilterChips';
@@ -60,6 +62,7 @@ function getTierFromReach(reachNum: number): string {
 }
 
 export default function SavedCreatorsSection() {
+  const router = useRouter();
   const { currency, formatBudget } = useCurrency();
   const [savedCreators, setSavedCreators] = useState<CreatorItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -396,7 +399,7 @@ export default function SavedCreatorsSection() {
                 }}
                 viewMode={viewMode}
                 onInvite={(c) => setSelectedCreatorForInvite(c)}
-                onViewProfile={(c) => setSelectedCreatorForDetail(c)}
+                onViewProfile={(c) => router.push(`/dashboard/find-influencer/${getCreatorSlug(c)}`)}
                 onToggleBookmark={handleToggleBookmark}
               />
             ))}

@@ -87,7 +87,7 @@ export default function PaymentSettingsTab({
     if (onNavigate) {
       onNavigate('payments');
     } else if (typeof window !== 'undefined') {
-      window.location.href = '/dashboard?tab=payments';
+      window.location.href = '/dashboard/payments';
     }
   };
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Plus, Megaphone } from 'lucide-react';
 import { CampaignItem, CampaignService } from '@/services/campaign.service';
 import CreateCampaignWizard from './campaigns/CreateCampaignWizard';
@@ -8,11 +9,12 @@ import CampaignOverviewDashboard from './campaigns/CampaignOverviewDashboard';
 import BrandCampaignCard from './campaigns/BrandCampaignCard';
 import LottieLoader from '@/components/ui/LottieLoader';
 
-export default function MyCampaignsSection() {
+export default function MyCampaignsSection({ initialCampaignId }: { initialCampaignId?: string } = {}) {
+  const router = useRouter();
   const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
-  const [activeCampaignId, setActiveCampaignId] = useState<string | null>(null);
+  const [activeCampaignId, setActiveCampaignId] = useState<string | null>(initialCampaignId || null);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
   const loadCampaigns = async () => {
@@ -133,7 +135,10 @@ export default function MyCampaignsSection() {
             <BrandCampaignCard
               key={c.id}
               campaign={c}
-              onClick={() => setActiveCampaignId(c.id)}
+              onClick={() => {
+                setActiveCampaignId(c.id);
+                router.push(`/dashboard/campaigns/${c.id}`);
+              }}
             />
           ))}
         </div>

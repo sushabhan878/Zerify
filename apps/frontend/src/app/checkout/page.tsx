@@ -25,7 +25,7 @@ function CheckoutContent() {
       <div className="w-full max-w-4xl flex items-center justify-between mb-4 relative z-10">
         <button
           type="button"
-          onClick={() => router.push('/dashboard?tab=payments')}
+          onClick={() => router.push('/dashboard/payments')}
           className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-xs font-bold text-slate-700 shadow-sm border border-purple-200/60 backdrop-blur-sm transition-all"
         >
           <ArrowLeft className="w-4 h-4 text-purple-700" />
@@ -40,8 +40,8 @@ function CheckoutContent() {
       {/* Split-Screen Checkout Component */}
       <div className="relative z-10 w-full flex items-center justify-center">
         <ZerifyCheckoutContainer
-          onClose={() => router.push('/dashboard?tab=payments')}
-          onSuccess={() => router.push('/dashboard?tab=payments&deposit=success')}
+          onClose={() => router.push('/dashboard/payments')}
+          onSuccess={() => router.push('/dashboard/payments?deposit=success')}
           campaignId={campaignId}
           campaignTitle={campaignTitle}
           initialAmount={initialAmount}
