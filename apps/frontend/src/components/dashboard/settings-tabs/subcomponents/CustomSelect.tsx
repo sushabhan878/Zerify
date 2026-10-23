@@ -10,12 +10,16 @@ export interface SelectOption {
   triggerLabel?: string;
   icon?: React.ReactNode;
   keywords?: string;
+  badge?: string;
+  badgeVariant?: 'default' | 'success' | 'warning' | 'purple';
+  disabled?: boolean;
 }
 
 interface CustomSelectProps {
   options: SelectOption[];
   value: string;
   onChange: (val: string) => void;
+  onDisabledSelect?: (option: SelectOption) => void;
   iconLeft?: React.ReactNode;
   className?: string;
   triggerClassName?: string;
@@ -30,6 +34,7 @@ export default function CustomSelect({
   options,
   value,
   onChange,
+  onDisabledSelect,
   iconLeft,
   className = '',
   triggerClassName = '',
@@ -99,10 +104,16 @@ export default function CustomSelect({
     });
   };
 
-  const handleSelect = (optionValue: string, e: React.MouseEvent) => {
+  const handleSelect = (option: SelectOption, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    onChange(optionValue);
+    if (option.disabled) {
+      if (onDisabledSelect) {
+        onDisabledSelect(option);
+      }
+      return;
+    }
+    onChange(option.value);
     setIsOpen(false);
     setSearch('');
   };
@@ -190,18 +201,33 @@ export default function CustomSelect({
                   <button
                     key={option.value}
                     type="button"
-                    onClick={(e) => handleSelect(option.value, e)}
+                    onClick={(e) => handleSelect(option, e)}
                     className={`w-full px-3 py-2 rounded-md text-xs transition-colors flex items-center justify-between text-left font-medium ${
                       isSelected
                         ? 'bg-purple-600/30 text-white font-bold border border-purple-500/30'
+                        : option.disabled
+                        ? 'text-slate-400 hover:text-slate-200 hover:bg-white/5 opacity-85 cursor-pointer'
                         : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
                     }`}
                   >
                     <span className="flex items-center gap-2 truncate">
                       {option.icon}
-                      {option.label}
+                      <span>{option.label}</span>
                     </span>
-                    {showCheckmark && isSelected && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                      {option.badge && (
+                        <span
+                          className={`text-[9.5px] tracking-wide font-bold px-1.5 py-0.5 rounded-md border ${
+                            option.badgeVariant === 'success' || option.badge === 'Active'
+                              ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                              : 'bg-purple-500/15 border-purple-500/30 text-purple-300'
+                          }`}
+                        >
+                          {option.badge}
+                        </span>
+                      )}
+                      {showCheckmark && isSelected && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                    </div>
                   </button>
                 );
               })

@@ -5,6 +5,7 @@ import { Users, CheckCircle, Check, Loader2, Sparkles, ShieldCheck, DollarSign, 
 
 import CustomSelect, { SelectOption } from '../settings-tabs/subcomponents/CustomSelect';
 import { useToast } from '@/components/ui/Toast';
+import { getIndustryBudgetRanges, normalizeBudgetForCurrency } from '@/utils/budgetRanges';
 
 interface BrandTargetInfluencersTabProps {
   initialData?: any;
@@ -21,13 +22,7 @@ const CREATOR_TIERS = [
 
 const CREATOR_LOCATIONS = ['India', 'USA', 'Canada', 'UK', 'Australia', 'Germany', 'France', 'Global'];
 const GENDER_PREFERENCES = ['Any', 'Female', 'Male', 'Non-Binary'];
-const BUDGET_RANGES = ['<$1,000', '$1,000 – $5,000', '$5,000 – $20,000', '$20,000 – $50,000', '$50,000+'];
 const FREQUENCY_OPTIONS = ['One-time Campaign', 'Monthly Recurring', 'Quarterly Campaigns', 'Ongoing Partnership'];
-
-const BUDGET_SELECT_OPTIONS: SelectOption[] = BUDGET_RANGES.map((b) => ({
-  value: b,
-  label: b,
-}));
 
 const FREQUENCY_SELECT_OPTIONS: SelectOption[] = FREQUENCY_OPTIONS.map((f) => ({
   value: f,
@@ -49,13 +44,24 @@ export default function BrandTargetInfluencersTab({ initialData, onSaveSuccess }
   };
 
   const cached = getCachedData();
+  const activeCurrency = initialData?.currency || cached?.currency || 'INR';
+
+  const budgetSelectOptions: SelectOption[] = React.useMemo(() => {
+    const ranges = getIndustryBudgetRanges(activeCurrency);
+    return ranges.map((r) => ({
+      value: r.value,
+      label: r.label,
+      keywords: `${r.value} ${r.tierDescription || ''}`,
+      badge: r.tierDescription,
+    }));
+  }, [activeCurrency]);
 
   const [selectedTiers, setSelectedTiers] = useState<string[]>(() => cached?.creatorTiers || []);
   const [locations, setLocations] = useState<string[]>(() => cached?.creatorLocations || []);
   const [preferredGender, setPreferredGender] = useState<string>(() => cached?.preferredCreatorGender || 'Any');
   const [verifiedOnly, setVerifiedOnly] = useState<boolean>(() => cached?.verifiedOnly ?? false);
   const [minEngagement, setMinEngagement] = useState<number>(() => cached?.minEngagementRate ?? 2.0);
-  const [budget, setBudget] = useState<string>(() => cached?.campaignBudget || '$5,000 – $20,000');
+  const [budget, setBudget] = useState<string>(() => normalizeBudgetForCurrency(cached?.campaignBudget, activeCurrency));
   const [frequency, setFrequency] = useState<string>(() => cached?.campaignFrequency || 'Monthly Recurring');
 
   // Sync state whenever initialData changes from backend API
@@ -66,10 +72,14 @@ export default function BrandTargetInfluencersTab({ initialData, onSaveSuccess }
       if (initialData.preferredCreatorGender) setPreferredGender(initialData.preferredCreatorGender);
       if (initialData.verifiedOnly !== undefined) setVerifiedOnly(initialData.verifiedOnly);
       if (initialData.minEngagementRate !== undefined && initialData.minEngagementRate !== null) setMinEngagement(initialData.minEngagementRate);
-      if (initialData.campaignBudget) setBudget(initialData.campaignBudget);
+      if (initialData.campaignBudget) {
+        setBudget(normalizeBudgetForCurrency(initialData.campaignBudget, activeCurrency));
+      } else {
+        setBudget((prev) => prev || normalizeBudgetForCurrency(null, activeCurrency));
+      }
       if (initialData.campaignFrequency) setFrequency(initialData.campaignFrequency);
     }
-  }, [initialData]);
+  }, [initialData, activeCurrency]);
 
   const [saving, setSaving] = useState(false);
 
@@ -237,15 +247,26 @@ export default function BrandTargetInfluencersTab({ initialData, onSaveSuccess }
       {/* 4. Budget & Frequency */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-            Estimated Campaign Budget Range
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-xs font-semibold text-slate-300">
+              Estimated Campaign Budget Range
+            </label>
+            <span className="text-[10px] text-purple-400 font-semibold flex items-center gap-1">
+              <span>Currency:</span>
+              <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                {activeCurrency}
+              </span>
+            </span>
+          </div>
           <CustomSelect
-            options={BUDGET_SELECT_OPTIONS}
+            options={budgetSelectOptions}
             value={budget}
             onChange={(val) => setBudget(val)}
-            dropdownHeight="max-h-52"
+            dropdownHeight="max-h-60"
           />
+          <p className="text-[10px] text-slate-400 mt-1">
+            Industry-standard budget tiers in {activeCurrency} for matched creators.
+          </p>
         </div>
 
         <div>

@@ -121,7 +121,7 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
   const [foundedYear, setFoundedYear] = useState(() => cached?.foundedYear || '');
   const [description, setDescription] = useState(() => cached?.description || '');
   const [selectedValues, setSelectedValues] = useState<string[]>(() => cached?.brandValues || []);
-  const [currency, setCurrency] = useState<string>(() => cached?.currency || 'INR');
+  const [currency, setCurrency] = useState<string>('INR');
   
   const [instagram, setInstagram] = useState(() => cached?.socialLinks?.instagram || '');
   const [linkedin, setLinkedin] = useState(() => cached?.socialLinks?.linkedin || '');
@@ -149,7 +149,7 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
       if (initialData.foundedYear !== undefined) setFoundedYear(initialData.foundedYear || '');
       if (initialData.description !== undefined) setDescription(initialData.description || '');
       if (initialData.brandValues !== undefined) setSelectedValues(initialData.brandValues || []);
-      if (initialData.currency) setCurrency(initialData.currency);
+      setCurrency('INR');
       if (initialData.socialLinks) {
         if (initialData.socialLinks.instagram !== undefined) setInstagram(initialData.socialLinks.instagram || '');
         if (initialData.socialLinks.linkedin !== undefined) setLinkedin(initialData.socialLinks.linkedin || '');
@@ -169,6 +169,8 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
       label: `${c.flag ? c.flag + ' ' : ''}${c.code} — ${c.name} (${c.symbol})`,
       triggerLabel: `${c.flag ? c.flag + ' ' : ''}${c.code} (${c.symbol})`,
       keywords: `${c.code} ${c.name} ${c.symbol}`,
+      badge: c.code === 'INR' ? 'Active' : 'Coming Soon',
+      disabled: c.code !== 'INR',
     }));
   }, [currencies]);
 
@@ -441,15 +443,31 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1.5">Billing &amp; Platform Currency</label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-xs font-semibold text-slate-300">Billing &amp; Platform Currency</label>
+            <span className="text-[10px] text-purple-400 font-medium">Default: INR (₹)</span>
+          </div>
           <CustomSelect
             options={currencyOptions}
             value={currency}
-            onChange={(val) => setCurrency(val)}
+            onChange={(val) => {
+              if (val !== 'INR') {
+                toastError(`Coming Soon: ${val} billing will be available in upcoming releases. Zerify currently processes platform billing and escrow exclusively in INR (₹).`);
+                setCurrency('INR');
+                return;
+              }
+              setCurrency(val);
+            }}
+            onDisabledSelect={(opt) => {
+              toastError(`Coming Soon: ${opt.value} billing is coming soon! Platform billing & escrow currently operates exclusively in INR (₹).`);
+            }}
             iconLeft={<Coins className="w-4 h-4 text-purple-400" />}
             searchable={true}
-            searchPlaceholder="Search currency..."
+            searchPlaceholder="Search currency (INR, USD, EUR...)..."
           />
+          <p className="text-[10px] text-slate-400 mt-1">
+            All campaign budgets, escrow deposits, and creator payouts are settled in INR (₹).
+          </p>
         </div>
       </div>
 

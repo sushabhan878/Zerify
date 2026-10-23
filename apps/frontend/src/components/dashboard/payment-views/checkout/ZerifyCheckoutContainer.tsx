@@ -58,7 +58,7 @@ export default function ZerifyCheckoutContainer({
       try {
         localStorage.setItem('zerify_token', devToken);
         document.cookie = `zerify_token=${devToken}; path=/; max-age=604800; SameSite=Lax`;
-      } catch {}
+      } catch { }
       return devToken;
     }
     return '';
@@ -129,7 +129,7 @@ export default function ZerifyCheckoutContainer({
             setIsEnteringNewUpi(false);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   }, [apiUrl]);
 
@@ -149,7 +149,7 @@ export default function ZerifyCheckoutContainer({
           body: JSON.stringify({ upiId: idToDelete }),
         });
       }
-    } catch {}
+    } catch { }
 
     if (upiId === idToDelete) {
       if (nextList.length > 0) {
@@ -554,7 +554,7 @@ export default function ZerifyCheckoutContainer({
           setSavedUpiIds(updated);
           try {
             localStorage.setItem('zerify_saved_upi_ids', JSON.stringify(updated));
-          } catch {}
+          } catch { }
         }
       }
 
@@ -607,7 +607,7 @@ export default function ZerifyCheckoutContainer({
                 return true;
               }
             }
-          } catch {}
+          } catch { }
           return false;
         };
 
@@ -665,7 +665,7 @@ export default function ZerifyCheckoutContainer({
             } else if (verifyData.status === 'FAILED') {
               throw new Error(
                 verifyData.failureReason ||
-                  `${activeTab === 'CARD' ? 'Card' : 'NetBanking'} payment declined or failed`,
+                `${activeTab === 'CARD' ? 'Card' : 'NetBanking'} payment declined or failed`,
               );
             }
           }
@@ -748,11 +748,10 @@ export default function ZerifyCheckoutContainer({
                 setActiveTab('UPI');
                 setShowQrCode(false);
               }}
-              className={`h-9 rounded-xl border font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
-                activeTab === 'UPI'
+              className={`h-9 rounded-xl border font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${activeTab === 'UPI'
                   ? 'bg-purple-50 border-purple-600 text-purple-700 ring-2 ring-purple-600/20 shadow-sm'
                   : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-              }`}
+                }`}
             >
               <Smartphone className={`w-3.5 h-3.5 ${activeTab === 'UPI' ? 'text-purple-600' : 'text-slate-500'}`} />
               <span>UPI</span>
@@ -764,11 +763,10 @@ export default function ZerifyCheckoutContainer({
                 setActiveTab('CARD');
                 setShowQrCode(false);
               }}
-              className={`h-9 rounded-xl border font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
-                activeTab === 'CARD'
+              className={`h-9 rounded-xl border font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${activeTab === 'CARD'
                   ? 'bg-purple-50 border-purple-600 text-purple-700 ring-2 ring-purple-600/20 shadow-sm'
                   : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-              }`}
+                }`}
             >
               <CreditCard className={`w-3.5 h-3.5 ${activeTab === 'CARD' ? 'text-purple-600' : 'text-slate-500'}`} />
               <span>Card</span>
@@ -780,11 +778,10 @@ export default function ZerifyCheckoutContainer({
                 setActiveTab('NETBANKING');
                 setShowQrCode(false);
               }}
-              className={`h-9 rounded-xl border font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
-                activeTab === 'NETBANKING'
+              className={`h-9 rounded-xl border font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${activeTab === 'NETBANKING'
                   ? 'bg-purple-50 border-purple-600 text-purple-700 ring-2 ring-purple-600/20 shadow-sm'
                   : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-              }`}
+                }`}
             >
               <Building2 className={`w-3.5 h-3.5 ${activeTab === 'NETBANKING' ? 'text-purple-600' : 'text-slate-500'}`} />
               <span>Net Banking</span>
