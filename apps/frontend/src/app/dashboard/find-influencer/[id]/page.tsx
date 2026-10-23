@@ -10,7 +10,7 @@ import { MOCK_CREATORS } from '@/components/dashboard/brand-views/find-influence
 import { slugify, getCreatorSlug } from '@/utils/dashboardRoutes';
 import LottieLoader from '@/components/ui/LottieLoader';
 import { useCurrency } from '@/context/CurrencyContext';
-import { formatCurrency } from '@/utils/currency';
+import { formatCurrency, convertCurrency } from '@/utils/currency';
 
 const AVATAR_COLORS = [
   'bg-purple-600',
@@ -43,7 +43,7 @@ export default function InfluencerProfilePage() {
   const params = useParams();
   const idParam = typeof params?.id === 'string' ? decodeURIComponent(params.id).toLowerCase() : '';
 
-  const { currency, formatBudget } = useCurrency();
+  const { currency, rates, formatBudget, convert, format } = useCurrency();
   const [creator, setCreator] = useState<CreatorItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCreatorForInvite, setSelectedCreatorForInvite] = useState<CreatorItem | null>(null);
@@ -75,8 +75,16 @@ export default function InfluencerProfilePage() {
                 socialAcc.followerCount ||
                 450000;
               const engRateNum = socialAcc.engagementRate || 6.5;
-              const baseRateUSD = inf.minPricePerReel || 750;
-              const startingRateNum = currency === 'INR' ? Math.round(baseRateUSD * 83.5) : baseRateUSD;
+
+              // Read influencer budget and source currency saved in DB
+              const infCurrency = inf.currency || 'USD';
+              const rawPrice =
+                typeof inf.minPricePerReel === 'number' && !isNaN(inf.minPricePerReel) && inf.minPricePerReel > 0
+                  ? inf.minPricePerReel
+                  : (infCurrency === 'INR' ? 25000 : 750);
+
+              // Live conversion from influencer DB currency to brand's selected currency
+              const convertedRate = convertCurrency(rawPrice, infCurrency, currency, rates);
               const mainPlatform = socialAcc.platform || 'Instagram';
               const platformsList =
                 inf.user?.socialAccounts?.map((sa: any) => sa.platform) || [mainPlatform, 'YouTube'];
@@ -97,8 +105,10 @@ export default function InfluencerProfilePage() {
                 engRate: `${engRateNum}%`,
                 engRateNumber: engRateNum,
                 rating: Number((4.8 + ((idx % 3) * 0.1)).toFixed(1)),
-                startingRate: formatCurrency(startingRateNum, currency),
-                rateNumber: startingRateNum,
+                rawPrice,
+                sourceCurrency: infCurrency,
+                startingRate: formatCurrency(convertedRate, currency),
+                rateNumber: convertedRate,
                 platforms: Array.from(new Set(platformsList)),
                 primaryPlatform: mainPlatform,
                 socialAccounts: (inf.user?.socialAccounts || []).map((sa: any) => ({
@@ -142,7 +152,16 @@ export default function InfluencerProfilePage() {
       }
 
       if (list.length === 0) {
-        list = MOCK_CREATORS;
+        list = MOCK_CREATORS.map((mc) => {
+          const rawAmt = mc.rawPrice ?? mc.rateNumber;
+          const srcCurr = mc.sourceCurrency || 'USD';
+          const converted = convertCurrency(rawAmt, srcCurr, currency, rates);
+          return {
+            ...mc,
+            startingRate: formatCurrency(converted, currency),
+            rateNumber: converted,
+          };
+        });
       }
 
       // Find by id or slug or handle or name
@@ -171,7 +190,25 @@ export default function InfluencerProfilePage() {
     }
 
     fetchCreator();
-  }, [idParam, currency, formatBudget]);
+  }, [idParam, currency, rates]);
+
+  // Keep creator startingRate and rateNumber updated dynamically whenever active currency or live rates change
+  useEffect(() => {
+    if (creator) {
+      const rawAmt = creator.rawPrice ?? creator.rateNumber;
+      const srcCurr = creator.sourceCurrency || (creator.startingRate?.includes('$') ? 'USD' : 'INR');
+      const converted = convertCurrency(rawAmt, srcCurr, currency, rates);
+      setCreator((prev) =>
+        prev
+          ? {
+              ...prev,
+              startingRate: formatCurrency(converted, currency),
+              rateNumber: converted,
+            }
+          : null
+      );
+    }
+  }, [currency, rates]);
 
   if (isLoading) {
     return (

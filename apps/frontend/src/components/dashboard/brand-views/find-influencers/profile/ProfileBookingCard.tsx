@@ -14,10 +14,30 @@ export default function ProfileBookingCard({
   creator,
   onInvite,
 }: ProfileBookingCardProps) {
-  const { formatBudget, format } = useCurrency();
-  const startingRateDisplay = creator.startingRate
-    ? formatBudget(creator.startingRate)
-    : format(creator.rateNumber || 200);
+  const { format, convert, formatBudget, currency } = useCurrency();
+
+  const startingRateDisplay = React.useMemo(() => {
+    // 1. If rawPrice is available (fetched directly from DB influencerProfile.minPricePerReel)
+    if (typeof creator.rawPrice === 'number' && !isNaN(creator.rawPrice) && creator.rawPrice > 0) {
+      const srcCurr = creator.sourceCurrency || 'USD';
+      const converted = convert(creator.rawPrice, srcCurr);
+      return format(converted);
+    }
+
+    // 2. If rateNumber is available
+    if (typeof creator.rateNumber === 'number' && !isNaN(creator.rateNumber) && creator.rateNumber > 0) {
+      const srcCurr = creator.sourceCurrency || (creator.startingRate?.includes('$') ? 'USD' : 'INR');
+      const converted = convert(creator.rateNumber, srcCurr);
+      return format(converted);
+    }
+
+    // 3. Fallback using budget string with detected or source currency
+    if (creator.startingRate) {
+      return formatBudget(creator.startingRate, creator.sourceCurrency);
+    }
+
+    return format(convert(200, 'USD'));
+  }, [creator.rawPrice, creator.rateNumber, creator.sourceCurrency, creator.startingRate, convert, format, formatBudget, currency]);
 
   return (
     <div className="sticky top-20 rounded-2xl sm:rounded-3xl bg-[#090C15]/95 border border-white/10 p-5 sm:p-6 space-y-4 shadow-2xl backdrop-blur-xl">

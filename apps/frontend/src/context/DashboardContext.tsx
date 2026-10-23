@@ -172,6 +172,11 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
               setBrandProfile(data);
               try {
                 localStorage.setItem('zerify_brand_profile_cache', JSON.stringify(data));
+                if (data.currency) {
+                  localStorage.setItem('zerify_preferred_currency', data.currency);
+                  window.dispatchEvent(new Event('zerify_currency_change'));
+                }
+                window.dispatchEvent(new Event('zerify_brand_profile_update'));
               } catch (err) {}
             }
           })

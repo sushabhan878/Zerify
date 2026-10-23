@@ -405,23 +405,41 @@ export class CurrencyService implements OnModuleInit {
   }
 
   /**
-   * Retrieves user currency preference from BrandProfile or InfluencerProfile (PRD §24)
+   * Retrieves user currency preference from BrandProfile or InfluencerProfile based on user role (PRD §24)
    */
   async getUserCurrencyPreference(userId: string): Promise<{ currency: string }> {
     if (!userId) {
       return { currency: DEFAULT_USER_CURRENCY };
     }
 
-    // Check influencer profile
-    const influencer = await this.prisma.influencerProfile.findUnique({
-      where: { userId },
-      select: { currency: true },
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
     });
-    if (influencer?.currency) {
-      return { currency: influencer.currency };
+
+    if (user?.role === 'BRAND') {
+      const brand = await this.prisma.brandProfile.findUnique({
+        where: { userId },
+        select: { currency: true },
+      });
+      if (brand?.currency) {
+        return { currency: brand.currency };
+      }
+      return { currency: 'INR' };
     }
 
-    // Check brand profile
+    if (user?.role === 'INFLUENCER') {
+      const influencer = await this.prisma.influencerProfile.findUnique({
+        where: { userId },
+        select: { currency: true },
+      });
+      if (influencer?.currency) {
+        return { currency: influencer.currency };
+      }
+      return { currency: 'INR' };
+    }
+
+    // Fallback if role is not set
     const brand = await this.prisma.brandProfile.findUnique({
       where: { userId },
       select: { currency: true },
@@ -430,29 +448,61 @@ export class CurrencyService implements OnModuleInit {
       return { currency: brand.currency };
     }
 
+    const influencer = await this.prisma.influencerProfile.findUnique({
+      where: { userId },
+      select: { currency: true },
+    });
+    if (influencer?.currency) {
+      return { currency: influencer.currency };
+    }
+
     return { currency: DEFAULT_USER_CURRENCY };
   }
 
   /**
-   * Updates user currency preference on their profile (PRD §24)
+   * Updates user currency preference on their profile based on role (PRD §24)
    */
   async updateUserCurrencyPreference(userId: string, currency: string): Promise<{ currency: string; updated: boolean }> {
     const norm = (currency || 'INR').toUpperCase().trim();
 
-    // Check if user has an influencer profile
-    const influencer = await this.prisma.influencerProfile.findUnique({ where: { userId } });
-    if (influencer) {
-      await this.prisma.influencerProfile.update({
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (user?.role === 'BRAND') {
+      const brand = await this.prisma.brandProfile.findUnique({ where: { userId } });
+      if (brand) {
+        await this.prisma.brandProfile.update({
+          where: { userId },
+          data: { currency: norm },
+        });
+        return { currency: norm, updated: true };
+      }
+    } else if (user?.role === 'INFLUENCER') {
+      const influencer = await this.prisma.influencerProfile.findUnique({ where: { userId } });
+      if (influencer) {
+        await this.prisma.influencerProfile.update({
+          where: { userId },
+          data: { currency: norm },
+        });
+        return { currency: norm, updated: true };
+      }
+    }
+
+    // Fallback: update whichever profile exists
+    const brand = await this.prisma.brandProfile.findUnique({ where: { userId } });
+    if (brand) {
+      await this.prisma.brandProfile.update({
         where: { userId },
         data: { currency: norm },
       });
       return { currency: norm, updated: true };
     }
 
-    // Check if user has a brand profile
-    const brand = await this.prisma.brandProfile.findUnique({ where: { userId } });
-    if (brand) {
-      await this.prisma.brandProfile.update({
+    const influencer = await this.prisma.influencerProfile.findUnique({ where: { userId } });
+    if (influencer) {
+      await this.prisma.influencerProfile.update({
         where: { userId },
         data: { currency: norm },
       });

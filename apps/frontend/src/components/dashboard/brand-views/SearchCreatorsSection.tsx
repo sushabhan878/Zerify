@@ -19,7 +19,7 @@ import CreatorInviteModal from './find-influencers/CreatorInviteModal';
 import LottieLoader from '@/components/ui/LottieLoader';
 import { MOCK_CREATORS } from './find-influencers/mockCreators';
 import { useCurrency } from '@/context/CurrencyContext';
-import { formatCurrency } from '@/utils/currency';
+import { formatCurrency, convertCurrency } from '@/utils/currency';
 
 const INITIAL_FILTERS: CreatorAdvancedFilterState = {
   category: 'All',
@@ -65,13 +65,18 @@ function getTierFromReach(reachNum: number): string {
 
 export default function SearchCreatorsSection() {
   const router = useRouter();
-  const { currency, formatBudget } = useCurrency();
+  const { currency, rates, formatBudget, convert, format } = useCurrency();
   const [creators, setCreators] = useState<CreatorItem[]>(() => {
-    return MOCK_CREATORS.map((c) => ({
-      ...c,
-      startingRate: c.startingRate ? formatBudget(c.startingRate) : (currency === 'INR' ? '₹25,000' : '$750'),
-      rateNumber: currency === 'INR' ? (c.rateNumber > 1000 ? c.rateNumber : c.rateNumber * 83.5) : (c.rateNumber > 1000 ? Math.round(c.rateNumber / 83.5) : c.rateNumber),
-    }));
+    return MOCK_CREATORS.map((c) => {
+      const rawAmt = c.rawPrice ?? c.rateNumber;
+      const srcCurr = c.sourceCurrency || 'USD';
+      const converted = convertCurrency(rawAmt, srcCurr, currency, rates);
+      return {
+        ...c,
+        startingRate: formatCurrency(converted, currency),
+        rateNumber: converted,
+      };
+    });
   });
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -86,6 +91,22 @@ export default function SearchCreatorsSection() {
   // Pagination state: default 8 creators per page (max 8-10)
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
+
+  // Dynamically re-convert prices for all creators whenever active currency or live exchange rates change
+  useEffect(() => {
+    setCreators((prevList) =>
+      prevList.map((c) => {
+        const rawAmt = c.rawPrice ?? c.rateNumber;
+        const srcCurr = c.sourceCurrency || (c.startingRate?.includes('$') ? 'USD' : 'INR');
+        const converted = convertCurrency(rawAmt, srcCurr, currency, rates);
+        return {
+          ...c,
+          startingRate: formatCurrency(converted, currency),
+          rateNumber: converted,
+        };
+      })
+    );
+  }, [currency, rates]);
 
   useEffect(() => {
     async function loadInfluencersFromDb() {
@@ -110,8 +131,16 @@ export default function SearchCreatorsSection() {
                 socialAcc.followerCount ||
                 450000;
               const engRateNum = socialAcc.engagementRate || 6.5;
-              const baseRateUSD = inf.minPricePerReel || 750;
-              const startingRateNum = currency === 'INR' ? Math.round(baseRateUSD * 83.5) : baseRateUSD;
+
+              // Read influencer budget and source currency saved in DB
+              const infCurrency = inf.currency || 'USD';
+              const rawPrice =
+                typeof inf.minPricePerReel === 'number' && !isNaN(inf.minPricePerReel) && inf.minPricePerReel > 0
+                  ? inf.minPricePerReel
+                  : (infCurrency === 'INR' ? 25000 : 750);
+
+              // Live conversion from influencer DB currency to brand's selected currency
+              const convertedRate = convertCurrency(rawPrice, infCurrency, currency, rates);
               const baseMatch = Math.min(99, Math.max(68, 97 - (idx % 12) * 2));
               const mainPlatform = socialAcc.platform || 'Instagram';
               const platformsList =
@@ -133,8 +162,10 @@ export default function SearchCreatorsSection() {
                 engRate: `${engRateNum}%`,
                 engRateNumber: engRateNum,
                 rating: Number((4.8 + ((idx % 3) * 0.1)).toFixed(1)),
-                startingRate: formatCurrency(startingRateNum, currency),
-                rateNumber: startingRateNum,
+                rawPrice,
+                sourceCurrency: infCurrency,
+                startingRate: formatCurrency(convertedRate, currency),
+                rateNumber: convertedRate,
                 platforms: Array.from(new Set(platformsList)),
                 primaryPlatform: mainPlatform,
                 socialAccounts: (inf.user?.socialAccounts || []).map((sa: any) => ({
@@ -201,12 +232,23 @@ export default function SearchCreatorsSection() {
       }
 
       // Fallback
-      setCreators(MOCK_CREATORS);
+      setCreators(
+        MOCK_CREATORS.map((mc) => {
+          const rawAmt = mc.rawPrice ?? mc.rateNumber;
+          const srcCurr = mc.sourceCurrency || 'USD';
+          const converted = convertCurrency(rawAmt, srcCurr, currency, rates);
+          return {
+            ...mc,
+            startingRate: formatCurrency(converted, currency),
+            rateNumber: converted,
+          };
+        })
+      );
       setIsLoading(false);
     }
 
     loadInfluencersFromDb();
-  }, []);
+  }, [currency, rates]);
 
   // Reset page to 1 whenever filters, search or sort change
   useEffect(() => {

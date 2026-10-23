@@ -70,6 +70,22 @@ class CurrencyApiService {
         return await res.json();
       }
     } catch (e) {}
+
+    // Direct fallback to live API if local backend is unreachable
+    try {
+      const res = await fetch(`https://api.frankfurter.dev/v1/latest?base=${encodeURIComponent(base)}`);
+      if (res.ok) {
+        const data = await res.json();
+        return {
+          base: data.base || base,
+          rates: { ...(data.rates || {}), [base]: 1 },
+          provider: 'frankfurter_live',
+          rateTimestamp: data.date || new Date().toISOString(),
+          isCached: false,
+        };
+      }
+    } catch (e) {}
+
     return null;
   }
 

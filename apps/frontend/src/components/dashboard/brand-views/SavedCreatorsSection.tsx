@@ -17,7 +17,7 @@ import CreatorProfileFullView from './find-influencers/CreatorProfileFullView';
 import CreatorInviteModal from './find-influencers/CreatorInviteModal';
 import LottieLoader from '@/components/ui/LottieLoader';
 import { useCurrency } from '@/context/CurrencyContext';
-import { formatCurrency } from '@/utils/currency';
+import { formatCurrency, convertCurrency } from '@/utils/currency';
 
 const INITIAL_FILTERS: CreatorAdvancedFilterState = {
   category: 'All',
@@ -63,7 +63,7 @@ function getTierFromReach(reachNum: number): string {
 
 export default function SavedCreatorsSection() {
   const router = useRouter();
-  const { currency, formatBudget } = useCurrency();
+  const { currency, rates, formatBudget, convert, format } = useCurrency();
   const [savedCreators, setSavedCreators] = useState<CreatorItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -83,6 +83,22 @@ export default function SavedCreatorsSection() {
   // Modals & Full View
   const [selectedCreatorForDetail, setSelectedCreatorForDetail] = useState<CreatorItem | null>(null);
   const [selectedCreatorForInvite, setSelectedCreatorForInvite] = useState<CreatorItem | null>(null);
+
+  // Dynamically re-convert prices for all saved creators whenever active currency or live exchange rates change
+  useEffect(() => {
+    setSavedCreators((prevList) =>
+      prevList.map((c) => {
+        const rawAmt = c.rawPrice ?? c.rateNumber;
+        const srcCurr = c.sourceCurrency || (c.startingRate?.includes('$') ? 'USD' : 'INR');
+        const converted = convertCurrency(rawAmt, srcCurr, currency, rates);
+        return {
+          ...c,
+          startingRate: formatCurrency(converted, currency),
+          rateNumber: converted,
+        };
+      })
+    );
+  }, [currency, rates]);
 
   const fetchSavedCreators = async () => {
     setIsLoading(true);
@@ -107,8 +123,16 @@ export default function SavedCreatorsSection() {
               socialAcc.followerCount ||
               450000;
             const engRateNum = socialAcc.engagementRate || 6.5;
-            const baseRateUSD = inf.minPricePerReel || 750;
-            const startingRateNum = currency === 'INR' ? Math.round(baseRateUSD * 83.5) : baseRateUSD;
+
+            // Read influencer budget and source currency saved in DB
+            const infCurrency = inf.currency || 'USD';
+            const rawPrice =
+              typeof inf.minPricePerReel === 'number' && !isNaN(inf.minPricePerReel) && inf.minPricePerReel > 0
+                ? inf.minPricePerReel
+                : (infCurrency === 'INR' ? 25000 : 750);
+
+            // Live conversion from influencer DB currency to brand's selected currency
+            const convertedRate = convertCurrency(rawPrice, infCurrency, currency, rates);
             const baseMatch = Math.min(99, Math.max(68, 97 - (idx % 12) * 2));
             const mainPlatform = socialAcc.platform || 'Instagram';
             const platformsList =
@@ -130,8 +154,10 @@ export default function SavedCreatorsSection() {
               engRate: `${engRateNum}%`,
               engRateNumber: engRateNum,
               rating: Number((4.8 + ((idx % 3) * 0.1)).toFixed(1)),
-              startingRate: formatCurrency(startingRateNum, currency),
-              rateNumber: startingRateNum,
+              rawPrice,
+              sourceCurrency: infCurrency,
+              startingRate: formatCurrency(convertedRate, currency),
+              rateNumber: convertedRate,
               platforms: Array.from(new Set(platformsList)),
               primaryPlatform: mainPlatform,
               socialAccounts: (inf.user?.socialAccounts || []).map((sa: any) => ({
@@ -185,7 +211,7 @@ export default function SavedCreatorsSection() {
 
   useEffect(() => {
     fetchSavedCreators();
-  }, []);
+  }, [currency, rates]);
 
   // Reset page to 1 whenever filters, search or sort change
   useEffect(() => {

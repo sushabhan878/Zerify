@@ -218,15 +218,16 @@ export function formatCurrency(
 export function formatBudgetString(
   budgetString: string | null | undefined,
   targetCurrency: string | null | undefined = 'INR',
-  rates?: Record<string, number> | null
+  rates?: Record<string, number> | null,
+  defaultSourceCurrency?: string | null
 ): string {
   const norm = normalizeCurrency(targetCurrency);
   if (!budgetString) {
     return norm === 'INR' ? '₹4,00,000 – ₹15,00,000' : '$5,000 – $20,000';
   }
 
-  // Detect original currency in the string
-  let sourceCurrency = norm;
+  // Detect original currency in the string or fallback to defaultSourceCurrency / norm
+  let sourceCurrency = defaultSourceCurrency ? normalizeCurrency(defaultSourceCurrency) : norm;
   if (budgetString.includes('$') || budgetString.toUpperCase().includes('USD')) {
     sourceCurrency = 'USD';
   } else if (budgetString.includes('₹') || budgetString.toUpperCase().includes('INR')) {
@@ -275,7 +276,8 @@ export function formatBudgetString(
 export function formatBudgetCompact(
   budgetString: string | null | undefined,
   targetCurrency: string | null | undefined = 'INR',
-  rates?: Record<string, number> | null
+  rates?: Record<string, number> | null,
+  defaultSourceCurrency?: string | null
 ): string {
   const norm = normalizeCurrency(targetCurrency);
   const symbol = getCurrencySymbol(norm);
@@ -284,8 +286,8 @@ export function formatBudgetCompact(
     return norm === 'INR' ? '₹400K – ₹1.5M' : '$5K – $20K';
   }
 
-  // Detect original currency in the string
-  let sourceCurrency = norm;
+  // Detect original currency in the string or fallback to defaultSourceCurrency / norm
+  let sourceCurrency = defaultSourceCurrency ? normalizeCurrency(defaultSourceCurrency) : norm;
   if (budgetString.includes('$') || budgetString.toUpperCase().includes('USD')) {
     sourceCurrency = 'USD';
   } else if (budgetString.includes('₹') || budgetString.toUpperCase().includes('INR')) {

@@ -45,6 +45,8 @@ export interface CreatorItem {
   rating: number;
   startingRate: string;
   rateNumber: number;
+  rawPrice?: number;
+  sourceCurrency?: string;
   platforms: string[];
   primaryPlatform: string;
   socialAccounts?: CreatorSocialAccount[];

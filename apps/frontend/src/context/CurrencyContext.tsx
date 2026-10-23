@@ -24,9 +24,14 @@ interface CurrencyContextType {
     amount: number | string | null | undefined,
     options?: { compact?: boolean; showDecimals?: boolean; suffix?: string }
   ) => string;
-  formatBudget: (budgetString: string | null | undefined) => string;
-  formatBudgetCompact: (budgetString: string | null | undefined) => string;
+  formatBudget: (budgetString: string | null | undefined, sourceCurrency?: string) => string;
+  formatBudgetCompact: (budgetString: string | null | undefined, sourceCurrency?: string) => string;
   convert: (amount: number, fromCurrency?: string) => number;
+  convertAndFormat: (
+    amount: number | string | null | undefined,
+    fromCurrency?: string,
+    options?: { compact?: boolean; showDecimals?: boolean; suffix?: string }
+  ) => string;
   isLoading: boolean;
   lastUpdated: string | null;
 }
@@ -38,9 +43,10 @@ const CurrencyContext = createContext<CurrencyContextType>({
   currencies: [],
   setCurrency: async () => {},
   format: (amount) => formatCurrency(amount, DEFAULT_CURRENCY),
-  formatBudget: (budgetString) => formatBudgetString(budgetString, DEFAULT_CURRENCY),
-  formatBudgetCompact: (budgetString) => formatBudgetCompact(budgetString, DEFAULT_CURRENCY),
+  formatBudget: (budgetString, sourceCurrency) => formatBudgetString(budgetString, DEFAULT_CURRENCY, null, sourceCurrency),
+  formatBudgetCompact: (budgetString, sourceCurrency) => formatBudgetCompact(budgetString, DEFAULT_CURRENCY, null, sourceCurrency),
   convert: (amount) => amount,
+  convertAndFormat: (amount) => formatCurrency(amount, DEFAULT_CURRENCY),
   isLoading: false,
   lastUpdated: null,
 });
@@ -57,24 +63,53 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     const updateCurrencyFromStorage = () => {
       if (typeof window === 'undefined') return;
 
-      // 1. Check local preference
+      // 1. Check if user is in Brand Dashboard context (or role === 'BRAND')
+      let userRole: string | null = null;
+      try {
+        const storedUser = localStorage.getItem('zerify_user');
+        if (storedUser) {
+          const parsed = JSON.parse(storedUser);
+          userRole = parsed?.role || null;
+        }
+      } catch (e) {}
+
+      const isBrandContext =
+        userRole === 'BRAND' ||
+        (typeof window !== 'undefined' && window.location.pathname.startsWith('/dashboard'));
+
+      if (isBrandContext) {
+        // Priority 1: Brand profile currency in DB / cache
+        try {
+          const brandCache = localStorage.getItem('zerify_brand_profile_cache');
+          if (brandCache) {
+            const parsed = JSON.parse(brandCache);
+            if (parsed.currency) {
+              setCurrencyState(normalizeCurrency(parsed.currency));
+              return;
+            }
+          }
+        } catch (e) {}
+
+        // Priority 2: Stored preference if specifically set
+        const storedPref = localStorage.getItem('zerify_preferred_currency');
+        if (storedPref) {
+          setCurrencyState(normalizeCurrency(storedPref));
+          return;
+        }
+
+        // Priority 3: Default strictly to INR for Brand
+        setCurrencyState(DEFAULT_CURRENCY);
+        return;
+      }
+
+      // If Influencer or generic context
       const storedPref = localStorage.getItem('zerify_preferred_currency');
       if (storedPref) {
         setCurrencyState(normalizeCurrency(storedPref));
         return;
       }
 
-      // 2. Check cached user / brand / influencer profiles
       try {
-        const brandCache = localStorage.getItem('zerify_brand_profile_cache');
-        if (brandCache) {
-          const parsed = JSON.parse(brandCache);
-          if (parsed.currency) {
-            setCurrencyState(normalizeCurrency(parsed.currency));
-            return;
-          }
-        }
-
         const influencerCache = localStorage.getItem('zerify_influencer_profile_cache');
         if (influencerCache) {
           const parsed = JSON.parse(influencerCache);
@@ -85,7 +120,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         }
       } catch (e) {}
 
-      // 3. Fallback to INR
+      // Fallback to INR
       setCurrencyState(DEFAULT_CURRENCY);
     };
 
@@ -151,13 +186,30 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         }
 
         // If user preference found in database profile, apply it directly (PRD §24)
-        if (userPref) {
-          const norm = normalizeCurrency(userPref);
-          setCurrencyState(norm);
+        let roleIsBrand = false;
+        try {
+          const uStr = localStorage.getItem('zerify_user');
+          if (uStr && JSON.parse(uStr).role === 'BRAND') roleIsBrand = true;
+          if (typeof window !== 'undefined' && window.location.pathname.startsWith('/dashboard')) roleIsBrand = true;
+        } catch (e) {}
+
+        let resolvedCurrency = userPref ? normalizeCurrency(userPref) : DEFAULT_CURRENCY;
+        if (roleIsBrand) {
           try {
-            localStorage.setItem('zerify_preferred_currency', norm);
+            const bCache = localStorage.getItem('zerify_brand_profile_cache');
+            if (bCache) {
+              const parsed = JSON.parse(bCache);
+              if (parsed.currency) {
+                resolvedCurrency = normalizeCurrency(parsed.currency);
+              }
+            }
           } catch (e) {}
         }
+
+        setCurrencyState(resolvedCurrency);
+        try {
+          localStorage.setItem('zerify_preferred_currency', resolvedCurrency);
+        } catch (e) {}
       } catch (err) {
         // Soft fallback
       } finally {
@@ -192,15 +244,15 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   );
 
   const formatBudget = useCallback(
-    (budgetString: string | null | undefined) => {
-      return formatBudgetString(budgetString, currency, rates);
+    (budgetString: string | null | undefined, sourceCurrency?: string) => {
+      return formatBudgetString(budgetString, currency, rates, sourceCurrency);
     },
     [currency, rates]
   );
 
   const formatBudgetCompactVal = useCallback(
-    (budgetString: string | null | undefined) => {
-      return formatBudgetCompact(budgetString, currency, rates);
+    (budgetString: string | null | undefined, sourceCurrency?: string) => {
+      return formatBudgetCompact(budgetString, currency, rates, sourceCurrency);
     },
     [currency, rates]
   );
@@ -208,6 +260,25 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const convert = useCallback(
     (amount: number, fromCurrency?: string) => {
       return convertCurrency(amount, fromCurrency || 'USD', currency, rates);
+    },
+    [currency, rates]
+  );
+
+  const convertAndFormat = useCallback(
+    (
+      amount: number | string | null | undefined,
+      fromCurrency?: string,
+      options?: { compact?: boolean; showDecimals?: boolean; suffix?: string }
+    ) => {
+      if (amount === undefined || amount === null || amount === '') {
+        return formatCurrency(0, currency, options);
+      }
+      const num = typeof amount === 'string' ? parseFloat(amount.replace(/[^0-9.-]+/g, '')) : amount;
+      if (isNaN(num)) {
+        return formatCurrency(0, currency, options);
+      }
+      const converted = convertCurrency(num, fromCurrency || 'USD', currency, rates);
+      return formatCurrency(converted, currency, options);
     },
     [currency, rates]
   );
@@ -224,6 +295,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         formatBudget,
         formatBudgetCompact: formatBudgetCompactVal,
         convert,
+        convertAndFormat,
         isLoading,
         lastUpdated,
       }}

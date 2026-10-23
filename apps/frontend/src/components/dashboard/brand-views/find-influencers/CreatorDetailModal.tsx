@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -40,8 +40,19 @@ export default function CreatorDetailModal({
   onClose,
   onInvite,
 }: CreatorDetailModalProps) {
-  const { formatBudget, format } = useCurrency();
+  const { formatBudget, format, convert, currency } = useCurrency();
   const [activeTab, setActiveTab] = useState<'overview' | 'works' | 'analytics' | 'rates'>('overview');
+
+  const basePriceConverted = useMemo(() => {
+    if (!creator) return 0;
+    const rawAmt = creator.rawPrice ?? (creator.rateNumber || 200);
+    const srcCurr = creator.sourceCurrency || (creator.startingRate?.includes('$') ? 'USD' : 'INR');
+    return convert(rawAmt, srcCurr);
+  }, [creator, convert]);
+
+  const startingRateDisplay = useMemo(() => {
+    return format(basePriceConverted);
+  }, [basePriceConverted, format]);
 
   if (!creator) return null;
 
@@ -195,7 +206,7 @@ export default function CreatorDetailModal({
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">STARTS AT</span>
-                    <span className="text-base font-black text-purple-300">{formatBudget(creator.startingRate)}</span>
+                    <span className="text-base font-black text-purple-300">{startingRateDisplay}</span>
                   </div>
                 </div>
 
@@ -333,10 +344,10 @@ export default function CreatorDetailModal({
                 <h4 className="text-xs font-bold text-white uppercase tracking-wider">Deliverable Packages & Rates</h4>
                 <div className="space-y-2.5">
                   {[
-                    { format: 'Dedicated 60s Reel / Short', rate: formatBudget(creator.startingRate), desc: 'Includes script, production, 1 revision & 30-day organic rights.' },
-                    { format: 'YouTube 60-90s Dedicated Sponsor Segment', rate: format(creator.rateNumber * 1.5), desc: 'Integrated ad read with description link and pinned comment.' },
-                    { format: '3-Story Sequence with Direct Link', rate: format(Math.round(creator.rateNumber * 0.4)), desc: '24h story sequence with CTA sticker and tracking link.' },
-                    { format: 'Full UGC Video (Whitelisting Included)', rate: format(creator.rateNumber * 1.2), desc: 'Raw high-res file for brand ad accounts with 90-day usage.' },
+                    { format: 'Dedicated 60s Reel / Short', rate: format(basePriceConverted), desc: 'Includes script, production, 1 revision & 30-day organic rights.' },
+                    { format: 'YouTube 60-90s Dedicated Sponsor Segment', rate: format(Math.round(basePriceConverted * 1.5)), desc: 'Integrated ad read with description link and pinned comment.' },
+                    { format: '3-Story Sequence with Direct Link', rate: format(Math.round(basePriceConverted * 0.4)), desc: '24h story sequence with CTA sticker and tracking link.' },
+                    { format: 'Full UGC Video (Whitelisting Included)', rate: format(Math.round(basePriceConverted * 1.2)), desc: 'Raw high-res file for brand ad accounts with 90-day usage.' },
                   ].map((pkg, idx) => (
                     <div key={idx} className="p-4 rounded-2xl bg-slate-900/70 border border-white/10 flex items-center justify-between gap-4">
                       <div className="space-y-1 min-w-0">
