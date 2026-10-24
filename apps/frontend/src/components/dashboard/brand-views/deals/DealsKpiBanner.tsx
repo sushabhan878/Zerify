@@ -62,7 +62,7 @@ export default function DealsKpiBanner({ deals }: DealsKpiBannerProps) {
         return (
           <div
             key={idx}
-            className="p-4 sm:p-5 rounded-2xl bg-[#090C15]/95 border border-white/[0.08] backdrop-blur-2xl space-y-2 hover:border-purple-500/30 transition-all shadow-md shadow-purple-950/10"
+            className="p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl space-y-2 hover:border-purple-500/30 transition-all shadow-md shadow-purple-950/10"
           >
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">

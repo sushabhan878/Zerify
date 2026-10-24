@@ -17,6 +17,7 @@ import {
   Send,
   Globe,
 } from 'lucide-react';
+import { PlatformBadge } from '../../find-influencers/CreatorCard';
 
 interface ReviewPublishStepProps {
   formData: any;
@@ -167,12 +168,16 @@ export default function ReviewPublishStep({
               <Video className="w-4 h-4" />
               <span>Deliverables & Channels ({deliverables.length})</span>
             </div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex items-center -space-x-1.5 isolate">
               {platforms.length > 0 ? (
-                platforms.map((p: string) => (
-                  <span key={p} className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-200 border border-purple-300/30">
-                    {p}
-                  </span>
+                platforms.map((p: string, idx: number) => (
+                  <div
+                    key={p}
+                    style={{ zIndex: 10 + idx }}
+                    className="hover:z-30 transition-transform duration-200 hover:scale-120"
+                  >
+                    <PlatformBadge platform={p} size="md" />
+                  </div>
                 ))
               ) : (
                 <span className="text-[10px] text-slate-500 italic">No specific platforms</span>

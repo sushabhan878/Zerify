@@ -33,7 +33,7 @@ import ParticipantManagementView from './ParticipantManagementView';
 import ParticipantDeliverablesPage from './ParticipantDeliverablesPage';
 import OfferManagementView from './OfferManagementView';
 import CreatorProfileFullView from '../find-influencers/CreatorProfileFullView';
-import { CreatorItem } from '../find-influencers/CreatorCard';
+import { CreatorItem, PlatformBadge } from '../find-influencers/CreatorCard';
 import LottieLoader from '@/components/ui/LottieLoader';
 import { useCurrency } from '@/context/CurrencyContext';
 import { formatCurrency } from '@/utils/currency';
@@ -400,7 +400,7 @@ export default function CampaignOverviewDashboard({
 
             {/* Industry Tag */}
             {campaign.industry && (
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-950/40 border border-purple-500/20 text-purple-200 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+              <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-purple-950/40 border border-purple-500/25 text-purple-200 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
                 <Layers className="w-3 h-3 text-purple-400 shrink-0" />
                 <span>{campaign.industry}</span>
               </span>
@@ -410,7 +410,7 @@ export default function CampaignOverviewDashboard({
             {visibleObjectives.map((obj) => (
               <span
                 key={obj}
-                className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-purple-600/15 border border-purple-500/25 text-purple-200 shrink-0 whitespace-nowrap"
+                className="px-3 py-1.5 rounded-full text-xs font-semibold bg-purple-600/15 border border-purple-500/25 text-purple-200 shrink-0 whitespace-nowrap"
               >
                 {obj}
               </span>
@@ -419,7 +419,7 @@ export default function CampaignOverviewDashboard({
             {/* Truncated ... indicator if more objectives */}
             {hiddenObjectives.length > 0 && (
               <span
-                className="px-2.5 py-1 rounded-full text-[11px] font-black bg-purple-950/60 border border-purple-500/30 text-purple-300 shrink-0 whitespace-nowrap cursor-help hover:bg-purple-900/60 hover:text-white transition-colors tracking-widest"
+                className="px-3 py-1.5 rounded-full text-xs font-black bg-purple-950/60 border border-purple-500/30 text-purple-300 shrink-0 whitespace-nowrap cursor-help hover:bg-purple-900/60 hover:text-white transition-colors tracking-widest"
                 title={`More tags: ${hiddenObjectives.join(', ')}`}
               >
                 ...
@@ -428,7 +428,7 @@ export default function CampaignOverviewDashboard({
 
             {/* Payment Model Tag */}
             {campaign.budgetPaymentModel && (
-              <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-indigo-950/40 border border-indigo-400/25 text-indigo-200 shrink-0 whitespace-nowrap">
+              <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-950/40 border border-indigo-400/25 text-indigo-200 shrink-0 whitespace-nowrap">
                 {formatPaymentModel(campaign.budgetPaymentModel)}
               </span>
             )}
@@ -466,24 +466,26 @@ export default function CampaignOverviewDashboard({
             </p>
           )}
 
-          {/* Platforms Badges */}
+          {/* Overlapping Social Platforms */}
           {Array.isArray(campaign.platforms) && campaign.platforms.length > 0 && (
-            <div className="flex items-center gap-1.5 pt-1 flex-nowrap overflow-hidden">
-              {campaign.platforms.slice(0, 5).map((p) => (
-                <span
-                  key={p}
-                  className="px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-purple-950/30 border border-purple-500/20 text-purple-200 uppercase tracking-wider shrink-0"
+            <div className="flex items-center -space-x-2 isolate pt-2">
+              {campaign.platforms.slice(0, 6).map((plat: string, idx: number) => (
+                <div
+                  key={plat}
+                  style={{ zIndex: 10 + idx }}
+                  className="hover:z-30 transition-transform duration-200 hover:scale-120 hover:-translate-y-0.5"
                 >
-                  {p}
-                </span>
+                  <PlatformBadge platform={plat} size="md" />
+                </div>
               ))}
-              {campaign.platforms.length > 5 && (
-                <span
-                  className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-purple-950/30 border border-purple-500/20 text-purple-300 uppercase shrink-0 cursor-help"
-                  title={campaign.platforms.slice(5).join(', ')}
+              {campaign.platforms.length > 6 && (
+                <div
+                  style={{ zIndex: 20 }}
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full ring-2 ring-[#090C15] flex items-center justify-center text-xs font-bold bg-slate-900 border border-white/10 text-purple-300"
+                  title={campaign.platforms.slice(6).join(', ')}
                 >
-                  ...
-                </span>
+                  +{campaign.platforms.length - 6}
+                </div>
               )}
             </div>
           )}
