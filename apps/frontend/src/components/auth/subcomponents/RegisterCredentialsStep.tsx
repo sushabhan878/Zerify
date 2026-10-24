@@ -67,7 +67,7 @@ export default function RegisterCredentialsStep({
         <div className="p-3 sm:p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-xs text-purple-200 flex items-center gap-3 shadow-inner">
           <ShieldCheck className="w-4.5 h-4.5 text-purple-400 flex-shrink-0" />
           <p className="leading-snug">
-            Zerify Brands must register using an official <span className="font-bold text-white">work email</span> (no @gmail or @yahoo) to receive your verified portal status.
+            Brands must register using an official <span className="font-bold text-white">work email</span> (example: manager@zerify.in) to receive their verification badge.
           </p>
         </div>
       )}
