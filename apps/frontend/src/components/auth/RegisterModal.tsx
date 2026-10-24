@@ -190,9 +190,11 @@ export default function RegisterModal({
 
   return (
     <div className={`relative w-full mx-auto p-1 transition-all duration-300 ${step === 1 ? 'max-w-3xl sm:max-w-4xl' : 'max-w-lg'}`}>
-      <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-indigo-600/20 rounded-3xl blur-xl opacity-[0.04] pointer-events-none" />
+      {/* Ambient card back-glow */}
+      <div className="absolute -inset-1.5 bg-gradient-to-r from-purple-600/35 via-pink-600/25 to-indigo-600/35 rounded-3xl blur-2xl opacity-40 pointer-events-none" />
 
-      <div className="relative rounded-3xl bg-[#07090e]/30 border border-white/10 backdrop-blur-2xl p-6 sm:p-10 shadow-2xl overflow-hidden transition-all duration-300">
+      {/* Main Glassmorphic Card Container */}
+      <div className="relative rounded-3xl bg-slate-900/85 border border-white/15 backdrop-blur-2xl p-6 sm:p-9 shadow-2xl shadow-purple-950/40 overflow-hidden transition-all duration-300">
         <RegisterProgressHeader step={step} />
 
         <AnimatePresence mode="wait">
