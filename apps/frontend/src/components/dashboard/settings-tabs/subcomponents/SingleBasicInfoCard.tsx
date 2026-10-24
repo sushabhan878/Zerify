@@ -10,6 +10,7 @@ import CustomSelect from './CustomSelect';
 import CustomDatePicker from '@/components/ui/CustomDatePicker';
 import { SUPPORTED_CURRENCIES } from '@/utils/currency';
 import { useCurrency } from '@/context/CurrencyContext';
+import { useToast } from '@/components/ui/Toast';
 
 interface SingleBasicInfoCardProps {
   name: string;
@@ -61,6 +62,7 @@ export default function SingleBasicInfoCard({
   onRemoveAvatar,
 }: SingleBasicInfoCardProps) {
   const { currencies } = useCurrency();
+  const { toastError } = useToast();
   const [isEditingNameInline, setIsEditingNameInline] = useState(false);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -123,6 +125,9 @@ export default function SingleBasicInfoCard({
       label: `${c.flag ? c.flag + ' ' : ''}${c.code} — ${c.name} (${c.symbol})`,
       triggerLabel: `${c.flag ? c.flag + ' ' : ''}${c.code} (${c.symbol})`,
       keywords: `${c.code} ${c.name} ${c.symbol}`,
+      badge: c.code === 'INR' ? 'Active' : 'Coming Soon',
+      badgeVariant: c.code === 'INR' ? ('success' as const) : ('warning' as const),
+      disabled: c.code !== 'INR',
     }));
   }, [currencies]);
 
@@ -339,13 +344,32 @@ export default function SingleBasicInfoCard({
         </div>
 
         <div>
-          <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
-            Preferred Currency
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block">
+              Preferred Currency
+            </label>
+            <span className="text-[10px] text-purple-400 font-medium">Default: INR (₹)</span>
+          </div>
           <CustomSelect
             options={currencyOptions}
-            value={currency}
-            onChange={(val) => setCurrency?.(val)}
+            value={currency || 'INR'}
+            onChange={(val) => {
+              if (val !== 'INR') {
+                toastError(
+                  `Coming Soon: ${val} payout & currency support will be available soon! Zerify creator payouts currently operate exclusively in INR (₹).`,
+                  'Coming Soon'
+                );
+                setCurrency?.('INR');
+                return;
+              }
+              setCurrency?.(val);
+            }}
+            onDisabledSelect={(opt) => {
+              toastError(
+                `Coming Soon: ${opt.value} currency is coming soon! Zerify creator payouts and platform transactions currently operate exclusively in INR (₹).`,
+                'Coming Soon'
+              );
+            }}
             iconLeft={<Coins className="w-4 h-4 text-purple-400" />}
             placement="top"
             searchable={true}

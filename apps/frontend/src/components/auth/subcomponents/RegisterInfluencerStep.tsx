@@ -117,6 +117,7 @@ export default function RegisterInfluencerStep({
   }, [maxSliderRate]);
 
   const handleCurrencyChange = (newCurr: string) => {
+    if (newCurr !== 'INR') return;
     if (newCurr === currency) return;
     const oldRate = currDetails.exchangeRateToUSD || 1;
     const newDetails = SUPPORTED_CURRENCIES[newCurr];

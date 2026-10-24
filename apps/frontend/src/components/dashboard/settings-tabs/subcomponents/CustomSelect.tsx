@@ -218,7 +218,9 @@ export default function CustomSelect({
                       {option.badge && (
                         <span
                           className={`text-[9.5px] tracking-wide font-bold px-1.5 py-0.5 rounded-md border ${
-                            option.badgeVariant === 'success' || option.badge === 'Active'
+                            option.badgeVariant === 'warning' || option.badge === 'Coming Soon'
+                              ? 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                              : option.badgeVariant === 'success' || option.badge === 'Active'
                               ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
                               : 'bg-purple-500/15 border-purple-500/30 text-purple-300'
                           }`}

@@ -46,7 +46,7 @@ export default function BasicInfoTab({
   const [phoneNumber, setPhoneNumber] = useState(() => cached?.phoneNumber || '');
   const [dob, setDob] = useState(() => (cached?.dob ? new Date(cached.dob).toISOString().split('T')[0] : ''));
   const [gender, setGender] = useState(() => cached?.gender || 'Prefer not to say');
-  const [currency, setCurrency] = useState(() => cached?.currency || 'INR');
+  const [currency, setCurrency] = useState('INR');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(() => cached?.avatarUrl || cached?.user?.avatarUrl || initialAvatar || null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -62,7 +62,7 @@ export default function BasicInfoTab({
       if (initialData.phoneNumber !== undefined) setPhoneNumber(initialData.phoneNumber || '');
       if (initialData.dob) setDob(new Date(initialData.dob).toISOString().split('T')[0]);
       if (initialData.gender) setGender(initialData.gender);
-      if (initialData.currency) setCurrency(initialData.currency);
+      setCurrency('INR');
       if (initialData.avatarUrl !== undefined) setAvatarUrl(initialData.avatarUrl || null);
     }
   }, [initialData]);
@@ -88,7 +88,7 @@ export default function BasicInfoTab({
           if (data.phoneNumber !== undefined) setPhoneNumber(data.phoneNumber || '');
           if (data.dob) setDob(new Date(data.dob).toISOString().split('T')[0]);
           if (data.gender) setGender(data.gender);
-          if (data.currency) setCurrency(data.currency);
+          setCurrency('INR');
           if (data.avatarUrl) setAvatarUrl(data.avatarUrl);
 
           try {
@@ -249,8 +249,10 @@ export default function BasicInfoTab({
         setDob={setDob}
         gender={gender}
         setGender={setGender}
-        currency={currency}
-        setCurrency={setCurrency}
+        currency={currency || 'INR'}
+        setCurrency={(val) => {
+          if (val === 'INR') setCurrency('INR');
+        }}
         avatarUrl={avatarUrl}
         onAvatarChange={handleAvatarChange}
         onRemoveAvatar={() => setAvatarUrl(null)}
