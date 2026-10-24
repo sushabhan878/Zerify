@@ -10,6 +10,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { CampaignService } from './campaign.service';
+import { CampaignLifecycleService } from './campaign-lifecycle.service';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -26,6 +27,7 @@ export class CampaignController {
   constructor(
     private readonly campaignService: CampaignService,
     private readonly discoveryService: DiscoveryService,
+    private readonly lifecycle: CampaignLifecycleService,
   ) {}
 
   @Post()
@@ -62,7 +64,15 @@ export class CampaignController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update an existing draft or open campaign' })
   async updateCampaign(@Param('id') id: string, @Body() dto: UpdateCampaignDto) {
-    return this.campaignService.updateCampaign(id, dto);
+    return this.lifecycle.update(id, dto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, CampaignOwnerGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Soft delete a campaign and notify applicants and collaborators' })
+  async deleteCampaign(@Param('id') id: string) {
+    return this.lifecycle.delete(id);
   }
 
   @Post(':id/publish')

@@ -261,7 +261,7 @@ export default function OfferReceivedCard({
         </div>
 
         {/* Right: Actions */}
-        {offer.status === 'PENDING' && (
+        {offer.status === 'PENDING' && campaign.status !== 'DELETED' && (
           <div className="flex items-center gap-2 self-end sm:self-auto shrink-0 flex-wrap">
             {isInfluencerCounter ? (
               <>

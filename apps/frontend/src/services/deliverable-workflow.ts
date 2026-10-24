@@ -20,8 +20,9 @@ export interface SubmissionVersion {
 }
 export const isComplete = (d: ParticipantDeliverableItem) => d.status === 'VERIFIED' || (d.status === 'APPROVED' && d.requirements?.requiresPublication === false);
 export const isOverdue = (d: ParticipantDeliverableItem) => !isComplete(d) && !!d.dueDate && new Date(d.dueDate).getTime() < Date.now() && ['PENDING', 'IN_PROGRESS', 'REVISION_REQUESTED'].includes(d.status);
-export function nextAction(participant: { status: string; deliverables?: ParticipantDeliverableItem[] }) {
+export function nextAction(participant: { status: string; deliverables?: ParticipantDeliverableItem[]; campaign?: { status?: string } }) {
   const items = participant.deliverables || [];
+  if (participant.campaign?.status === 'DELETED') return { label: 'View Records', message: 'Campaign deleted by brand · Records retained', state: 'DELETED' };
   if (participant.status === 'PARTICIPANT_CANCELLED') return { label: 'View Campaign', message: 'Collaboration cancelled', state: 'CANCELLED' };
   if (participant.status === 'PARTICIPANT_COMPLETED') return { label: 'View Payment', message: 'All deliverables approved · Payment processing', state: 'COMPLETED' };
   if (participant.status === 'CONFIRMED') return { label: 'Start Campaign', message: 'Campaign accepted · Review brief to begin', state: 'ACCEPTED' };

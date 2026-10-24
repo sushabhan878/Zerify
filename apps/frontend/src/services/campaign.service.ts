@@ -36,7 +36,7 @@ export interface CampaignItem {
   };
   landingPageUrl?: string;
   requirement?: any;
-  status: 'DRAFT' | 'OPEN' | 'FILLING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'PAUSED';
+  status: 'DRAFT' | 'OPEN' | 'FILLING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'PAUSED' | 'DELETED';
   platforms: string[];
   requirements?: any;
   budgetTotalAmount?: number;
@@ -44,6 +44,10 @@ export interface CampaignItem {
   budgetPaymentModel?: string;
   budgetMinPerInfluencer?: number;
   budgetMaxPerInfluencer?: number;
+  performanceMetric?: string;
+  performanceRate?: number;
+  barterItems?: string;
+  shippingCovered?: boolean;
   targetParticipants: number;
   maxParticipants: number;
   autoCloseWhenFilled: boolean;
@@ -92,6 +96,10 @@ export const CampaignService = {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
+  },
+
+  async deleteCampaign(id: string): Promise<CampaignItem> {
+    return apiRequest(`/campaigns/${id}`, { method: 'DELETE' });
   },
 
   async publishCampaign(id: string): Promise<CampaignItem> {

@@ -612,6 +612,7 @@ enum CampaignStatus {
   COMPLETED
   CANCELLED
   PAUSED
+  DELETED
 }
 
 enum CampaignObjective {

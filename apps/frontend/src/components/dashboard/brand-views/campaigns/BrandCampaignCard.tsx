@@ -15,13 +15,15 @@ import { CampaignItem } from '@/services/campaign.service';
 import { formatCurrency as formatMoney } from '@/utils/currency';
 import { useCurrency } from '@/context/CurrencyContext';
 import { PlatformBadge } from '../find-influencers/CreatorCard';
+import CampaignActions from './CampaignActions';
 
 interface BrandCampaignCardProps {
   campaign: CampaignItem;
   onClick: () => void;
+  onUpdated: () => void;
 }
 
-export default function BrandCampaignCard({ campaign: c, onClick }: BrandCampaignCardProps) {
+export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: BrandCampaignCardProps) {
   const { currency: userCurrency } = useCurrency();
   const hired = c._count?.participants || 0;
   const applicants = Array.isArray((c as any).applications)
@@ -342,6 +344,7 @@ export default function BrandCampaignCard({ campaign: c, onClick }: BrandCampaig
             </span>
           )}
         </div>
+        <CampaignActions campaign={c} onUpdated={onUpdated} onDeleted={onUpdated} />
       </div>
     </motion.div>
   );

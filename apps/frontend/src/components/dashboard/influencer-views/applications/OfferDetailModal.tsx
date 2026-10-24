@@ -192,7 +192,7 @@ export default function OfferDetailModal({
         {/* Footer */}
         <div className="p-4 border-t border-white/10 bg-slate-950/40 flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
-            {offer.status === 'PENDING' && (
+            {offer.status === 'PENDING' && campaign.status !== 'DELETED' && (
               <>
                 {isInfluencerCounter ? (
                   <>
@@ -260,7 +260,7 @@ export default function OfferDetailModal({
               </button>
             )}
           </div>
-          {offer.status === 'PENDING' && !isInfluencerCounter && (
+          {offer.status === 'PENDING' && campaign.status !== 'DELETED' && !isInfluencerCounter && (
             <button
               onClick={() => {
                 onAccept(offer.id);

@@ -199,6 +199,10 @@ export class CampaignRequirementsDto {
 export class CampaignContentGuidelinesDto {
   @IsOptional()
   @IsString()
+  moodboardUrl?: string;
+
+  @IsOptional()
+  @IsString()
   description?: string;
 
   @IsOptional()

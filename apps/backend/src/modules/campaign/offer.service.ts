@@ -32,6 +32,7 @@ export class OfferService {
     }
 
     // Verify requesting user owns the campaign
+    if (application.campaign.status === CampaignStatus.DELETED) throw new BadRequestException('Campaign has been deleted');
     if (application.campaign.brandProfile.userId !== userId) {
       throw new ForbiddenException('Only the campaign owner can send offers');
     }
@@ -114,6 +115,7 @@ export class OfferService {
     }
 
     const snapshot = (offer.termsSnapshot as Record<string, any>) || {};
+    if (offer.application.campaign.status === CampaignStatus.DELETED) throw new BadRequestException('Campaign has been deleted');
     const isBrandAcceptingCreatorCounter =
       Boolean(snapshot.isCounterOffer) &&
       snapshot.counterBy === 'INFLUENCER' &&
@@ -314,6 +316,7 @@ export class OfferService {
     }
 
     const isBrand = offer.application.campaign.brandProfile.userId === userId;
+    if (offer.application.campaign.status === CampaignStatus.DELETED) throw new BadRequestException('Campaign has been deleted');
     const isInfluencer = offer.application.influencerProfile.userId === userId;
 
     if (!isBrand && !isInfluencer) {

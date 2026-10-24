@@ -43,6 +43,7 @@ export default function MyCampaignsSection({ initialCampaignId }: { initialCampa
         campaignId={activeCampaignId}
         onBack={() => {
           setActiveCampaignId(null);
+          router.push('/dashboard/campaigns');
           loadCampaigns();
         }}
       />
@@ -159,6 +160,7 @@ export default function MyCampaignsSection({ initialCampaignId }: { initialCampa
             <BrandCampaignCard
               key={c.id}
               campaign={c}
+              onUpdated={loadCampaigns}
               onClick={() => {
                 setActiveCampaignId(c.id);
                 router.push(`/dashboard/campaigns/${c.id}`);

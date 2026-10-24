@@ -59,6 +59,7 @@ export default function CampaignWorkspace({ participantId, onBack, onNavigate }:
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       <button onClick={onBack} className="flex items-center gap-2 text-sm text-slate-400 hover:text-white"><ArrowLeft className="h-4 w-4" />Back to campaigns</button>
       <ErrorNotice message={error} />
+      {campaign.status === 'DELETED' && <p role="status" className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">The brand deleted this campaign. Your records and chat history are retained. Contact the brand in Messages about your collaboration.</p>}
     {loading ? (
       <div className="p-16 flex flex-col items-center justify-center min-h-[350px]">
         <LottieLoader size={180} message="Loading collaboration workspace..." />
@@ -147,7 +148,7 @@ export default function CampaignWorkspace({ participantId, onBack, onNavigate }:
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-4">
           <CampaignBrief campaign={campaign} />
-          {participant.status === 'CONFIRMED' && (
+          {participant.status === 'CONFIRMED' && campaign.status !== 'DELETED' && (
             <div className={`${panel} space-y-3 p-5`}>
               <p className="text-sm text-slate-300">Read the brief and requirements, then start the campaign to unlock submissions.</p>
               <ActionButton busy={busy} onClick={start}>I’ve reviewed the brief · Start Campaign</ActionButton>

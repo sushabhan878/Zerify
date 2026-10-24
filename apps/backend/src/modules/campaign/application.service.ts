@@ -200,6 +200,11 @@ export class ApplicationService {
     // Create the application and enqueue its system message atomically with generous timeout for Neon.
     return this.prisma.$transaction(
       async (tx) => {
+        await tx.$queryRaw`SELECT id FROM campaigns WHERE id = ${campaignId} FOR UPDATE`;
+        const currentCampaign = await tx.campaign.findUniqueOrThrow({ where: { id: campaignId } });
+        if (!['OPEN', 'FILLING'].includes(currentCampaign.status) || currentCampaign.applicationsClosedAt) {
+          throw new BadRequestException('Campaign is no longer open for applications');
+        }
         const application = await tx.campaignApplication.create({
           data: {
             campaign: { connect: { id: campaignId } },

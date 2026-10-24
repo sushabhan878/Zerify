@@ -31,6 +31,7 @@ export default function ActiveCampaignCard({
   };
 
   const getActionConfig = () => {
+    if (c.state === 'DELETED') return { label: 'View Records', className: 'bg-slate-900/90 hover:bg-slate-800 border border-rose-500/25 text-slate-300 hover:text-white', iconClass: 'text-rose-400' };
     if (c.stage === 'COMPLETED' || c.state === 'COMPLETED') {
       return {
         label: 'View Brief',

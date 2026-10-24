@@ -5,6 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { CampaignRepository } from './campaign.repository';
+import { CampaignLifecycleService } from './campaign-lifecycle.service';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
 import { CampaignStatus, Prisma } from '@prisma/client';
@@ -15,6 +16,7 @@ export class CampaignService {
   constructor(
     private readonly repository: CampaignRepository,
     private readonly prisma: PrismaService,
+    private readonly lifecycle: CampaignLifecycleService,
   ) {}
 
   private generateSlug(title: string): string {
@@ -41,6 +43,7 @@ export class CampaignService {
     const existingCampaign = await this.prisma.campaign.findFirst({
       where: {
         brandProfileId: brandProfile.id,
+        status: { not: CampaignStatus.DELETED },
         title: {
           equals: dto.title.trim(),
           mode: 'insensitive',
@@ -229,59 +232,7 @@ export class CampaignService {
   }
 
   async updateCampaign(campaignId: string, dto: UpdateCampaignDto) {
-    const existing = await this.repository.findCampaignById(campaignId);
-    if (!existing) {
-      throw new NotFoundException('Campaign not found');
-    }
-
-    if (existing.status === CampaignStatus.COMPLETED || existing.status === CampaignStatus.CANCELLED) {
-      throw new BadRequestException(`Cannot update a campaign in ${existing.status} status`);
-    }
-
-    const { deliverables, requirements, categories, ...campaignData } = dto;
-
-    // Replace deliverables if specified
-    if (deliverables) {
-      await this.repository.replaceDeliverables(
-        campaignId,
-        deliverables.map((d) => ({
-          platform: d.platform,
-          type: d.type,
-          title: d.title,
-          description: d.description,
-          quantity: d.quantity || 1,
-          dueDate: d.dueDate ? new Date(d.dueDate) : undefined,
-          requiredCta: d.requiredCta,
-          mandatoryHashtags: d.mandatoryHashtags || [],
-          mandatoryMentions: d.mandatoryMentions || [],
-          instructions: (d as any).instructions,
-          revisionLimit: d.revisionLimit ?? 2,
-          requiresPreApproval: d.requiresPreApproval,
-          requiresPublication: d.requiresPublication,
-          allowLateSubmission: d.allowLateSubmission,
-          maxFileSizeMb: d.maxFileSizeMb,
-          allowedMimeTypes: d.allowedMimeTypes,
-          publicationDeadline: d.publicationDeadline ? new Date(d.publicationDeadline) : undefined,
-        })),
-      );
-    }
-
-    const objectives = Array.isArray(campaignData.objective)
-      ? campaignData.objective
-      : campaignData.objective
-      ? [campaignData.objective as string]
-      : Array.isArray((categories as any))
-      ? (categories as any)
-      : undefined;
-
-    return this.repository.updateCampaign(campaignId, {
-      ...campaignData,
-      ...(objectives !== undefined ? { objective: objectives } : {}),
-      contentGuidelines: campaignData.contentGuidelines ? (campaignData.contentGuidelines as any) : undefined,
-      applicationDeadline: campaignData.applicationDeadline ? new Date(campaignData.applicationDeadline) : undefined,
-      startDate: campaignData.startDate ? new Date(campaignData.startDate) : undefined,
-      endDate: campaignData.endDate ? new Date(campaignData.endDate) : undefined,
-    });
+    return this.lifecycle.update(campaignId, dto);
   }
 
   async publishCampaign(campaignId: string) {
@@ -324,6 +275,7 @@ export class CampaignService {
       throw new NotFoundException('Campaign not found');
     }
 
+    if (campaign.status === CampaignStatus.DELETED) throw new BadRequestException('Campaign has been deleted');
     return this.repository.updateCampaignStatus(campaignId, campaign.status, {
       applicationsClosedAt: new Date(),
     });
@@ -335,6 +287,7 @@ export class CampaignService {
       throw new NotFoundException('Campaign not found');
     }
 
+    if (campaign.status === CampaignStatus.DELETED) throw new BadRequestException('Campaign has been deleted');
     if (campaign.status === CampaignStatus.COMPLETED) {
       throw new BadRequestException('Cannot cancel a completed campaign');
     }

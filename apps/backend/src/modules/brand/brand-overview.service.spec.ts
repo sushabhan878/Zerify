@@ -36,7 +36,7 @@ describe('Brand overview', () => {
     const repository = new BrandOverviewRepository({ campaign: { findMany } } as unknown as PrismaService);
     await repository.findCampaigns('owner-id');
     expect(findMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: { brandProfile: { userId: 'owner-id' } },
+      where: { brandProfile: { userId: 'owner-id' }, status: { not: 'DELETED' } },
       select: expect.objectContaining({ applications: expect.objectContaining({ where: INBOUND_APPLICATIONS_WHERE }) }),
     }));
   });

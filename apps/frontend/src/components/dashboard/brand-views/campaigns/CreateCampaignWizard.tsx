@@ -15,6 +15,7 @@ import ReviewPublishStep from './steps/ReviewPublishStep';
 import { CampaignItem, CampaignService } from '@/services/campaign.service';
 import { useToast } from '@/components/ui/Toast';
 import { useCurrency } from '@/context/CurrencyContext';
+import { campaignToForm, campaignEditPayload } from './campaign-form';
 
 const STEPS = [
   { id: 1, label: 'Basic Info', description: 'Brief & objectives' },
@@ -30,12 +31,14 @@ interface CreateCampaignWizardProps {
   onClose: () => void;
   onSuccess: (campaign: any) => void;
   existingCampaigns?: CampaignItem[];
+  initialCampaign?: CampaignItem;
 }
 
 export default function CreateCampaignWizard({
   onClose,
   onSuccess,
   existingCampaigns,
+  initialCampaign,
 }: CreateCampaignWizardProps) {
   const { currency: userCurrency } = useCurrency();
   const { toastError, toastSuccess } = useToast();
@@ -45,7 +48,7 @@ export default function CreateCampaignWizard({
   const [isPublishing, setIsPublishing] = useState(false);
   const [existingCampaignNames, setExistingCampaignNames] = useState<string[]>(() => {
     if (existingCampaigns && existingCampaigns.length > 0) {
-      return existingCampaigns.map((c) => (c.title || '').trim().toLowerCase()).filter(Boolean);
+      return existingCampaigns.filter((c) => c.id !== initialCampaign?.id).map((c) => (c.title || '').trim().toLowerCase()).filter(Boolean);
     }
     return [];
   });
@@ -55,12 +58,12 @@ export default function CreateCampaignWizard({
       CampaignService.getBrandCampaigns()
         .then((camps) => {
           if (Array.isArray(camps)) {
-            setExistingCampaignNames(camps.map((c) => (c.title || '').trim().toLowerCase()).filter(Boolean));
+            setExistingCampaignNames(camps.filter((c) => c.id !== initialCampaign?.id).map((c) => (c.title || '').trim().toLowerCase()).filter(Boolean));
           }
         })
         .catch(() => {});
     }
-  }, [existingCampaigns]);
+  }, [existingCampaigns, initialCampaign?.id]);
 
   useEffect(() => {
     setMounted(true);
@@ -71,7 +74,7 @@ export default function CreateCampaignWizard({
     };
   }, []);
 
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState<any>(() => ({
     title: '',
     objective: [],
     description: '',
@@ -108,7 +111,9 @@ export default function CreateCampaignWizard({
       assetUrls: [],
       moodboardUrl: '',
     },
-  });
+    ...campaignToForm(initialCampaign),
+  }));
+  const [baseline] = useState(() => formData);
 
   const handleFieldChange = (field: string, val: any) => {
     setFormData((prev: any) => ({ ...prev, [field]: val }));
@@ -234,10 +239,10 @@ export default function CreateCampaignWizard({
           formData.maxParticipants !== null
         ) {
           const max = Number(formData.maxParticipants);
-          if (max <= target) {
+          if (max < target) {
             return {
               isValid: false,
-              error: 'Maximum Creators Allowed must be greater than Target No. of Creators to Hire.',
+              error: 'Maximum Creators Allowed must be at least Target No. of Creators to Hire.',
             };
           }
         }
@@ -338,6 +343,12 @@ export default function CreateCampaignWizard({
           if (item.revisionLimit !== undefined && item.revisionLimit !== '') item.revisionLimit = Number(item.revisionLimit);
           else delete item.revisionLimit;
           if (!item.type) item.type = 'Instagram Reel';
+          for (const field of ['dueDate', 'publicationDeadline']) {
+            if (item[field] === '') {
+              if (initialCampaign) item[field] = null;
+              else delete item[field];
+            }
+          }
           return item;
         });
     }
@@ -370,6 +381,12 @@ export default function CreateCampaignWizard({
     setIsSavingDraft(true);
     try {
       const sanitized = sanitizeCampaignPayload(formData);
+      if (initialCampaign) {
+        const updated = await CampaignService.updateCampaign(initialCampaign.id, campaignEditPayload(formData, sanitized, baseline));
+        toastSuccess('Campaign updated. Change notices have been queued for applicants and collaborators.', 'Changes Saved');
+        onSuccess(updated);
+        return;
+      }
       const created = await CampaignService.createCampaign(sanitized);
       toastSuccess('Campaign draft saved successfully.', 'Draft Saved');
       onSuccess(created);
@@ -396,6 +413,12 @@ export default function CreateCampaignWizard({
     setIsPublishing(true);
     try {
       const sanitized = sanitizeCampaignPayload(formData);
+      if (initialCampaign) {
+        const updated = await CampaignService.updateCampaign(initialCampaign.id, campaignEditPayload(formData, sanitized, baseline));
+        toastSuccess('Campaign updated. Change notices have been queued for applicants and collaborators.', 'Changes Saved');
+        onSuccess(updated);
+        return;
+      }
       const created = await CampaignService.createCampaign(sanitized);
       const published = await CampaignService.publishCampaign(created.id);
       toastSuccess('Campaign published and live for creator pitches!', 'Campaign Published');
@@ -419,8 +442,9 @@ export default function CreateCampaignWizard({
       >
         {/* Step Indicator OUT of the card, on top of the card */}
         <div className="w-full px-2 sm:px-6">
+          {initialCampaign && <p className="text-sm font-bold text-white mb-3">Edit campaign · {initialCampaign.title}</p>}
           <CampaignWizardStepIndicator
-            steps={STEPS}
+            steps={initialCampaign ? STEPS.map((step) => step.id === 7 ? { ...step, description: 'Save changes' } : step) : STEPS}
             currentStep={currentStep}
             onStepClick={handleStepClick}
             isStepCompleted={isStepCompleted}
@@ -432,6 +456,7 @@ export default function CreateCampaignWizard({
           {/* Overlapping Close Button */}
           <button
             onClick={onClose}
+            disabled={isPublishing || isSavingDraft}
             className="group absolute -top-3 -right-3 sm:-top-3.5 sm:-right-3.5 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-900/90 hover:bg-slate-800/90 backdrop-blur-xl border border-white/15 hover:border-purple-500/50 flex items-center justify-center text-slate-400 hover:text-white transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.6)] hover:shadow-[0_0_20px_rgba(168,85,247,0.35)] hover:scale-105 active:scale-95 cursor-pointer ring-1 ring-white/5"
             aria-label="Close"
           >
@@ -473,6 +498,7 @@ export default function CreateCampaignWizard({
                 )}
                 {currentStep === 7 && (
                   <ReviewPublishStep
+                    isEditing={Boolean(initialCampaign)}
                     formData={formData}
                     onPublish={handlePublish}
                     onSaveDraft={handleSaveDraft}

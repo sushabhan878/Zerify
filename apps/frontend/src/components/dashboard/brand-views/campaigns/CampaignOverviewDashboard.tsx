@@ -39,6 +39,7 @@ import { useCurrency } from '@/context/CurrencyContext';
 import { formatCurrency } from '@/utils/currency';
 import Money from '@/components/currency/Money';
 import CampaignReviewModal from '../../subcomponents/CampaignReviewModal';
+import CampaignActions from './CampaignActions';
 
 interface CampaignOverviewDashboardProps {
   campaignId: string;
@@ -263,6 +264,8 @@ export default function CampaignOverviewDashboard({
 
   const getStatusBadge = (status: string) => {
     switch (status) {
+      case 'DELETED':
+        return { label: 'Deleted', gradient: 'bg-gradient-to-r from-rose-700 to-rose-600', border: 'border-rose-400/60', shadow: 'shadow-lg shadow-rose-950/30', dot: 'bg-rose-200' };
       case 'OPEN':
       case 'ACTIVE':
         return {
@@ -373,7 +376,9 @@ export default function CampaignOverviewDashboard({
           <ArrowLeft className="w-4 h-4 text-purple-400 group-hover:-translate-x-0.5 transition-transform" />
           <span>Back to Campaigns</span>
         </button>
+        <CampaignActions campaign={campaign} onUpdated={() => void loadData(true)} onDeleted={onBack} />
       </div>
+      {campaign.status === 'DELETED' && <div role="status" className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-200 text-sm">This campaign has been deleted. Historical applications and collaboration records are retained.</div>}
 
       {/* Main Campaign Hero Card with All Card Details */}
       <div className="relative px-6 pb-6 pt-3.5 sm:px-8 sm:pb-8 sm:pt-4 rounded-3xl bg-slate-950/45 border border-purple-500/20 backdrop-blur-2xl shadow-2xl shadow-purple-950/20 space-y-5">

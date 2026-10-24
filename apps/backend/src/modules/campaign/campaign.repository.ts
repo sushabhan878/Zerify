@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import {
   Campaign,
@@ -119,7 +119,7 @@ export class CampaignRepository {
 
   async listCampaignsByBrand(brandProfileId: string) {
     return this.prisma.campaign.findMany({
-      where: { brandProfileId },
+      where: { brandProfileId, status: { not: CampaignStatus.DELETED } },
       include: {
         product: true,
         requirement: true,
@@ -154,7 +154,7 @@ export class CampaignRepository {
 
   async updateCampaignStatus(id: string, status: CampaignStatus, extraData: Prisma.CampaignUpdateInput = {}) {
     return this.prisma.campaign.update({
-      where: { id },
+      where: { id, status: { not: CampaignStatus.DELETED } },
       data: {
         status,
         ...extraData,
@@ -163,8 +163,9 @@ export class CampaignRepository {
   }
 
   async deleteCampaign(id: string) {
-    return this.prisma.campaign.delete({
+    return this.prisma.campaign.update({
       where: { id },
+      data: { status: CampaignStatus.DELETED },
     });
   }
 
@@ -440,6 +441,11 @@ export class CampaignRepository {
   }) {
     return this.prisma.$transaction(async (tx) => {
       // 1. Update Offer
+      await tx.$queryRaw`SELECT id FROM campaigns WHERE id = ${params.campaignId} FOR UPDATE`;
+      const campaign = await tx.campaign.findUniqueOrThrow({ where: { id: params.campaignId } });
+      if (!['OPEN', 'FILLING', 'ACTIVE'].includes(campaign.status)) {
+        throw new BadRequestException('Campaign is no longer available for new collaborations');
+      }
       const updatedOffer = await tx.campaignOffer.update({
         where: { id: params.offerId },
         data: {

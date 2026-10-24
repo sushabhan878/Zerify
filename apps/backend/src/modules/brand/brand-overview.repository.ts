@@ -8,7 +8,7 @@ export class BrandOverviewRepository {
 
   async findCampaigns(userId: string) {
     return this.prisma.campaign.findMany({
-      where: { brandProfile: { userId } },
+      where: { brandProfile: { userId }, status: { not: 'DELETED' } },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true, title: true, status: true, platforms: true, createdAt: true,

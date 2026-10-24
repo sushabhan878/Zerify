@@ -41,6 +41,8 @@ export const userRoom = (userId: string) => `user:${userId}`;
  * for the PRD's "collaboration request".
  */
 export const OUTBOX_EVENTS = {
+  CAMPAIGN_UPDATED: 'CAMPAIGN_UPDATED',
+  CAMPAIGN_DELETED: 'CAMPAIGN_DELETED',
   COLLABORATION_REQUEST_CREATED: 'COLLABORATION_REQUEST_CREATED',
   COLLABORATION_REQUEST_UNDER_REVIEW: 'COLLABORATION_REQUEST_UNDER_REVIEW',
   COLLABORATION_REQUEST_SHORTLISTED: 'COLLABORATION_REQUEST_SHORTLISTED',
@@ -62,6 +64,7 @@ export interface ApplicationEventPayload {
   /** Which side triggered the transition — used to pick the actor in the copy. */
   actor: 'BRAND' | 'INFLUENCER';
   workflowMessage?: string;
+  changes?: { field: string; before: string; after: string }[];
 }
 
 /** Machine-readable error codes surfaced to clients (PRD §67). */

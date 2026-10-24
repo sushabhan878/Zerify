@@ -20,6 +20,14 @@ const campaignSuffix = (p: ApplicationEventPayload) =>
 type Renderer = (payload: ApplicationEventPayload) => RenderedSystemMessage;
 
 const TEMPLATES: Record<OutboxEventType, Renderer> = {
+  [OUTBOX_EVENTS.CAMPAIGN_UPDATED]: (p) => ({
+    messageKey: 'system.campaign.updated',
+    text: `${brandOf(p)} updated the campaign "${p.campaignTitle}".\n\n${(p.changes ?? []).map((change) => `${change.field}: ${change.before} → ${change.after}`).join('\n')}\n\nExisting accepted collaboration terms remain unchanged.`,
+  }),
+  [OUTBOX_EVENTS.CAMPAIGN_DELETED]: (p) => ({
+    messageKey: 'system.campaign.deleted',
+    text: `${brandOf(p)} deleted the campaign "${p.campaignTitle}". It is no longer available for applications or new collaborations. Your application, collaboration records, and conversation history have been retained. Please contact the brand in this chat about any ongoing collaboration.`,
+  }),
   [OUTBOX_EVENTS.COLLABORATION_REQUEST_CREATED]: (p) => ({
     messageKey: 'system.collaboration.created',
     text: `${creatorOf(p)} sent a collaboration request${campaignSuffix(p)}.`,
@@ -69,5 +77,6 @@ export function buildSystemMetadata(
     brandUserId: payload.brandUserId,
     influencerUserId: payload.influencerUserId,
     actor: payload.actor,
+    ...(payload.changes ? { changes: payload.changes } : {}),
   };
 }

@@ -25,6 +25,7 @@ interface ReviewPublishStepProps {
   onSaveDraft: () => void;
   isPublishing: boolean;
   isSavingDraft: boolean;
+  isEditing?: boolean;
 }
 
 export default function ReviewPublishStep({
@@ -33,6 +34,7 @@ export default function ReviewPublishStep({
   onSaveDraft,
   isPublishing,
   isSavingDraft,
+  isEditing = false,
 }: ReviewPublishStepProps) {
   const deliverables = formData.deliverables || [];
   const platforms = formData.platforms || [];
@@ -210,8 +212,9 @@ export default function ReviewPublishStep({
       </div>
 
       {/* Action Buttons */}
+      {isEditing && <p className="text-xs text-purple-200 p-3 rounded-xl bg-purple-500/10 border border-purple-500/20">Saving sends an automated message listing the changed details to applicants and collaborators. Existing accepted collaboration terms remain unchanged.</p>}
       <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-purple-400/10">
-        <button
+        {!isEditing && <button
           type="button"
           onClick={onSaveDraft}
           disabled={isSavingDraft || isPublishing}
@@ -219,7 +222,7 @@ export default function ReviewPublishStep({
         >
           <Bookmark className="w-3.5 h-3.5 text-slate-400" />
           <span>{isSavingDraft ? 'Saving Draft...' : 'Save Draft & Exit'}</span>
-        </button>
+        </button>}
 
         <button
           type="button"
@@ -228,7 +231,7 @@ export default function ReviewPublishStep({
           className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 hover:opacity-95 text-xs font-black text-white flex items-center justify-center gap-2 transition-all shadow-[0_0_16px_rgba(192,132,252,0.35)] disabled:opacity-50"
         >
           <Sparkles className="w-4 h-4 text-purple-200" />
-          <span>{isPublishing ? 'Publishing Campaign...' : 'Publish Campaign Live'}</span>
+          <span>{isPublishing ? (isEditing ? 'Saving Changes...' : 'Publishing Campaign...') : (isEditing ? 'Save Changes & Notify' : 'Publish Campaign Live')}</span>
         </button>
       </div>
     </div>

@@ -14,6 +14,7 @@ import { DeliverableController } from './deliverable.controller';
 import { DiscoveryController } from './discovery.controller';
 
 import { CampaignService } from './campaign.service';
+import { CampaignLifecycleService } from './campaign-lifecycle.service';
 import { ApplicationService } from './application.service';
 import { OfferService } from './offer.service';
 import { ParticipantService } from './participant.service';
@@ -43,6 +44,7 @@ import { ApplicationOwnerGuard } from './guards/application-owner.guard';
     DeliverableWorkflowService,
     CampaignRepository,
     CampaignService,
+    CampaignLifecycleService,
     ApplicationService,
     OfferService,
     ParticipantService,
