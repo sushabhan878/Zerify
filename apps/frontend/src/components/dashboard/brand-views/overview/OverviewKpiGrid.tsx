@@ -1,159 +1,49 @@
 'use client';
 
-import React from 'react';
 import { motion } from 'framer-motion';
-import {
-  Megaphone,
-  DollarSign,
-  Eye,
-  Heart,
-  TrendingUp,
-  Inbox,
-  Users,
-  ArrowUpRight,
-} from 'lucide-react';
+import { Megaphone, DollarSign, Eye, Heart, TrendingUp, Inbox, Users, CheckCircle2 } from 'lucide-react';
+import { OverviewCampaign } from '@/services/brand-overview.service';
 import { useCurrency } from '@/context/CurrencyContext';
 
-interface KpiItem {
-  id: string;
-  label: string;
-  value: string;
-  subtext: string;
-  change: string;
-  isPositive: boolean;
-  icon: React.ComponentType<{ className?: string }>;
-  color: string;
-  bgGradient: string;
-}
-
-export default function OverviewKpiGrid() {
-  const { currency, format } = useCurrency();
-  const spendDisplay = currency === 'INR' ? '₹35,40,000' : '$42,500';
-  const spendChange = currency === 'INR' ? '+₹7.0L' : '+$8.4K';
-
-  const kpis: KpiItem[] = [
-    {
-      id: 'active-campaigns',
-      label: 'Active Campaigns',
-      value: '4',
-      subtext: '2 closing this week',
-      change: '+1 new',
-      isPositive: true,
-      icon: Megaphone,
-      color: 'text-purple-400',
-      bgGradient: 'from-purple-500/20 to-indigo-500/10',
-    },
-    {
-      id: 'total-spend',
-      label: 'Total Campaign Spend',
-      value: spendDisplay,
-      subtext: '78% of quarterly budget',
-      change: spendChange,
-      isPositive: true,
-      icon: DollarSign,
-      color: 'text-emerald-400',
-      bgGradient: 'from-emerald-500/20 to-teal-500/10',
-    },
-    {
-      id: 'total-reach',
-      label: 'Total Reach',
-      value: '2.4M',
-      subtext: 'Across YT, IG & TikTok',
-      change: '+18.4%',
-      isPositive: true,
-      icon: Eye,
-      color: 'text-sky-400',
-      bgGradient: 'from-sky-500/20 to-blue-500/10',
-    },
-    {
-      id: 'total-engagement',
-      label: 'Total Engagement',
-      value: '184K',
-      subtext: 'Likes, comments & shares',
-      change: '+12.6%',
-      isPositive: true,
-      icon: Heart,
-      color: 'text-pink-400',
-      bgGradient: 'from-pink-500/20 to-rose-500/10',
-    },
-    {
-      id: 'engagement-rate',
-      label: 'Overall Engagement Rate',
-      value: '7.8%',
-      subtext: 'Industry avg: 3.2%',
-      change: '+1.4%',
-      isPositive: true,
-      icon: TrendingUp,
-      color: 'text-amber-400',
-      bgGradient: 'from-amber-500/20 to-orange-500/10',
-    },
-    {
-      id: 'applications-received',
-      label: 'Applications Received',
-      value: '142',
-      subtext: '12 awaiting review',
-      change: '+24 this week',
-      isPositive: true,
-      icon: Inbox,
-      color: 'text-violet-400',
-      bgGradient: 'from-violet-500/20 to-purple-500/10',
-    },
-    {
-      id: 'active-influencers',
-      label: 'Influencers Working With',
-      value: '18',
-      subtext: 'Across 4 active campaigns',
-      change: '+5 active',
-      isPositive: true,
-      icon: Users,
-      color: 'text-cyan-400',
-      bgGradient: 'from-cyan-500/20 to-blue-500/10',
-    },
+export default function OverviewKpiGrid({ campaigns, isLoading }: {
+  campaigns: OverviewCampaign[];
+  isLoading: boolean;
+}) {
+  const { convert, format } = useCurrency();
+  const applications = campaigns.flatMap((c) => c.applications);
+  const participants = campaigns.flatMap((c) => c.participants);
+  const activeCreators = new Set(participants
+    .filter((p) => ['CONFIRMED', 'PARTICIPANT_ACTIVE'].includes(p.status))
+    .map((p) => p.influencerProfileId)).size;
+  const activeCampaigns = campaigns.filter((c) => ['OPEN', 'FILLING', 'ACTIVE'].includes(c.status)).length;
+  const pending = applications.filter((a) => ['APPLIED', 'UNDER_REVIEW'].includes(a.status)).length;
+  const completed = participants.flatMap((p) => p.deliverables)
+    .filter((d) => ['PUBLISHED', 'VERIFIED'].includes(d.status)).length;
+  const kpis = [
+    { label: 'Active Campaigns', value: String(activeCampaigns), detail: `${campaigns.length} campaigns in total`, icon: Megaphone, color: 'text-purple-400' },
+    { label: 'Creator Payments', value: format(campaigns.reduce((sum, c) => sum + convert(c.paidOutAmount, c.currency), 0)), detail: 'Paid out · excludes planned budgets', icon: DollarSign, color: 'text-indigo-400' },
+    { label: 'Total Reach', value: '—', detail: 'Campaign reach not available', icon: Eye, color: 'text-pink-400' },
+    { label: 'Engagement Rate', value: '—', detail: 'Campaign engagement not available', icon: TrendingUp, color: 'text-emerald-400' },
+    { label: 'Total Engagement', value: '—', detail: 'Campaign interactions not available', icon: Heart, color: 'text-rose-400' },
+    { label: 'Applications Received', value: String(applications.length), detail: `${pending} awaiting review`, icon: Inbox, color: 'text-amber-400' },
+    { label: 'Active Creators', value: String(activeCreators), detail: 'Unique confirmed & active creators', icon: Users, color: 'text-cyan-400' },
+    { label: 'Published Deliverables', value: String(completed), detail: 'Published or verified submissions', icon: CheckCircle2, color: 'text-teal-400' },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-      {kpis.map((kpi, idx) => {
-        const Icon = kpi.icon;
-        const isWide = idx === 0;
-
-        return (
-          <motion.div
-            key={kpi.id}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: idx * 0.04 }}
-            className={`p-4 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl flex flex-col justify-between hover:border-white/20 transition-all group ${
-              isWide ? 'sm:col-span-2 lg:col-span-1' : ''
-            }`}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <span className="text-[11px] font-bold text-slate-400 group-hover:text-slate-300 transition-colors uppercase tracking-wider">
-                {kpi.label}
-              </span>
-              <div
-                className={`p-2 rounded-xl bg-gradient-to-br ${kpi.bgGradient} border border-white/10 ${kpi.color} shrink-0 group-hover:scale-105 transition-transform`}
-              >
-                <Icon className="w-4 h-4" />
-              </div>
-            </div>
-
-            <div className="mt-3 flex items-baseline justify-between gap-2">
-              <span className="text-2xl font-black text-white tracking-tight">
-                {kpi.value}
-              </span>
-              <span className="inline-flex items-center text-[10.5px] font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                <ArrowUpRight className="w-3 h-3 mr-0.5" />
-                {kpi.change}
-              </span>
-            </div>
-
-            <p className="text-[11px] text-slate-500 font-medium mt-1 truncate">
-              {kpi.subtext}
-            </p>
-          </motion.div>
-        );
-      })}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" aria-busy={isLoading}>
+      {kpis.map(({ label, value, detail, icon: Icon, color }, index) => (
+        <motion.div key={label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: index * 0.04 }}
+          className="p-4 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl hover:border-purple-500/30 transition-colors group">
+          <div className="flex items-center justify-between gap-2 mb-2.5">
+            <span className="text-xs font-semibold text-slate-400 group-hover:text-slate-200 transition-colors">{label}</span>
+            <div className={`p-2 rounded-xl bg-slate-950/60 border border-white/10 ${color}`}><Icon className="w-4 h-4" /></div>
+          </div>
+          {isLoading ? <div className="h-8 w-24 rounded-lg bg-white/10 animate-pulse" /> : <div className="text-2xl font-black text-white break-words">{value}</div>}
+          <p className="text-[11px] font-medium text-slate-400 mt-1">{isLoading ? 'Loading records…' : detail}</p>
+        </motion.div>
+      ))}
     </div>
   );
 }

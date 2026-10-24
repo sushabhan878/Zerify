@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Tag, Check, Plus, X, Sparkles, ChevronDown, Search } from 'lucide-react';
+import { Tag, Check, Plus, X, Sparkles, ChevronDown, Search, AlertCircle } from 'lucide-react';
 import { ALL_INDUSTRIES_GROUPED, SUGGESTED_OBJECTIVE_TAGS } from '@/constants/categories';
 
 import CustomDatePicker from '@/components/ui/CustomDatePicker';
@@ -10,6 +10,7 @@ import CustomDatePicker from '@/components/ui/CustomDatePicker';
 interface BasicInfoStepProps {
   formData: any;
   onChange: (field: string, val: any) => void;
+  existingCampaignNames?: string[];
 }
 
 
@@ -31,12 +32,23 @@ const getTodayString = () => {
   return `${year}-${month}-${day}`;
 };
 
-export default function BasicInfoStep({ formData, onChange }: BasicInfoStepProps) {
+export default function BasicInfoStep({
+  formData,
+  onChange,
+  existingCampaignNames = [],
+}: BasicInfoStepProps) {
   const [customTagInput, setCustomTagInput] = useState('');
   const [isIndustryDropdownOpen, setIsIndustryDropdownOpen] = useState(false);
   const [industrySearchQuery, setIndustrySearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const todayStr = getTodayString();
+
+  const currentTitleTrimmed = (formData.title || '').trim().toLowerCase();
+  const isDuplicateName = Boolean(
+    currentTitleTrimmed &&
+    existingCampaignNames &&
+    existingCampaignNames.some((name) => name.trim().toLowerCase() === currentTitleTrimmed)
+  );
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -102,8 +114,18 @@ export default function BasicInfoStep({ formData, onChange }: BasicInfoStepProps
             placeholder="e.g. Q3 Next-Gen AI Workspace Launch"
             value={formData.title || ''}
             onChange={(e) => onChange('title', e.target.value)}
-            className="w-full px-4 py-3 bg-slate-900/90 border border-purple-400/20 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+            className={`w-full px-4 py-3 bg-slate-900/90 border rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-0 transition-colors ${
+              isDuplicateName
+                ? 'border-rose-500/80 bg-rose-500/5 focus:border-rose-500'
+                : 'border-purple-400/20 focus:border-white/20'
+            }`}
           />
+          {isDuplicateName && (
+            <div className="flex items-center gap-1.5 mt-1.5 text-xs text-rose-400 font-medium">
+              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>A campaign named &ldquo;{formData.title.trim()}&rdquo; already exists. Please choose a unique name.</span>
+            </div>
+          )}
         </div>
 
         {/* Custom Searchable Industry Dropdown */}

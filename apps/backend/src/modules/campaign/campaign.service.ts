@@ -37,6 +37,21 @@ export class CampaignService {
       throw new ForbiddenException('You must have a brand profile to create campaigns');
     }
 
+    // Check if a campaign with this title already exists for this brand
+    const existingCampaign = await this.prisma.campaign.findFirst({
+      where: {
+        brandProfileId: brandProfile.id,
+        title: {
+          equals: dto.title.trim(),
+          mode: 'insensitive',
+        },
+      },
+    });
+
+    if (existingCampaign) {
+      throw new BadRequestException(`A campaign named "${dto.title.trim()}" already exists. Please choose a unique name.`);
+    }
+
     // Business Rules Validation
     if (dto.applicationDeadline && dto.startDate) {
       if (new Date(dto.applicationDeadline) >= new Date(dto.startDate)) {

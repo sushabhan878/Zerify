@@ -1,15 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
-import AnalyticsFilterBar from './analytics/AnalyticsFilterBar';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import { AlertCircle, Download, Loader2, RefreshCw } from 'lucide-react';
+import { BrandOverviewData, BrandOverviewService } from '@/services/brand-overview.service';
 import OverviewKpiGrid from './overview/OverviewKpiGrid';
-import AnalyticsPerformanceChart from './analytics/AnalyticsPerformanceChart';
 import CampaignPerformanceTrend from './overview/CampaignPerformanceTrend';
-import AnalyticsTopCampaigns from './analytics/AnalyticsTopCampaigns';
-import AnalyticsTopInfluencers from './analytics/AnalyticsTopInfluencers';
+import TopCampaignsList from './overview/TopCampaignsList';
+import OverviewCreators from './overview/OverviewCreators';
 import RecentActivityFeed from './overview/RecentActivityFeed';
-import UnderConstructionNotice from '../common/UnderConstructionNotice';
-import { BarChart3, TrendingUp } from 'lucide-react';
 
 interface BrandOverviewSectionProps {
   userName?: string;
@@ -17,90 +16,93 @@ interface BrandOverviewSectionProps {
   onNavigate?: (routeId: string) => void;
 }
 
-export default function BrandOverviewSection({
-  userName = 'Partner',
-  companyName = 'Apex Gear Inc',
-  onNavigate,
-}: BrandOverviewSectionProps) {
-  const [dateRange, setDateRange] = useState('30d');
-  const [selectedCampaign, setSelectedCampaign] = useState('all');
-  const [selectedPlatform, setSelectedPlatform] = useState('all');
-  const [chartView, setChartView] = useState<'weekly' | 'daily'>('weekly');
+const controlClass = 'px-3.5 py-2 rounded-xl bg-slate-950/60 border border-white/10 text-xs font-semibold text-slate-300 hover:text-white hover:border-purple-500/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 disabled:opacity-50 transition-all';
 
-  const handleExport = () => {
-    alert(`Exporting consolidated analytics & overview report for ${dateRange}...`);
+export default function BrandOverviewSection({ onNavigate }: BrandOverviewSectionProps) {
+  const [data, setData] = useState<BrandOverviewData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [campaignId, setCampaignId] = useState('all');
+  const mounted = useRef(false);
+  const loading = useRef(false);
+
+  const load = useCallback(async () => {
+    if (loading.current) return;
+    loading.current = true;
+    setIsLoading(true);
+    setError('');
+    try {
+      const result = await BrandOverviewService.getOverview();
+      if (mounted.current) setData(result);
+    } catch {
+      if (mounted.current) setError('Could not refresh overview data. Please try again.');
+    } finally {
+      loading.current = false;
+      if (mounted.current) setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    mounted.current = true;
+    void load();
+    const onFocus = () => { void load(); };
+    window.addEventListener('focus', onFocus);
+    return () => {
+      mounted.current = false;
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [load]);
+
+  const campaigns = useMemo(() => (data?.campaigns ?? []).filter((c) => campaignId === 'all' || c.id === campaignId), [data, campaignId]);
+
+  const exportCsv = () => {
+    const cell = (value: string | number) => {
+      const text = String(value);
+      return '"' + (/^[=+\-@\t\r]/.test(text) ? "'" + text : text).replaceAll('"', '""') + '"';
+    };
+    const rows = [
+      ['Campaign', 'Status', 'Applications', 'Collaborators', 'Paid out', 'Currency', 'Reach', 'Engagement'],
+      ...campaigns.map((c) => [c.title, c.status, c.applications.length, c.participants.filter((p) => p.status !== 'PARTICIPANT_CANCELLED').length, c.paidOutAmount, c.currency, '—', '—']),
+    ];
+    const url = URL.createObjectURL(new Blob(['\uFEFF' + rows.map((row) => row.map(cell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8;' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'brand-overview.csv';
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Production Deployment Under Construction Notice */}
-      <UnderConstructionNotice
-        customMessage="Brand analytics, real-time campaign performance tracking, and automated ROI intelligence are currently undergoing data pipeline integration for production deployment. Full telemetry will be live soon."
-      />
-
-      {/* 1. Analytics & Overview Filter Bar */}
-      <AnalyticsFilterBar
-        dateRange={dateRange}
-        setDateRange={setDateRange}
-        selectedCampaign={selectedCampaign}
-        setSelectedCampaign={setSelectedCampaign}
-        selectedPlatform={selectedPlatform}
-        setSelectedPlatform={setSelectedPlatform}
-        onExport={handleExport}
-      />
-
-      {/* 2. Comprehensive KPI Summary Grid (7 key metrics) */}
-      <OverviewKpiGrid />
-
-      {/* 3. Performance Over Time & Trajectory Chart with Toggle */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-400">
-              Performance Analytics
-            </span>
-          </div>
-          <div className="flex items-center gap-1 p-1 bg-slate-900/90 border border-white/10 rounded-xl backdrop-blur-md">
-            <button
-              onClick={() => setChartView('weekly')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                chartView === 'weekly'
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <BarChart3 className="w-3.5 h-3.5" />
-              <span>Weekly Velocity</span>
-            </button>
-            <button
-              onClick={() => setChartView('daily')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                chartView === 'daily'
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span>Daily Trajectory</span>
-            </button>
-          </div>
+    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <select aria-label="Filter overview by campaign" value={campaignId} onChange={(event) => setCampaignId(event.target.value)} className={controlClass + ' max-w-full sm:max-w-64 cursor-pointer'} disabled={isLoading}>
+            <option value="all" className="bg-slate-950">All campaigns</option>
+            {(data?.campaigns ?? []).map((campaign) => <option key={campaign.id} value={campaign.id} className="bg-slate-950">{campaign.title}</option>)}
+          </select>
+          <span className="text-xs text-slate-400">All-time totals</span>
         </div>
-
-        {chartView === 'weekly' ? (
-          <AnalyticsPerformanceChart />
-        ) : (
-          <CampaignPerformanceTrend />
-        )}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button type="button" onClick={() => void load()} disabled={isLoading} className={controlClass + ' flex items-center gap-2'}>
+            {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400" /> : <RefreshCw className="w-3.5 h-3.5 text-purple-400" />}
+            {isLoading ? 'Syncing records…' : 'Refresh'}
+          </button>
+          <button type="button" onClick={exportCsv} disabled={isLoading || !data} className={controlClass + ' bg-purple-600/20 border-purple-500/30 text-purple-200 flex items-center gap-2 active:scale-95'}>
+            <Download className="w-3.5 h-3.5 text-purple-400" />Export CSV
+          </button>
+        </div>
       </div>
-
-      {/* 4. Top Performing Campaigns & Top Performing Influencers */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <AnalyticsTopCampaigns onViewCampaigns={() => onNavigate?.('my-campaigns')} />
-        <AnalyticsTopInfluencers />
-      </div>
-
-      {/* 5. Recent Activity Feed */}
-      <RecentActivityFeed onViewMessages={() => onNavigate?.('brand-messages')} />
-    </div>
+      {error && <div role="alert" className="flex items-center gap-2 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-sm text-rose-200"><AlertCircle className="w-4 h-4 shrink-0" />{error}{data ? ' Showing the last loaded records.' : ' Values are unavailable until the connection is restored.'}</div>}
+      {data && !isLoading && <p className="text-[11px] text-slate-500">Last updated {new Date(data.updatedAt).toLocaleString()} · Missing metrics are shown as —.</p>}
+      {data || isLoading ? <>
+        <OverviewKpiGrid campaigns={campaigns} isLoading={isLoading} />
+        <CampaignPerformanceTrend campaigns={campaigns} isLoading={isLoading} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <TopCampaignsList campaigns={campaigns} isLoading={isLoading} onViewCampaigns={() => onNavigate?.('my-campaigns')} />
+          <OverviewCreators campaigns={campaigns} isLoading={isLoading} />
+        </div>
+        <RecentActivityFeed campaigns={campaigns} isLoading={isLoading} />
+      </> : null}
+    </motion.div>
   );
 }

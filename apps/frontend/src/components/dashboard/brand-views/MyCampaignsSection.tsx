@@ -172,6 +172,7 @@ export default function MyCampaignsSection({ initialCampaignId }: { initialCampa
       {isWizardOpen && (
         <CreateCampaignWizard
           onClose={() => setIsWizardOpen(false)}
+          existingCampaigns={campaigns}
           onSuccess={(newCampaign) => {
             setIsWizardOpen(false);
             loadCampaigns();

@@ -12,7 +12,7 @@ import DeliverablesStep from './steps/DeliverablesStep';
 import BudgetStep from './steps/BudgetStep';
 import SlotsStep from './steps/SlotsStep';
 import ReviewPublishStep from './steps/ReviewPublishStep';
-import { CampaignService } from '@/services/campaign.service';
+import { CampaignItem, CampaignService } from '@/services/campaign.service';
 import { useToast } from '@/components/ui/Toast';
 import { useCurrency } from '@/context/CurrencyContext';
 
@@ -29,15 +29,38 @@ const STEPS = [
 interface CreateCampaignWizardProps {
   onClose: () => void;
   onSuccess: (campaign: any) => void;
+  existingCampaigns?: CampaignItem[];
 }
 
-export default function CreateCampaignWizard({ onClose, onSuccess }: CreateCampaignWizardProps) {
+export default function CreateCampaignWizard({
+  onClose,
+  onSuccess,
+  existingCampaigns,
+}: CreateCampaignWizardProps) {
   const { currency: userCurrency } = useCurrency();
   const { toastError, toastSuccess } = useToast();
   const [mounted, setMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [existingCampaignNames, setExistingCampaignNames] = useState<string[]>(() => {
+    if (existingCampaigns && existingCampaigns.length > 0) {
+      return existingCampaigns.map((c) => (c.title || '').trim().toLowerCase()).filter(Boolean);
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    if (!existingCampaigns || existingCampaigns.length === 0) {
+      CampaignService.getBrandCampaigns()
+        .then((camps) => {
+          if (Array.isArray(camps)) {
+            setExistingCampaignNames(camps.map((c) => (c.title || '').trim().toLowerCase()).filter(Boolean));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [existingCampaigns]);
 
   useEffect(() => {
     setMounted(true);
@@ -94,8 +117,18 @@ export default function CreateCampaignWizard({ onClose, onSuccess }: CreateCampa
   const validateStep = (stepNumber: number): { isValid: boolean; error: string | null } => {
     switch (stepNumber) {
       case 1: {
-        if (!formData.title || !formData.title.trim()) {
+        const titleTrimmed = (formData.title || '').trim();
+        if (!titleTrimmed) {
           return { isValid: false, error: 'Campaign Name is required (*).' };
+        }
+        if (
+          existingCampaignNames.length > 0 &&
+          existingCampaignNames.includes(titleTrimmed.toLowerCase())
+        ) {
+          return {
+            isValid: false,
+            error: `A campaign named "${titleTrimmed}" already exists. Please choose a unique name.`,
+          };
         }
         if (!formData.industry || !formData.industry.trim()) {
           return { isValid: false, error: 'Industry / Vertical is required (*).' };
@@ -417,7 +450,11 @@ export default function CreateCampaignWizard({ onClose, onSuccess }: CreateCampa
                 transition={{ duration: 0.15 }}
               >
                 {currentStep === 1 && (
-                  <BasicInfoStep formData={formData} onChange={handleFieldChange} />
+                  <BasicInfoStep
+                    formData={formData}
+                    onChange={handleFieldChange}
+                    existingCampaignNames={existingCampaignNames}
+                  />
                 )}
                 {currentStep === 2 && (
                   <ProductServiceStep formData={formData} onChange={handleFieldChange} />
