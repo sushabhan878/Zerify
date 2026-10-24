@@ -212,7 +212,7 @@ export default function DeliverablesStep({ formData, onChange }: DeliverablesSte
                     <Video className="w-3.5 h-3.5" />
                   </div>
                   <span className="text-xs font-bold text-white">
-                    Deliverable #{idx + 1}
+                    Deliverable No. {idx + 1}
                   </span>
                 </div>
 

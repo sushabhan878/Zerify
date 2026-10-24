@@ -117,7 +117,7 @@ export default function WorkspacePaymentEscrowCard({
 
       steps.push({
         id: `step-deliverable-${d.id || index}`,
-        title: d.title || `Deliverable #${index + 1}`,
+        title: d.title || `Deliverable No. ${index + 1}`,
         subtitle,
         amount: milestoneShare,
         status,
