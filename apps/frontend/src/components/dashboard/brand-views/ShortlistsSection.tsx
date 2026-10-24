@@ -31,6 +31,7 @@ export default function ShortlistsSection() {
   const [applications, setApplications] = useState<CampaignApplicationItem[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,6 +50,7 @@ export default function ShortlistsSection() {
 
   const loadData = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const [appsData, campsData] = await Promise.all([
         ApplicationService.getBrandApplications(),
@@ -66,8 +68,9 @@ export default function ShortlistsSection() {
 
       setApplications(shortlistedPool);
       setCampaigns(campsData || []);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load shortlisted applications', err);
+      setError(err?.message || 'Failed to load shortlisted applications');
     } finally {
       setIsLoading(false);
     }
@@ -267,6 +270,23 @@ export default function ShortlistsSection() {
     return (
       <div className="min-h-[500px] flex items-center justify-center p-12">
         <LottieLoader size={200} message="Loading shortlisted creators across your campaigns..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-[400px] flex flex-col items-center justify-center p-12 text-center space-y-4">
+        <div className="p-8 rounded-3xl bg-rose-950/20 border border-rose-500/20 max-w-md space-y-4">
+          <p className="text-sm font-bold text-rose-300">{error}</p>
+          <button
+            type="button"
+            onClick={loadData}
+            className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white transition-colors"
+          >
+            Retry Loading
+          </button>
+        </div>
       </div>
     );
   }

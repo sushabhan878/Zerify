@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Megaphone } from 'lucide-react';
+import { Plus, Megaphone, AlertCircle, RefreshCw } from 'lucide-react';
 import { CampaignItem, CampaignService } from '@/services/campaign.service';
 import CreateCampaignWizard from './campaigns/CreateCampaignWizard';
 import CampaignOverviewDashboard from './campaigns/CampaignOverviewDashboard';
@@ -13,16 +13,20 @@ export default function MyCampaignsSection({ initialCampaignId }: { initialCampa
   const router = useRouter();
   const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [activeCampaignId, setActiveCampaignId] = useState<string | null>(initialCampaignId || null);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
   const loadCampaigns = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
       const data = await CampaignService.getBrandCampaigns();
-      setCampaigns(data);
-    } catch (err) {
+      setCampaigns(data || []);
+    } catch (err: any) {
       console.error('Failed to fetch brand campaigns', err);
+      setError(err?.message || 'Failed to load campaigns');
     } finally {
       setIsLoading(false);
     }
@@ -106,6 +110,26 @@ export default function MyCampaignsSection({ initialCampaignId }: { initialCampa
       {isLoading ? (
         <div className="min-h-[350px] flex items-center justify-center p-12">
           <LottieLoader size={180} message="Loading your campaigns..." />
+        </div>
+      ) : error ? (
+        <div className="p-10 rounded-3xl bg-rose-950/20 border border-rose-500/20 text-center space-y-4">
+          <div className="w-12 h-12 rounded-2xl bg-rose-500/15 border border-rose-400/20 text-rose-400 flex items-center justify-center mx-auto">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-base font-black text-white">Failed to load campaigns</h3>
+            <p className="text-xs text-rose-300/80 mt-1 max-w-md mx-auto">
+              {error}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={loadCampaigns}
+            className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white inline-flex items-center gap-2 border border-white/10 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>Try Again</span>
+          </button>
         </div>
       ) : filteredCampaigns.length === 0 ? (
         <div className="p-12 rounded-3xl bg-slate-900/60 border border-dashed border-white/10 text-center space-y-4">

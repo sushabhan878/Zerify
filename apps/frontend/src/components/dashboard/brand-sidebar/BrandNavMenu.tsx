@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard,
@@ -21,6 +21,7 @@ import {
 
 import ThemeToggle from '../subcomponents/ThemeToggle';
 import { useMessagingUnread } from '@/context/MessagingContext';
+import { ApplicationService } from '@/services/application.service';
 
 export interface BrandNavItem {
   id: string;
@@ -47,6 +48,28 @@ export default function BrandNavMenu({
   const [activeSubTab, setActiveSubTab] = useState('statistic');
   // Live unread total from the messaging socket.
   const totalUnread = useMessagingUnread();
+  const [shortlistCount, setShortlistCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    ApplicationService.getBrandApplications()
+      .then((apps) => {
+        if (!isMounted) return;
+        const pool = (apps || []).filter(
+          (a) =>
+            a.status === 'SHORTLISTED' ||
+            a.status === 'OFFER_SENT' ||
+            a.status === 'OFFER_ACCEPTED' ||
+            Boolean(a.offers && a.offers.length > 0)
+        );
+        setShortlistCount(pool.length);
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const mainRoutes: BrandNavItem[] = [
     {
@@ -75,7 +98,7 @@ export default function BrandNavMenu({
       id: 'shortlists',
       label: 'Shortlists',
       icon: ListChecks,
-      badge: '8',
+      badge: shortlistCount !== null && shortlistCount > 0 ? `${shortlistCount}` : undefined,
       badgeColor: 'bg-purple-500/20 text-purple-300 border border-purple-500/30',
       section: 'WORKSPACE',
     },
