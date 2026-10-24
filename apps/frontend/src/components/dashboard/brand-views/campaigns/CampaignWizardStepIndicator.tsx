@@ -8,12 +8,14 @@ interface CampaignWizardStepIndicatorProps {
   steps: { id: number; label: string; description?: string }[];
   currentStep: number;
   onStepClick: (stepId: number) => void;
+  isStepCompleted?: (stepId: number) => boolean;
 }
 
 export default function CampaignWizardStepIndicator({
   steps,
   currentStep,
   onStepClick,
+  isStepCompleted,
 }: CampaignWizardStepIndicatorProps) {
   const progressRatio = (currentStep - 1) / (steps.length - 1);
 
@@ -34,8 +36,10 @@ export default function CampaignWizardStepIndicator({
 
         {/* Step Nodes */}
         {steps.map((step) => {
-          const isCompleted = currentStep > step.id;
+          const isStepDone = isStepCompleted ? isStepCompleted(step.id) : currentStep > step.id;
           const isCurrent = currentStep === step.id;
+          const isCompleted = !isCurrent && isStepDone;
+          const isUnfilledPastStep = !isCurrent && !isStepDone && currentStep > step.id;
 
           return (
             <div
@@ -55,6 +59,8 @@ export default function CampaignWizardStepIndicator({
                     ? 'bg-purple-600 text-white shadow-md shadow-purple-900/30'
                     : isCurrent
                     ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/40 border-2 border-purple-400'
+                    : isUnfilledPastStep
+                    ? 'bg-slate-900 border-2 border-purple-500/40 text-slate-300 hover:border-purple-400 hover:text-white'
                     : 'bg-slate-900 border border-purple-500/25 text-slate-400 hover:border-purple-500/60 hover:text-white'
                 }`}
               >

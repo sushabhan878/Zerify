@@ -63,7 +63,7 @@ export default function CreateCampaignWizard({ onClose, onSuccess }: CreateCampa
     coverImageUrl: '',
     platforms: [],
     budgetPaymentModel: '',
-    budgetCurrency: userCurrency || 'INR',
+    budgetCurrency: 'INR',
     budgetTotalAmount: '',
     budgetMinPerInfluencer: '',
     budgetMaxPerInfluencer: '',
@@ -151,23 +151,24 @@ export default function CreateCampaignWizard({ onClose, onSuccess }: CreateCampa
           if (formData.budgetTotalAmount === undefined || formData.budgetTotalAmount === '') {
             return { isValid: false, error: 'Total Campaign Budget Pool is required (*).' };
           }
-        } else if (model === 'RANGE') {
-          if (formData.budgetMinPerInfluencer === undefined || formData.budgetMinPerInfluencer === '') {
-            return { isValid: false, error: 'Minimum Payout is required (*).' };
+          if (Number(formData.budgetTotalAmount) <= Number(formData.budgetMinPerInfluencer)) {
+            return { isValid: false, error: 'Total campaign budget pool must be higher than the per-creator fixed fee.' };
           }
-          if (formData.budgetMaxPerInfluencer === undefined || formData.budgetMaxPerInfluencer === '') {
-            return { isValid: false, error: 'Maximum Payout is required (*).' };
-          }
-          if (formData.budgetTotalAmount === undefined || formData.budgetTotalAmount === '') {
-            return { isValid: false, error: 'Total Budget Pool is required (*).' };
-          }
+        } else if (model === 'CUSTOM_PACKAGE') {
+          return { isValid: false, error: 'Custom Package is coming soon. Please select another payment model to launch.' };
         } else if (model === 'NEGOTIABLE') {
           if (formData.budgetTotalAmount === undefined || formData.budgetTotalAmount === '') {
             return { isValid: false, error: 'Estimated Total Budget Pool is required (*).' };
           }
+          if (formData.budgetMaxPerInfluencer && Number(formData.budgetTotalAmount) <= Number(formData.budgetMaxPerInfluencer)) {
+            return { isValid: false, error: 'Estimated total budget pool must be higher than the maximum payout cap per creator.' };
+          }
         } else if (model === 'PERFORMANCE_BASED') {
           if (formData.budgetTotalAmount === undefined || formData.budgetTotalAmount === '') {
             return { isValid: false, error: 'Total Budget Pool is required (*).' };
+          }
+          if (formData.budgetMaxPerInfluencer && Number(formData.budgetTotalAmount) <= Number(formData.budgetMaxPerInfluencer)) {
+            return { isValid: false, error: 'Total budget pool must be higher than the max payout cap per creator.' };
           }
         } else if (model === 'BARTER') {
           if (formData.freeProductValue === undefined || formData.freeProductValue === '') {
@@ -183,16 +184,29 @@ export default function CreateCampaignWizard({ onClose, onSuccess }: CreateCampa
           if (formData.budgetTotalAmount === undefined || formData.budgetTotalAmount === '') {
             return { isValid: false, error: 'Total Financial Budget is required (*).' };
           }
+          if (Number(formData.budgetTotalAmount) <= Number(formData.budgetMinPerInfluencer)) {
+            return { isValid: false, error: 'Total financial budget must be higher than the guaranteed cash payout per creator.' };
+          }
         }
         return { isValid: true, error: null };
       }
       case 6: {
+        const target = Number(formData.targetParticipants || 0);
+        if (!target || target < 1) {
+          return { isValid: false, error: 'Target No. of Creators to Hire is required (minimum 1) (*).' };
+        }
         if (
-          formData.targetParticipants === undefined ||
-          formData.targetParticipants === '' ||
-          Number(formData.targetParticipants) < 1
+          formData.maxParticipants !== undefined &&
+          formData.maxParticipants !== '' &&
+          formData.maxParticipants !== null
         ) {
-          return { isValid: false, error: 'Target Creators to Hire is required (minimum 1) (*).' };
+          const max = Number(formData.maxParticipants);
+          if (max <= target) {
+            return {
+              isValid: false,
+              error: 'Maximum Creators Allowed must be greater than Target No. of Creators to Hire.',
+            };
+          }
         }
         return { isValid: true, error: null };
       }
@@ -207,6 +221,11 @@ export default function CreateCampaignWizard({ onClose, onSuccess }: CreateCampa
 
   const handleStepClick = (targetStep: number) => {
     setCurrentStep(targetStep);
+  };
+
+  const isStepCompleted = (stepId: number): boolean => {
+    if (stepId >= 7) return false;
+    return validateStep(stepId).isValid;
   };
 
   const sanitizeCampaignPayload = (data: any) => {
@@ -371,6 +390,7 @@ export default function CreateCampaignWizard({ onClose, onSuccess }: CreateCampa
             steps={STEPS}
             currentStep={currentStep}
             onStepClick={handleStepClick}
+            isStepCompleted={isStepCompleted}
           />
         </div>
 

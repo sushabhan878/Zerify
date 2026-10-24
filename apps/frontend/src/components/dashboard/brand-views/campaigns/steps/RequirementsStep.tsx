@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Check, Plus, Sparkles, MapPin, Globe, ChevronDown, Users } from 'lucide-react';
+import { ShieldCheck, Check, Plus, Sparkles, MapPin, Globe, ChevronDown, Users, BadgeCheck } from 'lucide-react';
 
 const PLATFORM_OPTIONS = [
   { id: 'INSTAGRAM', label: 'Instagram' },
@@ -176,16 +176,21 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
       </div>
 
       {/* Creator Follower & Engagement Criteria */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end pt-1">
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-start pt-1">
         {/* Minimum Followers Custom Dropdown */}
-        <div className="relative" ref={followersDropdownRef}>
-          <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
-            Minimum Followers
-          </label>
+        <div className="relative sm:col-span-5 md:col-span-4" ref={followersDropdownRef}>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider">
+              Minimum Followers
+            </label>
+            <span className="text-[11px] text-slate-400 font-medium">
+              {selectedFollowerTier ? selectedFollowerTier.label.split(' ')[0] : 'Any'}
+            </span>
+          </div>
           <button
             type="button"
             onClick={() => setIsFollowersOpen((prev) => !prev)}
-            className="w-full px-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white flex items-center justify-between focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+            className="w-full px-4 py-2.5 bg-slate-900/90 border border-purple-400/20 hover:border-purple-400/40 rounded-xl text-xs text-white flex items-center justify-between focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
           >
             <span className={selectedFollowerTier ? 'text-white font-medium' : 'text-slate-500'}>
               {selectedFollowerTier ? selectedFollowerTier.label : 'Select Minimum Followers...'}
@@ -195,6 +200,9 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
                 }`}
             />
           </button>
+          <p className="text-[10px] text-slate-400/90 mt-2">
+            Filter creator tiers by audience size (Nano, Micro, Mid-Tier, or Macro).
+          </p>
 
           <AnimatePresence>
             {isFollowersOpen && (
@@ -203,7 +211,7 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.15 }}
-                className="absolute z-50 left-0 right-0 mt-1.5 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl max-h-56 overflow-y-auto p-1.5 space-y-0.5 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                className="absolute z-50 left-0 right-0 min-w-[260px] mt-1.5 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl max-h-56 overflow-y-auto p-1.5 space-y-0.5 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
               >
                 <button
                   type="button"
@@ -244,24 +252,24 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
           </AnimatePresence>
         </div>
 
-        {/* Minimum Engagement Rate Slider */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
+        {/* Minimum Engagement Rate Slider (Extended Width) */}
+        <div className="space-y-1.5 sm:col-span-7 md:col-span-8">
+          <div className="flex items-center justify-between mb-0.5">
             <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider">
               Min Engagement Rate
             </label>
-            <span className="px-2 py-0.5 rounded-md bg-purple-500/20 border border-purple-500/40 text-purple-300 text-[11px] font-black">
+            <span className="px-2.5 py-0.5 rounded-md bg-purple-500/20 border border-purple-500/40 text-purple-300 text-[11px] font-black">
               {Number(socialReq.minEngagementRate || 0) > 0
                 ? `${Number(socialReq.minEngagementRate).toFixed(1)}%`
                 : 'Any (0%)'}
             </span>
           </div>
 
-          <div className="relative pt-1 pb-0.5">
+          <div className="relative pt-1.5 pb-0.5">
             <input
               type="range"
               min={0}
-              max={10}
+              max={5}
               step={0.5}
               value={Number(socialReq.minEngagementRate || 0)}
               onChange={(e) => {
@@ -270,34 +278,21 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
               }}
               className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-400"
               style={{
-                background: `linear-gradient(to right, #a855f7 0%, #a855f7 ${(Number(socialReq.minEngagementRate || 0) / 10) * 100}%, #1e293b ${(Number(socialReq.minEngagementRate || 0) / 10) * 100}%, #1e293b 100%)`,
+                background: `linear-gradient(to right, #a855f7 0%, #a855f7 ${(Number(socialReq.minEngagementRate || 0) / 5) * 100}%, #1e293b ${(Number(socialReq.minEngagementRate || 0) / 5) * 100}%, #1e293b 100%)`,
               }}
             />
           </div>
 
           <div className="flex justify-between text-[10px] text-slate-400 font-semibold px-0.5 select-none">
-            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', undefined)}>Any</span>
-            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 2.5)}>2.5%</span>
-            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 5.0)}>5.0%</span>
-            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 7.5)}>7.5%</span>
-            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 10.0)}>10%</span>
+            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', undefined)}>Any (0%)</span>
+            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 1.5)}>1.5%</span>
+            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 2.5)}>2.5% (Avg)</span>
+            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 3.5)}>3.5%</span>
+            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 5.0)}>5.0% (Max)</span>
           </div>
-        </div>
-
-        <div className="flex items-center gap-3 pb-1">
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={socialReq.verifiedOnly || false}
-              onChange={(e) => handleSocialChange('verifiedOnly', e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
-          </label>
-          <div>
-            <span className="text-xs font-bold text-white block">Verified Creators Only</span>
-            <span className="text-[10px] text-slate-400 block">Require blue badge authentication</span>
-          </div>
+          <p className="text-[10px] text-slate-400/90 pt-0.5">
+            Industry standard: 1.5%–3.5% healthy average; 5.0% represents top-tier creator engagement.
+          </p>
         </div>
       </div>
 
@@ -355,28 +350,27 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
         </div>
       </div>
 
-      {/* Strict vs Flexible Eligibility Mode - Toggle Switch */}
-      <div className="pt-6 border-t border-purple-400/10 flex items-center justify-between">
+      {/* Verified Creators Only - Bottom Feature Banner */}
+      <div className="pt-5 border-t border-purple-400/10 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-purple-500/15 border border-purple-400/20 text-purple-300 flex items-center justify-center flex-shrink-0">
-            <ShieldCheck className="w-4 h-4" />
+          <div className="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-400/25 text-purple-300 flex items-center justify-center flex-shrink-0">
+            <BadgeCheck className="w-5 h-5 text-purple-300" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-white block">Strict Eligibility Filter</span>
+              <span className="text-xs font-bold text-white block">Verified Creators Only</span>
               <span
-                className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${req.strictEligibility
+                className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                  socialReq.verifiedOnly
                     ? 'bg-purple-500/20 text-purple-200 border-purple-400/30'
-                    : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-                  }`}
+                    : 'bg-slate-800/60 text-slate-400 border-white/10'
+                }`}
               >
-                {req.strictEligibility ? 'Strict Filter Active' : 'Flexible Match (Recommended)'}
+                {socialReq.verifiedOnly ? 'Blue Badge Required' : 'Open to All Creators'}
               </span>
             </div>
             <span className="text-[11px] text-slate-400 block mt-0.5">
-              {req.strictEligibility
-                ? 'Only creators who meet 100% of minimum followers, platforms, and locations can submit pitches'
-                : 'Creators slightly outside criteria can still apply. Zerify AI calculates a transparent Match Score'}
+              Require blue badge authentication. Restricts campaign pitch proposals exclusively to verified platform creators.
             </span>
           </div>
         </div>
@@ -384,11 +378,11 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
         <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
           <input
             type="checkbox"
-            checked={req.strictEligibility || false}
-            onChange={(e) => onChange('requirements', { ...req, strictEligibility: e.target.checked })}
+            checked={socialReq.verifiedOnly || false}
+            onChange={(e) => handleSocialChange('verifiedOnly', e.target.checked)}
             className="sr-only peer"
           />
-          <div className="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
+          <div className="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500 cursor-pointer"></div>
         </label>
       </div>
     </div>

@@ -18,7 +18,9 @@ import {
   Package,
   Activity,
   Info,
+  AlertCircle,
 } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast';
 
 const PAYMENT_MODELS = [
   {
@@ -32,12 +34,6 @@ const PAYMENT_MODELS = [
     label: 'Negotiable / Pitch',
     icon: MessageSquareQuote,
     desc: 'Creators propose their custom rate when applying',
-  },
-  {
-    value: 'RANGE',
-    label: 'Budget Range',
-    icon: Sliders,
-    desc: 'Min and Max target payout per creator',
   },
   {
     value: 'PERFORMANCE_BASED',
@@ -57,15 +53,21 @@ const PAYMENT_MODELS = [
     icon: Layers,
     desc: 'Base financial payout plus free product shipment',
   },
+  {
+    value: 'CUSTOM_PACKAGE',
+    label: 'Custom Package',
+    icon: Package,
+    desc: 'Tailored milestone or enterprise creator package',
+  },
 ];
 
 const CURRENCIES = [
-  { code: 'INR', symbol: '₹', label: 'INR - Indian Rupee (Default)' },
-  { code: 'USD', symbol: '$', label: 'USD - US Dollar' },
-  { code: 'EUR', symbol: '€', label: 'EUR - Euro' },
-  { code: 'GBP', symbol: '£', label: 'GBP - British Pound' },
-  { code: 'CAD', symbol: 'C$', label: 'CAD - Canadian Dollar' },
-  { code: 'AUD', symbol: 'A$', label: 'AUD - Australian Dollar' },
+  { code: 'INR', symbol: '₹', label: 'INR - Indian Rupee (Default)', isAvailable: true },
+  { code: 'USD', symbol: '$', label: 'USD - US Dollar', isAvailable: false },
+  { code: 'EUR', symbol: '€', label: 'EUR - Euro', isAvailable: false },
+  { code: 'GBP', symbol: '£', label: 'GBP - British Pound', isAvailable: false },
+  { code: 'CAD', symbol: 'C$', label: 'CAD - Canadian Dollar', isAvailable: false },
+  { code: 'AUD', symbol: 'A$', label: 'AUD - Australian Dollar', isAvailable: false },
 ];
 
 const PERFORMANCE_METRICS = [
@@ -81,12 +83,20 @@ interface BudgetStepProps {
 }
 
 export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
+  const { toastError } = useToast();
   const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
   const [isMetricOpen, setIsMetricOpen] = useState(false);
   const currencyDropdownRef = useRef<HTMLDivElement>(null);
   const metricDropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedModel = formData.budgetPaymentModel || '';
+
+  // Ensure default currency is strictly INR
+  useEffect(() => {
+    if (!formData.budgetCurrency || formData.budgetCurrency !== 'INR') {
+      onChange('budgetCurrency', 'INR');
+    }
+  }, [formData.budgetCurrency, onChange]);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -104,9 +114,24 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
     };
   }, []);
 
-  const preferredCurrency = typeof window !== 'undefined' ? localStorage.getItem('zerify_preferred_currency') || 'INR' : 'INR';
-  const selectedCurrency = CURRENCIES.find((c) => c.code === (formData.budgetCurrency || preferredCurrency)) || CURRENCIES[0];
+  const selectedCurrency = CURRENCIES.find((c) => c.code === (formData.budgetCurrency || 'INR')) || CURRENCIES[0];
   const selectedMetric = PERFORMANCE_METRICS.find((m) => m.id === formData.performanceMetric);
+
+  // Validate that total budget pool is strictly higher than per-creator fee/cap
+  const totalAmount = Number(formData.budgetTotalAmount || 0);
+  const minPerCreator = Number(formData.budgetMinPerInfluencer || 0);
+  const maxPerCreator = Number(formData.budgetMaxPerInfluencer || 0);
+
+  let budgetPoolError: string | null = null;
+  if (selectedModel === 'FIXED' && totalAmount > 0 && minPerCreator > 0 && totalAmount <= minPerCreator) {
+    budgetPoolError = 'Total campaign budget pool must be higher than the per-creator fixed fee.';
+  } else if (selectedModel === 'NEGOTIABLE' && totalAmount > 0 && maxPerCreator > 0 && totalAmount <= maxPerCreator) {
+    budgetPoolError = 'Estimated total budget pool must be higher than the maximum payout cap per creator.';
+  } else if (selectedModel === 'PERFORMANCE_BASED' && totalAmount > 0 && maxPerCreator > 0 && totalAmount <= maxPerCreator) {
+    budgetPoolError = 'Total budget pool must be higher than the max payout cap per creator.';
+  } else if (selectedModel === 'HYBRID' && totalAmount > 0 && minPerCreator > 0 && totalAmount <= minPerCreator) {
+    budgetPoolError = 'Total financial budget must be higher than the guaranteed cash payout per creator.';
+  }
 
   return (
     <div className="space-y-6">
@@ -197,26 +222,46 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute z-50 right-0 mt-1.5 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl max-h-56 overflow-y-auto p-1.5 space-y-0.5 w-48 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                  className="absolute z-50 right-0 mt-1.5 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl max-h-56 overflow-y-auto p-1.5 space-y-0.5 w-56 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                 >
                   {CURRENCIES.map((c) => {
                     const isSelected = selectedCurrency.code === c.code;
+                    const isAvailable = c.code === 'INR';
                     return (
                       <button
                         type="button"
                         key={c.code}
                         onClick={() => {
-                          onChange('budgetCurrency', c.code);
+                          if (!isAvailable) {
+                            toastError(
+                              `${c.code} (${c.label.split(' - ')[1] || c.code}) is coming soon! Campaign budget, escrow, and creator payouts currently operate exclusively in INR (₹).`,
+                              'Coming Soon',
+                            );
+                            return;
+                          }
+                          onChange('budgetCurrency', 'INR');
                           setIsCurrencyOpen(false);
                         }}
-                        className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between ${
+                        className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${
                           isSelected
                             ? 'bg-purple-500/20 text-purple-200 font-bold'
-                            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                            : isAvailable
+                            ? 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                            : 'text-slate-400 hover:bg-slate-800/60 opacity-80 hover:opacity-100'
                         }`}
                       >
-                        <span>{c.label}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />}
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-purple-300 w-4">{c.symbol}</span>
+                          <span className="text-white font-medium">{c.code}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {!isAvailable && (
+                            <span className="text-[9px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 rounded-md">
+                              Coming Soon
+                            </span>
+                          )}
+                          {isSelected && <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />}
+                        </div>
                       </button>
                     );
                   })}
@@ -282,12 +327,20 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       onChange('budgetTotalAmount', val ? Number(val) : undefined);
                     }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                    className={`w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition-colors ${
+                      budgetPoolError ? 'border-rose-500/80 bg-rose-500/5' : 'border-purple-400/20 focus:border-white/20'
+                    }`}
                   />
                   <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
+                {budgetPoolError && (
+                  <p className="text-[11px] text-rose-400 mt-1.5 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{budgetPoolError}</span>
+                  </p>
+                )}
               </div>
             </div>
             <p className="text-[11px] text-slate-400">
@@ -336,12 +389,20 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       onChange('budgetTotalAmount', val ? Number(val) : undefined);
                     }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                    className={`w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition-colors ${
+                      budgetPoolError ? 'border-rose-500/80 bg-rose-500/5' : 'border-purple-400/20 focus:border-white/20'
+                    }`}
                   />
                   <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
+                {budgetPoolError && (
+                  <p className="text-[11px] text-rose-400 mt-1.5 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{budgetPoolError}</span>
+                  </p>
+                )}
               </div>
             </div>
             <p className="text-[11px] text-slate-400">
@@ -350,80 +411,14 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
           </motion.div>
         )}
 
-        {/* 3. BUDGET RANGE FIELDS */}
-        {selectedModel === 'RANGE' && (
-          <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
-                  Minimum Payout ({selectedCurrency.code}) <span className="text-pink-400">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="e.g. 500"
-                    value={formData.budgetMinPerInfluencer || ''}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/[^0-9.]/g, '');
-                      onChange('budgetMinPerInfluencer', val ? Number(val) : undefined);
-                    }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
-                  />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
-                    {selectedCurrency.symbol}
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
-                  Maximum Payout ({selectedCurrency.code}) <span className="text-pink-400">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="e.g. 2000"
-                    value={formData.budgetMaxPerInfluencer || ''}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/[^0-9.]/g, '');
-                      onChange('budgetMaxPerInfluencer', val ? Number(val) : undefined);
-                    }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
-                  />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
-                    {selectedCurrency.symbol}
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
-                  Total Budget Pool ({selectedCurrency.code}) <span className="text-pink-400">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="e.g. 8000"
-                    value={formData.budgetTotalAmount || ''}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/[^0-9.]/g, '');
-                      onChange('budgetTotalAmount', val ? Number(val) : undefined);
-                    }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
-                  />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
-                    {selectedCurrency.symbol}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <p className="text-[11px] text-slate-400">
-              Creators will see this range and know expected compensation boundaries for this campaign.
+        {/* 6. CUSTOM PACKAGE FIELDS (COMING SOON) */}
+        {selectedModel === 'CUSTOM_PACKAGE' && (
+          <div className="p-6 rounded-2xl bg-slate-900/60 border border-white/10 text-center space-y-1.5">
+            <p className="text-sm font-semibold text-white">Custom Package is Coming Soon</p>
+            <p className="text-xs text-slate-400">
+              Custom milestone-based contracts and enterprise creator packages will be available in an upcoming release.
             </p>
-          </motion.div>
+          </div>
         )}
 
         {/* 4. PERFORMANCE / CPM FIELDS */}
@@ -563,12 +558,20 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       onChange('budgetTotalAmount', val ? Number(val) : undefined);
                     }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                    className={`w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition-colors ${
+                      budgetPoolError ? 'border-rose-500/80 bg-rose-500/5' : 'border-purple-400/20 focus:border-white/20'
+                    }`}
                   />
                   <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
+                {budgetPoolError && (
+                  <p className="text-[11px] text-rose-400 mt-1.5 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{budgetPoolError}</span>
+                  </p>
+                )}
               </div>
             </div>
           </motion.div>
@@ -695,12 +698,20 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       onChange('budgetTotalAmount', val ? Number(val) : undefined);
                     }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                    className={`w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition-colors ${
+                      budgetPoolError ? 'border-rose-500/80 bg-rose-500/5' : 'border-purple-400/20 focus:border-white/20'
+                    }`}
                   />
                   <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
+                {budgetPoolError && (
+                  <p className="text-[11px] text-rose-400 mt-1.5 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{budgetPoolError}</span>
+                  </p>
+                )}
               </div>
             </div>
             <p className="text-[11px] text-slate-400">

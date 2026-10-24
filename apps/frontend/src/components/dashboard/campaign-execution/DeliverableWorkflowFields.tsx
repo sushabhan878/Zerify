@@ -18,7 +18,15 @@ import {
 interface DeliverableWorkflowFieldsProps {
   item: any;
   onChange: (field: string, value: unknown) => void;
+  campaignStartDate?: string;
 }
+
+const getNextDay = (dateStr: string) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + 1);
+  return d.toLocaleDateString('en-CA');
+};
 
 const FILE_TYPE_OPTIONS = [
   {
@@ -44,7 +52,7 @@ const FILE_TYPE_OPTIONS = [
   },
 ];
 
-export default function DeliverableWorkflowFields({ item, onChange }: DeliverableWorkflowFieldsProps) {
+export default function DeliverableWorkflowFields({ item, onChange, campaignStartDate }: DeliverableWorkflowFieldsProps) {
   // Determine selected mime configuration
   const currentFileType =
     item.allowedMimeTypes && item.allowedMimeTypes.length > 0
@@ -133,12 +141,15 @@ export default function DeliverableWorkflowFields({ item, onChange }: Deliverabl
             value={item.dueDate ? item.dueDate.slice(0, 10) : ''}
             onChange={(val) => {
               onChange('dueDate', val || undefined);
-              if (val && item.publicationDeadline && item.publicationDeadline < val) {
-                onChange('publicationDeadline', '');
+              if (val) {
+                const nextPubDate = getNextDay(val);
+                if (!item.publicationDeadline || item.publicationDeadline <= val) {
+                  onChange('publicationDeadline', nextPubDate);
+                }
               }
             }}
             placeholder="Select submission deadline"
-            minDate={new Date().toLocaleDateString('en-CA')}
+            minDate={campaignStartDate ? getNextDay(campaignStartDate) : new Date().toLocaleDateString('en-CA')}
             position="top"
           />
         </div>
@@ -152,7 +163,13 @@ export default function DeliverableWorkflowFields({ item, onChange }: Deliverabl
             value={item.publicationDeadline ? item.publicationDeadline.slice(0, 10) : ''}
             onChange={(val) => onChange('publicationDeadline', val || undefined)}
             placeholder="Select publication deadline"
-            minDate={item.dueDate ? item.dueDate.slice(0, 10) : new Date().toLocaleDateString('en-CA')}
+            minDate={
+              item.dueDate
+                ? getNextDay(item.dueDate)
+                : campaignStartDate
+                ? getNextDay(getNextDay(campaignStartDate))
+                : getNextDay(new Date().toLocaleDateString('en-CA'))
+            }
             position="top"
           />
         </div>
@@ -178,13 +195,13 @@ export default function DeliverableWorkflowFields({ item, onChange }: Deliverabl
         </div>
       </div>
 
-      {/* Allowed Files (Radio Button Cards) */}
+      {/* Allowed Files */}
       <div className="pt-1">
         <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-2 flex items-center justify-between">
           <span>Allowed File Formats</span>
           <span className="text-[11px] font-normal normal-case text-slate-400">Choose acceptable upload formats</span>
         </label>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5" role="radiogroup">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           {FILE_TYPE_OPTIONS.map((opt) => {
             const isSelected = currentFileType === opt.key;
             const Icon = opt.icon;
@@ -193,8 +210,6 @@ export default function DeliverableWorkflowFields({ item, onChange }: Deliverabl
               <button
                 type="button"
                 key={opt.key}
-                role="radio"
-                aria-checked={isSelected}
                 onClick={() => onChange('allowedMimeTypes', opt.mimes)}
                 className={`relative flex items-center gap-3 p-3 rounded-xl border text-left transition-all cursor-pointer ${
                   isSelected
@@ -202,17 +217,6 @@ export default function DeliverableWorkflowFields({ item, onChange }: Deliverabl
                     : 'bg-slate-950/60 border-white/10 hover:border-purple-400/40 hover:bg-slate-900/80 text-slate-300'
                 }`}
               >
-                {/* Custom Radio Button Indicator */}
-                <div
-                  className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all ${
-                    isSelected
-                      ? 'border-purple-400 bg-purple-600 shadow-[0_0_8px_rgba(168,85,247,0.6)]'
-                      : 'border-white/25 bg-slate-900'
-                  }`}
-                >
-                  {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white shadow-xs" />}
-                </div>
-
                 {/* Format Icon */}
                 <div
                   className={`p-2 rounded-lg shrink-0 transition-colors ${
