@@ -132,10 +132,9 @@ export default function LinkedPaymentAccountCard({
         <button
           type="button"
           onClick={onManage}
-          className="w-full py-2 px-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-white/10 hover:border-purple-500/40 text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center justify-center gap-1.5"
+          className="w-full py-2 px-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-white/10 hover:border-purple-500/40 text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer"
         >
-          <span>Manage in Payments</span>
-          <ArrowUpRight className="w-3.5 h-3.5 text-purple-400" />
+          <span>Manage Account</span>
         </button>
       )}
     </div>
