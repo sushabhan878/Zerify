@@ -106,7 +106,7 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
       try {
         const stored = localStorage.getItem('zerify_brand_profile_cache');
         if (stored) return JSON.parse(stored);
-      } catch (e) {}
+      } catch (e) { }
     }
     return null;
   };
@@ -122,7 +122,7 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
   const [description, setDescription] = useState(() => cached?.description || '');
   const [selectedValues, setSelectedValues] = useState<string[]>(() => cached?.brandValues || []);
   const [currency, setCurrency] = useState<string>('INR');
-  
+
   const [instagram, setInstagram] = useState(() => cached?.socialLinks?.instagram || '');
   const [linkedin, setLinkedin] = useState(() => cached?.socialLinks?.linkedin || '');
   const [twitter, setTwitter] = useState(() => cached?.socialLinks?.twitter || '');
@@ -494,11 +494,10 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
                 type="button"
                 key={val}
                 onClick={() => toggleValue(val)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
-                  isSelected
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${isSelected
                     ? 'bg-purple-600/30 border-purple-500/60 text-purple-200 shadow-sm'
                     : 'bg-slate-950/50 border-white/10 text-slate-400 hover:text-white hover:border-white/20'
-                }`}
+                  }`}
               >
                 {isSelected && <Check className="w-3 h-3 text-purple-400" />}
                 <span>{val}</span>

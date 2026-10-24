@@ -486,8 +486,8 @@ export default function SingleSocialAccountsCard({
             <div
               key={acc.id}
               className={`p-3.5 sm:p-4 rounded-2xl border transition-all backdrop-blur-xl flex flex-col justify-between ${acc.connected
-                  ? 'bg-slate-950/80 border-purple-500/30 shadow-lg shadow-purple-950/20 hover:border-purple-500/50 hover:bg-slate-950/95'
-                  : 'bg-slate-950/40 border-white/10 hover:border-white/20'
+                ? 'bg-slate-950/80 border-purple-500/30 shadow-lg shadow-purple-950/20 hover:border-purple-500/50 hover:bg-slate-950/95'
+                : 'bg-slate-950/40 border-white/10 hover:border-white/20'
                 }`}
             >
               {/* Header row: Avatar + Platform Name & Handle + Actions */}

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
+import { X, ArrowRight, Sparkles } from 'lucide-react';
 import CampaignWizardStepIndicator from './CampaignWizardStepIndicator';
 import BasicInfoStep from './steps/BasicInfoStep';
 import ProductServiceStep from './steps/ProductServiceStep';
@@ -202,27 +202,10 @@ export default function CreateCampaignWizard({ onClose, onSuccess }: CreateCampa
   };
 
   const handleNextStep = () => {
-    const validation = validateStep(currentStep);
-    if (!validation.isValid) {
-      toastError(validation.error || 'Please fill in all required fields.', 'Required Field');
-      return;
-    }
     setCurrentStep((prev) => Math.min(STEPS.length, prev + 1));
   };
 
   const handleStepClick = (targetStep: number) => {
-    if (targetStep < currentStep) {
-      setCurrentStep(targetStep);
-      return;
-    }
-
-    for (let s = currentStep; s < targetStep; s++) {
-      const v = validateStep(s);
-      if (!v.isValid) {
-        toastError(v.error || 'Required fields missing.', `Step ${s} (${STEPS[s - 1].label}) Required`);
-        return;
-      }
-    }
     setCurrentStep(targetStep);
   };
 
@@ -346,6 +329,18 @@ export default function CreateCampaignWizard({ onClose, onSuccess }: CreateCampa
   };
 
   const handlePublish = async () => {
+    for (let s = 1; s <= 6; s++) {
+      const v = validateStep(s);
+      if (!v.isValid) {
+        toastError(
+          v.error || `Please complete all required fields in Step ${s} (${STEPS[s - 1].label}).`,
+          'Required Field Missing'
+        );
+        setCurrentStep(s);
+        return;
+      }
+    }
+
     setIsPublishing(true);
     try {
       const sanitized = sanitizeCampaignPayload(formData);
@@ -363,96 +358,93 @@ export default function CreateCampaignWizard({ onClose, onSuccess }: CreateCampa
   if (!mounted) return null;
 
   const modalContent = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="relative w-full max-w-4xl bg-slate-900 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] my-auto"
+        className="relative w-full max-w-4xl flex flex-col my-auto max-h-[96vh] space-y-3 sm:space-y-4"
       >
-        {/* Close Button Top Right */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 sm:top-5 sm:right-5 z-20 p-2 rounded-full bg-slate-800/60 hover:bg-slate-700/80 text-slate-400 hover:text-white border border-white/5 hover:border-white/20 transition-all shadow-sm"
-          aria-label="Close"
-        >
-          <X className="w-4 h-4" />
-        </button>
-
-        {/* Wizard Step Indicator & Body with Generous Top Negative Space */}
-        <div className="p-6 pt-12 sm:pt-14 sm:px-8 overflow-y-auto flex-1 space-y-6 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {/* Step Indicator OUT of the card, on top of the card */}
+        <div className="w-full px-2 sm:px-6">
           <CampaignWizardStepIndicator
             steps={STEPS}
             currentStep={currentStep}
             onStepClick={handleStepClick}
           />
+        </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentStep}
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.15 }}
-            >
-              {currentStep === 1 && (
-                <BasicInfoStep formData={formData} onChange={handleFieldChange} />
-              )}
-              {currentStep === 2 && (
-                <ProductServiceStep formData={formData} onChange={handleFieldChange} />
-              )}
-              {currentStep === 3 && (
-                <RequirementsStep formData={formData} onChange={handleFieldChange} />
-              )}
-              {currentStep === 4 && (
-                <DeliverablesStep formData={formData} onChange={handleFieldChange} />
-              )}
-              {currentStep === 5 && (
-                <BudgetStep formData={formData} onChange={handleFieldChange} />
-              )}
-              {currentStep === 6 && (
-                <SlotsStep formData={formData} onChange={handleFieldChange} />
-              )}
-              {currentStep === 7 && (
-                <ReviewPublishStep
-                  formData={formData}
-                  onPublish={handlePublish}
-                  onSaveDraft={handleSaveDraft}
-                  isPublishing={isPublishing}
-                  isSavingDraft={isSavingDraft}
-                />
-              )}
-            </motion.div>
-          </AnimatePresence>
+        {/* Main Card Container with Overlapping Close Button on Top Right Corner */}
+        <div className="relative w-full flex-1">
+          {/* Overlapping Close Button */}
+          <button
+            onClick={onClose}
+            className="group absolute -top-3 -right-3 sm:-top-3.5 sm:-right-3.5 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-900/90 hover:bg-slate-800/90 backdrop-blur-xl border border-white/15 hover:border-purple-500/50 flex items-center justify-center text-slate-400 hover:text-white transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.6)] hover:shadow-[0_0_20px_rgba(168,85,247,0.35)] hover:scale-105 active:scale-95 cursor-pointer ring-1 ring-white/5"
+            aria-label="Close"
+          >
+            <X className="w-4 h-4 transition-transform duration-200 group-hover:rotate-90 group-hover:scale-110 stroke-[2.2]" />
+          </button>
 
-          {/* Direct Navigation Buttons */}
-          <div className="flex items-center justify-between pt-2">
-            <button
-              type="button"
-              onClick={() => setCurrentStep((prev) => Math.max(1, prev - 1))}
-              disabled={currentStep === 1}
-              className="px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-xs font-bold text-slate-300 flex items-center gap-1.5 disabled:opacity-30 disabled:hover:bg-slate-800/80 transition-colors"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Previous</span>
-            </button>
-
-            {currentStep < STEPS.length && (
-              <button
-                type="button"
-                onClick={handleNextStep}
-                className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white flex items-center gap-1.5 shadow-md shadow-purple-900/30 transition-all ml-auto"
+          {/* Card Body Container */}
+          <div className="relative w-full bg-slate-900 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[76vh]">
+            <div className="p-6 sm:p-8 overflow-y-auto flex-1 space-y-6 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.15 }}
               >
-                <span>Next Step</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+                {currentStep === 1 && (
+                  <BasicInfoStep formData={formData} onChange={handleFieldChange} />
+                )}
+                {currentStep === 2 && (
+                  <ProductServiceStep formData={formData} onChange={handleFieldChange} />
+                )}
+                {currentStep === 3 && (
+                  <RequirementsStep formData={formData} onChange={handleFieldChange} />
+                )}
+                {currentStep === 4 && (
+                  <DeliverablesStep formData={formData} onChange={handleFieldChange} />
+                )}
+                {currentStep === 5 && (
+                  <BudgetStep formData={formData} onChange={handleFieldChange} />
+                )}
+                {currentStep === 6 && (
+                  <SlotsStep formData={formData} onChange={handleFieldChange} />
+                )}
+                {currentStep === 7 && (
+                  <ReviewPublishStep
+                    formData={formData}
+                    onPublish={handlePublish}
+                    onSaveDraft={handleSaveDraft}
+                    isPublishing={isPublishing}
+                    isSavingDraft={isSavingDraft}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Next Step Button Revealed After Scrolling the Form (No Previous Button) */}
+            {currentStep < STEPS.length && (
+              <div className="flex justify-end pt-4 pb-2 border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={handleNextStep}
+                  className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white flex items-center gap-2 shadow-lg shadow-purple-900/30 transition-all cursor-pointer"
+                >
+                  <span>Next Step</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             )}
           </div>
         </div>
-      </motion.div>
-    </div>
-
-  );
+      </div>
+    </motion.div>
+  </div>
+);
 
   return createPortal(modalContent, document.body);
 }

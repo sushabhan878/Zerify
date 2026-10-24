@@ -18,17 +18,17 @@ export default function CampaignWizardStepIndicator({
   const progressRatio = (currentStep - 1) / (steps.length - 1);
 
   return (
-    <div className="w-full py-3 mb-8 select-none">
+    <div className="w-full py-2 select-none">
       <div className="relative flex items-center justify-between">
-        {/* Continuous Connecting Line between circle centers (left-5 right-5 matches center of w-10 circle) */}
-        <div className="absolute top-5 left-5 right-5 h-[3px] bg-slate-800/80 rounded-full z-0 overflow-hidden">
+        {/* Continuous Connecting Line between circle centers */}
+        <div className="absolute top-5 left-5 right-5 h-[2px] bg-slate-800 rounded-full z-0 overflow-hidden">
           <motion.div
-            className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full shadow-[0_0_16px_rgba(168,85,247,1)]"
+            className="h-full bg-purple-600 rounded-full"
             initial={false}
             animate={{
               width: `${progressRatio * 100}%`,
             }}
-            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
           />
         </div>
 
@@ -47,33 +47,33 @@ export default function CampaignWizardStepIndicator({
               <motion.div
                 initial={false}
                 animate={{
-                  scale: isCurrent ? 1.15 : 1,
+                  scale: isCurrent ? 1.08 : 1,
                 }}
-                transition={{ type: 'spring', stiffness: 350, damping: 22 }}
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-black transition-all duration-300 ${
+                transition={{ type: 'spring', stiffness: 350, damping: 24 }}
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-200 ${
                   isCompleted
-                    ? 'bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 shadow-[0_0_16px_rgba(16,185,129,0.6)] ring-2 ring-emerald-400/50'
+                    ? 'bg-purple-600 text-white shadow-md shadow-purple-900/30'
                     : isCurrent
-                    ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 text-white shadow-[0_0_22px_rgba(168,85,247,0.9)] ring-4 ring-purple-500/30'
-                    : 'bg-slate-900 border border-white/10 text-slate-500 hover:border-purple-500/40 hover:text-slate-300'
+                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/40 border-2 border-purple-400'
+                    : 'bg-slate-900 border border-purple-500/25 text-slate-400 hover:border-purple-500/60 hover:text-white'
                 }`}
               >
                 {isCompleted ? (
-                  <Check className="w-4 h-4 stroke-[3]" />
+                  <Check className="w-4 h-4 stroke-[2.5]" />
                 ) : (
                   <span>{step.id}</span>
                 )}
               </motion.div>
 
               {/* Title Below the Number */}
-              <div className="text-center mt-3 max-w-[110px]">
+              <div className="text-center mt-2.5 max-w-[105px]">
                 <span
-                  className={`block text-[11px] font-extrabold tracking-tight transition-colors ${
+                  className={`block text-[11px] font-bold tracking-tight transition-colors ${
                     isCurrent
-                      ? 'text-white drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]'
+                      ? 'text-purple-300'
                       : isCompleted
                       ? 'text-slate-200'
-                      : 'text-slate-500 group-hover:text-slate-400'
+                      : 'text-slate-400 group-hover:text-slate-200'
                   }`}
                 >
                   {step.label}

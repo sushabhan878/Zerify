@@ -186,11 +186,10 @@ export default function SingleCreatorDetailsCard({
                 key={cat}
                 type="button"
                 onClick={() => toggleCategory(cat)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${
-                  isSelected
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${isSelected
                     ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold border-purple-400/50 shadow-md shadow-purple-950/40 scale-[1.02]'
                     : 'bg-slate-900/80 text-slate-400 border-white/10 hover:text-white hover:bg-slate-800/80'
-                }`}
+                  }`}
               >
                 <span>{cat}</span>
                 {isSelected && <span className="text-[10px] font-black">✓</span>}
@@ -259,11 +258,10 @@ export default function SingleCreatorDetailsCard({
                 key={lang}
                 type="button"
                 onClick={() => toggleSuggestedLanguage(lang)}
-                className={`text-[11px] px-2.5 py-0.5 rounded-full transition-colors font-medium ${
-                  isSelected
+                className={`text-[11px] px-2.5 py-0.5 rounded-full transition-colors font-medium ${isSelected
                     ? 'bg-purple-600/40 text-purple-200 border border-purple-400/40'
                     : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-white/5'
-                }`}
+                  }`}
               >
                 {isSelected ? `✓ ${lang}` : `+ ${lang}`}
               </button>
@@ -288,14 +286,12 @@ export default function SingleCreatorDetailsCard({
           <button
             type="button"
             onClick={() => setBarterAvailable(!barterAvailable)}
-            className={`w-11 h-6 rounded-full transition-colors relative shrink-0 p-1 ${
-              barterAvailable ? 'bg-purple-600' : 'bg-slate-800'
-            }`}
+            className={`w-11 h-6 rounded-full transition-colors relative shrink-0 p-1 ${barterAvailable ? 'bg-purple-600' : 'bg-slate-800'
+              }`}
           >
             <div
-              className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                barterAvailable ? 'translate-x-5' : 'translate-x-0'
-              }`}
+              className={`w-4 h-4 rounded-full bg-white transition-transform ${barterAvailable ? 'translate-x-5' : 'translate-x-0'
+                }`}
             />
           </button>
         </div>
@@ -314,14 +310,12 @@ export default function SingleCreatorDetailsCard({
           <button
             type="button"
             onClick={() => setTravelReady(!travelReady)}
-            className={`w-11 h-6 rounded-full transition-colors relative shrink-0 p-1 ${
-              travelReady ? 'bg-purple-600' : 'bg-slate-800'
-            }`}
+            className={`w-11 h-6 rounded-full transition-colors relative shrink-0 p-1 ${travelReady ? 'bg-purple-600' : 'bg-slate-800'
+              }`}
           >
             <div
-              className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                travelReady ? 'translate-x-5' : 'translate-x-0'
-              }`}
+              className={`w-4 h-4 rounded-full bg-white transition-transform ${travelReady ? 'translate-x-5' : 'translate-x-0'
+                }`}
             />
           </button>
         </div>
@@ -343,11 +337,10 @@ export default function SingleCreatorDetailsCard({
                 key={type}
                 type="button"
                 onClick={() => toggleCollabType(type)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${
-                  isSelected
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${isSelected
                     ? 'bg-purple-600/30 text-purple-200 border-purple-500/50 font-bold shadow-sm'
                     : 'bg-slate-900/60 text-slate-400 border-white/5 hover:text-white'
-                }`}
+                  }`}
               >
                 <span>{type}</span>
                 {isSelected && <span className="text-[10px]">✓</span>}

@@ -43,11 +43,10 @@ export default function LinkedPaymentAccountCard({
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3.5">
           <div
-            className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${
-              isBank
+            className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${isBank
                 ? 'bg-gradient-to-tr from-purple-900/60 via-indigo-900/40 to-slate-900 text-purple-300 border-purple-500/30'
                 : 'bg-gradient-to-tr from-pink-900/60 via-purple-900/40 to-slate-900 text-pink-300 border-pink-500/30'
-            }`}
+              }`}
           >
             <Icon className="w-6 h-6" />
           </div>

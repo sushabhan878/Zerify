@@ -43,7 +43,7 @@ export default function PaymentSettingsTab({
         if (cached) {
           try {
             setBeneficiary(JSON.parse(cached));
-          } catch (e) {}
+          } catch (e) { }
         }
       }
 
@@ -58,7 +58,7 @@ export default function PaymentSettingsTab({
             if (parsed?.paymentDetails) {
               setPaymentDetails(parsed.paymentDetails);
             }
-          } catch (e) {}
+          } catch (e) { }
         }
       }
     } catch (e) {
@@ -67,7 +67,7 @@ export default function PaymentSettingsTab({
       if (cached) {
         try {
           setBeneficiary(JSON.parse(cached));
-        } catch (err) {}
+        } catch (err) { }
       }
     } finally {
       setLoading(false);

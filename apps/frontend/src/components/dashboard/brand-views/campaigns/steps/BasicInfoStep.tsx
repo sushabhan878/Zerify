@@ -13,11 +13,30 @@ interface BasicInfoStepProps {
 }
 
 
+function addDays(dateStr: string, days: number): string {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const date = new Date(y, m - 1, d + days);
+  const nextY = date.getFullYear();
+  const nextM = String(date.getMonth() + 1).padStart(2, '0');
+  const nextD = String(date.getDate()).padStart(2, '0');
+  return `${nextY}-${nextM}-${nextD}`;
+}
+
+const getTodayString = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export default function BasicInfoStep({ formData, onChange }: BasicInfoStepProps) {
   const [customTagInput, setCustomTagInput] = useState('');
   const [isIndustryDropdownOpen, setIsIndustryDropdownOpen] = useState(false);
   const [industrySearchQuery, setIndustrySearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const todayStr = getTodayString();
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -261,15 +280,15 @@ export default function BasicInfoStep({ formData, onChange }: BasicInfoStepProps
             value={formData.applicationDeadline || ''}
             onChange={(val) => {
               onChange('applicationDeadline', val);
-              if (val && formData.startDate && formData.startDate < val) {
-                onChange('startDate', '');
-              }
-              if (val && formData.endDate && formData.endDate < val) {
-                onChange('endDate', '');
+              if (val) {
+                const nextStart = addDays(val, 1);
+                const nextEnd = addDays(val, 2);
+                onChange('startDate', nextStart);
+                onChange('endDate', nextEnd);
               }
             }}
             placeholder="Select deadline"
-            minDate={new Date().toLocaleDateString('en-CA')}
+            minDate={todayStr}
             position="top"
           />
         </div>
@@ -282,12 +301,13 @@ export default function BasicInfoStep({ formData, onChange }: BasicInfoStepProps
             value={formData.startDate || ''}
             onChange={(val) => {
               onChange('startDate', val);
-              if (val && formData.endDate && formData.endDate < val) {
-                onChange('endDate', '');
+              if (val) {
+                const nextEnd = addDays(val, 1);
+                onChange('endDate', nextEnd);
               }
             }}
             placeholder="Select start date"
-            minDate={formData.applicationDeadline || new Date().toLocaleDateString('en-CA')}
+            minDate={formData.applicationDeadline ? addDays(formData.applicationDeadline, 1) : addDays(todayStr, 1)}
             position="top"
           />
         </div>
@@ -300,7 +320,13 @@ export default function BasicInfoStep({ formData, onChange }: BasicInfoStepProps
             value={formData.endDate || ''}
             onChange={(val) => onChange('endDate', val)}
             placeholder="Select end date"
-            minDate={formData.startDate || formData.applicationDeadline || new Date().toLocaleDateString('en-CA')}
+            minDate={
+              formData.startDate
+                ? addDays(formData.startDate, 1)
+                : formData.applicationDeadline
+                ? addDays(formData.applicationDeadline, 2)
+                : addDays(todayStr, 2)
+            }
             position="top"
             align="right"
           />
