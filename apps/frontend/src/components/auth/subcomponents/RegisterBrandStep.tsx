@@ -2,12 +2,14 @@
 
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Globe, ArrowRight, Loader2, DollarSign } from 'lucide-react';
+import { Globe, ArrowRight, Loader2, DollarSign, Building2 } from 'lucide-react';
 import AuthAlert from './AuthAlert';
 import AuthCurrencySelector from './AuthCurrencySelector';
 import { SUPPORTED_CURRENCIES } from '@/utils/currency';
 
 interface RegisterBrandStepProps {
+  companyName: string;
+  setCompanyName: (val: string) => void;
   website: string;
   setWebsite: (val: string) => void;
   budget: number;
@@ -21,6 +23,8 @@ interface RegisterBrandStepProps {
 }
 
 export default function RegisterBrandStep({
+  companyName,
+  setCompanyName,
   website,
   setWebsite,
   budget,
@@ -56,6 +60,7 @@ export default function RegisterBrandStep({
   }, [maxBudget]);
 
   const handleCurrencyChange = (newCurr: string) => {
+    if (newCurr !== 'INR') return;
     if (newCurr === currency) return;
     const oldRate = currDetails.exchangeRateToUSD || 1;
     const newDetails = SUPPORTED_CURRENCIES[newCurr];
@@ -94,22 +99,38 @@ export default function RegisterBrandStep({
       <AuthAlert message={errorMessage} />
 
       <form onSubmit={onSubmit} className="space-y-4">
-        {/* 1. Website URL (Optional) */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1">Website URL (Optional)</label>
-          <div className="relative">
-            <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+        {/* 1. Company Name / Brand Name */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-semibold text-slate-300">Company Name / Brand Name</label>
+          <div className="relative group">
+            <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+            <input
+              type="text"
+              required
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              placeholder="e.g. Acme Corp or Nike"
+              className="w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-2xl bg-slate-950/70 border border-white/10 hover:border-white/20 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition-all shadow-inner"
+            />
+          </div>
+        </div>
+
+        {/* 2. Website URL (Optional) */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-semibold text-slate-300">Website URL (Optional)</label>
+          <div className="relative group">
+            <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
             <input
               type="url"
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
               placeholder="https://acmebrand.com"
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/90 border border-white/10 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-xs text-white placeholder-slate-500 outline-none transition-all"
+              className="w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-2xl bg-slate-950/70 border border-white/10 hover:border-white/20 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition-all shadow-inner"
             />
           </div>
         </div>
 
-        {/* 2. Campaign Budget Slider with Currency Selector */}
+        {/* 3. Campaign Budget Slider with Currency Selector */}
         <div className="space-y-3 pt-1">
           {/* Header Row: Label & Currency Selector */}
           <div className="flex items-center justify-between">
@@ -155,7 +176,7 @@ export default function RegisterBrandStep({
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:opacity-95 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 mt-4 cursor-pointer"
+          className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:opacity-95 text-white font-bold text-xs sm:text-sm shadow-xl shadow-purple-600/30 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 mt-4 cursor-pointer"
         >
           {loading ? (
             <>

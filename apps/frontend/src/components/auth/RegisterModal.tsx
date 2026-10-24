@@ -102,7 +102,6 @@ export default function RegisterModal({
       return;
     }
 
-    if (!companyName) setCompanyName(fullName ? `${fullName}'s Brand` : '');
     if (!handle) setHandle(`@${fullName.toLowerCase().replace(/\s+/g, '') || 'creator'}`);
 
     setStep(3);
@@ -190,11 +189,8 @@ export default function RegisterModal({
 
   return (
     <div className={`relative w-full mx-auto p-1 transition-all duration-300 ${step === 1 ? 'max-w-3xl sm:max-w-4xl' : 'max-w-lg'}`}>
-      {/* Ambient card back-glow */}
-      <div className="absolute -inset-1.5 bg-gradient-to-r from-purple-600/35 via-pink-600/25 to-indigo-600/35 rounded-3xl blur-2xl opacity-40 pointer-events-none" />
-
       {/* Main Glassmorphic Card Container */}
-      <div className="relative rounded-3xl bg-slate-900/85 border border-white/15 backdrop-blur-2xl p-6 sm:p-9 shadow-2xl shadow-purple-950/40 overflow-hidden transition-all duration-300">
+      <div className="relative rounded-3xl bg-slate-900/90 border border-white/10 backdrop-blur-2xl p-6 sm:p-9 shadow-2xl shadow-black/80 overflow-hidden transition-all duration-300">
         <RegisterProgressHeader step={step} />
 
         <AnimatePresence mode="wait">
@@ -223,6 +219,8 @@ export default function RegisterModal({
 
           {step === 3 && role === 'BRAND' && (
             <RegisterBrandStep
+              companyName={companyName}
+              setCompanyName={setCompanyName}
               website={website}
               setWebsite={setWebsite}
               budget={budget}

@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Search, Check } from 'lucide-react';
 import { SUPPORTED_CURRENCIES } from '@/utils/currency';
+import { useToast } from '@/components/ui/Toast';
 
 interface AuthCurrencySelectorProps {
   value: string;
@@ -14,6 +15,7 @@ export default function AuthCurrencySelector({
   value,
   onChange,
 }: AuthCurrencySelectorProps) {
+  const { toastError } = useToast();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -97,11 +99,19 @@ export default function AuthCurrencySelector({
             <div className="max-h-48 overflow-y-auto space-y-0.5 pr-0.5 custom-scrollbar">
               {filtered.map((c) => {
                 const isSelected = c.code === value;
+                const isAvailable = c.code === 'INR';
                 return (
                   <button
                     key={c.code}
                     type="button"
                     onClick={() => {
+                      if (!isAvailable) {
+                        toastError(
+                          `${c.code} (${c.name}) is coming soon! Zerify platform billing & escrow currently operates exclusively in INR (₹).`,
+                          'Coming Soon',
+                        );
+                        return;
+                      }
                       onChange(c.code);
                       setOpen(false);
                       setSearch('');
@@ -109,16 +119,23 @@ export default function AuthCurrencySelector({
                     className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
                       isSelected
                         ? 'bg-purple-600/25 text-purple-200 font-bold'
-                        : 'text-slate-300 hover:text-white hover:bg-white/5'
+                        : isAvailable
+                        ? 'text-slate-300 hover:text-white hover:bg-white/5'
+                        : 'text-slate-400 hover:bg-white/5 opacity-80 hover:opacity-100'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-white">{c.code}</span>
-                      <span className="text-[11px] text-slate-400 truncate max-w-[120px]">
+                      <span className="text-[11px] text-slate-400 truncate max-w-[90px]">
                         {c.name}
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">
+                      {!isAvailable && (
+                        <span className="text-[9px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 rounded-md">
+                          Coming Soon
+                        </span>
+                      )}
                       <span className="font-mono text-slate-400 text-xs">
                         {c.symbol}
                       </span>

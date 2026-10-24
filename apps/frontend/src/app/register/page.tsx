@@ -100,9 +100,9 @@ export default function RegisterPage() {
         <button
           type="button"
           onClick={handleGoBack}
-          className="inline-flex items-center gap-2 px-4.5 py-2 rounded-full bg-slate-900/80 border border-white/10 hover:border-white/20 text-xs font-semibold text-slate-300 hover:text-white transition-all backdrop-blur-md cursor-pointer shadow-lg"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors cursor-pointer group py-2 px-3"
         >
-          <ArrowLeft className="w-4 h-4 text-purple-400" />
+          <ArrowLeft className="w-4 h-4 text-slate-400 group-hover:text-purple-400 group-hover:-translate-x-0.5 transition-all" />
           <span>Go Back</span>
         </button>
       </header>
