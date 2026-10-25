@@ -129,7 +129,6 @@ export default function OfferManagementView({
         const avatarUrl = profile.avatarUrl || app.profileSnapshot?.avatarUrl;
         const displayName =
           profile.user?.name || app.profileSnapshot?.displayName || profile.handle || 'Creator';
-        const displayHandle = (profile.handle || app.profileSnapshot?.username || 'creator').replace(/^@/, '');
         const isCounterOffer =
           offer.status === 'PENDING' &&
           Boolean(
@@ -187,8 +186,6 @@ export default function OfferManagementView({
                 </div>
 
                 <div className="flex items-center gap-2 text-[11px] text-slate-400 flex-wrap">
-                  <span className="font-semibold text-purple-300/90">@{displayHandle}</span>
-                  <span>•</span>
                   <span>Sent {new Date(offer.sentAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                   {offer.customNotes && (
                     <>
