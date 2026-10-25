@@ -1,19 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  Users,
-  ChevronRight,
-  ArrowUpRight,
-  ArrowRight,
-  ShieldCheck,
-  Video,
-  Film,
-  Camera,
-  Sparkles,
-  Layers,
-  RotateCcw,
-} from 'lucide-react';
+import { Users, ChevronRight, ArrowUpRight, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useCurrency } from '@/context/CurrencyContext';
 import { formatCurrency } from '@/utils/currency';
 import { isComplete } from '@/services/deliverable-workflow';
@@ -28,63 +16,6 @@ interface ParticipantManagementViewProps {
   offersCount?: number;
   onViewProfile?: (creator: any) => void;
   onManageDeliverables?: (participant: any) => void;
-}
-
-function getDeliverableMeta(type: string) {
-  const lower = (type || '').toLowerCase();
-  if (lower.includes('reel') || lower.includes('short') || lower.includes('tiktok')) {
-    return {
-      Icon: Video,
-      iconColor: 'text-pink-400',
-      badgeGradient: 'from-pink-950/40 via-purple-950/30 to-slate-900/60',
-      borderColor: 'border-pink-500/30 hover:border-pink-400/50',
-      qtyBg: 'bg-gradient-to-r from-pink-500 to-purple-600',
-      glow: 'hover:shadow-[0_0_12px_rgba(236,72,153,0.2)]',
-      revBg: 'bg-pink-950/50 border-pink-500/25 text-pink-300',
-    };
-  }
-  if (lower.includes('youtube') || lower.includes('video')) {
-    return {
-      Icon: Film,
-      iconColor: 'text-red-400',
-      badgeGradient: 'from-red-950/40 via-purple-950/30 to-slate-900/60',
-      borderColor: 'border-red-500/30 hover:border-red-400/50',
-      qtyBg: 'bg-gradient-to-r from-red-500 to-rose-600',
-      glow: 'hover:shadow-[0_0_12px_rgba(239,68,68,0.2)]',
-      revBg: 'bg-red-950/50 border-red-500/25 text-red-300',
-    };
-  }
-  if (lower.includes('post') || lower.includes('photo') || lower.includes('image')) {
-    return {
-      Icon: Camera,
-      iconColor: 'text-cyan-400',
-      badgeGradient: 'from-cyan-950/40 via-blue-950/30 to-slate-900/60',
-      borderColor: 'border-cyan-500/30 hover:border-cyan-400/50',
-      qtyBg: 'bg-gradient-to-r from-cyan-500 to-blue-600',
-      glow: 'hover:shadow-[0_0_12px_rgba(6,182,212,0.2)]',
-      revBg: 'bg-cyan-950/50 border-cyan-500/25 text-cyan-300',
-    };
-  }
-  if (lower.includes('story')) {
-    return {
-      Icon: Sparkles,
-      iconColor: 'text-amber-400',
-      badgeGradient: 'from-amber-950/40 via-orange-950/30 to-slate-900/60',
-      borderColor: 'border-amber-500/30 hover:border-amber-400/50',
-      qtyBg: 'bg-gradient-to-r from-amber-500 to-orange-600',
-      glow: 'hover:shadow-[0_0_12px_rgba(245,158,11,0.2)]',
-      revBg: 'bg-amber-950/50 border-amber-500/25 text-amber-300',
-    };
-  }
-  return {
-    Icon: Layers,
-    iconColor: 'text-purple-400',
-    badgeGradient: 'from-purple-950/40 via-indigo-950/30 to-slate-900/60',
-    borderColor: 'border-purple-500/30 hover:border-purple-400/50',
-    qtyBg: 'bg-gradient-to-r from-purple-600 to-indigo-600',
-    glow: 'hover:shadow-[0_0_12px_rgba(168,85,247,0.2)]',
-    revBg: 'bg-purple-950/50 border-purple-500/25 text-purple-300',
-  };
 }
 
 export default function ParticipantManagementView({
@@ -249,68 +180,23 @@ export default function ParticipantManagementView({
                   </div>
                 </div>
 
-                {/* Amount Display (No "FEE" label) */}
+                {/* Amount Display (No "FEE" label) - Prominent big font similar to applications */}
                 <div className="text-right shrink-0">
-                  <span className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight leading-none block">
+                  <span className="text-2xl sm:text-3xl md:text-4xl font-black text-emerald-400 tracking-tight leading-none block">
                     {formatCurrency(p.agreedAmount, p.agreedCurrency || currency)}
                   </span>
                 </div>
               </div>
 
-              {/* Exact Deliverables Details (Quantity + Revisions) - Premium Badges */}
-              {deliverables.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2 py-0.5">
-                  {deliverables.map((del: any, idx: number) => {
-                    const qty = del.quantity || 1;
-                    const type = del.type || del.title || 'Deliverable';
-                    const revLimit = del.requirements?.revisionLimit ?? del.revisionLimit ?? 2;
-                    const meta = getDeliverableMeta(type);
-                    const Icon = meta.Icon;
-
-                    return (
-                      <div
-                        key={del.id || idx}
-                        className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-gradient-to-r ${meta.badgeGradient} bg-slate-900/80 border ${meta.borderColor} ${meta.glow} backdrop-blur-md transition-all duration-200 hover:scale-[1.02] shadow-sm`}
-                      >
-                        {/* Quantity Badge */}
-                        <span
-                          className={`inline-flex items-center justify-center px-2 py-0.5 rounded-lg ${meta.qtyBg} text-white font-black text-[11px] shadow-sm tracking-tight leading-none`}
-                        >
-                          {qty}x
-                        </span>
-
-                        {/* Format Icon & Type */}
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <Icon className={`w-3.5 h-3.5 ${meta.iconColor} shrink-0`} />
-                          <span className="text-xs font-bold text-white tracking-tight truncate max-w-[150px]">
-                            {type}
-                          </span>
-                        </div>
-
-                        {/* Revision Limit Pill */}
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-semibold ${meta.revBg} shrink-0`}
-                        >
-                          <RotateCcw className="w-2.5 h-2.5 shrink-0 opacity-80" />
-                          <span>
-                            {revLimit} {revLimit === 1 ? 'rev' : 'revs'}
-                          </span>
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
               {/* Deliverable Description */}
               {deliverableDescription && (
-                <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed font-normal">
+                <p className="text-xs sm:text-sm text-slate-300 line-clamp-2 leading-relaxed font-normal">
                   {deliverableDescription}
                 </p>
               )}
 
-              {/* Deliverable Progress Meter - Sleek and Slim (h-1.5) */}
-              <div className="space-y-1.5 pt-0.5">
+              {/* Deliverable Progress Meter - Shorter in width with comfortable spacing */}
+              <div className="space-y-1.5 pt-3 max-w-xs sm:max-w-sm">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-semibold text-slate-400">Deliverable Progress</span>
                   <span className="font-bold text-purple-300 text-[11px]">
