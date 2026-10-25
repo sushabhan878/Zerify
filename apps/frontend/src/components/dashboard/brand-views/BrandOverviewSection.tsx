@@ -74,7 +74,7 @@ export default function BrandOverviewSection({ onNavigate }: BrandOverviewSectio
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="space-y-6">
+    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="space-y-4 sm:space-y-5">
 
       {/* Filter & Action Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

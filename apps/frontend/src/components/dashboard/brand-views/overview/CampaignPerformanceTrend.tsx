@@ -70,24 +70,60 @@ export default function CampaignPerformanceTrend({ campaigns, isLoading }: { cam
         </div>
       ) : (
         <>
-          <div className="pt-6 pb-2 px-2 flex items-end justify-between gap-3 h-60 border-b border-white/10" role="img" aria-label={points.map((p) => `${p.fullLabel}: ${p.applications} applications, ${p.collaborations} collaborations`).join('; ')}>
-            {points.map((point, idx) => (
-              <div key={point.fullLabel} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group min-w-0">
-                <span className="text-[11px] font-bold text-purple-300 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  {point.applications} · {point.collaborations}
-                </span>
-                <div className="w-full flex-1 flex items-end justify-center gap-1.5 min-h-0" title={`${point.fullLabel}: ${point.applications} applications, ${point.collaborations} collaborations`}>
-                  {[{ value: point.applications, barClass: 'bg-gradient-to-t from-purple-900/60 to-indigo-500/70 group-hover:to-indigo-400 border-purple-400/30' },
-                    { value: point.collaborations, barClass: 'bg-gradient-to-t from-cyan-900/50 to-cyan-500/70 group-hover:to-cyan-400 border-cyan-400/30' }].map((bar, i) => (
-                    <div key={i} className="h-full flex-1 max-w-10 flex flex-col justify-end items-center">
-                      <motion.div initial={{ height: 0 }} animate={{ height: `${bar.value / max * 100}%` }} transition={{ duration: 0.5, delay: idx * 0.08 }}
-                        className={`w-full rounded-t-xl border-t border-x transition-all ${bar.barClass}`} />
+          <div className="pt-3 pb-2 px-2 flex items-end justify-between gap-3 h-56 sm:h-60 border-b border-white/10" role="img" aria-label={points.map((p) => `${p.fullLabel}: ${p.applications} applications, ${p.collaborations} collaborations`).join('; ')}>
+            {points.map((point, idx) => {
+              const maxVal = Math.max(point.applications, point.collaborations);
+              const maxPercent = (maxVal / max) * 100;
+
+              return (
+                <div key={point.fullLabel} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group min-w-0">
+                  <div className="w-full flex-1 relative flex items-end justify-center gap-1.5 min-h-0" title={`${point.fullLabel}: ${point.applications} applications, ${point.collaborations} collaborations`}>
+                    {/* Hover count pill sitting just on top of the taller bar */}
+                    <div
+                      className="absolute pointer-events-none transition-all duration-200 opacity-0 group-hover:opacity-100 z-20 -translate-x-1/2 left-1/2"
+                      style={{
+                        bottom: maxVal > 0 ? `calc(${maxPercent}% + 6px)` : '12px',
+                      }}
+                    >
+                      <span className="px-2 py-0.5 rounded-md bg-slate-900/95 border border-purple-500/40 text-[10px] font-bold text-purple-200 whitespace-nowrap shadow-lg backdrop-blur-md block">
+                        {point.applications} · {point.collaborations}
+                      </span>
                     </div>
-                  ))}
+
+                    {/* Applications Bar (with visible 6px baseline for 0) */}
+                    <div className="h-full flex-1 max-w-10 flex flex-col justify-end items-center">
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: point.applications > 0 ? `${(point.applications / max) * 100}%` : '6px' }}
+                        transition={{ duration: 0.5, delay: idx * 0.08 }}
+                        className={`w-full rounded-t-lg border-t border-x transition-all ${
+                          point.applications > 0
+                            ? 'bg-gradient-to-t from-purple-900/60 to-indigo-500/70 group-hover:to-indigo-400 border-purple-400/40 shadow-sm shadow-purple-950/40'
+                            : 'h-1.5 bg-purple-950/60 border-purple-500/30'
+                        }`}
+                      />
+                    </div>
+
+                    {/* Collaborations Bar (with visible 6px baseline for 0) */}
+                    <div className="h-full flex-1 max-w-10 flex flex-col justify-end items-center">
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: point.collaborations > 0 ? `${(point.collaborations / max) * 100}%` : '6px' }}
+                        transition={{ duration: 0.5, delay: idx * 0.08 }}
+                        className={`w-full rounded-t-lg border-t border-x transition-all ${
+                          point.collaborations > 0
+                            ? 'bg-gradient-to-t from-cyan-900/50 to-cyan-500/70 group-hover:to-cyan-400 border-cyan-400/40 shadow-sm shadow-cyan-950/40'
+                            : 'h-1.5 bg-cyan-950/60 border-cyan-500/30'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                  <span className={`text-[11px] sm:text-xs font-bold transition-colors ${busiest === point ? 'text-purple-300' : 'text-slate-400 group-hover:text-slate-200'}`}>
+                    {point.label}
+                  </span>
                 </div>
-                <span className={`text-[11px] sm:text-xs font-bold ${busiest === point ? 'text-purple-300' : 'text-slate-400'}`}>{point.label}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="flex flex-wrap items-center gap-5 text-xs text-slate-400 pt-1">
             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-sm shadow-indigo-500/50" /> Applications</span>
