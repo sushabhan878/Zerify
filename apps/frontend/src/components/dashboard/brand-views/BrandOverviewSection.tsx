@@ -6,8 +6,6 @@ import { AlertCircle, Download, Loader2, RefreshCw } from 'lucide-react';
 import { BrandOverviewData, BrandOverviewService } from '@/services/brand-overview.service';
 import OverviewKpiGrid from './overview/OverviewKpiGrid';
 import CampaignPerformanceTrend from './overview/CampaignPerformanceTrend';
-import TopCampaignsList from './overview/TopCampaignsList';
-import OverviewCreators from './overview/OverviewCreators';
 import RecentActivityFeed from './overview/RecentActivityFeed';
 import CampaignFilterDropdown from './overview/CampaignFilterDropdown';
 
@@ -102,10 +100,6 @@ export default function BrandOverviewSection({ onNavigate }: BrandOverviewSectio
       {data || isLoading ? <>
         <OverviewKpiGrid campaigns={campaigns} isLoading={isLoading} />
         <CampaignPerformanceTrend campaigns={campaigns} isLoading={isLoading} />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <TopCampaignsList campaigns={campaigns} isLoading={isLoading} onViewCampaigns={() => onNavigate?.('my-campaigns')} />
-          <OverviewCreators campaigns={campaigns} isLoading={isLoading} />
-        </div>
         <RecentActivityFeed campaigns={campaigns} isLoading={isLoading} />
       </> : null}
     </motion.div>
