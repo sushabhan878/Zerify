@@ -49,7 +49,9 @@ export default function OverviewKpiGrid({ campaigns, isLoading }: {
           className="p-4 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl hover:border-purple-500/30 transition-all group relative overflow-hidden">
           <div className="flex items-center justify-between gap-2 mb-2.5">
             <span className="text-xs font-semibold text-slate-400 group-hover:text-slate-200 transition-colors">{label}</span>
-            <div className={`p-2 rounded-xl bg-slate-950/60 border border-white/10 ${color} group-hover:scale-110 transition-transform duration-200`}><Icon className="w-4 h-4" /></div>
+            <div className={`${color} shrink-0 group-hover:scale-110 transition-transform duration-200`}>
+              <Icon className="w-5 h-5" />
+            </div>
           </div>
           {isLoading
             ? <div className="h-8 w-24 rounded-lg bg-white/10 animate-pulse" />
