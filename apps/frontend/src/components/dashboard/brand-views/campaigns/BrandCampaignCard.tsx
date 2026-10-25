@@ -164,9 +164,9 @@ export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: B
       </div>
 
       {/* Row 1: Tags on Top & Prominent Large Pricing */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10 min-w-0">
-        {/* Tags Cloud on Top (strictly single line, truncated with ... if more) */}
-        <div className="flex items-center gap-2 flex-nowrap overflow-hidden min-w-0 max-w-full">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 relative z-10 min-w-0">
+        {/* Tags Cloud on Top (shifted upper side, strictly single line) */}
+        <div className="flex items-center gap-2 flex-nowrap overflow-hidden min-w-0 max-w-full -mt-1 sm:-mt-1.5">
           {/* Industry Tag */}
           {c.industry && (
             <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-purple-950/40 border border-purple-500/25 text-purple-200 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
@@ -224,7 +224,7 @@ export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: B
       </div>
 
       {/* Row 2: Campaign Title, Description & Platforms */}
-      <div className="space-y-2 relative z-10 -mt-2 sm:-mt-2.5">
+      <div className="space-y-2 relative z-10 -mt-0.5 sm:-mt-1">
         <h3 className="text-xl sm:text-2xl font-black text-white group-hover:text-purple-200 transition-colors tracking-tight flex items-center gap-2">
           <span>{c.title}</span>
           <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-purple-300 opacity-0 group-hover:opacity-100 transition-all -translate-y-0.5 group-hover:translate-x-0.5" />

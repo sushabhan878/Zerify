@@ -13,6 +13,14 @@ export default function Error({
 }) {
   useEffect(() => {
     console.error('App-level runtime error:', error);
+    // Auto-reload to fetch fresh chunk hashes if Webpack chunks are stale or out of sync
+    if (
+      error?.message?.includes('Loading chunk') ||
+      error?.message?.includes('ChunkLoadError') ||
+      error?.name === 'ChunkLoadError'
+    ) {
+      window.location.reload();
+    }
   }, [error]);
 
   return (

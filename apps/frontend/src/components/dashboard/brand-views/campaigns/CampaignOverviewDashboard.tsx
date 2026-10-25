@@ -399,9 +399,9 @@ export default function CampaignOverviewDashboard({
         </div>
 
         {/* Row 1: Tags on Top & Prominent Large Pricing */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10 min-w-0">
-          {/* Tags Cloud (strictly single line, truncated with ... if more) */}
-          <div className="flex items-center gap-2 flex-nowrap overflow-hidden min-w-0 max-w-full">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 relative z-10 min-w-0">
+          {/* Tags Cloud (shifted upper side, strictly single line) */}
+          <div className="flex items-center gap-2 flex-nowrap overflow-hidden min-w-0 max-w-full -mt-1 sm:-mt-1.5">
 
             {/* Industry Tag */}
             {campaign.industry && (
@@ -460,7 +460,7 @@ export default function CampaignOverviewDashboard({
         </div>
 
         {/* Row 2: Campaign Title, Description & Platforms */}
-        <div className="space-y-2 relative z-10 -mt-2 sm:-mt-2.5">
+        <div className="space-y-2 relative z-10 -mt-0.5 sm:-mt-1">
           <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
             <span>{campaign.title}</span>
           </h1>

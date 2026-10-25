@@ -40,7 +40,11 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
     setIsMobileMenuOpen(false);
     const targetPath = getRoutePath(routeId);
     if (pathname !== targetPath) {
-      router.push(targetPath);
+      try {
+        router.push(targetPath);
+      } catch (err) {
+        window.location.href = targetPath;
+      }
     }
   };
 

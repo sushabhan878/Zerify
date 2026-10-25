@@ -6,6 +6,7 @@
     "build:landing": "turbo build --filter=@zerify/landing-page",
     "build:app": "turbo build --filter=@zerify/frontend",
     "dev": "turbo dev",
+    "dev:fresh": "node scripts/kill-dev-ports.js && turbo dev",
     "dev:landing": "turbo dev --filter=@zerify/landing-page",
     "dev:app": "turbo dev --filter=@zerify/frontend",
     "lint": "turbo lint",
