@@ -180,9 +180,9 @@ export default function ParticipantManagementView({
                   </div>
                 </div>
 
-                {/* Amount Display (No "FEE" label) - Prominent big font similar to applications */}
+                {/* Amount Display (No "FEE" label) */}
                 <div className="text-right shrink-0">
-                  <span className="text-2xl sm:text-3xl md:text-4xl font-black text-emerald-400 tracking-tight leading-none block">
+                  <span className="text-lg sm:text-xl md:text-2xl font-black text-emerald-400 tracking-tight leading-none block">
                     {formatCurrency(p.agreedAmount, p.agreedCurrency || currency)}
                   </span>
                 </div>
