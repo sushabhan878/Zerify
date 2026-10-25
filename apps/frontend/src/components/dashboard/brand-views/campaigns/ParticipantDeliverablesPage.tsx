@@ -103,6 +103,19 @@ export default function ParticipantDeliverablesPage({
     }, 0);
   }, [currentCampaign, participant, convert]);
 
+  const activeCandidateCount = React.useMemo(() => {
+    const rawParts: any[] =
+      Array.isArray(currentCampaign?.participants) && currentCampaign.participants.length > 0
+        ? currentCampaign.participants
+        : participant
+        ? [participant]
+        : [];
+    const active = rawParts.filter(
+      (p) => p.status !== 'PARTICIPANT_CANCELLED' && p.status !== 'CANCELLED'
+    );
+    return Math.max(1, active.length);
+  }, [currentCampaign, participant]);
+
   const handleOpenProfile = () => {
     if (!onViewProfile) return;
     onViewProfile({
@@ -279,6 +292,7 @@ export default function ParticipantDeliverablesPage({
         campaignId={currentCampaign?.id || campaignId}
         campaignTitle={currentCampaign?.title}
         initialAmount={Math.round(combinedEscrowAmount)}
+        creatorCount={activeCandidateCount}
         onSuccess={handlePaymentSuccess}
       />
     </div>

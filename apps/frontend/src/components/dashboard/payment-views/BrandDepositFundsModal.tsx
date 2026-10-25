@@ -12,6 +12,7 @@ interface BrandDepositFundsModalProps {
   campaignId?: string;
   campaignTitle?: string;
   initialAmount?: number;
+  creatorCount?: number;
 }
 
 export default function BrandDepositFundsModal({
@@ -21,10 +22,9 @@ export default function BrandDepositFundsModal({
   campaignId,
   campaignTitle,
   initialAmount = 5000,
+  creatorCount = 1,
 }: BrandDepositFundsModalProps) {
   const [mounted, setMounted] = useState(false);
-  // If campaignId is provided (escrow deposit for specific campaign), go straight to checkout.
-  // Otherwise, start at SELECT_AMOUNT step for wallet top-up.
   const [step, setStep] = useState<'SELECT_AMOUNT' | 'CHECKOUT'>('SELECT_AMOUNT');
   const [selectedAmount, setSelectedAmount] = useState<number>(initialAmount);
 
@@ -34,14 +34,10 @@ export default function BrandDepositFundsModal({
 
   useEffect(() => {
     if (isOpen) {
-      if (campaignId) {
-        setStep('CHECKOUT');
-      } else {
-        setStep('SELECT_AMOUNT');
-      }
+      setStep('SELECT_AMOUNT');
       setSelectedAmount(initialAmount);
     }
-  }, [isOpen, campaignId, initialAmount]);
+  }, [isOpen, initialAmount]);
 
   if (!isOpen || !mounted) return null;
 
@@ -54,6 +50,9 @@ export default function BrandDepositFundsModal({
       {step === 'SELECT_AMOUNT' ? (
         <BrandTopupAmountStep
           initialAmount={selectedAmount}
+          campaignId={campaignId}
+          campaignTitle={campaignTitle}
+          creatorCount={creatorCount}
           onContinue={(chosenAmount) => {
             setSelectedAmount(chosenAmount);
             setStep('CHECKOUT');

@@ -7,7 +7,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { PaymentStatus, Prisma, RefundStatus } from '@prisma/client';
+import { CampaignStatus, PaymentStatus, Prisma, RefundStatus } from '@prisma/client';
 import { PaymentRepository, PrismaLike } from './payment.repository';
 import { LedgerService } from './ledger.service';
 import { FeeEngine } from './fee-engine.service';
@@ -521,6 +521,37 @@ export class PaymentService {
       },
       client,
     );
+
+    // PRD §5 Step 5: Activate campaign and deliverables upon verified escrow funding
+    try {
+      await (client as any).campaign.update({
+        where: { id: payment.campaignId },
+        data: {
+          status: CampaignStatus.ACTIVE,
+          startDate: new Date(),
+        },
+      });
+
+      await (client as any).campaignParticipant.updateMany({
+        where: { campaignId: payment.campaignId, status: 'CONFIRMED' },
+        data: { status: 'PARTICIPANT_ACTIVE', startedAt: new Date() },
+      });
+
+      const confirmedParts = await (client as any).campaignParticipant.findMany({
+        where: { campaignId: payment.campaignId },
+        select: { id: true },
+      });
+
+      const partIds = confirmedParts.map((p: any) => p.id);
+      if (partIds.length > 0) {
+        await (client as any).participantDeliverable.updateMany({
+          where: { participantId: { in: partIds }, status: 'PENDING' },
+          data: { status: 'IN_PROGRESS' },
+        });
+      }
+    } catch (actErr: any) {
+      this.logger.warn(`Could not auto-activate campaign ${payment.campaignId}: ${actErr?.message}`);
+    }
   }
 
   // ----------------------------------------------------------------- refunds
