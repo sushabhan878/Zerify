@@ -16,6 +16,7 @@ import { CreatorItem } from '../find-influencers/CreatorCard';
 import { mapApplicationToCreator } from './mapApplicationToCreator';
 import { useCurrency } from '@/context/CurrencyContext';
 import Money from '@/components/currency/Money';
+import ZerifyCreatorRibbon from '@/components/dashboard/common/ZerifyCreatorRibbon';
 
 interface ApplicantCardProps {
   application: CampaignApplicationItem;
@@ -316,15 +317,8 @@ export default function ApplicantCard({
         </div>
       </div>
 
-      {/* Bottom-Right Diagonal Corner Ribbon: Zerify Creator (Bigger & Prominent) */}
-      <div className="absolute bottom-0 right-0 w-28 h-28 sm:w-32 sm:h-32 overflow-hidden rounded-br-3xl pointer-events-none z-20">
-        <div className="absolute bottom-[20px] sm:bottom-[22px] -right-[40px] sm:-right-[44px] w-[160px] sm:w-[170px] -rotate-45 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 py-1 sm:py-1.5 shadow-xl shadow-purple-950/90 border-y border-purple-300/40 flex items-center justify-center gap-1.5 group-hover:scale-105 transition-transform duration-300">
-          <ShieldCheck className="w-3.5 h-3.5 text-purple-200 shrink-0" />
-          <span className="text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider text-white drop-shadow-md whitespace-nowrap">
-            Zerify Creator
-          </span>
-        </div>
-      </div>
+      {/* Bottom-Right Diagonal Corner Ribbon: Zerify Creator (3D wrap effect) */}
+      <ZerifyCreatorRibbon />
     </div>
   );
 }

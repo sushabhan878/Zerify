@@ -206,7 +206,7 @@ export default function OfferManagementView({
                   Offered Fee
                 </span>
                 <span className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight leading-none block pt-0.5">
-                  {formatCurrency(offer.compensationAmount, offer.compensationCurrency || currency)}
+                  {formatCurrency(offer.compensationAmount, currency || offer.compensationCurrency || 'INR')}
                 </span>
               </div>
 

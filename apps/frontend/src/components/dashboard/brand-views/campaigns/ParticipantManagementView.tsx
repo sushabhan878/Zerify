@@ -183,7 +183,7 @@ export default function ParticipantManagementView({
                 {/* Amount Display (No "FEE" label) */}
                 <div className="text-right shrink-0">
                   <span className="text-lg sm:text-xl md:text-2xl font-black text-emerald-400 tracking-tight leading-none block">
-                    {formatCurrency(p.agreedAmount, p.agreedCurrency || currency)}
+                    {formatCurrency(p.agreedAmount, currency || p.agreedCurrency || 'INR')}
                   </span>
                 </div>
               </div>

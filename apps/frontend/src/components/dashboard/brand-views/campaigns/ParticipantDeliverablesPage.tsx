@@ -168,7 +168,7 @@ export default function ParticipantDeliverablesPage({
           {/* Agreed Amount */}
           <div className="text-left sm:text-right shrink-0">
             <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight leading-none block">
-              {formatCurrency(participant.agreedAmount, participant.agreedCurrency || currency)}
+              {formatCurrency(participant.agreedAmount, currency || participant.agreedCurrency || 'INR')}
             </span>
             <span className="text-[11px] text-slate-400 font-semibold block pt-1">
               Agreed Collaboration Fee

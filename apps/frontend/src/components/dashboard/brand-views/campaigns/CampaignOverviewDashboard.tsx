@@ -184,7 +184,7 @@ export default function CampaignOverviewDashboard({
       } else {
         await OfferService.sendOffer(app.id, {
           compensationAmount: app.proposedAmount || 0,
-          compensationCurrency: app.proposedCurrency || 'USD',
+          compensationCurrency: app.proposedCurrency || campaign?.budgetCurrency || currency || 'INR',
           customNotes: 'Pitch accepted at proposed quote.',
         });
       }
