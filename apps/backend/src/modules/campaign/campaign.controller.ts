@@ -106,4 +106,13 @@ export class CampaignController {
   async cancelCampaign(@Param('id') id: string) {
     return this.campaignService.cancelCampaign(id);
   }
+
+  @Post(':id/start')
+  @UseGuards(JwtAuthGuard, CampaignOwnerGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Start a campaign and activate creator deliverables' })
+  async startCampaign(@Param('id') id: string) {
+    return this.campaignService.startCampaign(id);
+  }
 }
+

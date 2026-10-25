@@ -296,4 +296,47 @@ export class CampaignService {
       cancelledAt: new Date(),
     });
   }
+
+  async startCampaign(campaignId: string) {
+    const campaign = await this.repository.findCampaignById(campaignId);
+    if (!campaign) {
+      throw new NotFoundException('Campaign not found');
+    }
+
+    if (campaign.status === CampaignStatus.DELETED || campaign.status === CampaignStatus.CANCELLED) {
+      throw new BadRequestException(`Cannot start a ${campaign.status.toLowerCase()} campaign`);
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const updatedCampaign = await tx.campaign.update({
+        where: { id: campaignId },
+        data: {
+          status: CampaignStatus.ACTIVE,
+          startDate: campaign.startDate || new Date(),
+        },
+      });
+
+      // Activate confirmed participants and their deliverables
+      await tx.campaignParticipant.updateMany({
+        where: { campaignId, status: 'CONFIRMED' },
+        data: { status: 'PARTICIPANT_ACTIVE', startedAt: new Date() },
+      });
+
+      const confirmedParticipants = await tx.campaignParticipant.findMany({
+        where: { campaignId },
+        select: { id: true },
+      });
+
+      const participantIds = confirmedParticipants.map((p) => p.id);
+      if (participantIds.length > 0) {
+        await tx.participantDeliverable.updateMany({
+          where: { participantId: { in: participantIds }, status: 'PENDING' },
+          data: { status: 'IN_PROGRESS' },
+        });
+      }
+
+      return updatedCampaign;
+    });
+  }
 }
+

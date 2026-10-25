@@ -126,6 +126,13 @@ export const CampaignService = {
     });
   },
 
+  async startCampaign(id: string): Promise<CampaignItem> {
+    return apiRequest(`/campaigns/${id}/start`, {
+      method: 'POST',
+    });
+  },
+
+
   // Discovery Endpoints
   async discoverCampaigns(params: Record<string, any> = {}): Promise<{
     campaigns: CampaignItem[];
