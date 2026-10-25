@@ -460,7 +460,7 @@ export default function CampaignOverviewDashboard({
         </div>
 
         {/* Row 2: Campaign Title, Description & Platforms */}
-        <div className="space-y-2 relative z-10 -mt-0.5 sm:-mt-1">
+        <div className="space-y-3 sm:space-y-3.5 relative z-10 -mt-2.5 sm:-mt-3">
           <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
             <span>{campaign.title}</span>
           </h1>
@@ -473,7 +473,7 @@ export default function CampaignOverviewDashboard({
 
           {/* Overlapping Social Platforms */}
           {Array.isArray(campaign.platforms) && campaign.platforms.length > 0 && (
-            <div className="flex items-center -space-x-2 isolate pt-2">
+            <div className="flex items-center -space-x-2 isolate pt-1 sm:pt-1.5">
               {campaign.platforms.slice(0, 6).map((plat: string, idx: number) => (
                 <div
                   key={plat}

@@ -16,7 +16,8 @@ export default function CampaignActions({ campaign, onUpdated, onDeleted }: {
   const [editing, setEditing] = useState<CampaignItem | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [busy, setBusy] = useState<'edit' | 'delete' | null>(null);
-  const buttonClass = 'px-3 py-2 rounded-xl border text-xs font-bold inline-flex items-center gap-2 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400';
+  const baseButtonClass =
+    'px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 sm:gap-2 transition-all duration-200 hover:scale-[1.03] active:scale-95 disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 cursor-pointer shadow-md';
 
   const edit = async () => {
     setBusy('edit');
@@ -40,11 +41,31 @@ export default function CampaignActions({ campaign, onUpdated, onDeleted }: {
   if (campaign.status === 'DELETED') return <span className="text-xs text-rose-300">Campaign deleted</span>;
 
   return (
-    <div className="flex items-center gap-2" onClick={(event) => event.stopPropagation()}>
-      {!['COMPLETED', 'CANCELLED'].includes(campaign.status) && <button type="button" disabled={Boolean(busy)} onClick={() => void edit()} className={`${buttonClass} bg-slate-900/80 border-white/10 text-slate-300 hover:text-white hover:border-purple-500/40`}>
-        {busy === 'edit' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Pencil className="w-3.5 h-3.5 text-purple-400" />}Edit
-      </button>}
-      <button type="button" disabled={Boolean(busy)} onClick={() => setConfirmDelete(true)} className={`${buttonClass} bg-rose-500/10 border-rose-500/20 text-rose-300 hover:bg-rose-500/20`}><Trash2 className="w-3.5 h-3.5" />Delete</button>
+    <div className="flex items-center gap-3 sm:gap-3.5" onClick={(event) => event.stopPropagation()}>
+      {!['COMPLETED', 'CANCELLED'].includes(campaign.status) && (
+        <button
+          type="button"
+          disabled={Boolean(busy)}
+          onClick={() => void edit()}
+          className={`${baseButtonClass} bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 text-white border border-violet-400/30 hover:border-violet-300/60 shadow-purple-950/40 hover:shadow-lg hover:shadow-purple-600/30`}
+        >
+          {busy === 'edit' ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+          ) : (
+            <Pencil className="w-3.5 h-3.5 text-white" />
+          )}
+          <span>Edit</span>
+        </button>
+      )}
+      <button
+        type="button"
+        disabled={Boolean(busy)}
+        onClick={() => setConfirmDelete(true)}
+        className={`${baseButtonClass} bg-gradient-to-r from-rose-600 via-rose-600 to-red-600 hover:from-rose-500 hover:via-rose-500 hover:to-red-500 text-white border border-rose-400/30 hover:border-rose-300/60 shadow-rose-950/40 hover:shadow-lg hover:shadow-rose-600/30`}
+      >
+        <Trash2 className="w-3.5 h-3.5 text-white" />
+        <span>Delete</span>
+      </button>
       {editing && <CreateCampaignWizard initialCampaign={editing} onClose={() => setEditing(null)} onSuccess={() => { setEditing(null); onUpdated(); }} />}
       {confirmDelete && createPortal(
         <div className="fixed inset-0 z-[10000] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4" onClick={(event) => event.stopPropagation()}>
@@ -55,8 +76,8 @@ export default function CampaignActions({ campaign, onUpdated, onDeleted }: {
             <p className="text-sm text-slate-300">This campaign will be removed from listings and stop accepting new applications and collaborations.</p>
             <p className="text-sm text-slate-400">All applicants and active collaborators will receive an automated deletion notice. Campaign data, applications, collaboration records, and messages will be retained.</p>
             <div className="flex justify-end gap-3 pt-2">
-              <button type="button" disabled={Boolean(busy)} onClick={() => setConfirmDelete(false)} className={`${buttonClass} bg-slate-800 border-white/10 text-slate-200 hover:bg-slate-700`}>Keep campaign</button>
-              <button type="button" disabled={Boolean(busy)} onClick={() => void remove()} className={`${buttonClass} bg-rose-600 border-rose-500 text-white hover:bg-rose-500`}>{busy === 'delete' && <Loader2 className="w-4 h-4 animate-spin" />}Delete & notify</button>
+              <button type="button" disabled={Boolean(busy)} onClick={() => setConfirmDelete(false)} className={`${baseButtonClass} bg-slate-800 border-white/10 text-slate-200 hover:bg-slate-700`}>Keep campaign</button>
+              <button type="button" disabled={Boolean(busy)} onClick={() => void remove()} className={`${baseButtonClass} bg-gradient-to-r from-rose-600 to-red-600 border border-rose-500/50 text-white hover:from-rose-500 hover:to-red-500 shadow-lg shadow-rose-950/40`}>{busy === 'delete' && <Loader2 className="w-4 h-4 animate-spin" />}Delete & notify</button>
             </div>
           </div>
         </div>, document.body,

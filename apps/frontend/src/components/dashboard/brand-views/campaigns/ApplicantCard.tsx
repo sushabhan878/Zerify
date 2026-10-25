@@ -2,7 +2,6 @@
 
 import React from 'react';
 import {
-  Sparkles,
   Send,
   ArrowRight,
   CheckCircle2,
@@ -47,7 +46,6 @@ export default function ApplicantCard({
   const [imageError, setImageError] = React.useState(false);
 
   const creatorItem = React.useMemo(() => mapApplicationToCreator(application), [application]);
-  const match: any = application.matchSnapshot || { score: 95, eligibility: 'ELIGIBLE' };
 
   const handleOpenProfile = () => {
     if (onViewProfile) {
@@ -63,11 +61,86 @@ export default function ApplicantCard({
   // Engagement Rate
   const engagementDisplay = creatorItem.engRate;
 
+  // Status Badge Configuration for Top-Right Floating Badge (like CreatorCard)
+  const statusBadge = (() => {
+    if (application.reviewNotes === 'COUNTER_OFFER') {
+      return {
+        label: 'Counter Offer',
+        gradient: 'bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600',
+        border: 'border-amber-400/60',
+        shadow: 'shadow-lg shadow-amber-600/30',
+        dot: 'bg-amber-200 animate-pulse shadow-sm',
+      };
+    }
+    switch (application.status) {
+      case 'OFFER_ACCEPTED':
+        return {
+          label: 'Accepted',
+          gradient: 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500',
+          border: 'border-emerald-400/60',
+          shadow: 'shadow-lg shadow-emerald-600/30',
+          dot: 'bg-emerald-200 animate-pulse shadow-sm',
+        };
+      case 'OFFER_SENT':
+        return {
+          label: 'Offer Sent',
+          gradient: 'bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600',
+          border: 'border-indigo-400/60',
+          shadow: 'shadow-lg shadow-indigo-600/30',
+          dot: 'bg-indigo-200 animate-pulse shadow-sm',
+        };
+      case 'SHORTLISTED':
+        return {
+          label: 'Shortlisted',
+          gradient: 'bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600',
+          border: 'border-purple-400/60',
+          shadow: 'shadow-lg shadow-purple-600/30',
+          dot: 'bg-purple-200 animate-pulse shadow-sm',
+        };
+      case 'REJECTED':
+      case 'OFFER_DECLINED':
+        return {
+          label: 'Declined',
+          gradient: 'bg-gradient-to-r from-rose-700 via-red-700 to-rose-700',
+          border: 'border-rose-400/60',
+          shadow: 'shadow-lg shadow-rose-900/40',
+          dot: 'bg-rose-200 shadow-sm',
+        };
+      case 'UNDER_REVIEW':
+        return {
+          label: 'Under Review',
+          gradient: 'bg-gradient-to-r from-cyan-600 via-teal-600 to-cyan-600',
+          border: 'border-cyan-400/60',
+          shadow: 'shadow-lg shadow-cyan-600/30',
+          dot: 'bg-cyan-200 shadow-sm',
+        };
+      case 'APPLIED':
+      default:
+        return {
+          label: 'New Pitch',
+          gradient: 'bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600',
+          border: 'border-purple-400/60',
+          shadow: 'shadow-lg shadow-purple-600/30',
+          dot: 'bg-purple-200 animate-pulse shadow-sm',
+        };
+    }
+  })();
+
   return (
-    <div className="p-5 sm:p-6 rounded-3xl bg-slate-950/75 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 space-y-4 shadow-xl shadow-purple-950/20 backdrop-blur-xl group">
-      {/* Top Header Row */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3.5 min-w-0">
+    <div className="relative overflow-visible px-5 pb-5 pt-3 sm:px-6 sm:pb-6 sm:pt-3.5 rounded-3xl bg-slate-950/75 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 space-y-3.5 shadow-xl shadow-purple-950/20 backdrop-blur-xl group">
+      {/* Floating Status Badge Overlapping Top-Right Corner */}
+      <div className="absolute -top-2.5 sm:-top-3 right-5 sm:right-6 z-30 pointer-events-none">
+        <span
+          className={`px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full ${statusBadge.gradient} border ${statusBadge.border} text-xs sm:text-sm font-black text-white flex items-center gap-1.5 shadow-xl ${statusBadge.shadow} ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300`}
+        >
+          <span className={`w-2 h-2 rounded-full ${statusBadge.dot}`} />
+          <span className="uppercase tracking-wider">{statusBadge.label}</span>
+        </span>
+      </div>
+
+      {/* Top Header Row - Shifted upward to eliminate dead gap on top */}
+      <div className="flex items-start justify-between gap-3 -mt-0.5 sm:-mt-1">
+        <div className="flex items-center gap-3.5 min-w-0 pr-24 sm:pr-28">
           {/* Profile Picture / Initial Avatar Button */}
           <button
             type="button"
@@ -90,7 +163,7 @@ export default function ApplicantCard({
           </button>
 
           {/* Identity, Arrow & In-Platform Creator Info */}
-          <div className="space-y-1 min-w-0">
+          <div className="space-y-0.5 min-w-0">
             <button
               type="button"
               onClick={handleOpenProfile}
@@ -105,81 +178,9 @@ export default function ApplicantCard({
               </span>
             </button>
 
-            <div>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-950/60 border border-purple-500/25 text-[11px] font-semibold text-purple-300 shadow-sm">
-                <ShieldCheck className="w-3 h-3 text-purple-400 shrink-0" />
-                <span>Zerify Creator</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Badges: Status + Match Score */}
-        <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
-          {(() => {
-            const badge = (() => {
-              if (application.reviewNotes === 'COUNTER_OFFER') {
-                return {
-                  label: 'Counter Offer',
-                  bg: 'bg-amber-500/20 text-amber-300 border-amber-400/40 shadow-[0_0_15px_rgba(245,158,11,0.25)]',
-                  dot: 'bg-amber-300 animate-ping',
-                };
-              }
-              switch (application.status) {
-                case 'OFFER_ACCEPTED':
-                  return {
-                    label: 'Accepted',
-                    bg: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-                    dot: 'bg-emerald-400',
-                  };
-                case 'OFFER_SENT':
-                  return {
-                    label: 'Offer Sent',
-                    bg: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30',
-                    dot: 'bg-indigo-400 animate-pulse',
-                  };
-                case 'SHORTLISTED':
-                  return {
-                    label: 'Shortlisted',
-                    bg: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-                    dot: 'bg-amber-400',
-                  };
-                case 'REJECTED':
-                case 'OFFER_DECLINED':
-                  return {
-                    label: 'Declined',
-                    bg: 'bg-rose-500/15 text-rose-400 border-rose-500/30',
-                    dot: 'bg-rose-400',
-                  };
-                case 'UNDER_REVIEW':
-                  return {
-                    label: 'Under Review',
-                    bg: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
-                    dot: 'bg-cyan-400',
-                  };
-                case 'APPLIED':
-                default:
-                  return {
-                    label: 'New Pitch',
-                    bg: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
-                    dot: 'bg-purple-400',
-                  };
-              }
-            })();
-
-            return (
-              <div
-                className={`px-2.5 py-1 rounded-full border text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm ${badge.bg}`}
-              >
-                <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
-                <span>{badge.label}</span>
-              </div>
-            );
-          })()}
-
-          <div className="px-2.5 py-1 rounded-full bg-purple-950/70 border border-purple-500/35 flex items-center gap-1 text-xs font-black text-purple-200 shadow-sm">
-            <Sparkles className="w-3 h-3 text-purple-300 animate-pulse" />
-            <span>{match.score || 95}% Match</span>
+            <p className="text-xs text-slate-400 font-medium truncate">
+              {creatorItem.category || creatorItem.role || 'Verified Creator'}
+            </p>
           </div>
         </div>
       </div>
@@ -190,7 +191,7 @@ export default function ApplicantCard({
           <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-0.5">
             Followers
           </span>
-          <span className="text-sm sm:text-base font-black text-white">
+          <span className="text-lg sm:text-xl md:text-2xl font-black text-white tracking-tight">
             {followersDisplay}
           </span>
         </div>
@@ -198,7 +199,7 @@ export default function ApplicantCard({
           <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-0.5">
             Engagement
           </span>
-          <span className="text-sm sm:text-base font-black text-emerald-400">
+          <span className="text-lg sm:text-xl md:text-2xl font-black text-emerald-400 tracking-tight">
             {engagementDisplay}
           </span>
         </div>
@@ -206,7 +207,7 @@ export default function ApplicantCard({
           <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-0.5">
             {application.reviewNotes === 'COUNTER_OFFER' ? 'Counter Quote' : 'Pitch Quote'}
           </span>
-          <span className={`text-sm sm:text-base font-black ${application.reviewNotes === 'COUNTER_OFFER' ? 'text-amber-400' : 'text-purple-300'}`}>
+          <span className={`text-lg sm:text-xl md:text-2xl font-black tracking-tight ${application.reviewNotes === 'COUNTER_OFFER' ? 'text-amber-400' : 'text-purple-300'}`}>
             {application.proposedAmount ? (
               <Money
                 amount={application.proposedAmount}
@@ -231,18 +232,17 @@ export default function ApplicantCard({
 
       {/* Action Footer */}
       <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1">
+        {/* Link to Detailed Pitch Popup */}
         <button
           onClick={() => onViewDetails(application)}
           type="button"
-          className="group/pitch relative h-8 w-20 sm:w-24 rounded-xl bg-slate-900/60 hover:bg-slate-800 border border-white/5 hover:border-purple-500/40 text-xs font-bold text-slate-300 hover:text-white flex items-center justify-center transition-colors duration-200 cursor-pointer shadow-sm overflow-hidden select-none"
+          className="group/pitch inline-flex items-center gap-1.5 py-1 text-xs sm:text-sm font-bold text-purple-400 hover:text-purple-300 transition-colors duration-200 cursor-pointer select-none"
         >
-          <span className="transition-transform duration-200 group-hover/pitch:-translate-x-2">
-            Pitch
-          </span>
-          <ArrowRight className="w-3.5 h-3.5 text-purple-400 absolute right-2.5 opacity-0 translate-x-2 group-hover/pitch:opacity-100 group-hover/pitch:translate-x-0 transition-all duration-200" />
+          <span>Detailed Pitch</span>
+          <ArrowRight className="w-4 h-4 text-purple-400 group-hover/pitch:text-purple-300 group-hover/pitch:translate-x-1 transition-transform duration-200 shrink-0" />
         </button>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap pr-16 sm:pr-20">
           {application.status === 'APPLIED' ||
           application.status === 'UNDER_REVIEW' ||
           application.reviewNotes === 'COUNTER_OFFER' ? (
@@ -299,12 +299,7 @@ export default function ApplicantCard({
               <Send className="w-3.5 h-3.5 text-indigo-400" />
               <span>Offer Sent • Awaiting Response</span>
             </span>
-          ) : application.status === 'OFFER_ACCEPTED' ? (
-            <span className="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-xs font-bold text-emerald-300 flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Offer Accepted • In Collab</span>
-            </span>
-          ) : application.status === 'REJECTED' || application.status === 'OFFER_DECLINED' ? (
+          ) : application.status === 'OFFER_ACCEPTED' ? null : application.status === 'REJECTED' || application.status === 'OFFER_DECLINED' ? (
             <span className="px-3.5 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/25 text-xs font-bold text-rose-400">
               Application Declined
             </span>
@@ -318,6 +313,16 @@ export default function ApplicantCard({
               <span>Send Offer</span>
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Bottom-Right Diagonal Corner Ribbon: Zerify Creator (Bigger & Prominent) */}
+      <div className="absolute bottom-0 right-0 w-28 h-28 sm:w-32 sm:h-32 overflow-hidden rounded-br-3xl pointer-events-none z-20">
+        <div className="absolute bottom-[20px] sm:bottom-[22px] -right-[40px] sm:-right-[44px] w-[160px] sm:w-[170px] -rotate-45 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 py-1 sm:py-1.5 shadow-xl shadow-purple-950/90 border-y border-purple-300/40 flex items-center justify-center gap-1.5 group-hover:scale-105 transition-transform duration-300">
+          <ShieldCheck className="w-3.5 h-3.5 text-purple-200 shrink-0" />
+          <span className="text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider text-white drop-shadow-md whitespace-nowrap">
+            Zerify Creator
+          </span>
         </div>
       </div>
     </div>

@@ -76,7 +76,7 @@ export default function ApplicationListView({
       )}
 
       {/* Grid of All Application Cards with their status */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 pt-1 sm:pt-1.5">
         {applications.map((app) => (
           <ApplicantCard
             key={app.id}

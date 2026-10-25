@@ -179,13 +179,9 @@ export default function OfferManagementView({
                   <h4 className="text-sm sm:text-base font-black text-white truncate group-hover:text-purple-300 transition-colors">
                     {displayName}
                   </h4>
-                  {isDirectInvite ? (
+                  {isDirectInvite && (
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-500/15 text-indigo-300 border border-indigo-400/30 shadow-sm">
                       Direct Invite
-                    </span>
-                  ) : (
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-500/15 text-purple-300 border border-purple-400/30 shadow-sm">
-                      Application Offer
                     </span>
                   )}
                 </div>
@@ -223,17 +219,17 @@ export default function OfferManagementView({
                   onClick={() => handleCancel(offer.id)}
                   disabled={cancellingOfferId === offer.id}
                   type="button"
-                  className="px-4 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white border border-rose-500/25 hover:border-rose-500/50 text-xs font-bold transition-all duration-300 flex items-center gap-1.5 shadow-sm hover:shadow-[0_0_20px_rgba(244,63,94,0.3)] hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer group/btn"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 via-rose-600 to-red-600 hover:from-rose-500 hover:via-rose-500 hover:to-red-500 text-white border border-rose-400/30 hover:border-rose-300/60 shadow-md shadow-rose-950/40 hover:shadow-lg hover:shadow-rose-600/30 text-xs font-bold transition-all duration-200 flex items-center gap-1.5 hover:scale-[1.03] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer group/btn"
                   title="Withdraw this offer"
                 >
                   {cancellingOfferId === offer.id ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-rose-300" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
                       <span>Cancelling...</span>
                     </>
                   ) : (
                     <>
-                      <X className="w-3.5 h-3.5 text-rose-400 group-hover/btn:rotate-90 group-hover/btn:text-white transition-all duration-300" />
+                      <X className="w-3.5 h-3.5 text-white group-hover/btn:rotate-90 transition-transform duration-300" />
                       <span>Cancel</span>
                     </>
                   )}

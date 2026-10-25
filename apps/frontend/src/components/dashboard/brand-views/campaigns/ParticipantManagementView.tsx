@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Users, ChevronRight, ArrowUpRight } from 'lucide-react';
+import { Users, ChevronRight, ArrowUpRight, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useCurrency } from '@/context/CurrencyContext';
 import { formatCurrency } from '@/utils/currency';
 import { isComplete } from '@/services/deliverable-workflow';
@@ -81,6 +81,30 @@ export default function ParticipantManagementView({
           const deliverables = p.deliverables || [];
           const completedCount = deliverables.filter(isComplete).length;
 
+          const deliverableDescription =
+            deliverables.find((d: any) => d.description)?.description ||
+            p.deliverableDescription ||
+            p.deliverablesDescription ||
+            p.notes ||
+            p.customNotes ||
+            p.description ||
+            p.application?.applicationMessage ||
+            campaign?.description ||
+            (campaign?.deliverables && campaign.deliverables[0]?.description);
+
+          const showZerifyCreator = Boolean(
+            p.hasWorkedWithBrand ||
+            p.workedWithBrand ||
+            p.influencerProfile?.hasWorkedWithBrand ||
+            p.isPastCollaborator ||
+            p.influencerProfile?.isPastCollaborator ||
+            p.influencerProfile?.verified ||
+            p.influencerProfile?.isVerified ||
+            (p.influencerProfile?.completedCollaborations && p.influencerProfile.completedCollaborations > 0) ||
+            (p.influencerProfile?.collaborationsCount && p.influencerProfile.collaborationsCount > 0) ||
+            p.isZerifyCreator !== false
+          );
+
           const handleOpenProfile = (e: React.MouseEvent) => {
             if (!onViewProfile) return;
             e.stopPropagation();
@@ -112,7 +136,7 @@ export default function ParticipantManagementView({
           return (
             <div
               key={p.id}
-              className="p-5 sm:p-6 rounded-3xl border transition-all duration-300 space-y-3.5 shadow-xl backdrop-blur-xl group bg-slate-950/75 border-purple-500/20 hover:border-purple-500/40 shadow-purple-950/20 hover:shadow-[0_16px_40px_rgba(168,85,247,0.16)]"
+              className="relative overflow-hidden p-5 sm:p-6 rounded-3xl border transition-all duration-300 space-y-3.5 shadow-xl backdrop-blur-xl group bg-slate-950/75 border-purple-500/20 hover:border-purple-500/40 shadow-purple-950/20 hover:shadow-[0_16px_40px_rgba(168,85,247,0.16)]"
             >
               {/* Header: Avatar, Name & Payout (No "FEE" text) */}
               <div className="flex items-start justify-between gap-4">
@@ -186,6 +210,13 @@ export default function ParticipantManagementView({
                 </div>
               )}
 
+              {/* Deliverable Description */}
+              {deliverableDescription && (
+                <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed font-normal">
+                  {deliverableDescription}
+                </p>
+              )}
+
               {/* Deliverable Progress Meter - Sleek and Slim (h-1.5) */}
               <div className="space-y-1.5 pt-0.5">
                 <div className="flex justify-between items-center text-xs">
@@ -204,17 +235,29 @@ export default function ParticipantManagementView({
                 </div>
               </div>
 
-              {/* Action Footer: Manage Deliverables Button */}
-              <div className="pt-2 border-t border-white/5 flex items-center justify-end">
+              {/* Action Footer: Link to Manage Deliverables (similar to Detailed Pitch) */}
+              <div className="pt-2 border-t border-white/5 flex items-center justify-between gap-3 relative z-30">
                 <button
                   type="button"
                   onClick={handleOpenDeliverables}
-                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/35 text-purple-300 hover:text-white border border-purple-500/30 hover:border-purple-400/50 text-xs font-bold transition-all duration-200 flex items-center justify-center gap-2 group/btn cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(168,85,247,0.25)]"
+                  className="group/manage inline-flex items-center gap-1.5 py-1 text-xs sm:text-sm font-bold text-purple-400 hover:text-purple-300 transition-colors duration-200 cursor-pointer select-none"
                 >
                   <span>Manage Deliverables</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-purple-400 group-hover/btn:translate-x-0.5 transition-transform" />
+                  <ArrowRight className="w-4 h-4 text-purple-400 group-hover/manage:text-purple-300 group-hover/manage:translate-x-1 transition-transform duration-200 shrink-0" />
                 </button>
               </div>
+
+              {/* Bottom-Right Diagonal Corner Ribbon: Zerify Creator */}
+              {showZerifyCreator && (
+                <div className="absolute bottom-0 right-0 w-28 h-28 sm:w-32 sm:h-32 overflow-hidden rounded-br-3xl pointer-events-none z-20">
+                  <div className="absolute bottom-[20px] sm:bottom-[22px] -right-[40px] sm:-right-[44px] w-[160px] sm:w-[170px] -rotate-45 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 py-1 sm:py-1.5 shadow-xl shadow-purple-950/90 border-y border-purple-300/40 flex items-center justify-center gap-1.5 group-hover:scale-105 transition-transform duration-300">
+                    <ShieldCheck className="w-3.5 h-3.5 text-purple-200 shrink-0" />
+                    <span className="text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider text-white drop-shadow-md whitespace-nowrap">
+                      Zerify Creator
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
