@@ -9,6 +9,7 @@ import CampaignPerformanceTrend from './overview/CampaignPerformanceTrend';
 import TopCampaignsList from './overview/TopCampaignsList';
 import OverviewCreators from './overview/OverviewCreators';
 import RecentActivityFeed from './overview/RecentActivityFeed';
+import CampaignFilterDropdown from './overview/CampaignFilterDropdown';
 
 interface BrandOverviewSectionProps {
   userName?: string;
@@ -78,10 +79,12 @@ export default function BrandOverviewSection({ onNavigate }: BrandOverviewSectio
       {/* Filter & Action Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
-          <select aria-label="Filter overview by campaign" value={campaignId} onChange={(event) => setCampaignId(event.target.value)} className={controlClass + ' max-w-full sm:max-w-64 cursor-pointer'} disabled={isLoading}>
-            <option value="all" className="bg-slate-950">All campaigns</option>
-            {(data?.campaigns ?? []).map((campaign) => <option key={campaign.id} value={campaign.id} className="bg-slate-950">{campaign.title}</option>)}
-          </select>
+          <CampaignFilterDropdown
+            value={campaignId}
+            onChange={setCampaignId}
+            campaigns={data?.campaigns ?? []}
+            disabled={isLoading}
+          />
           <span className="text-xs text-slate-400">All-time totals</span>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">

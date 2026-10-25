@@ -57,11 +57,13 @@ export default function OverviewKpiGrid({ campaigns, isLoading }: {
           <span className="text-[11px] font-bold text-emerald-400 mt-1 inline-block">
             {isLoading ? 'Loading records…' : change}
           </span>
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent pointer-events-none"
-            animate={{ x: ['-100%', '100%'] }}
-            transition={{ repeat: Infinity, duration: 1.6, ease: 'linear', delay: index * 0.08 }}
-          />
+          {isLoading && (
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent pointer-events-none"
+              animate={{ x: ['-100%', '100%'] }}
+              transition={{ repeat: Infinity, duration: 1.6, ease: 'linear', delay: index * 0.08 }}
+            />
+          )}
         </motion.div>
       ))}
     </div>

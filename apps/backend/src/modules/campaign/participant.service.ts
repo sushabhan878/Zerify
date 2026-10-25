@@ -5,7 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { CampaignRepository } from './campaign.repository';
-import { ParticipantStatus } from '@prisma/client';
+import { ParticipantStatus, OfferStatus } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
@@ -18,7 +18,40 @@ export class ParticipantService {
   async listCampaignParticipants(campaignId: string, userId: string) {
     const campaign = await this.prisma.campaign.findUnique({ where: { id: campaignId }, include: { brandProfile: true } });
     if (!campaign || campaign.brandProfile.userId !== userId) throw new ForbiddenException('Only the campaign owner can view participants');
-    return this.repository.listParticipantsForCampaign(campaignId);
+    const participants = await this.repository.listParticipantsForCampaign(campaignId);
+
+    // Flag creators the brand already has a relationship with from BEFORE this
+    // campaign: a prior confirmed participation, an accepted offer on another
+    // campaign, or a recorded deal in the influencer-brand partner network.
+    const [pastParticipants, acceptedOffers, brandPartners] = await Promise.all([
+      this.prisma.campaignParticipant.findMany({
+        where: {
+          campaignId: { not: campaignId },
+          campaign: { brandProfile: { userId } },
+          status: { in: [ParticipantStatus.CONFIRMED, ParticipantStatus.PARTICIPANT_ACTIVE, ParticipantStatus.PARTICIPANT_COMPLETED] },
+        },
+        select: { influencerProfileId: true },
+      }),
+      this.prisma.campaignOffer.findMany({
+        where: {
+          application: { campaignId: { not: campaignId }, campaign: { brandProfile: { userId } } },
+          status: OfferStatus.ACCEPTED,
+        },
+        select: { influencerProfileId: true },
+      }),
+      (this.prisma as any).influencerBrandPartner.findMany({
+        where: { brandProfileId: campaign.brandProfileId, totalDeals: { gt: 0 } },
+        select: { influencerProfileId: true },
+      }),
+    ]);
+    const priorCollaboratorIds = new Set<string>(
+      [...pastParticipants, ...acceptedOffers, ...brandPartners].map((row) => row.influencerProfileId),
+    );
+
+    return participants.map((p) => ({
+      ...p,
+      hasWorkedWithBrand: priorCollaboratorIds.has(p.influencerProfileId),
+    }));
   }
 
   async listInfluencerCollaborations(userId: string) {
