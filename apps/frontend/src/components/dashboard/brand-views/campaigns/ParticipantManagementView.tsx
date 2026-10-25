@@ -1,11 +1,24 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Users, ChevronRight, ArrowUpRight, ArrowRight, ShieldCheck } from 'lucide-react';
+import {
+  Users,
+  ChevronRight,
+  ArrowUpRight,
+  ArrowRight,
+  ShieldCheck,
+  Video,
+  Film,
+  Camera,
+  Sparkles,
+  Layers,
+  RotateCcw,
+} from 'lucide-react';
 import { useCurrency } from '@/context/CurrencyContext';
 import { formatCurrency } from '@/utils/currency';
 import { isComplete } from '@/services/deliverable-workflow';
 import ParticipantDeliverablesPage from './ParticipantDeliverablesPage';
+import ZerifyCreatorRibbon from '@/components/dashboard/common/ZerifyCreatorRibbon';
 
 interface ParticipantManagementViewProps {
   participants: any[];
@@ -15,6 +28,63 @@ interface ParticipantManagementViewProps {
   offersCount?: number;
   onViewProfile?: (creator: any) => void;
   onManageDeliverables?: (participant: any) => void;
+}
+
+function getDeliverableMeta(type: string) {
+  const lower = (type || '').toLowerCase();
+  if (lower.includes('reel') || lower.includes('short') || lower.includes('tiktok')) {
+    return {
+      Icon: Video,
+      iconColor: 'text-pink-400',
+      badgeGradient: 'from-pink-950/40 via-purple-950/30 to-slate-900/60',
+      borderColor: 'border-pink-500/30 hover:border-pink-400/50',
+      qtyBg: 'bg-gradient-to-r from-pink-500 to-purple-600',
+      glow: 'hover:shadow-[0_0_12px_rgba(236,72,153,0.2)]',
+      revBg: 'bg-pink-950/50 border-pink-500/25 text-pink-300',
+    };
+  }
+  if (lower.includes('youtube') || lower.includes('video')) {
+    return {
+      Icon: Film,
+      iconColor: 'text-red-400',
+      badgeGradient: 'from-red-950/40 via-purple-950/30 to-slate-900/60',
+      borderColor: 'border-red-500/30 hover:border-red-400/50',
+      qtyBg: 'bg-gradient-to-r from-red-500 to-rose-600',
+      glow: 'hover:shadow-[0_0_12px_rgba(239,68,68,0.2)]',
+      revBg: 'bg-red-950/50 border-red-500/25 text-red-300',
+    };
+  }
+  if (lower.includes('post') || lower.includes('photo') || lower.includes('image')) {
+    return {
+      Icon: Camera,
+      iconColor: 'text-cyan-400',
+      badgeGradient: 'from-cyan-950/40 via-blue-950/30 to-slate-900/60',
+      borderColor: 'border-cyan-500/30 hover:border-cyan-400/50',
+      qtyBg: 'bg-gradient-to-r from-cyan-500 to-blue-600',
+      glow: 'hover:shadow-[0_0_12px_rgba(6,182,212,0.2)]',
+      revBg: 'bg-cyan-950/50 border-cyan-500/25 text-cyan-300',
+    };
+  }
+  if (lower.includes('story')) {
+    return {
+      Icon: Sparkles,
+      iconColor: 'text-amber-400',
+      badgeGradient: 'from-amber-950/40 via-orange-950/30 to-slate-900/60',
+      borderColor: 'border-amber-500/30 hover:border-amber-400/50',
+      qtyBg: 'bg-gradient-to-r from-amber-500 to-orange-600',
+      glow: 'hover:shadow-[0_0_12px_rgba(245,158,11,0.2)]',
+      revBg: 'bg-amber-950/50 border-amber-500/25 text-amber-300',
+    };
+  }
+  return {
+    Icon: Layers,
+    iconColor: 'text-purple-400',
+    badgeGradient: 'from-purple-950/40 via-indigo-950/30 to-slate-900/60',
+    borderColor: 'border-purple-500/30 hover:border-purple-400/50',
+    qtyBg: 'bg-gradient-to-r from-purple-600 to-indigo-600',
+    glow: 'hover:shadow-[0_0_12px_rgba(168,85,247,0.2)]',
+    revBg: 'bg-purple-950/50 border-purple-500/25 text-purple-300',
+  };
 }
 
 export default function ParticipantManagementView({
@@ -187,24 +257,46 @@ export default function ParticipantManagementView({
                 </div>
               </div>
 
-              {/* Exact Deliverables Details (Quantity + Revisions) - Short & Clean */}
+              {/* Exact Deliverables Details (Quantity + Revisions) - Premium Badges */}
               {deliverables.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5 py-0.5">
+                <div className="flex flex-wrap items-center gap-2 py-0.5">
                   {deliverables.map((del: any, idx: number) => {
                     const qty = del.quantity || 1;
                     const type = del.type || del.title || 'Deliverable';
                     const revLimit = del.requirements?.revisionLimit ?? del.revisionLimit ?? 2;
+                    const meta = getDeliverableMeta(type);
+                    const Icon = meta.Icon;
+
                     return (
-                      <span
+                      <div
                         key={del.id || idx}
-                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-purple-950/40 border border-purple-500/20 text-[11px] font-semibold text-purple-200"
+                        className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-gradient-to-r ${meta.badgeGradient} bg-slate-900/80 border ${meta.borderColor} ${meta.glow} backdrop-blur-md transition-all duration-200 hover:scale-[1.02] shadow-sm`}
                       >
-                        <span className="font-bold text-white">{qty}x</span>
-                        <span className="truncate max-w-[130px]">{type}</span>
-                        <span className="text-slate-400 text-[10px]">
-                          · {revLimit} {revLimit === 1 ? 'rev' : 'revs'}
+                        {/* Quantity Badge */}
+                        <span
+                          className={`inline-flex items-center justify-center px-2 py-0.5 rounded-lg ${meta.qtyBg} text-white font-black text-[11px] shadow-sm tracking-tight leading-none`}
+                        >
+                          {qty}x
                         </span>
-                      </span>
+
+                        {/* Format Icon & Type */}
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <Icon className={`w-3.5 h-3.5 ${meta.iconColor} shrink-0`} />
+                          <span className="text-xs font-bold text-white tracking-tight truncate max-w-[150px]">
+                            {type}
+                          </span>
+                        </div>
+
+                        {/* Revision Limit Pill */}
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-semibold ${meta.revBg} shrink-0`}
+                        >
+                          <RotateCcw className="w-2.5 h-2.5 shrink-0 opacity-80" />
+                          <span>
+                            {revLimit} {revLimit === 1 ? 'rev' : 'revs'}
+                          </span>
+                        </span>
+                      </div>
                     );
                   })}
                 </div>
@@ -247,17 +339,8 @@ export default function ParticipantManagementView({
                 </button>
               </div>
 
-              {/* Bottom-Right Diagonal Corner Ribbon: Zerify Creator */}
-              {showZerifyCreator && (
-                <div className="absolute bottom-0 right-0 w-28 h-28 sm:w-32 sm:h-32 overflow-hidden rounded-br-3xl pointer-events-none z-20">
-                  <div className="absolute bottom-[20px] sm:bottom-[22px] -right-[40px] sm:-right-[44px] w-[160px] sm:w-[170px] -rotate-45 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 py-1 sm:py-1.5 shadow-xl shadow-purple-950/90 border-y border-purple-300/40 flex items-center justify-center gap-1.5 group-hover:scale-105 transition-transform duration-300">
-                    <ShieldCheck className="w-3.5 h-3.5 text-purple-200 shrink-0" />
-                    <span className="text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider text-white drop-shadow-md whitespace-nowrap">
-                      Zerify Creator
-                    </span>
-                  </div>
-                </div>
-              )}
+              {/* Bottom-Right Diagonal Corner Ribbon: Zerify Creator (3D wrap effect) */}
+              {showZerifyCreator && <ZerifyCreatorRibbon />}
             </div>
           );
         })}
