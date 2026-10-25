@@ -6,7 +6,7 @@ import { useCurrency } from '@/context/CurrencyContext';
 import { formatCurrency } from '@/utils/currency';
 import { isComplete } from '@/services/deliverable-workflow';
 import ParticipantDeliverablesPage from './ParticipantDeliverablesPage';
-import ZerifyCreatorRibbon from '@/components/dashboard/common/ZerifyCreatorRibbon';
+import AlreadyWorkedRibbon from '@/components/dashboard/common/AlreadyWorkedRibbon';
 
 interface ParticipantManagementViewProps {
   participants: any[];
@@ -93,17 +93,15 @@ export default function ParticipantManagementView({
             campaign?.description ||
             (campaign?.deliverables && campaign.deliverables[0]?.description);
 
-          const showZerifyCreator = Boolean(
+          // "Already Worked" ribbon: only for creators with an existing
+          // relationship with this brand (platform-wide popularity signals
+          // like verification or collaboration counts deliberately excluded).
+          const showAlreadyWorked = Boolean(
             p.hasWorkedWithBrand ||
             p.workedWithBrand ||
             p.influencerProfile?.hasWorkedWithBrand ||
             p.isPastCollaborator ||
-            p.influencerProfile?.isPastCollaborator ||
-            p.influencerProfile?.verified ||
-            p.influencerProfile?.isVerified ||
-            (p.influencerProfile?.completedCollaborations && p.influencerProfile.completedCollaborations > 0) ||
-            (p.influencerProfile?.collaborationsCount && p.influencerProfile.collaborationsCount > 0) ||
-            p.isZerifyCreator !== false
+            p.influencerProfile?.isPastCollaborator
           );
 
           const handleOpenProfile = (e: React.MouseEvent) => {
@@ -226,7 +224,7 @@ export default function ParticipantManagementView({
               </div>
 
               {/* Bottom-Right Diagonal Corner Ribbon: Zerify Creator (3D wrap effect) */}
-              {showZerifyCreator && <ZerifyCreatorRibbon />}
+              {showAlreadyWorked && <AlreadyWorkedRibbon />}
             </div>
           );
         })}

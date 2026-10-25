@@ -376,7 +376,6 @@ export default function CampaignOverviewDashboard({
           <ArrowLeft className="w-4 h-4 text-purple-400 group-hover:-translate-x-0.5 transition-transform" />
           <span>Back to Campaigns</span>
         </button>
-        <CampaignActions campaign={campaign} onUpdated={() => void loadData(true)} onDeleted={onBack} />
       </div>
       {campaign.status === 'DELETED' && <div role="status" className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-200 text-sm">This campaign has been deleted. Historical applications and collaboration records are retained.</div>}
 
@@ -562,8 +561,8 @@ export default function CampaignOverviewDashboard({
           </div>
         </div>
 
-        {/* Row 4: Footer Meta Dates & Actions */}
-        <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10 border-t border-purple-500/15">
+        {/* Row 4: Footer Meta Dates & Bottom-Right Actions (No Horizontal Dividing Line) */}
+        <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
           <div className="flex items-center gap-4 text-xs text-slate-400 font-medium">
             {formattedCreated && (
               <span className="flex items-center gap-1.5">
@@ -580,16 +579,19 @@ export default function CampaignOverviewDashboard({
             )}
           </div>
 
-          {campaign.status === 'DRAFT' && (
-            <button
-              onClick={handlePublish}
-              type="button"
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black text-white flex items-center gap-1.5 shadow-md shadow-emerald-950/40 transition-all cursor-pointer"
-            >
-              <Play className="w-3.5 h-3.5" />
-              <span>Publish Campaign</span>
-            </button>
-          )}
+          <div className="flex items-center gap-3 self-end sm:self-auto">
+            {campaign.status === 'DRAFT' && (
+              <button
+                onClick={handlePublish}
+                type="button"
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black text-white flex items-center gap-1.5 shadow-md shadow-emerald-950/40 transition-all cursor-pointer"
+              >
+                <Play className="w-3.5 h-3.5" />
+                <span>Publish Campaign</span>
+              </button>
+            )}
+            <CampaignActions campaign={campaign} onUpdated={() => void loadData(true)} onDeleted={onBack} />
+          </div>
         </div>
       </div>
 

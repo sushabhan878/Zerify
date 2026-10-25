@@ -16,7 +16,7 @@ import { CreatorItem } from '../find-influencers/CreatorCard';
 import { mapApplicationToCreator } from './mapApplicationToCreator';
 import { useCurrency } from '@/context/CurrencyContext';
 import Money from '@/components/currency/Money';
-import ZerifyCreatorRibbon from '@/components/dashboard/common/ZerifyCreatorRibbon';
+import AlreadyWorkedRibbon from '@/components/dashboard/common/AlreadyWorkedRibbon';
 
 interface ApplicantCardProps {
   application: CampaignApplicationItem;
@@ -317,8 +317,8 @@ export default function ApplicantCard({
         </div>
       </div>
 
-      {/* Bottom-Right Diagonal Corner Ribbon: Zerify Creator (3D wrap effect) */}
-      <ZerifyCreatorRibbon />
+      {/* Bottom-Right Diagonal Corner Ribbon: creator has an existing relationship with this brand */}
+      {application.hasWorkedWithBrand && <AlreadyWorkedRibbon />}
     </div>
   );
 }
