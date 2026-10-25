@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { X, ShieldCheck, CheckCircle2, AlertCircle, FileText, Calendar, DollarSign, ExternalLink } from 'lucide-react';
 import { DealItem } from './deal-types';
 import { useCurrency } from '@/context/CurrencyContext';
@@ -16,14 +17,18 @@ export default function DealDetailModal({ deal, onClose, onApproveRelease }: Dea
   const { format } = useCurrency();
   if (!deal) return null;
 
-  return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+  // Portalled to <body> so the backdrop covers the full viewport (sidebar
+  // included) — ancestors with backdrop-filter otherwise trap `fixed`.
+  const modalContent = (
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md"
+    >
         <motion.div
+          onClick={(e) => e.stopPropagation()}
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.96 }}
-          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#090C15] border border-white/10 shadow-2xl p-6 space-y-6"
+          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#090D16] border border-purple-500/25 shadow-2xl p-6 space-y-6 backdrop-blur-2xl"
         >
           {/* Header */}
           <div className="flex items-start justify-between border-b border-white/10 pb-4">
@@ -136,6 +141,7 @@ export default function DealDetailModal({ deal, onClose, onApproveRelease }: Dea
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
   );
+
+  return createPortal(modalContent, document.body);
 }
