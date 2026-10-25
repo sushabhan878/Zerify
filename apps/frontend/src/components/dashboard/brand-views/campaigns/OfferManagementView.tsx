@@ -11,6 +11,7 @@ import {
 import { CampaignOfferItem, OfferService } from '@/services/offer.service';
 import { useCurrency } from '@/context/CurrencyContext';
 import { formatCurrency } from '@/utils/currency';
+import Money from '@/components/currency/Money';
 
 interface OfferManagementViewProps {
   offers: CampaignOfferItem[];
@@ -206,7 +207,7 @@ export default function OfferManagementView({
                   Offered Fee
                 </span>
                 <span className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight leading-none block pt-0.5">
-                  {formatCurrency(offer.compensationAmount, currency || offer.compensationCurrency || 'INR')}
+                  <Money amount={offer.compensationAmount} currency={offer.compensationCurrency || 'USD'} />
                 </span>
               </div>
 

@@ -16,6 +16,7 @@ import { useCurrency } from '@/context/CurrencyContext';
 import { formatCurrency } from '@/utils/currency';
 import { isComplete } from '@/services/deliverable-workflow';
 import { DeliverableService } from '@/services/deliverable.service';
+import Money from '@/components/currency/Money';
 
 interface ParticipantDeliverablesPageProps {
   participant: any;
@@ -168,7 +169,7 @@ export default function ParticipantDeliverablesPage({
           {/* Agreed Amount */}
           <div className="text-left sm:text-right shrink-0">
             <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight leading-none block">
-              {formatCurrency(participant.agreedAmount, currency || participant.agreedCurrency || 'INR')}
+              <Money amount={participant.agreedAmount} currency={participant.agreedCurrency || 'USD'} />
             </span>
             <span className="text-[11px] text-slate-400 font-semibold block pt-1">
               Agreed Collaboration Fee

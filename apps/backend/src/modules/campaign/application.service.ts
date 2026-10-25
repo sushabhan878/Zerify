@@ -371,7 +371,71 @@ export class ApplicationService {
   }
 
   async listApplicationsForCampaign(campaignId: string, status?: ApplicationStatus) {
-    return this.repository.listApplicationsForCampaign(campaignId, status);
+    const applications = await this.repository.listApplicationsForCampaign(campaignId, status);
+    const campaign = await this.prisma.campaign.findUnique({
+      where: { id: campaignId },
+      select: { brandProfile: { select: { userId: true } } },
+    });
+    if (!campaign?.brandProfile?.userId) return applications;
+    return this.annotatePastCollaboration(campaign.brandProfile.userId, applications);
+  }
+
+  /**
+   * Flags applications whose creator already has a relationship with this
+   * brand: a confirmed participant record, or any accepted offer/deal.
+   */
+  private async annotatePastCollaboration<
+    T extends { influencerProfileId: string; status: ApplicationStatus; offers?: { status: OfferStatus }[] },
+  >(brandProfileUserId: string, applications: T[]): Promise<(T & { hasWorkedWithBrand: boolean })[]> {
+    const [confirmedParticipants, acceptedOffers] = await Promise.all([
+      this.prisma.campaignParticipant.findMany({
+        where: {
+          campaign: {
+            brandProfile: {
+              userId: brandProfileUserId,
+            },
+          },
+          status: {
+            in: [
+              ParticipantStatus.CONFIRMED,
+              ParticipantStatus.PARTICIPANT_ACTIVE,
+              ParticipantStatus.PARTICIPANT_COMPLETED,
+            ],
+          },
+        },
+        select: {
+          influencerProfileId: true,
+        },
+      }),
+      this.prisma.campaignOffer.findMany({
+        where: {
+          application: {
+            campaign: {
+              brandProfile: {
+                userId: brandProfileUserId,
+              },
+            },
+          },
+          status: OfferStatus.ACCEPTED,
+        },
+        select: {
+          influencerProfileId: true,
+        },
+      }),
+    ]);
+
+    const pastCollaboratorIds = new Set<string>([
+      ...confirmedParticipants.map((p) => p.influencerProfileId),
+      ...acceptedOffers.map((o) => o.influencerProfileId),
+    ]);
+
+    return applications.map((app) => ({
+      ...app,
+      hasWorkedWithBrand:
+        pastCollaboratorIds.has(app.influencerProfileId) ||
+        app.status === ApplicationStatus.OFFER_ACCEPTED ||
+        app.offers?.some((o) => o.status === OfferStatus.ACCEPTED) === true,
+    }));
   }
 
   async listBrandApplications(userId: string, status?: ApplicationStatus) {
@@ -434,55 +498,7 @@ export class ApplicationService {
 
     // Check which influencers have worked previously with this brand
     // (either as a confirmed CampaignParticipant, or having an accepted offer/deal with this brand)
-    const [confirmedParticipants, acceptedOffers] = await Promise.all([
-      this.prisma.campaignParticipant.findMany({
-        where: {
-          campaign: {
-            brandProfile: {
-              userId,
-            },
-          },
-          status: {
-            in: [
-              ParticipantStatus.CONFIRMED,
-              ParticipantStatus.PARTICIPANT_ACTIVE,
-              ParticipantStatus.PARTICIPANT_COMPLETED,
-            ],
-          },
-        },
-        select: {
-          influencerProfileId: true,
-        },
-      }),
-      this.prisma.campaignOffer.findMany({
-        where: {
-          application: {
-            campaign: {
-              brandProfile: {
-                userId,
-              },
-            },
-          },
-          status: OfferStatus.ACCEPTED,
-        },
-        select: {
-          influencerProfileId: true,
-        },
-      }),
-    ]);
-
-    const pastCollaboratorIds = new Set<string>([
-      ...confirmedParticipants.map((p) => p.influencerProfileId),
-      ...acceptedOffers.map((o) => o.influencerProfileId),
-    ]);
-
-    return applications.map((app) => ({
-      ...app,
-      hasWorkedWithBrand:
-        pastCollaboratorIds.has(app.influencerProfileId) ||
-        app.status === ApplicationStatus.OFFER_ACCEPTED ||
-        app.offers?.some((o: any) => o.status === OfferStatus.ACCEPTED),
-    }));
+    return this.annotatePastCollaboration(userId, applications);
   }
 
   async listApplicationsForInfluencer(userId: string) {

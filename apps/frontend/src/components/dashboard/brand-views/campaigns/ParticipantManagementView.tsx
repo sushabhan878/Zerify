@@ -7,6 +7,7 @@ import { formatCurrency } from '@/utils/currency';
 import { isComplete } from '@/services/deliverable-workflow';
 import ParticipantDeliverablesPage from './ParticipantDeliverablesPage';
 import AlreadyWorkedRibbon from '@/components/dashboard/common/AlreadyWorkedRibbon';
+import Money from '@/components/currency/Money';
 
 interface ParticipantManagementViewProps {
   participants: any[];
@@ -181,7 +182,7 @@ export default function ParticipantManagementView({
                 {/* Amount Display (No "FEE" label) */}
                 <div className="text-right shrink-0">
                   <span className="text-lg sm:text-xl md:text-2xl font-black text-emerald-400 tracking-tight leading-none block">
-                    {formatCurrency(p.agreedAmount, currency || p.agreedCurrency || 'INR')}
+                    <Money amount={p.agreedAmount} currency={p.agreedCurrency || 'USD'} />
                   </span>
                 </div>
               </div>
