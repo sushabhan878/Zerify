@@ -96,22 +96,18 @@ export default function CheckoutStatusModal({
       )}
 
       {status === 'PROCESSING' && (
-        <div className="space-y-4 max-w-sm">
-          <div className="w-16 h-16 rounded-2xl bg-purple-100 flex items-center justify-center mx-auto text-purple-600 shadow-md">
-            <Loader2 className="w-8 h-8 animate-spin" />
-          </div>
-          <div>
-            <h3 className="text-base font-extrabold text-slate-900">
-              {isWalletTopup ? 'Processing Wallet Top-up' : 'Processing Escrow Deposit'}
-            </h3>
-            <p className="text-xs text-slate-500 mt-1">
+        <div className="flex flex-col items-center justify-between h-full w-full max-w-sm py-2">
+          <div className="my-auto flex flex-col items-center justify-center space-y-3">
+            <Loader2 className="w-10 h-10 text-purple-600 animate-spin" />
+            <p className="text-xs text-slate-500 text-center max-w-xs leading-relaxed">
               Communicating securely with Cashfree Payment Gateway and confirming transaction...
             </p>
           </div>
-          <div className="p-3 rounded-xl bg-purple-50 border border-purple-200/60 text-[11px] text-purple-700 font-semibold flex items-center justify-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-purple-600 shrink-0" />
+
+          <p className="text-[11px] text-slate-400 font-medium flex items-center justify-center gap-1.5 mt-auto">
+            <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
             <span>Do not refresh or close this window</span>
-          </div>
+          </p>
         </div>
       )}
 

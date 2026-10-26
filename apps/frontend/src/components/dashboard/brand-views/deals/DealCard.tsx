@@ -4,14 +4,13 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import {
   Sparkles,
-  CheckCircle2,
-  AlertCircle,
   BadgeCheck,
   Target,
   ArrowRight,
 } from 'lucide-react';
 import { DealItem } from './deal-types';
 import { useCurrency } from '@/context/CurrencyContext';
+import { normalizeCurrency, formatCurrency } from '@/utils/currency';
 import { PlatformBadge } from '../find-influencers/CreatorCard';
 import { BrandWorkedRibbonBadge } from '../shortlists/ShortlistApplicantCard';
 
@@ -21,6 +20,7 @@ interface DealCardProps {
   onViewDetails: (deal: DealItem) => void;
   onApproveRelease: (deal: DealItem) => void;
   onRequestEdits: (deal: DealItem) => void;
+  onManageDeliverables?: (deal: DealItem) => void;
 }
 
 export default function DealCard({
@@ -28,9 +28,16 @@ export default function DealCard({
   onPreviewDraft,
   onViewDetails,
   onApproveRelease,
+  onManageDeliverables,
 }: DealCardProps) {
-  const { format } = useCurrency();
+  const { currency, format, convert } = useCurrency();
   const [imageError, setImageError] = React.useState(false);
+
+  const sourceCurrency = deal.agreedCurrency || 'INR';
+  const isDiffCurrency = normalizeCurrency(sourceCurrency) !== normalizeCurrency(currency);
+  const convertedAmount = isDiffCurrency
+    ? convert(deal.agreedAmount, sourceCurrency)
+    : deal.agreedAmount;
 
   const defaultAvatar =
     'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80';
@@ -163,46 +170,29 @@ export default function DealCard({
                 ? 'Refunded Amount'
                 : 'Pitch Quote'}
             </span>
-            <span className="text-2xl sm:text-[28px] font-black text-purple-300 tracking-tight">
-              {format(deal.agreedAmount)}
-            </span>
+            <div className="flex flex-col items-end">
+              <span className="text-2xl sm:text-[28px] font-black text-purple-300 tracking-tight">
+                {format(convertedAmount)}
+              </span>
+            </div>
           </div>
 
-          {/* Action Buttons: Pitch + Offer Accepted/Main Action */}
-          <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+          {/* Action: Manage Deliverables with animated hover arrow */}
+          <div className="flex items-center justify-end pt-1" onClick={(e) => e.stopPropagation()}>
             <button
-              onClick={() => onPreviewDraft(deal)}
+              onClick={() => {
+                if (onManageDeliverables) {
+                  onManageDeliverables(deal);
+                } else {
+                  onPreviewDraft(deal);
+                }
+              }}
               type="button"
-              className="group/pitch relative h-10 sm:h-11 w-24 sm:w-28 rounded-xl bg-slate-900/90 hover:bg-slate-800 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/50 text-xs sm:text-sm font-bold text-slate-200 hover:text-white flex items-center justify-center transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-purple-900/30 cursor-pointer shrink-0 select-none overflow-hidden"
+              className="group/manage inline-flex items-center gap-2 py-1 px-1 rounded-lg text-xs sm:text-sm font-bold text-purple-400 hover:text-purple-300 transition-colors duration-200 cursor-pointer select-none"
             >
-              <span className="transition-transform duration-200 group-hover/pitch:-translate-x-2">
-                Pitch
-              </span>
-              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400 absolute right-3 opacity-0 translate-x-2 group-hover/pitch:opacity-100 group-hover/pitch:translate-x-0 transition-all duration-200" />
+              <span>Manage Deliverables</span>
+              <ArrowRight className="w-4 h-4 text-purple-400 transition-transform duration-200 group-hover/manage:translate-x-1.5" />
             </button>
-
-            {/* Right Status / Action Button */}
-            {deal.status === 'ACTIVE' ? (
-              <button
-                onClick={() => onApproveRelease(deal)}
-                type="button"
-                className="flex-1 py-2 sm:py-2.5 px-4 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-xs sm:text-sm font-bold text-emerald-300 flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
-                title="Click to review & release payment"
-              >
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Offer Accepted</span>
-              </button>
-            ) : deal.status === 'COMPLETED' ? (
-              <div className="flex-1 py-2 sm:py-2.5 px-4 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xs sm:text-sm font-bold text-emerald-300 flex items-center justify-center gap-1.5 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Completed</span>
-              </div>
-            ) : (
-              <div className="flex-1 py-2 sm:py-2.5 px-4 rounded-xl bg-rose-500/15 border border-rose-500/30 text-xs sm:text-sm font-bold text-rose-300 flex items-center justify-center gap-1.5 shadow-sm">
-                <AlertCircle className="w-4 h-4 text-rose-400" />
-                <span>Deal Cancelled</span>
-              </div>
-            )}
           </div>
         </div>
       </div>

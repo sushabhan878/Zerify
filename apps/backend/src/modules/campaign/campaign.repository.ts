@@ -124,6 +124,23 @@ export class CampaignRepository {
         product: true,
         requirement: true,
         deliverables: true,
+        participants: {
+          include: {
+            influencerProfile: {
+              include: {
+                user: { select: { id: true, name: true, email: true } },
+              },
+            },
+            deliverables: {
+              include: {
+                revisions: { orderBy: { version: 'desc' } },
+                events: { orderBy: { createdAt: 'desc' } },
+              },
+            },
+            payments: true,
+          },
+          orderBy: { joinedAt: 'desc' },
+        },
         _count: {
           select: {
             applications: {

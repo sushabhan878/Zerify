@@ -15,6 +15,8 @@ import CreatorProfileFullView from './find-influencers/CreatorProfileFullView';
 import SendOfferModal from './campaigns/SendOfferModal';
 import ApplicantDetailModal from './campaigns/ApplicantDetailModal';
 import LottieLoader from '@/components/ui/LottieLoader';
+import { useCurrency } from '@/context/CurrencyContext';
+import { convertCurrency } from '@/utils/currency';
 
 const INITIAL_FILTERS: ShortlistFiltersState = {
   campaignId: 'ALL',
@@ -28,6 +30,7 @@ const INITIAL_FILTERS: ShortlistFiltersState = {
 };
 
 export default function ShortlistsSection() {
+  const { convert } = useCurrency();
   const [applications, setApplications] = useState<CampaignApplicationItem[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -202,7 +205,9 @@ export default function ShortlistsSection() {
       // 7. Rate Range
       if (filters.rateRange !== 'Any Rate') {
         const rawAmt = app.proposedAmount || creator.startingRate || 0;
-        const amt = typeof rawAmt === 'number' ? rawAmt : parseFloat(String(rawAmt).replace(/[^0-9.]/g, '')) || 0;
+        const curr = app.proposedCurrency || (app as any).influencerProfile?.currency || 'USD';
+        const numAmt = typeof rawAmt === 'number' ? rawAmt : parseFloat(String(rawAmt).replace(/[^0-9.]/g, '')) || 0;
+        const amt = convertCurrency(numAmt, curr, 'USD');
         if (filters.rateRange === 'Under $250' && amt > 250) return false;
         if (filters.rateRange === '$250 - $500' && (amt < 250 || amt > 500)) return false;
         if (filters.rateRange === '$500 - $1K' && (amt < 500 || amt > 1000)) return false;
@@ -240,16 +245,24 @@ export default function ShortlistsSection() {
       if (sortBy === 'priceLow') {
         const rawA = a.proposedAmount || cA.startingRate || 0;
         const rawB = b.proposedAmount || cB.startingRate || 0;
+        const currA = a.proposedCurrency || (a as any).influencerProfile?.currency || 'USD';
+        const currB = b.proposedCurrency || (b as any).influencerProfile?.currency || 'USD';
         const pA = typeof rawA === 'number' ? rawA : parseFloat(String(rawA).replace(/[^0-9.]/g, '')) || 0;
         const pB = typeof rawB === 'number' ? rawB : parseFloat(String(rawB).replace(/[^0-9.]/g, '')) || 0;
-        return pA - pB;
+        const convA = convert ? convert(pA, currA) : pA;
+        const convB = convert ? convert(pB, currB) : pB;
+        return convA - convB;
       }
       if (sortBy === 'priceHigh') {
         const rawA = a.proposedAmount || cA.startingRate || 0;
         const rawB = b.proposedAmount || cB.startingRate || 0;
+        const currA = a.proposedCurrency || (a as any).influencerProfile?.currency || 'USD';
+        const currB = b.proposedCurrency || (b as any).influencerProfile?.currency || 'USD';
         const pA = typeof rawA === 'number' ? rawA : parseFloat(String(rawA).replace(/[^0-9.]/g, '')) || 0;
         const pB = typeof rawB === 'number' ? rawB : parseFloat(String(rawB).replace(/[^0-9.]/g, '')) || 0;
-        return pB - pA;
+        const convA = convert ? convert(pA, currA) : pA;
+        const convB = convert ? convert(pB, currB) : pB;
+        return convB - convA;
       }
       if (sortBy === 'recent') {
         return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();

@@ -8,11 +8,13 @@ import { ShieldCheck, Sparkles } from 'lucide-react';
 interface Floating3DCardsAnimationProps {
   cardHolderName?: string;
   cardNumber?: string;
+  isEscrow?: boolean;
 }
 
 export default function Floating3DCardsAnimation({
   cardHolderName = 'Edward Hunt',
   cardNumber = '4455 5491 6118 6164',
+  isEscrow = false,
 }: Floating3DCardsAnimationProps) {
   const displayHolder = cardHolderName.trim() || 'Edward Hunt';
   const displayCardNum = cardNumber.trim() || '4455 5491 6118 6164';
@@ -38,9 +40,11 @@ export default function Floating3DCardsAnimation({
           </div>
           <div>
             <span className="text-xs font-black tracking-wider text-white uppercase block">
-              Add Money
+              {isEscrow ? 'Campaign Escrow' : 'Add Money'}
             </span>
-            <span className="text-[9px] text-slate-400 font-medium">Zerify Instant Wallet</span>
+            <span className="text-[9px] text-slate-400 font-medium">
+              {isEscrow ? 'Smart Escrow Custody' : 'Zerify Instant Wallet'}
+            </span>
           </div>
         </div>
 

@@ -24,7 +24,7 @@ interface BrandCampaignCardProps {
 }
 
 export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: BrandCampaignCardProps) {
-  const { currency: userCurrency } = useCurrency();
+  const { currency: userCurrency, convertAndFormat } = useCurrency();
   const hired = c._count?.participants || 0;
   const applicants = Array.isArray((c as any).applications)
     ? (c as any).applications.filter(
@@ -86,9 +86,9 @@ export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: B
 
   const statusConfig = getStatusBadge(c.status);
 
-  const formatCurrency = (amount?: number | string, currency?: string) => {
+  const formatCurrency = (amount?: number | string, budgetCurrency?: string) => {
     if (amount === undefined || amount === null || amount === '') return 'Flexible';
-    return formatMoney(amount, currency || userCurrency || 'INR');
+    return convertAndFormat(amount, budgetCurrency || 'INR');
   };
 
   const formatPaymentModel = (model?: string) => {
@@ -212,7 +212,7 @@ export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: B
             <span>
               {c.budgetPaymentModel === 'BARTER'
                 ? 'Product Barter'
-                : formatCurrency(c.budgetTotalAmount, userCurrency)}
+                : formatCurrency(c.budgetTotalAmount, c.budgetCurrency)}
             </span>
             {c.budgetPaymentModel !== 'BARTER' && (
               <span className="text-xs font-bold text-emerald-300/70 uppercase">

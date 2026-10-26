@@ -218,6 +218,18 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     }
 
     loadRemoteCurrencyData();
+
+    // Periodically refresh live FX rates every 5 minutes (PRD §27)
+    const rateInterval = setInterval(() => {
+      currencyService.getRates('USD').then((ratesData) => {
+        if (ratesData?.rates) {
+          setRates(ratesData.rates);
+          setLastUpdated(ratesData.rateTimestamp || new Date().toISOString());
+        }
+      }).catch(() => {});
+    }, 5 * 60 * 1000);
+
+    return () => clearInterval(rateInterval);
   }, []);
 
   const setCurrency = useCallback(async (newCurrency: SupportedCurrency) => {

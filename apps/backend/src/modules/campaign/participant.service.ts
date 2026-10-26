@@ -223,4 +223,55 @@ export class ParticipantService {
       ParticipantStatus.PARTICIPANT_CANCELLED,
     );
   }
+
+  async listBrandDeals(userId: string) {
+    const brandProfile = await this.prisma.brandProfile.findFirst({
+      where: { userId },
+    });
+    if (!brandProfile) {
+      return [];
+    }
+
+    return this.prisma.campaignParticipant.findMany({
+      where: {
+        campaign: {
+          brandProfileId: brandProfile.id,
+          status: { not: 'DELETED' as any },
+        },
+      },
+      include: {
+        campaign: {
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            coverImageUrl: true,
+            budgetCurrency: true,
+            startDate: true,
+            endDate: true,
+            brandProfile: {
+              select: {
+                id: true,
+                companyName: true,
+                logoUrl: true,
+              },
+            },
+          },
+        },
+        influencerProfile: {
+          include: {
+            user: { select: { id: true, name: true, email: true } },
+          },
+        },
+        deliverables: {
+          include: {
+            revisions: { orderBy: { version: 'desc' } },
+            events: { orderBy: { createdAt: 'desc' } },
+          },
+        },
+        payments: true,
+      },
+      orderBy: { joinedAt: 'desc' },
+    });
+  }
 }

@@ -13,6 +13,10 @@ interface OrderSummaryBreakdownProps {
   availableBalance?: number;
   grossAmount?: number;
   zerifyFee?: number;
+  isEscrow?: boolean;
+  baseEscrowAmount?: number;
+  platformFee?: number;
+  gstTax?: number;
 }
 
 export default function OrderSummaryBreakdown({
@@ -23,6 +27,10 @@ export default function OrderSummaryBreakdown({
   availableBalance,
   grossAmount,
   zerifyFee,
+  isEscrow = false,
+  baseEscrowAmount,
+  platformFee,
+  gstTax,
 }: OrderSummaryBreakdownProps) {
   const { format } = useCurrency();
 
@@ -31,6 +39,30 @@ export default function OrderSummaryBreakdown({
 
   return (
     <div className="space-y-2 text-left border-t border-slate-100 pt-3">
+      {/* For Campaign Escrow: Breakdown with 7% Platform Fee + 18% GST */}
+      {isEscrow && (
+        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs space-y-2">
+          {campaignTitle && (
+            <div className="flex items-center justify-between pb-1.5 border-b border-slate-200/70 text-[11px]">
+              <span className="text-slate-500 font-medium">Campaign</span>
+              <span className="font-semibold text-slate-800 truncate max-w-[200px]">{campaignTitle}</span>
+            </div>
+          )}
+          <div className="flex items-center justify-between text-slate-700">
+            <span className="text-slate-600 font-medium">Creator Escrow Allocation</span>
+            <span className="font-bold text-slate-900">{format(baseEscrowAmount ?? campaignAmount, { showDecimals: true })}</span>
+          </div>
+          <div className="flex items-center justify-between text-slate-500 text-[11.5px]">
+            <span>Zerify Platform Fee (7%)</span>
+            <span>+{format(platformFee || 0, { showDecimals: true })}</span>
+          </div>
+          <div className="flex items-center justify-between text-slate-500 text-[11.5px]">
+            <span>GST / Tax (18% on Platform Fee)</span>
+            <span>+{format(gstTax || 0, { showDecimals: true })}</span>
+          </div>
+        </div>
+      )}
+
       {/* For Withdrawal: Clear balance calculations */}
       {mode === 'WITHDRAW' && availableBalance !== undefined && (
         <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
@@ -72,8 +104,16 @@ export default function OrderSummaryBreakdown({
         </div>
       )}
 
-      {/* Free Transaction Notice / Influencer Fee Notice */}
-      {isInfluencerWithdrawal ? (
+      {/* Free Transaction Notice / Influencer Fee Notice / Escrow Trust Notice */}
+      {isEscrow ? (
+        <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-emerald-50/70 border border-emerald-200/60 text-[11px] text-emerald-800 font-medium">
+          <div className="flex items-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>Smart Escrow Custody • Released only upon your approval</span>
+          </div>
+          <span className="font-bold text-emerald-700">Protected</span>
+        </div>
+      ) : isInfluencerWithdrawal ? (
         <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-purple-50/70 border border-purple-200/60 text-[11px] text-purple-800 font-medium">
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-purple-600 shrink-0" />

@@ -192,8 +192,19 @@ export default function ZerifyCheckoutContainer({
     }
   };
 
-  // 0% platform fee, zero GST for adding funds (Amount entered is 100% credited)
-  const totalAmountToPay = effectiveAmount;
+  // Fees and taxes calculation:
+  // For campaign escrow funding:
+  // - Base escrow amount = Agreed creator compensation
+  // - 7% Zerify Platform Fee = 7% of Base
+  // - 18% GST / Tax = 18% of Platform Fee
+  // - Final payable amount = Base + Platform Fee + GST
+  const isEscrowPayment = Boolean(campaignId);
+  const baseEscrowAmount = effectiveAmount;
+  const platformFee = isEscrowPayment ? Math.round(baseEscrowAmount * 0.07 * 100) / 100 : 0;
+  const gstTax = isEscrowPayment ? Math.round(platformFee * 0.18 * 100) / 100 : 0;
+  const totalAmountToPay = isEscrowPayment
+    ? Math.round((baseEscrowAmount + platformFee + gstTax) * 100) / 100
+    : effectiveAmount;
 
   // Background polling for Dynamic QR Code payments
   const startQrPolling = React.useCallback((paymentId: string) => {
@@ -700,7 +711,11 @@ export default function ZerifyCheckoutContainer({
     <div className="relative w-full max-w-4xl h-[560px] max-h-[88vh] rounded-[24px] md:rounded-[28px] overflow-hidden shadow-2xl shadow-purple-950/30 border border-white/30 bg-white grid grid-cols-1 md:grid-cols-12 text-slate-800">
       {/* LEFT PANEL: 3D Floating Cards & Navy Atmosphere */}
       <div className="md:col-span-5 h-[560px] max-h-[88vh] overflow-hidden hidden md:block">
-        <Floating3DCardsAnimation cardHolderName={cardHolderName} cardNumber={cardNumber} />
+        <Floating3DCardsAnimation
+          cardHolderName={cardHolderName}
+          cardNumber={cardNumber}
+          isEscrow={isEscrowPayment}
+        />
       </div>
 
       {/* RIGHT PANEL: Pure White Modern Payment Details */}
@@ -845,16 +860,22 @@ export default function ZerifyCheckoutContainer({
               availableBalance={availableBalance}
               grossAmount={grossAmount}
               zerifyFee={zerifyFee}
+              isEscrow={isEscrowPayment}
+              baseEscrowAmount={baseEscrowAmount}
+              platformFee={platformFee}
+              gstTax={gstTax}
             />
 
             {/* Total Amount Row */}
-            <div className="flex items-center justify-between pt-1 pb-0.5 text-slate-900 font-extrabold">
+            <div className="flex items-center justify-between pt-1 pb-0.5 text-slate-900">
               <span className="text-xs font-bold text-slate-700">
                 {mode === 'WITHDRAW'
                   ? (zerifyFee && zerifyFee > 0 ? 'Net Amount to Receive:' : 'Withdrawal Amount:')
-                  : 'Total Amount:'}
+                  : isEscrowPayment
+                    ? 'Total Payable Amount:'
+                    : 'Total Amount:'}
               </span>
-              <span className="text-lg text-purple-700 font-black tracking-tight">
+              <span className="text-xl text-slate-900 font-black tracking-tight">
                 {format(totalAmountToPay, { showDecimals: true })}
               </span>
             </div>

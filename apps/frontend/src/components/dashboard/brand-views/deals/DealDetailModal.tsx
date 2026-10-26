@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import { X, ShieldCheck, CheckCircle2, AlertCircle, FileText, Calendar, DollarSign, ExternalLink } from 'lucide-react';
 import { DealItem } from './deal-types';
 import { useCurrency } from '@/context/CurrencyContext';
+import { normalizeCurrency, formatCurrency } from '@/utils/currency';
 
 interface DealDetailModalProps {
   deal: DealItem | null;
@@ -14,8 +15,14 @@ interface DealDetailModalProps {
 }
 
 export default function DealDetailModal({ deal, onClose, onApproveRelease }: DealDetailModalProps) {
-  const { format } = useCurrency();
+  const { currency, format, convert } = useCurrency();
   if (!deal) return null;
+
+  const sourceCurrency = deal.agreedCurrency || 'INR';
+  const isDiffCurrency = normalizeCurrency(sourceCurrency) !== normalizeCurrency(currency);
+  const convertedAmount = isDiffCurrency
+    ? convert(deal.agreedAmount, sourceCurrency)
+    : deal.agreedAmount;
 
   // Portalled to <body> so the backdrop covers the full viewport (sidebar
   // included) — ancestors with backdrop-filter otherwise trap `fixed`.
@@ -60,7 +67,9 @@ export default function DealDetailModal({ deal, onClose, onApproveRelease }: Dea
 
             <div className="p-4 rounded-2xl bg-slate-900/60 border border-white/5 space-y-1">
               <span className="text-[10.5px] font-bold uppercase text-slate-400">Agreed Compensation</span>
-              <h4 className="text-xl font-black text-emerald-400">{format(deal.agreedAmount)}</h4>
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <h4 className="text-xl font-black text-emerald-400">{format(convertedAmount)}</h4>
+              </div>
               <p className="text-xs text-slate-400 flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                 <span>{deal.escrowStatus === 'SECURED' ? 'Protected in Escrow' : deal.escrowStatus}</span>

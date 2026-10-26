@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard,
@@ -21,7 +21,7 @@ import {
 
 import ThemeToggle from '../subcomponents/ThemeToggle';
 import { useMessagingUnread } from '@/context/MessagingContext';
-import { MOCK_DEALS } from '../brand-views/deals/deal-types';
+import { CampaignService } from '@/services/campaign.service';
 
 export interface BrandNavItem {
   id: string;
@@ -48,7 +48,28 @@ export default function BrandNavMenu({
   const [activeSubTab, setActiveSubTab] = useState('statistic');
   // Live unread total from the messaging socket.
   const totalUnread = useMessagingUnread();
-  const activeDealCount = MOCK_DEALS.filter((deal) => deal.status === 'ACTIVE').length;
+  const [activeDealCount, setActiveDealCount] = useState<number>(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    CampaignService.getBrandDeals()
+      .then((deals) => {
+        if (isMounted && Array.isArray(deals)) {
+          const active = deals.filter(
+            (d) =>
+              d.status !== 'PARTICIPANT_COMPLETED' &&
+              d.status !== 'PARTICIPANT_CANCELLED' &&
+              d.status !== 'CANCELLED' &&
+              d.status !== 'COMPLETED'
+          );
+          setActiveDealCount(active.length);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const mainRoutes: BrandNavItem[] = [
     {

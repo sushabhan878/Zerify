@@ -10,15 +10,24 @@ interface DealsKpiBannerProps {
 }
 
 export default function DealsKpiBanner({ deals }: DealsKpiBannerProps) {
-  const { format } = useCurrency();
+  const { format, convert } = useCurrency();
 
   const activeDeals = deals.filter((d) => d.status === 'ACTIVE');
   const completedDeals = deals.filter((d) => d.status === 'COMPLETED');
   const cancelledDeals = deals.filter((d) => d.status === 'CANCELLED');
 
-  const activeEscrowAmount = activeDeals.reduce((sum, d) => sum + d.agreedAmount, 0);
-  const completedAmount = completedDeals.reduce((sum, d) => sum + d.agreedAmount, 0);
-  const totalVolume = deals.reduce((sum, d) => sum + d.agreedAmount, 0);
+  const activeEscrowAmount = activeDeals.reduce(
+    (sum, d) => sum + (convert ? convert(d.agreedAmount, d.agreedCurrency) : d.agreedAmount),
+    0
+  );
+  const completedAmount = completedDeals.reduce(
+    (sum, d) => sum + (convert ? convert(d.agreedAmount, d.agreedCurrency) : d.agreedAmount),
+    0
+  );
+  const totalVolume = deals.reduce(
+    (sum, d) => sum + (convert ? convert(d.agreedAmount, d.agreedCurrency) : d.agreedAmount),
+    0
+  );
 
   const kpis = [
     {

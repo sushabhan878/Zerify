@@ -7,6 +7,7 @@ import { X, Sparkles, DollarSign, Users, Activity, MapPin, Send, ArrowUpRight } 
 import { CampaignApplicationItem } from '@/services/application.service';
 import { CreatorItem } from '../find-influencers/CreatorCard';
 import { mapApplicationToCreator } from './mapApplicationToCreator';
+import Money from '@/components/currency/Money';
 
 interface ApplicantComparisonViewProps {
   applicants: CampaignApplicationItem[];
@@ -129,7 +130,14 @@ export default function ApplicantComparisonView({
                       <div className="flex justify-between py-1.5 border-b border-white/5">
                         <span className="text-slate-400">Proposed Fee:</span>
                         <span className="font-black text-purple-300">
-                          {app.proposedAmount ? `$${Number(app.proposedAmount).toLocaleString()}` : 'Flexible'}
+                          {app.proposedAmount ? (
+                            <Money
+                              amount={app.proposedAmount}
+                              currency={app.proposedCurrency || (app as any).influencerProfile?.currency || 'USD'}
+                            />
+                          ) : (
+                            'Flexible'
+                          )}
                         </span>
                       </div>
 

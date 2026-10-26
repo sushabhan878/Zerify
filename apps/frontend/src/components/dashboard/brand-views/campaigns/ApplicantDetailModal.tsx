@@ -17,6 +17,7 @@ import { CreatorItem } from '../find-influencers/CreatorCard';
 import { mapApplicationToCreator } from './mapApplicationToCreator';
 import { useCurrency } from '@/context/CurrencyContext';
 import { formatCurrency } from '@/utils/currency';
+import Money from '@/components/currency/Money';
 
 interface ApplicantDetailModalProps {
   application: CampaignApplicationItem | null;
@@ -180,7 +181,10 @@ export default function ApplicantDetailModal({
               </div>
               <div className="text-right">
                 <span className="text-sm sm:text-base font-black text-amber-400">
-                  {formatCurrency(application.proposedAmount, application.proposedCurrency || currency)}
+                  <Money
+                    amount={application.proposedAmount}
+                    currency={application.proposedCurrency || (application as any).influencerProfile?.currency || 'USD'}
+                  />
                 </span>
               </div>
             </div>
@@ -214,9 +218,14 @@ export default function ApplicantDetailModal({
               Proposed Compensation:
             </span>
             <span className="text-base sm:text-lg font-black text-emerald-400 tracking-tight">
-              {application.proposedAmount
-                ? formatCurrency(application.proposedAmount, application.proposedCurrency || currency)
-                : 'Flexible / Standard Rate'}
+              {application.proposedAmount ? (
+                <Money
+                  amount={application.proposedAmount}
+                  currency={application.proposedCurrency || (application as any).influencerProfile?.currency || 'USD'}
+                />
+              ) : (
+                'Flexible / Standard Rate'
+              )}
             </span>
           </div>
 

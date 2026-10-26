@@ -15,7 +15,7 @@ import { CampaignApplicationItem } from '@/services/application.service';
 import { CreatorItem, PlatformBadge } from '../find-influencers/CreatorCard';
 import { mapApplicationToCreator } from '../campaigns/mapApplicationToCreator';
 import { useCurrency } from '@/context/CurrencyContext';
-import { formatCurrency } from '@/utils/currency';
+import { formatCurrency, normalizeCurrency } from '@/utils/currency';
 
 interface ShortlistApplicantCardProps {
   application: CampaignApplicationItem;
@@ -130,7 +130,7 @@ export default function ShortlistApplicantCard({
   viewMode = 'grid',
   onFilterByCampaign,
 }: ShortlistApplicantCardProps) {
-  const { currency } = useCurrency();
+  const { currency, format, convert } = useCurrency();
   const [imageError, setImageError] = useState(false);
 
   const creatorItem = mapApplicationToCreator(application);
@@ -143,8 +143,20 @@ export default function ShortlistApplicantCard({
     }
   };
 
-  const quoteDisplay = application.proposedAmount
-    ? formatCurrency(application.proposedAmount, application.proposedCurrency || currency)
+  const sourceCurrency =
+    application.proposedCurrency ||
+    (application as any).influencerProfile?.currency ||
+    'USD';
+  const isDiffCurrency =
+    Boolean(application.proposedAmount) &&
+    normalizeCurrency(sourceCurrency) !== normalizeCurrency(currency);
+  const convertedQuoteAmount =
+    application.proposedAmount && isDiffCurrency
+      ? convert(application.proposedAmount, sourceCurrency)
+      : application.proposedAmount;
+
+  const quoteDisplay = convertedQuoteAmount
+    ? format(convertedQuoteAmount)
     : 'Flexible';
 
   const hasExistingOffer =
@@ -412,9 +424,11 @@ export default function ShortlistApplicantCard({
             <span className="text-xs uppercase font-extrabold tracking-wider text-slate-400">
               Pitch Quote
             </span>
-            <span className="text-2xl sm:text-[28px] font-black text-purple-300 tracking-tight">
-              {quoteDisplay}
-            </span>
+            <div className="flex flex-col items-end">
+              <span className="text-2xl sm:text-[28px] font-black text-purple-300 tracking-tight">
+                {quoteDisplay}
+              </span>
+            </div>
           </div>
 
           {/* Action Buttons: Full Pitch + Main Action */}

@@ -25,7 +25,9 @@ export default function BrandDepositFundsModal({
   creatorCount = 1,
 }: BrandDepositFundsModalProps) {
   const [mounted, setMounted] = useState(false);
-  const [step, setStep] = useState<'SELECT_AMOUNT' | 'CHECKOUT'>('SELECT_AMOUNT');
+  const [step, setStep] = useState<'SELECT_AMOUNT' | 'CHECKOUT'>(
+    campaignId ? 'CHECKOUT' : 'SELECT_AMOUNT'
+  );
   const [selectedAmount, setSelectedAmount] = useState<number>(initialAmount);
 
   useEffect(() => {
@@ -34,10 +36,10 @@ export default function BrandDepositFundsModal({
 
   useEffect(() => {
     if (isOpen) {
-      setStep('SELECT_AMOUNT');
+      setStep(campaignId ? 'CHECKOUT' : 'SELECT_AMOUNT');
       setSelectedAmount(initialAmount);
     }
-  }, [isOpen, initialAmount]);
+  }, [isOpen, initialAmount, campaignId]);
 
   if (!isOpen || !mounted) return null;
 
@@ -47,7 +49,7 @@ export default function BrandDepositFundsModal({
       <div className="fixed top-1/4 left-1/4 w-96 h-96 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
       <div className="fixed bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
-      {step === 'SELECT_AMOUNT' ? (
+      {step === 'SELECT_AMOUNT' && !campaignId ? (
         <BrandTopupAmountStep
           initialAmount={selectedAmount}
           campaignId={campaignId}
@@ -68,7 +70,7 @@ export default function BrandDepositFundsModal({
             campaignId={campaignId}
             campaignTitle={campaignTitle}
             fixedAmount={selectedAmount}
-            onChangeAmount={() => setStep('SELECT_AMOUNT')}
+            onChangeAmount={campaignId ? undefined : () => setStep('SELECT_AMOUNT')}
           />
         </div>
       )}

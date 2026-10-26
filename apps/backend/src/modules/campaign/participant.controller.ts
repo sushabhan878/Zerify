@@ -15,6 +15,22 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 export class ParticipantController {
   constructor(private readonly participantService: ParticipantService) {}
 
+  @Get('brand/deals')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all active and past deals across all campaigns for the brand' })
+  async listBrandDeals(@Req() req: any) {
+    return this.participantService.listBrandDeals(req.user.id);
+  }
+
+  @Get('campaigns/deals')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all active and past deals across all campaigns for the brand' })
+  async listCampaignsDeals(@Req() req: any) {
+    return this.participantService.listBrandDeals(req.user.id);
+  }
+
   @Get('campaigns/:campaignId/participants')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

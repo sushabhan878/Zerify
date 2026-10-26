@@ -87,6 +87,10 @@ export const CampaignService = {
     return apiRequest('/campaigns');
   },
 
+  async getBrandDeals(): Promise<any[]> {
+    return apiRequest('/brand/deals');
+  },
+
   async getCampaignDetails(id: string): Promise<CampaignItem> {
     return apiRequest(`/campaigns/${id}`);
   },

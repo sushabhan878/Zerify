@@ -48,6 +48,8 @@ export interface DealItem {
   completedAt?: string;
   cancelledAt?: string;
   cancellationReason?: string;
+  rawParticipant?: any;
+  rawCampaign?: any;
 }
 
 export const MOCK_DEALS: DealItem[] = [
@@ -291,3 +293,132 @@ export const MOCK_DEALS: DealItem[] = [
     cancellationReason: 'Creator requested mutual termination due to personal schedule conflicts. All escrow funds safely restored to brand balance.',
   },
 ];
+
+export function mapParticipantToDealItem(p: any): DealItem {
+  const profile = p.influencerProfile || {};
+  const user = profile.user || {};
+  const rawHandle = profile.handle || user.name || 'creator';
+  const cleanHandle = rawHandle.startsWith('@') ? rawHandle : `@${rawHandle}`;
+  const displayName = user.name || profile.displayName || cleanHandle.replace(/^@/, '');
+  const avatarUrl =
+    profile.avatarUrl ||
+    user.avatarUrl ||
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80';
+
+  const deliverables: DealDeliverable[] = (p.deliverables || []).map((d: any) => ({
+    id: d.id,
+    title: d.title || d.type || 'Deliverable',
+    type: d.type || 'Content Post',
+    platform: d.platform || 'Instagram',
+    dueDate: d.dueDate
+      ? new Date(d.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      : 'Upcoming',
+    status: d.status || 'PENDING',
+    previewUrl: d.publishedUrl || (d.contentUrls && d.contentUrls[0]) || '',
+    draftNotes: d.submissionNotes || '',
+  }));
+
+  const isCompleted = p.status === 'PARTICIPANT_COMPLETED' || p.status === 'COMPLETED';
+  const isCancelled = p.status === 'PARTICIPANT_CANCELLED' || p.status === 'CANCELLED';
+  const status: DealStatus = isCompleted ? 'COMPLETED' : isCancelled ? 'CANCELLED' : 'ACTIVE';
+
+  let stage: DealStage = 'IN_PRODUCTION';
+  let stageLabel = 'In Production • Creator Drafting';
+
+  if (isCompleted) {
+    stage = 'COMPLETED';
+    stageLabel = 'Contract Fulfilled & Escrow Released';
+  } else if (isCancelled) {
+    stage = 'CANCELLED';
+    stageLabel = 'Collaboration Cancelled';
+  } else {
+    const hasSubmitted = deliverables.some((d) => d.status === 'SUBMITTED');
+    const hasRevision = deliverables.some((d) => d.status === 'REVISION_REQUESTED');
+    const hasApproved = deliverables.some((d) => d.status === 'APPROVED');
+    const hasVerified = deliverables.some((d) => d.status === 'VERIFIED');
+
+    if (hasSubmitted) {
+      stage = 'DRAFT_REVIEW';
+      stageLabel = 'Draft Review Required';
+    } else if (hasRevision) {
+      stage = 'DRAFT_REVIEW';
+      stageLabel = 'Revisions Requested from Creator';
+    } else if (hasVerified || hasApproved) {
+      stage = 'PUBLISHED_VERIFYING';
+      stageLabel = 'Published • Verifying Live Performance';
+    } else {
+      stage = 'IN_PRODUCTION';
+      stageLabel = 'In Production • Creator Drafting';
+    }
+  }
+
+  const hasPayments =
+    Array.isArray(p.payments) &&
+    p.payments.some((pay: any) => pay.status === 'PAID' || pay.status === 'SUCCESSFUL');
+  const isFunded = p.allocationStatus === 'FUNDED' || p.allocationStatus === 'ALLOCATED' || hasPayments;
+
+  const escrowStatus: 'SECURED' | 'RELEASED' | 'REFUNDED' = isCompleted
+    ? 'RELEASED'
+    : isCancelled
+    ? 'REFUNDED'
+    : isFunded
+    ? 'SECURED'
+    : 'SECURED';
+
+  const agreedAmt = Number(p.agreedAmount || 0);
+  const primaryTitle =
+    deliverables[0]?.title || deliverables[0]?.type || `${p.campaign?.title || 'Campaign'} Content`;
+  const dealNumber = `CNT-${(p.id || '').slice(0, 4).toUpperCase() || 'DEAL'}`;
+
+  const startedAt = p.startedAt
+    ? new Date(p.startedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : p.joinedAt
+    ? new Date(p.joinedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : 'Recently';
+
+  const dueDate =
+    deliverables[0]?.dueDate ||
+    (p.campaign?.endDate
+      ? new Date(p.campaign.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      : 'Upcoming');
+
+  return {
+    id: p.id,
+    dealNumber,
+    campaignId: p.campaignId,
+    campaignTitle: p.campaign?.title || 'Campaign',
+    brandName: p.campaign?.brandProfile?.companyName,
+    creator: {
+      id: p.influencerProfileId || profile.id,
+      name: displayName,
+      handle: cleanHandle,
+      avatarUrl,
+      category:
+        profile.niches && profile.niches.length > 0
+          ? profile.niches.slice(0, 2).join(' & ')
+          : 'Creator',
+      platforms: profile.collaborationTypes && profile.collaborationTypes.length > 0 ? profile.collaborationTypes : ['Instagram'],
+      isVerified: Boolean(profile.totalFollowers && profile.totalFollowers > 1000),
+      rating: profile.avgEngagementRate ? Number(profile.avgEngagementRate.toFixed(1)) : 4.9,
+    },
+    status,
+    stage,
+    stageLabel,
+    agreedAmount: agreedAmt,
+    agreedCurrency: p.agreedCurrency || p.campaign?.budgetCurrency || profile?.currency || 'INR',
+    escrowStatus,
+    escrowSecuredAmount: agreedAmt,
+    deliverables,
+    primaryDeliverableTitle: primaryTitle,
+    startedAt,
+    dueDate,
+    completedAt: p.completedAt
+      ? new Date(p.completedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      : undefined,
+    cancelledAt: p.cancelledAt
+      ? new Date(p.cancelledAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      : undefined,
+    rawParticipant: p,
+    rawCampaign: p.campaign,
+  };
+}

@@ -1,17 +1,23 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { AlertCircle } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import DealsKpiBanner from './deals/DealsKpiBanner';
 import DealsFilterBar, { DealsTabFilter } from './deals/DealsFilterBar';
 import DealCard from './deals/DealCard';
 import DealDetailModal from './deals/DealDetailModal';
 import DeliverablePreviewModal from './deals/DeliverablePreviewModal';
-import { DealItem, MOCK_DEALS } from './deals/deal-types';
+import DealsLoadingSkeleton from './deals/DealsLoadingSkeleton';
+import ParticipantDeliverablesPage from './campaigns/ParticipantDeliverablesPage';
+import { DealItem, mapParticipantToDealItem, MOCK_DEALS } from './deals/deal-types';
 import { CampaignService } from '@/services/campaign.service';
+import { DeliverableService } from '@/services/deliverable.service';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export default function ActiveDealsSection() {
-  const [deals, setDeals] = useState<DealItem[]>(MOCK_DEALS);
+  const { format, convert } = useCurrency();
+  const [deals, setDeals] = useState<DealItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isTabSwitching, setIsTabSwitching] = useState(false);
   const [activeTab, setActiveTab] = useState<DealsTabFilter>('ACTIVE');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCampaignId, setSelectedCampaignId] = useState('ALL');
@@ -23,30 +29,120 @@ export default function ActiveDealsSection() {
   const [campaignsList, setCampaignsList] = useState<{ id: string; title: string }[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Fetch real campaigns for filter dropdown
-  useEffect(() => {
-    async function loadCampaigns() {
-      try {
-        const camps = await CampaignService.getBrandCampaigns();
-        if (camps && camps.length > 0) {
-          setCampaignsList(camps.map((c) => ({ id: c.id, title: c.title })));
-        } else {
-          setCampaignsList([
-            { id: 'camp-101', title: 'Q3 Enterprise SaaS Launch' },
-            { id: 'camp-102', title: 'Summer Desk Setup Showcase' },
-            { id: 'camp-103', title: 'Developer Tools AI Spotlight' },
-          ]);
-        }
-      } catch (err) {
-        setCampaignsList([
-          { id: 'camp-101', title: 'Q3 Enterprise SaaS Launch' },
-          { id: 'camp-102', title: 'Summer Desk Setup Showcase' },
-          { id: 'camp-103', title: 'Developer Tools AI Spotlight' },
-        ]);
+  // Dedicated Deliverables Management State
+  const [managingDeal, setManagingDeal] = useState<DealItem | null>(null);
+  const [managingParticipant, setManagingParticipant] = useState<any | null>(null);
+  const [managingCampaign, setManagingCampaign] = useState<any | null>(null);
+
+  // Fetch real deals and campaigns across all campaigns running by the brand
+  const loadDealsAndCampaigns = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      // Run both brand deals and brand campaigns fetch in parallel
+      const [rawDealsResult, campaignsResult] = await Promise.allSettled([
+        CampaignService.getBrandDeals(),
+        CampaignService.getBrandCampaigns(),
+      ]);
+
+      let allMappedDeals: DealItem[] = [];
+
+      // 1. Process /brand/deals if returned
+      if (rawDealsResult.status === 'fulfilled' && Array.isArray(rawDealsResult.value)) {
+        allMappedDeals = rawDealsResult.value.map(mapParticipantToDealItem);
       }
+
+      // 2. Process /campaigns to populate filter dropdown & aggregate any embedded participants
+      if (campaignsResult.status === 'fulfilled' && Array.isArray(campaignsResult.value)) {
+        const camps = campaignsResult.value;
+        setCampaignsList(camps.map((c) => ({ id: c.id, title: c.title })));
+
+        // If /brand/deals was empty, extract embedded participants from campaigns
+        if (allMappedDeals.length === 0) {
+          const extractedDeals: DealItem[] = [];
+          for (const camp of camps) {
+            const participants = (camp as any).participants;
+            if (Array.isArray(participants) && participants.length > 0) {
+              for (const p of participants) {
+                extractedDeals.push(
+                  mapParticipantToDealItem({
+                    ...p,
+                    campaign: p.campaign || { id: camp.id, title: camp.title, status: camp.status },
+                  })
+                );
+              }
+            }
+          }
+          if (extractedDeals.length > 0) {
+            allMappedDeals = extractedDeals;
+          }
+        }
+      }
+
+      // If deals were found, save them; otherwise fallback to empty list
+      setDeals(allMappedDeals);
+    } catch (err) {
+      console.error('Failed to load active brand deals:', err);
+    } finally {
+      setIsLoading(false);
     }
-    loadCampaigns();
   }, []);
+
+  useEffect(() => {
+    loadDealsAndCampaigns();
+  }, [loadDealsAndCampaigns]);
+
+  const handleManageDeliverables = async (deal: DealItem) => {
+    setManagingDeal(deal);
+
+    // Initial participant structure immediately available from deal
+    const initialParticipant = deal.rawParticipant || {
+      id: deal.id,
+      campaignId: deal.campaignId,
+      status: deal.status === 'COMPLETED' ? 'PARTICIPANT_COMPLETED' : 'PARTICIPANT_ACTIVE',
+      agreedAmount: deal.agreedAmount,
+      agreedCurrency: deal.agreedCurrency,
+      deliverables: deal.deliverables,
+      influencerProfile: {
+        id: deal.creator.id,
+        handle: deal.creator.handle,
+        user: {
+          name: deal.creator.name,
+          avatarUrl: deal.creator.avatarUrl,
+        },
+        avatarUrl: deal.creator.avatarUrl,
+        niches: [deal.creator.category],
+        collaborationTypes: deal.creator.platforms,
+      },
+      campaign: deal.rawCampaign || {
+        id: deal.campaignId,
+        title: deal.campaignTitle,
+      },
+    };
+
+    const initialCampaign = deal.rawCampaign || {
+      id: deal.campaignId,
+      title: deal.campaignTitle,
+    };
+
+    setManagingParticipant(initialParticipant);
+    setManagingCampaign(initialCampaign);
+
+    // Fetch fresh live participant and campaign details from database
+    try {
+      const [freshPart, freshCamp] = await Promise.allSettled([
+        DeliverableService.getParticipantDetails(deal.id),
+        CampaignService.getCampaignDetails(deal.campaignId),
+      ]);
+      if (freshPart.status === 'fulfilled' && freshPart.value) {
+        setManagingParticipant(freshPart.value);
+      }
+      if (freshCamp.status === 'fulfilled' && freshCamp.value) {
+        setManagingCampaign(freshCamp.value);
+      }
+    } catch (err) {
+      console.error('Error fetching participant deliverables page data:', err);
+    }
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -68,7 +164,8 @@ export default function ActiveDealsSection() {
           : d,
       ),
     );
-    showToast(`Payment of $${deal.agreedAmount.toLocaleString()} released from Escrow to ${deal.creator.name}.`);
+    const formattedAmt = format(convert(deal.agreedAmount, deal.agreedCurrency));
+    showToast(`Payment of ${formattedAmt} released from Escrow to ${deal.creator.name}.`);
   };
 
   const handleRequestEdits = (deal: DealItem, note?: string) => {
@@ -83,6 +180,18 @@ export default function ActiveDealsSection() {
       ),
     );
     showToast(`Revision request dispatched to ${deal.creator.name}.`);
+  };
+
+  const handleTabChange = (tab: DealsTabFilter) => {
+    setActiveTab(tab);
+    setIsTabSwitching(true);
+    setTimeout(() => setIsTabSwitching(false), 240);
+  };
+
+  const handleCampaignChange = (campaignId: string) => {
+    setSelectedCampaignId(campaignId);
+    setIsTabSwitching(true);
+    setTimeout(() => setIsTabSwitching(false), 240);
   };
 
   // Tab counts
@@ -116,10 +225,47 @@ export default function ActiveDealsSection() {
         return true;
       })
       .sort((a, b) => {
-        if (sortBy === 'highest_amount') return b.agreedAmount - a.agreedAmount;
+        if (sortBy === 'highest_amount') {
+          const amtA = convert(a.agreedAmount, a.agreedCurrency);
+          const amtB = convert(b.agreedAmount, b.agreedCurrency);
+          return amtB - amtA;
+        }
         return 0; // Default newest
       });
   }, [deals, activeTab, selectedCampaignId, searchQuery, sortBy]);
+
+  // If brand is managing deliverables for a specific deal, show the dedicated ParticipantDeliverablesPage
+  if (managingDeal && managingParticipant) {
+    return (
+      <ParticipantDeliverablesPage
+        participant={managingParticipant}
+        campaign={managingCampaign}
+        onBack={() => {
+          setManagingDeal(null);
+          setManagingParticipant(null);
+          setManagingCampaign(null);
+          loadDealsAndCampaigns();
+        }}
+        onRefresh={async () => {
+          try {
+            const [freshPart, freshCamp] = await Promise.allSettled([
+              DeliverableService.getParticipantDetails(managingDeal.id),
+              CampaignService.getCampaignDetails(managingDeal.campaignId),
+            ]);
+            if (freshPart.status === 'fulfilled' && freshPart.value) {
+              setManagingParticipant(freshPart.value);
+            }
+            if (freshCamp.status === 'fulfilled' && freshCamp.value) {
+              setManagingCampaign(freshCamp.value);
+            }
+          } catch (e) {
+            console.error('Error refreshing deliverables page:', e);
+          }
+          loadDealsAndCampaigns();
+        }}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -138,19 +284,21 @@ export default function ActiveDealsSection() {
       {/* Switchable Tabs & Filter Bar */}
       <DealsFilterBar
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         tabCounts={tabCounts}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         campaignsList={campaignsList}
         selectedCampaignId={selectedCampaignId}
-        onCampaignChange={setSelectedCampaignId}
+        onCampaignChange={handleCampaignChange}
         sortBy={sortBy}
         onSortByChange={setSortBy}
       />
 
       {/* Deals List */}
-      {filteredDeals.length > 0 ? (
+      {isLoading || isTabSwitching ? (
+        <DealsLoadingSkeleton count={4} />
+      ) : filteredDeals.length > 0 ? (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 pt-4">
           {filteredDeals.map((deal) => (
             <DealCard
@@ -160,19 +308,22 @@ export default function ActiveDealsSection() {
               onViewDetails={setSelectedDealForDetails}
               onApproveRelease={handleApproveRelease}
               onRequestEdits={(d) => setSelectedDealForPreview(d)}
+              onManageDeliverables={handleManageDeliverables}
             />
           ))}
         </div>
       ) : (
-        <div className="p-12 text-center rounded-3xl bg-[#090C15]/95 border border-white/[0.08] backdrop-blur-xl space-y-3">
-          <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 mx-auto flex items-center justify-center">
-            <AlertCircle className="w-7 h-7 opacity-80" />
-          </div>
-          <h3 className="text-base font-bold text-white">No deals found in this view</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+        <div className="py-14 sm:py-20 text-center">
+          <p className="text-xs sm:text-sm font-medium text-slate-400 tracking-wide">
             {searchQuery
-              ? 'No contracts match your current search criteria. Try modifying your search or reset filters.'
-              : `There are currently no deals categorized under ${activeTab.toLowerCase()} deals.`}
+              ? `No deals matching "${searchQuery}"`
+              : activeTab === 'ACTIVE'
+              ? 'No Active Deals found'
+              : activeTab === 'COMPLETED'
+              ? 'No Completed Deals found'
+              : activeTab === 'CANCELLED'
+              ? 'No Cancelled Deals found'
+              : 'No Deals found'}
           </p>
         </div>
       )}

@@ -36,7 +36,7 @@ import CreatorProfileFullView from '../find-influencers/CreatorProfileFullView';
 import { CreatorItem, PlatformBadge } from '../find-influencers/CreatorCard';
 import LottieLoader from '@/components/ui/LottieLoader';
 import { useCurrency } from '@/context/CurrencyContext';
-import { formatCurrency } from '@/utils/currency';
+import { formatCurrency, normalizeCurrency } from '@/utils/currency';
 import Money from '@/components/currency/Money';
 import CampaignReviewModal from '../../subcomponents/CampaignReviewModal';
 import CampaignActions from './CampaignActions';
@@ -50,7 +50,7 @@ export default function CampaignOverviewDashboard({
   campaignId,
   onBack,
 }: CampaignOverviewDashboardProps) {
-  const { currency, formatBudget } = useCurrency();
+  const { currency, formatBudget, convert } = useCurrency();
   const [campaign, setCampaign] = useState<CampaignItem | null>(null);
   const [applications, setApplications] = useState<CampaignApplicationItem[]>([]);
   const [offers, setOffers] = useState<CampaignOfferItem[]>([]);
@@ -182,9 +182,20 @@ export default function CampaignOverviewDashboard({
         // Brand accepts creator's counter offer directly -> immediately counts as an active collaboration!
         await OfferService.acceptOffer(matchingOffer.id);
       } else {
+        const sourceCurr =
+          app.proposedCurrency ||
+          (app as any).influencerProfile?.currency ||
+          campaign?.budgetCurrency ||
+          'USD';
+        const isDiff = normalizeCurrency(sourceCurr) !== normalizeCurrency(currency);
+        const finalAmt =
+          isDiff && app.proposedAmount
+            ? convert(app.proposedAmount, sourceCurr)
+            : app.proposedAmount || 0;
+
         await OfferService.sendOffer(app.id, {
-          compensationAmount: app.proposedAmount || 0,
-          compensationCurrency: app.proposedCurrency || campaign?.budgetCurrency || currency || 'INR',
+          compensationAmount: finalAmt,
+          compensationCurrency: currency || 'INR',
           customNotes: 'Pitch accepted at proposed quote.',
         });
       }

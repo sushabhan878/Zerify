@@ -149,50 +149,35 @@ export default function BrandTopupAmountStep({
         {/* Quick Amount Presets */}
         <div className="space-y-1.5">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
-            {isEscrowMode ? 'Recommended Options' : 'Quick Amounts'}
+            {isEscrowMode ? 'Exact Escrow Fee' : 'Quick Amounts'}
           </span>
-          <div className="grid grid-cols-3 gap-2">
-            {isEscrowMode ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => selectPreset(initialAmount)}
-                  className={`py-2 px-2.5 rounded-xl text-xs font-bold border transition-all text-center ${
-                    amount === initialAmount
-                      ? 'bg-purple-600/30 border-purple-500 text-white'
-                      : 'bg-slate-900/60 border-white/5 text-slate-300 hover:border-purple-500/30'
-                  }`}
-                >
-                  <span className="block font-black">{format(initialAmount)}</span>
-                  <span className="text-[10px] text-slate-400">Exact Fee</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => selectPreset(Math.round(initialAmount * 1.1))}
-                  className={`py-2 px-2.5 rounded-xl text-xs font-bold border transition-all text-center ${
-                    amount === Math.round(initialAmount * 1.1)
-                      ? 'bg-purple-600/30 border-purple-500 text-white'
-                      : 'bg-slate-900/60 border-white/5 text-slate-300 hover:border-purple-500/30'
-                  }`}
-                >
-                  <span className="block font-black">{format(Math.round(initialAmount * 1.1))}</span>
-                  <span className="text-[10px] text-slate-400">+10% Buffer</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => selectPreset(Math.round(initialAmount * 1.2))}
-                  className={`py-2 px-2.5 rounded-xl text-xs font-bold border transition-all text-center ${
-                    amount === Math.round(initialAmount * 1.2)
-                      ? 'bg-purple-600/30 border-purple-500 text-white'
-                      : 'bg-slate-900/60 border-white/5 text-slate-300 hover:border-purple-500/30'
-                  }`}
-                >
-                  <span className="block font-black">{format(Math.round(initialAmount * 1.2))}</span>
-                  <span className="text-[10px] text-slate-400">+20% Buffer</span>
-                </button>
-              </>
-            ) : (
-              [1000, 5000, 10000].map((preset) => (
+          {isEscrowMode ? (
+            <button
+              type="button"
+              onClick={() => selectPreset(initialAmount)}
+              className={`w-full py-2.5 px-3.5 rounded-xl text-xs font-bold border transition-all flex items-center justify-between ${
+                amount === initialAmount
+                  ? 'bg-purple-600/30 border-purple-500 text-white shadow-lg shadow-purple-900/20'
+                  : 'bg-slate-900/60 border-white/5 text-slate-300 hover:border-purple-500/30'
+              }`}
+            >
+              <div className="flex flex-col text-left">
+                <span className="font-black text-sm text-white">{format(initialAmount)}</span>
+                <span className="text-[10px] text-slate-400">Exact Fee</span>
+              </div>
+              <span
+                className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold transition-colors ${
+                  amount === initialAmount
+                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                    : 'bg-white/5 text-slate-400'
+                }`}
+              >
+                {amount === initialAmount ? 'Selected' : 'Use Exact Fee'}
+              </span>
+            </button>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              {[1000, 5000, 10000].map((preset) => (
                 <button
                   key={preset}
                   type="button"
@@ -205,9 +190,9 @@ export default function BrandTopupAmountStep({
                 >
                   {format(preset)}
                 </button>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Security & Reassurance Box */}

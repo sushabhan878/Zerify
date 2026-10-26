@@ -40,7 +40,10 @@ export default function CounterOfferModal({
   const [hasUserEdited, setHasUserEdited] = useState(false);
 
   const sourceAmount = Number(application?.proposedAmount || 0);
-  const sourceCurrency = application?.proposedCurrency || 'INR';
+  const sourceCurrency =
+    application?.proposedCurrency ||
+    (application as any)?.influencerProfile?.currency ||
+    'USD';
 
   const convertedCurrentAmount = useMemo(() => {
     if (sourceAmount > 0) {
