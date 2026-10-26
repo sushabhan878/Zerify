@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Link2, ExternalLink, Globe, CheckCircle2, Cloud, Sparkles } from 'lucide-react';
+import { Link2, ExternalLink } from 'lucide-react';
 import { ParticipantDeliverableItem } from '@/services/deliverable.service';
 import { input } from './ExecutionUi';
 
@@ -111,41 +111,6 @@ export default function SubmissionMediaInput({
           )}
         </div>
       </div>
-
-      {/* Supported Platform Badges */}
-      <div className="flex items-center gap-1.5 flex-wrap text-[11px] text-slate-400 pt-0.5">
-        <span className="font-semibold text-slate-400 mr-1 flex items-center gap-1">
-          <Cloud className="w-3 h-3 text-purple-400" /> Supported:
-        </span>
-        {['Google Drive', 'Dropbox', 'Frame.io', 'Loom', 'OneDrive', 'Live Social Post'].map((p) => (
-          <span
-            key={p}
-            className="px-2 py-0.5 rounded-md bg-slate-950/70 border border-white/10 text-slate-300 font-medium"
-          >
-            {p}
-          </span>
-        ))}
-      </div>
-
-      {/* Detected Provider Feedback Box */}
-      {url && (
-        <div className="p-3 rounded-xl bg-purple-950/20 border border-purple-500/20 flex items-start gap-2.5 text-xs">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-          <div className="space-y-0.5 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-bold text-white">Deliverable link ready</span>
-              {detected && (
-                <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold ${detected.color}`}>
-                  {detected.name}
-                </span>
-              )}
-            </div>
-            <p className="text-slate-400 text-[11px] leading-relaxed">
-              Ensure permission is set to <strong>"Anyone with the link can view"</strong> so the brand can inspect your work without access requests.
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -6,55 +6,8 @@ import { DeliverableService, ParticipantDeliverableItem } from '@/services/deliv
 import SubmissionHistory from './SubmissionHistory';
 import { ActionButton, ErrorNotice, input, StatusBadge, dateLabel } from './ExecutionUi';
 
-const REVISION_CATEGORIES = [
-  'Content Quality',
-  'Campaign Requirement',
-  'Caption & CTA',
-  'Hashtags & Mentions',
-  'Product Visibility',
-  'Brand Guidelines',
-  'Technical Issue',
-  'Other',
-];
 
-function FloatingDeliverableBadge({ status }: { status: string }) {
-  const norm = (status || '').toUpperCase();
-  const isApproved = /VERIFIED|COMPLETED|APPROVED/.test(norm);
-  const isRevision = /REVISION|REJECT|CANCEL|FAIL/.test(norm);
-  const isSubmitted = /SUBMITTED|IN_REVIEW|REVIEW/.test(norm);
-
-  if (isApproved) {
-    return (
-      <span className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-emerald-400/50 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white text-sm sm:text-[14px] font-black tracking-wide flex items-center gap-2 shadow-2xl shadow-emerald-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
-        <CheckCircle2 className="w-4 h-4 text-emerald-200 shrink-0" />
-        <span>Approved</span>
-      </span>
-    );
-  }
-  if (isRevision) {
-    return (
-      <span className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-rose-400/50 bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 text-white text-sm sm:text-[14px] font-black tracking-wide flex items-center gap-2 shadow-2xl shadow-rose-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
-        <X className="w-4 h-4 text-rose-200 shrink-0" />
-        <span>{norm === 'REVISION_REQUESTED' ? 'Revision Requested' : 'Rejected'}</span>
-      </span>
-    );
-  }
-  if (isSubmitted) {
-    return (
-      <span className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-purple-400/50 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 text-white text-sm sm:text-[14px] font-black tracking-wide flex items-center gap-2 shadow-2xl shadow-purple-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
-        <Sparkles className="w-4 h-4 text-purple-200 animate-pulse shrink-0" />
-        <span>Ready for Review</span>
-      </span>
-    );
-  }
-  // PENDING or default
-  return (
-    <span className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600 text-white text-sm sm:text-[14px] font-black tracking-wide flex items-center gap-2 shadow-2xl shadow-amber-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
-      <Clock className="w-4 h-4 text-amber-200 animate-pulse shrink-0" />
-      <span>Pending</span>
-    </span>
-  );
-}
+import FloatingDeliverableBadge from './FloatingDeliverableBadge';
 
 export default function BrandReviewCard({ deliverable: d, onRefresh }: { deliverable: ParticipantDeliverableItem; onRefresh: () => void }) {
   const [feedback, setFeedback] = useState('');
@@ -63,15 +16,6 @@ export default function BrandReviewCard({ deliverable: d, onRefresh }: { deliver
   const [confirmed, setConfirmed] = useState(false);
   const latest = d.revisions?.[0];
 
-  const handleSelectCategory = (category: string) => {
-    const prefix = `[${category}]: `;
-    if (!feedback.startsWith('[')) {
-      setFeedback(prefix + feedback);
-    } else {
-      const replaced = feedback.replace(/^\[[^\]]+\]:\s*/, prefix);
-      setFeedback(replaced);
-    }
-  };
 
   const act = async (decision: 'APPROVED' | 'REVISION_REQUESTED' | 'REJECTED' | 'VERIFY') => {
     setError(''); setBusy(true);
@@ -153,31 +97,18 @@ export default function BrandReviewCard({ deliverable: d, onRefresh }: { deliver
     )}
 
     {/* Brand Review Section */}
-    {d.status === 'SUBMITTED' && (
+    {['SUBMITTED', 'READY_TO_PUBLISH'].includes(d.status) && (
       <div className="space-y-3 border-t border-white/10 pt-4 relative z-10">
         <div>
           <label className="block text-sm font-medium text-slate-200">
             Feedback (required for revisions or rejection)
           </label>
-          <div className="flex flex-wrap gap-1.5 mt-2 mb-2">
-            <span className="text-xs text-slate-400 self-center mr-1">Categories:</span>
-            {REVISION_CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => handleSelectCategory(cat)}
-                className="rounded-md border border-white/10 bg-slate-950 px-2 py-0.5 text-[11px] text-slate-300 hover:border-purple-500/50 hover:text-white transition"
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
           <textarea
             value={feedback}
             maxLength={5000}
             onChange={e => setFeedback(e.target.value)}
             placeholder="Include specific actionable changes, timestamps (e.g. 00:12), and required fixes…"
-            className={`${input} mt-1`}
+            className={`${input} mt-2`}
             rows={3}
           />
         </div>

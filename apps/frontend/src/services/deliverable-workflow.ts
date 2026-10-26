@@ -18,7 +18,9 @@ export interface SubmissionVersion {
   caption?: string; notes?: string; status: string; reviewComments?: string;
   createdAt: string; reviewedAt?: string;
 }
-export const isComplete = (d: ParticipantDeliverableItem) => d.status === 'VERIFIED' || (d.status === 'APPROVED' && d.requirements?.requiresPublication === false);
+export const isComplete = (d: ParticipantDeliverableItem) =>
+  ['VERIFIED', 'PUBLISHED'].includes(d.status) ||
+  (d.status === 'APPROVED' && d.requirements?.requiresPublication === false);
 export const isOverdue = (d: ParticipantDeliverableItem) => !isComplete(d) && !!d.dueDate && new Date(d.dueDate).getTime() < Date.now() && ['PENDING', 'IN_PROGRESS', 'REVISION_REQUESTED'].includes(d.status);
 export function nextAction(participant: { status: string; deliverables?: ParticipantDeliverableItem[]; campaign?: { status?: string } }) {
   const items = participant.deliverables || [];

@@ -92,16 +92,21 @@ export default function WorkspacePaymentEscrowCard({
 
   if (deliverables.length > 0) {
     deliverables.forEach((d, index) => {
-      const isDone = isComplete(d);
-      const isUnderReview = d.status === 'SUBMITTED' || d.status === 'PUBLISHED';
-      const status: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING' = isDone
+      // Deliverable is considered complete once it is Ready to Publish, Approved, Published, or Verified!
+      const isDeliverableReadyOrDone =
+        ['READY_TO_PUBLISH', 'APPROVED', 'PUBLISHED', 'VERIFIED'].includes(d.status) || isComplete(d);
+      const isUnderReview = d.status === 'SUBMITTED';
+
+      const status: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING' = isDeliverableReadyOrDone
         ? 'COMPLETED'
         : isUnderReview
         ? 'IN_PROGRESS'
         : 'PENDING';
 
-      const subtitle = isDone
-        ? 'Deliverable approved & release authorized'
+      const subtitle = ['PUBLISHED', 'VERIFIED'].includes(d.status)
+        ? 'Deliverable published & verified'
+        : ['READY_TO_PUBLISH', 'APPROVED'].includes(d.status)
+        ? 'Deliverable approved & ready for release'
         : isUnderReview
         ? 'Submission submitted for brand review'
         : 'Awaiting content submission by creator';
@@ -116,14 +121,28 @@ export default function WorkspacePaymentEscrowCard({
     });
   }
 
-  // Final Settlement Step
-  const isSettled = completedAmount >= totalAmount && totalAmount > 0;
-  const isSettlementProcessing = allDeliverablesCompleted || isParticipantDone || processingAmount > 0;
+  // Final Settlement Step: Once published URL is sent, complete the escrow flow!
+  const hasPublishedUrlSent =
+    deliverables.length > 0 &&
+    deliverables.every(
+      (d) => ['PUBLISHED', 'VERIFIED'].includes(d.status) || Boolean(d.publishedUrl)
+    );
+  const isSettled =
+    (completedAmount >= totalAmount && totalAmount > 0) ||
+    hasPublishedUrlSent ||
+    isParticipantDone;
+
+  const isSettlementProcessing =
+    allDeliverablesCompleted ||
+    isParticipantDone ||
+    processingAmount > 0 ||
+    deliverables.some((d) => ['READY_TO_PUBLISH', 'APPROVED'].includes(d.status));
+
   steps.push({
     id: 'step-final-payout',
     title: 'Final Payout Release',
     subtitle: isSettled
-      ? 'All funds successfully disbursed to creator'
+      ? 'Published URL submitted · Escrow release authorized'
       : isSettlementProcessing
       ? 'Processing final bank release to creator'
       : 'Auto-released once all deliverables are verified',

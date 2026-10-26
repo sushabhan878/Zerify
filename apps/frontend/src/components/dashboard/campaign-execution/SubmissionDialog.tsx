@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { Check, CheckCircle2, X, Sparkles, Cloud, Globe, ExternalLink, Link2 } from 'lucide-react';
+import { Check, CheckCircle2, X, Sparkles } from 'lucide-react';
 import { DeliverableService, ParticipantDeliverableItem } from '@/services/deliverable.service';
 import { ActionButton, ErrorNotice, input } from './ExecutionUi';
 import SubmissionMediaInput from './SubmissionMediaInput';
@@ -22,8 +22,7 @@ export default function SubmissionDialog({
   onSuccess,
   publicationOnly = false,
 }: Props) {
-  const [step, setStep] = useState(1);
-  const [method, setMethod] = useState<'LINK' | 'PUBLISHED_URL'>(
+  const [method] = useState<'LINK' | 'PUBLISHED_URL'>(
     publicationOnly ? 'PUBLISHED_URL' : 'LINK'
   );
   const [isFinal, setFinal] = useState(publicationOnly ? true : false);
@@ -81,26 +80,7 @@ export default function SubmissionDialog({
     },
   ];
 
-  const methodOptions: DropdownOption[] = [
-    {
-      value: 'LINK',
-      label: 'Cloud Deliverable Link',
-      description: 'Google Drive, Dropbox, Frame.io, Loom, etc.',
-      icon: <Cloud className="w-3.5 h-3.5" />,
-    },
-    ...(d.requirements?.requiresPreApproval === false
-      ? [
-          {
-            value: 'PUBLISHED_URL',
-            label: 'Published Social Post URL',
-            description: 'Direct live public post link',
-            icon: <Globe className="w-3.5 h-3.5" />,
-          },
-        ]
-      : []),
-  ];
-
-  const prepare = async () => {
+  const submit = async () => {
     setError('');
     const cleanUrl = url.trim();
     if (!cleanUrl) {
@@ -112,16 +92,17 @@ export default function SubmissionDialog({
       if (parsed.protocol !== 'https:') {
         throw new Error('Please enter a secure HTTPS link (e.g. Google Drive, Dropbox, Frame.io, Loom).');
       }
-      setStep(2);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Please enter a valid HTTPS URL.');
+      return;
     }
-  };
 
-  const submit = async () => {
+    if (!confirmed) {
+      setError('Please confirm that this link contains your original work before submitting.');
+      return;
+    }
+
     setBusy(true);
-    setError('');
-    const cleanUrl = url.trim();
     try {
       const result = publicationOnly
         ? await DeliverableService.publishDeliverable(d.id, {
@@ -132,7 +113,7 @@ export default function SubmissionDialog({
             submissionType: method === 'PUBLISHED_URL' ? 'PUBLISHED_URL' : 'LINK',
             isFinal: method === 'PUBLISHED_URL' || isFinal,
             expectedVersion: d.version,
-            confirmed,
+            confirmed: true,
             contentUrl: cleanUrl,
             publishedUrl: method === 'PUBLISHED_URL' ? cleanUrl : undefined,
             caption,
@@ -164,7 +145,9 @@ export default function SubmissionDialog({
             <p className="text-xs font-bold uppercase tracking-widest text-purple-300">
               {receipt
                 ? 'Submission received'
-                : `Step ${step} of 2 · ${step === 1 ? 'Prepare' : 'Review'}`}
+                : publicationOnly
+                ? 'Publish Content'
+                : 'Submit for Brand Review'}
             </p>
             <h2 id="submission-title" className="mt-1 text-xl font-bold text-white">
               {d.title || d.type}
@@ -217,171 +200,114 @@ export default function SubmissionDialog({
           </div>
         ) : (
           <div className="space-y-4">
-            {step === 1 ? (
-              <>
-                {!publicationOnly && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    {/* Custom Styled Submission Stage Dropdown */}
-                    <ExecutionDropdown
-                      label="Submission stage"
-                      options={stageOptions}
-                      value={isFinal ? 'final' : 'draft'}
-                      onChange={(val) => setFinal(val === 'final')}
-                      disabled={busy || method === 'PUBLISHED_URL'}
-                    />
-
-                    {/* Custom Styled Method / Source Dropdown */}
-                    <ExecutionDropdown
-                      label="Deliverable type"
-                      options={methodOptions}
-                      value={method}
-                      onChange={(val) => setMethod(val as typeof method)}
-                      disabled={busy}
-                    />
-                  </div>
-                )}
-
-                {/* Deliverable Link Input Component */}
-                <SubmissionMediaInput
-                  deliverable={d}
-                  url={url}
-                  busy={busy}
-                  onUrl={setUrl}
+            {!publicationOnly && (
+              <div>
+                {/* Custom Styled Submission Stage Dropdown */}
+                <ExecutionDropdown
+                  label="Submission stage"
+                  options={stageOptions}
+                  value={isFinal ? 'final' : 'draft'}
+                  onChange={(val) => setFinal(val === 'final')}
+                  disabled={busy}
                 />
+              </div>
+            )}
 
-                {!publicationOnly && (
-                  <>
-                    <label className="block text-xs font-bold text-slate-200">
-                      Caption / hashtags / mentions
-                      <textarea
-                        className={`${input} mt-1`}
-                        rows={2}
-                        value={caption}
-                        placeholder="Add planned caption, mentions or hashtags…"
-                        maxLength={5000}
-                        onChange={(e) => setCaption(e.target.value)}
-                      />
-                    </label>
+            {/* Deliverable Link Input Component */}
+            <SubmissionMediaInput
+              deliverable={d}
+              url={url}
+              busy={busy}
+              onUrl={setUrl}
+            />
 
-                    <label className="block text-xs font-bold text-slate-200">
-                      Note for the brand
-                      <textarea
-                        className={`${input} mt-1`}
-                        rows={2}
-                        value={notes}
-                        placeholder="Any notes or context for the brand reviewer…"
-                        maxLength={5000}
-                        onChange={(e) => setNotes(e.target.value)}
-                      />
-                    </label>
-                  </>
-                )}
-
-                <ActionButton busy={busy} onClick={prepare} className="w-full">
-                  Continue to review
-                </ActionButton>
-              </>
-            ) : (
+            {!publicationOnly && (
               <>
-                {/* Step 2 Review */}
-                <SubmissionMediaInput
-                  deliverable={d}
-                  url={url}
-                  busy={busy}
-                  readOnly
-                  onUrl={() => {}}
-                />
+                <label className="block text-xs font-bold text-slate-200">
+                  Caption / hashtags / mentions
+                  <textarea
+                    className={`${input} mt-1`}
+                    rows={2}
+                    value={caption}
+                    placeholder="Add planned caption, mentions or hashtags…"
+                    maxLength={5000}
+                    onChange={(e) => setCaption(e.target.value)}
+                  />
+                </label>
 
-                <div className="space-y-2 rounded-2xl bg-slate-950/70 border border-white/10 p-4 text-xs text-slate-300">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-purple-300">
-                      {publicationOnly
-                        ? 'Publication verification'
-                        : isFinal || method === 'PUBLISHED_URL'
-                        ? 'Final Content Submission'
-                        : 'Draft for Review'}
-                    </span>
-                    <span className="text-[11px] text-slate-400">
-                      Target v{d.version + 1}
-                    </span>
-                  </div>
-
-                  {caption && (
-                    <p className="whitespace-pre-wrap bg-white/5 p-2 rounded-lg">
-                      <strong className="text-purple-300">Caption:</strong> {caption}
-                    </p>
-                  )}
-                  {notes && (
-                    <p className="whitespace-pre-wrap bg-white/5 p-2 rounded-lg">
-                      <strong className="text-purple-300">Note:</strong> {notes}
-                    </p>
-                  )}
-                </div>
-
-                {/* Polished Interactive Confirmation Card */}
-                <div
-                  onClick={() => setConfirmed(!confirmed)}
-                  role="checkbox"
-                  aria-checked={confirmed}
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === ' ' || e.key === 'Enter') {
-                      e.preventDefault();
-                      setConfirmed(!confirmed);
-                    }
-                  }}
-                  className={`group relative p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex items-start gap-3.5 select-none ${
-                    confirmed
-                      ? 'bg-purple-950/30 border-purple-500/50 shadow-lg shadow-purple-950/40 ring-1 ring-purple-500/30'
-                      : 'bg-slate-950/60 border-white/10 hover:border-purple-500/30 hover:bg-slate-950/80'
-                  }`}
-                >
-                  {/* Custom Checkbox Indicator */}
-                  <div
-                    className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-200 shrink-0 mt-0.5 ${
-                      confirmed
-                        ? 'bg-gradient-to-tr from-purple-600 to-pink-600 border border-purple-400 text-white shadow-md shadow-purple-950/60 scale-105'
-                        : 'border-2 border-white/20 bg-slate-900 group-hover:border-purple-400/60 group-hover:bg-slate-800'
-                    }`}
-                  >
-                    {confirmed ? (
-                      <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
-                    ) : (
-                      <div className="w-1.5 h-1.5 rounded-full bg-transparent group-hover:bg-purple-400/40 transition-colors" />
-                    )}
-                  </div>
-
-                  <div className="space-y-0.5 min-w-0">
-                    <p
-                      className={`text-xs font-bold transition-colors ${
-                        confirmed ? 'text-white' : 'text-slate-200 group-hover:text-white'
-                      }`}
-                    >
-                      I confirm this link contains my original work
-                    </p>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Follows all campaign requirements, belongs to my assigned account, and is fully accessible to the brand without access restrictions.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between gap-3 pt-2">
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => setStep(1)}
-                    className="text-xs font-bold text-slate-400 hover:text-white transition cursor-pointer"
-                  >
-                    Back to edit
-                  </button>
-                  <ActionButton disabled={!confirmed} busy={busy} onClick={submit}>
-                    {publicationOnly
-                      ? 'Submit URL for verification'
-                      : 'Submit for brand review'}
-                  </ActionButton>
-                </div>
+                <label className="block text-xs font-bold text-slate-200">
+                  Note for the brand
+                  <textarea
+                    className={`${input} mt-1`}
+                    rows={2}
+                    value={notes}
+                    placeholder="Any notes or context for the brand reviewer…"
+                    maxLength={5000}
+                    onChange={(e) => setNotes(e.target.value)}
+                  />
+                </label>
               </>
             )}
+
+            {/* Polished Interactive Confirmation Card */}
+            <div
+              onClick={() => setConfirmed(!confirmed)}
+              role="checkbox"
+              aria-checked={confirmed}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                  e.preventDefault();
+                  setConfirmed(!confirmed);
+                }
+              }}
+              className={`group relative p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex items-start gap-3.5 select-none ${
+                confirmed
+                  ? 'bg-purple-950/30 border-purple-500/50 shadow-lg shadow-purple-950/40 ring-1 ring-purple-500/30'
+                  : 'bg-slate-950/60 border-white/10 hover:border-purple-500/30 hover:bg-slate-950/80'
+              }`}
+            >
+              {/* Custom Checkbox Indicator */}
+              <div
+                className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-200 shrink-0 mt-0.5 ${
+                  confirmed
+                    ? 'bg-gradient-to-tr from-purple-600 to-pink-600 border border-purple-400 text-white shadow-md shadow-purple-950/60 scale-105'
+                    : 'border-2 border-white/20 bg-slate-900 group-hover:border-purple-400/60 group-hover:bg-slate-800'
+                }`}
+              >
+                {confirmed ? (
+                  <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
+                ) : (
+                  <div className="w-1.5 h-1.5 rounded-full bg-transparent group-hover:bg-purple-400/40 transition-colors" />
+                )}
+              </div>
+
+              <div className="space-y-0.5 min-w-0">
+                <p
+                  className={`text-xs font-bold transition-colors ${
+                    confirmed ? 'text-white' : 'text-slate-200 group-hover:text-white'
+                  }`}
+                >
+                  I confirm this link contains my original work
+                </p>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Follows all campaign requirements, belongs to my assigned account, and is fully accessible to the brand without access restrictions.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <ActionButton
+                disabled={!confirmed || !url.trim()}
+                busy={busy}
+                onClick={submit}
+                className="w-full"
+              >
+                {publicationOnly
+                  ? 'Submit URL for verification'
+                  : 'Submit for brand review'}
+              </ActionButton>
+            </div>
           </div>
         )}
       </motion.div>

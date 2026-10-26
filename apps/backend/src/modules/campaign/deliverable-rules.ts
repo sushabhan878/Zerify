@@ -24,7 +24,7 @@ export function rulesOf(snapshot: unknown): DeliverableRules {
 }
 
 export function isDeliverableComplete(d: { status: string; requirements: unknown }) {
-  return d.status === 'VERIFIED' || (d.status === 'APPROVED' && !rulesOf(d.requirements).requiresPublication);
+  return ['VERIFIED', 'PUBLISHED'].includes(d.status) || (d.status === 'APPROVED' && !rulesOf(d.requirements).requiresPublication);
 }
 
 /** Parse only: never fetch arbitrary URLs or claim remote ownership verification. */

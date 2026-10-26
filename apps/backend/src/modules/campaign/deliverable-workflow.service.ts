@@ -87,22 +87,26 @@ export class DeliverableWorkflowService {
         files: filesList,
         notes: dto.notes, caption: dto.caption,
       } });
+      const nextStatus: DeliverableStatus = dto.isFinal && rules.requiresPublication
+        ? 'READY_TO_PUBLISH'
+        : 'SUBMITTED';
       await tx.participantDeliverable.update({ where: { id }, data: {
-        version, status: 'SUBMITTED',
+        version, status: nextStatus,
         contentUrls: filesList,
         submissionNotes: dto.notes, submittedAt: new Date(),
-        reviewStatus: 'PENDING', reviewComments: null, reviewedBy: null, reviewedAt: null,
+        reviewStatus: dto.isFinal && rules.requiresPublication ? 'APPROVED' : 'PENDING',
+        reviewComments: null, reviewedBy: null, reviewedAt: null,
         publishedUrl: publishedUrl || null, publishedAt: null, verifiedAt: null, verifiedBy: null,
         verificationStatus: publishedUrl ? 'MANUAL_REVIEW_REQUIRED' : null,
       } });
-      await this.events.record(tx, d, userId, version > 1 ? 'SUBMISSION_RESUBMITTED' : 'DELIVERABLE_SUBMITTED', 'SUBMITTED', { submissionId: revision.id, version });
+      await this.events.record(tx, d, userId, version > 1 ? 'SUBMISSION_RESUBMITTED' : 'DELIVERABLE_SUBMITTED', nextStatus, { submissionId: revision.id, version });
     });
   }
 
   review(userId: string, id: string, dto: ReviewDeliverableDto) {
     return this.mutate(userId, id, 'brand', async (tx, d) => {
       this.checkVersion(d, dto.expectedVersion);
-      if (!['SUBMITTED', 'PUBLISHED'].includes(d.status)) throw new BadRequestException('Only the current submitted version can be reviewed');
+      if (!['SUBMITTED', 'READY_TO_PUBLISH', 'APPROVED', 'PUBLISHED'].includes(d.status)) throw new BadRequestException('Only the current submitted version can be reviewed');
       if (dto.decision !== 'APPROVED' && !dto.comments?.trim()) throw new BadRequestException('Actionable feedback is required for revisions or rejection');
       if (d.status === 'PUBLISHED') {
         if (dto.decision !== 'REVISION_REQUESTED') throw new BadRequestException('Confirm publication or request a revision with feedback');
@@ -118,12 +122,16 @@ export class DeliverableWorkflowService {
       if (!latest || latest.version !== dto.expectedVersion) throw new ConflictException('Refresh to review the current version');
       let status: DeliverableStatus = dto.decision === 'REJECTED' ? 'DELIVERABLE_REJECTED' : dto.decision;
       if (dto.decision === 'APPROVED') {
-        if (!latest.isFinal) status = 'IN_PROGRESS'; // Draft approval is not final content approval.
-        else if (latest.publishedUrl) status = 'PUBLISHED';
+        if (latest.publishedUrl) status = 'PUBLISHED';
         else if (rulesOf(d.requirements).requiresPublication) status = 'READY_TO_PUBLISH';
+        else status = 'APPROVED';
       }
       await tx.deliverableRevision.update({ where: { id: latest.id }, data: {
-        status: dto.decision, reviewComments: dto.comments?.trim(), reviewedBy: userId, reviewedAt: new Date(),
+        status: dto.decision,
+        isFinal: dto.decision === 'APPROVED' ? true : latest.isFinal,
+        reviewComments: dto.comments?.trim(),
+        reviewedBy: userId,
+        reviewedAt: new Date(),
       } });
       await tx.participantDeliverable.update({ where: { id }, data: {
         status, reviewStatus: dto.decision, reviewComments: dto.comments?.trim(), reviewedBy: userId, reviewedAt: new Date(),
@@ -137,12 +145,13 @@ export class DeliverableWorkflowService {
   publish(userId: string, id: string, dto: PublishDeliverableDto) {
     return this.mutate(userId, id, 'creator', async (tx, d) => {
       this.checkVersion(d, dto.expectedVersion);
-      if (!['APPROVED', 'READY_TO_PUBLISH'].includes(d.status) || !rulesOf(d.requirements).requiresPublication || !d.revisions[0]?.isFinal) {
+      if (!['APPROVED', 'READY_TO_PUBLISH'].includes(d.status) || !rulesOf(d.requirements).requiresPublication) {
         throw new BadRequestException('Final content must be approved for publication first');
       }
       const url = await this.checkUrl(tx, d, dto.publishedUrl);
       await tx.participantDeliverable.update({ where: { id }, data: { status: 'PUBLISHED', publishedUrl: url, verificationStatus: 'MANUAL_REVIEW_REQUIRED' } });
       await this.events.record(tx, d, userId, 'PUBLICATION_SUBMITTED', 'PUBLISHED', { url, version: d.version });
+      await this.events.completeIfEligible(tx, { ...d, status: 'PUBLISHED' }, userId);
     });
   }
 

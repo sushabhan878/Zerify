@@ -14,7 +14,11 @@ export function ErrorNotice({ message }: { message?: string | null }) {
   return message ? <p role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{message}</p> : null;
 }
 export function StatusBadge({ status }: { status: string }) {
-  const tone = /REVISION|REJECT|CANCEL|FAIL/.test(status) ? 'border-rose-500/30 bg-rose-500/10 text-rose-300' : /VERIFIED|COMPLETED|APPROVED/.test(status) ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' : 'border-purple-500/30 bg-purple-500/10 text-purple-200';
+  const tone = /REVISION|REJECT|CANCEL|FAIL/.test(status)
+    ? 'border-rose-500/30 bg-rose-500/10 text-rose-300'
+    : /VERIFIED|COMPLETED|APPROVED|READY_TO_PUBLISH/.test(status)
+    ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+    : 'border-purple-500/30 bg-purple-500/10 text-purple-200';
   return <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${tone}`}>{status.replace(/_/g, ' ')}</span>;
 }
 export function dateLabel(value?: string) { return value ? new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : 'Not set'; }
