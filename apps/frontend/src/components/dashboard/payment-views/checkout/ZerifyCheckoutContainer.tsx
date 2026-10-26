@@ -169,6 +169,7 @@ export default function ZerifyCheckoutContainer({
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
   const [isGeneratingQr, setIsGeneratingQr] = useState(false);
   const [activeQrPaymentId, setActiveQrPaymentId] = useState<string | null>(null);
+  const [activePaymentId, setActivePaymentId] = useState<string | null>(null);
 
   const pollingIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
   const timerIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -224,7 +225,7 @@ export default function ZerifyCheckoutContainer({
         const vRes = await fetch(verifyEndpoint, { method: 'POST', headers }).catch(() => null);
         if (vRes && vRes.ok) {
           const vData = await vRes.json();
-          if (vData.status === 'PAID') {
+          if (vData.status === 'PAID' || vData.status === 'SUCCESSFUL') {
             clearTimers();
             setVerifiedOrderId(vData.providerOrderId || paymentId);
             setCheckoutStatus('SUCCESS');
@@ -317,25 +318,35 @@ export default function ZerifyCheckoutContainer({
     }
   }, [activeTab, showQrCode, totalAmountToPay, fetchDynamicQr]);
 
-  // Instant simulator for test scans in sandbox mode
-  const handleSimulateQrPayment = async () => {
-    if (!activeQrPaymentId) return;
+  // Instant simulator for test scans and UPI in sandbox mode
+  const handleSimulatePayment = async (overrideId?: string) => {
+    const targetId = overrideId || activePaymentId || activeQrPaymentId;
+    if (!targetId) return;
     try {
       const token = getAuthToken();
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         Authorization: token ? `Bearer ${token}` : '',
       };
-      const res = await fetch(`${apiUrl}/wallet/add-money/${activeQrPaymentId}/simulate`, {
+      const isWalletTopup = !campaignId;
+      const endpoint = isWalletTopup
+        ? `${apiUrl}/wallet/add-money/${targetId}/simulate`
+        : `${apiUrl}/payments/${targetId}/simulate`;
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers,
       });
       if (res.ok) {
         const vData = await res.json();
         clearTimers();
-        setVerifiedOrderId(vData.providerOrderId || activeQrPaymentId);
+        setVerifiedOrderId(vData.providerOrderId || targetId);
         setCheckoutStatus('SUCCESS');
-        toastSuccess(`Successfully added ${format(totalAmountToPay, { showDecimals: true })} to your Zerify Wallet!`);
+        toastSuccess(
+          isWalletTopup
+            ? `Successfully added ${format(totalAmountToPay, { showDecimals: true })} to your Zerify Wallet!`
+            : `Deposited ${format(totalAmountToPay, { showDecimals: true })} to Campaign Escrow!`
+        );
         onSuccess?.(totalAmountToPay);
       }
     } catch (err) {
@@ -479,7 +490,7 @@ export default function ZerifyCheckoutContainer({
         const vRes = await fetch(verifyEndpoint, { method: 'POST', headers }).catch(() => null);
         if (vRes && vRes.ok) {
           const vData = await vRes.json();
-          if (vData.status === 'PAID') {
+          if (vData.status === 'PAID' || vData.status === 'SUCCESSFUL') {
             setVerifiedOrderId(vData.providerOrderId || activeQrPaymentId);
             setCheckoutStatus('SUCCESS');
             toastSuccess(
@@ -580,10 +591,12 @@ export default function ZerifyCheckoutContainer({
       // Production-grade Polling Loop:
       // Checks status every 2.5 seconds while user enters PIN on their phone
       if (activeTab === 'UPI' && !showQrCode) {
+        setActivePaymentId(paymentId);
         setCheckoutStatus('AWAITING_APPROVAL');
 
         // Start countdown
         let remaining = 300;
+        let pollCount = 0;
         timerIntervalRef.current = setInterval(() => {
           remaining -= 1;
           setTimeLeftSeconds(remaining);
@@ -600,7 +613,7 @@ export default function ZerifyCheckoutContainer({
             const vRes = await fetch(verifyEndpoint, { method: 'POST', headers }).catch(() => null);
             if (vRes && vRes.ok) {
               const vData = await vRes.json();
-              if (vData.status === 'PAID') {
+              if (vData.status === 'PAID' || vData.status === 'SUCCESSFUL') {
                 clearTimers();
                 setVerifiedOrderId(vData.providerOrderId || paymentId);
                 setCheckoutStatus('SUCCESS');
@@ -627,11 +640,20 @@ export default function ZerifyCheckoutContainer({
 
         // Poll every 2.5 seconds
         pollingIntervalRef.current = setInterval(async () => {
+          pollCount += 1;
           try {
+            // For test sandbox credentials like success@upi, auto-simulate after 3 seconds (2 polls)
+            if (upiId.toLowerCase().includes('success') && pollCount >= 2) {
+              const simEndpoint = isWalletTopup
+                ? `${apiUrl}/wallet/add-money/${paymentId}/simulate`
+                : `${apiUrl}/payments/${paymentId}/simulate`;
+              await fetch(simEndpoint, { method: 'POST', headers }).catch(() => null);
+            }
+
             const vRes = await fetch(verifyEndpoint, { method: 'POST', headers }).catch(() => null);
             if (vRes && vRes.ok) {
               const vData = await vRes.json();
-              if (vData.status === 'PAID') {
+              if (vData.status === 'PAID' || vData.status === 'SUCCESSFUL') {
                 clearTimers();
                 setVerifiedOrderId(vData.providerOrderId || paymentId);
                 setCheckoutStatus('SUCCESS');
@@ -925,6 +947,7 @@ export default function ZerifyCheckoutContainer({
             setCheckoutStatus('IDLE');
             onClose?.();
           }}
+          onSimulate={() => handleSimulatePayment()}
         />
       </div>
     </div>

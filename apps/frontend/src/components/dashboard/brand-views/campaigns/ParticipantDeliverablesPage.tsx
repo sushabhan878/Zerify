@@ -10,7 +10,10 @@ import DeliverableReviewCard from './DeliverableReviewCard';
 import ManageDeliverableOverviewCard from './ManageDeliverableOverviewCard';
 import StartCampaignConfirmationModal from './StartCampaignConfirmationModal';
 import BrandDepositFundsModal from '@/components/dashboard/payment-views/BrandDepositFundsModal';
+import WorkspacePaymentEscrowCard from '@/components/dashboard/campaign-execution/WorkspacePaymentEscrowCard';
+import WorkspaceNeedClarificationCard from '@/components/dashboard/campaign-execution/WorkspaceNeedClarificationCard';
 import { useCurrency } from '@/context/CurrencyContext';
+import { convertCurrency } from '@/utils/currency';
 import { isComplete } from '@/services/deliverable-workflow';
 import { DeliverableService } from '@/services/deliverable.service';
 import { CampaignService } from '@/services/campaign.service';
@@ -73,10 +76,16 @@ export default function ParticipantDeliverablesPage({
       : 1;
 
   const remainingSlots = Math.max(0, targetSlots - filledSlots);
-  const isCampaignStarted =
-    currentCampaign?.status === 'ACTIVE' || participant?.status === 'PARTICIPANT_ACTIVE';
 
-  const { convert } = useCurrency();
+  // The deliverables pipeline unlocks once the brand officially launches/starts the campaign with escrow reservation
+  const isCampaignStarted =
+    currentCampaign?.status === 'ACTIVE' || currentCampaign?.status === 'COMPLETED';
+
+  const { convert, currency, rates } = useCurrency();
+  const sourceCurrency = participant?.agreedCurrency || currentCampaign?.budgetCurrency || 'USD';
+  const userCurrency = currency || 'INR';
+  const rawAgreedAmount = Number(participant?.agreedAmount || currentCampaign?.budgetMinPerInfluencer || 1000);
+  const convertedAgreedAmount = convertCurrency(rawAgreedAmount, sourceCurrency, userCurrency, rates);
 
   // Combined value of all active/confirmed collabs for this campaign
   const combinedEscrowAmount = React.useMemo(() => {
@@ -254,19 +263,44 @@ export default function ParticipantDeliverablesPage({
               </button>
             </div>
           </div>
-        ) : deliverables.length === 0 ? (
-          <div className="p-12 rounded-3xl bg-slate-950/50 border border-dashed border-white/10 text-center space-y-2">
-            <Layers className="w-8 h-8 text-slate-600 mx-auto" />
-            <h4 className="text-sm font-bold text-slate-300">No deliverables assigned yet</h4>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Deliverables configured in the campaign brief will appear here once instantiated.
-            </p>
-          </div>
         ) : (
-          <div className="space-y-8 sm:space-y-10 pt-3">
-            {deliverables.map((del: any) => (
-              <DeliverableReviewCard key={del.id} deliverable={del} onRefresh={onRefresh} />
-            ))}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start pt-3">
+            {/* Left: Deliverables Review Cards (Shorter Width) */}
+            <div className="lg:col-span-7 xl:col-span-7 space-y-6 sm:space-y-8">
+              {deliverables.length === 0 ? (
+                <div className="p-12 rounded-3xl bg-slate-950/50 border border-dashed border-white/10 text-center space-y-2">
+                  <Layers className="w-8 h-8 text-slate-600 mx-auto" />
+                  <h4 className="text-sm font-bold text-slate-300">No deliverables assigned yet</h4>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                    Deliverables configured in the campaign brief will appear here once instantiated.
+                  </p>
+                </div>
+              ) : (
+                deliverables.map((del: any) => (
+                  <DeliverableReviewCard key={del.id} deliverable={del} onRefresh={onRefresh} />
+                ))
+              )}
+            </div>
+
+            {/* Right: Vertical Box with Escrow Details & Need Clarification (Wider) */}
+            <aside className="lg:col-span-5 xl:col-span-5 space-y-5 lg:sticky lg:top-6">
+              <WorkspacePaymentEscrowCard
+                agreedAmount={convertedAgreedAmount}
+                agreedCurrency={userCurrency}
+                originalAmount={rawAgreedAmount}
+                originalCurrency={sourceCurrency}
+                payouts={participant?.payouts || []}
+                deliverables={deliverables}
+                participantStatus={participant?.status}
+              />
+              <WorkspaceNeedClarificationCard
+                campaign={currentCampaign}
+                participantCampaignId={participant?.campaignId}
+                recipientUserId={profile.userId || participant.influencerProfileId}
+                recipientName={displayName}
+                recipientRole="Creator"
+              />
+            </aside>
           </div>
         )}
       </div>

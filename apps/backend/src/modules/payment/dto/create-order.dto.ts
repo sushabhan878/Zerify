@@ -41,4 +41,8 @@ export class CreateOrderDto {
   @IsOptional()
   @IsString()
   bankCode?: string;
+
+  @IsOptional()
+  @IsString()
+  channel?: string;
 }

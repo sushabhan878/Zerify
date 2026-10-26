@@ -62,6 +62,7 @@ export class PaymentController {
       paymentMethod: dto.paymentMethod,
       card: dto.card,
       upiId: dto.upiId,
+      channel: dto.channel,
       bankCode: dto.bankCode,
     });
     return presentPayment(payment, dto.currency ?? 'INR');
@@ -83,6 +84,7 @@ export class PaymentController {
       paymentMethod: dto.paymentMethod,
       card: dto.card,
       upiId: dto.upiId,
+      channel: dto.channel,
       bankCode: dto.bankCode,
     });
     return presentPayment(payment, dto.currency ?? 'INR');
@@ -91,7 +93,7 @@ export class PaymentController {
   @Get('payments/me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'List the authenticated user\u2019s payments' })
+  @ApiOperation({ summary: 'List the authenticated user’s payments' })
   async listMyPayments(@Req() req: any, @Query() query: ListPaymentsQueryDto) {
     const payments = await this.paymentService.listPaymentsForUser(req.user.id, query);
     return payments.map((p) => presentPayment(p, p.currency));
@@ -113,6 +115,17 @@ export class PaymentController {
   @ApiOperation({ summary: 'Re-check payment status with the provider' })
   async verifyPayment(@Req() req: any, @Param('paymentId') paymentId: string) {
     const payment = await this.paymentService.syncPaymentStatus(paymentId);
+    return presentPayment(payment, payment.currency);
+  }
+
+  /** Simulation endpoint for sandbox testing of campaign payments. */
+  @Post('payments/:paymentId/simulate')
+  @UseGuards(JwtAuthGuard, PaymentOwnerGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Simulate successful payment for campaign escrow in sandbox' })
+  async simulatePayment(@Req() req: any, @Param('paymentId') paymentId: string) {
+    const payment = await this.paymentService.simulatePayment(paymentId);
     return presentPayment(payment, payment.currency);
   }
 

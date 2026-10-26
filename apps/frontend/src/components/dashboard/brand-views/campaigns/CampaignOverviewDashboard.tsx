@@ -44,11 +44,15 @@ import CampaignActions from './CampaignActions';
 interface CampaignOverviewDashboardProps {
   campaignId: string;
   onBack: () => void;
+  initialTab?: 'applicants' | 'participants' | 'offers' | 'brief';
+  initialCollabId?: string;
 }
 
 export default function CampaignOverviewDashboard({
   campaignId,
   onBack,
+  initialTab,
+  initialCollabId,
 }: CampaignOverviewDashboardProps) {
   const { currency, formatBudget, convert } = useCurrency();
   const [campaign, setCampaign] = useState<CampaignItem | null>(null);
@@ -57,7 +61,9 @@ export default function CampaignOverviewDashboard({
   const [participants, setParticipants] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'applicants' | 'participants' | 'offers' | 'brief'>('applicants');
+  const [activeTab, setActiveTab] = useState<'applicants' | 'participants' | 'offers' | 'brief'>(
+    initialTab || 'applicants'
+  );
 
   // Modals & In-Platform Profile state
   const [selectedCreatorForProfile, setSelectedCreatorForProfile] = useState<CreatorItem | null>(null);
@@ -105,6 +111,12 @@ export default function CampaignOverviewDashboard({
       }
       if (partRes.status === 'fulfilled' && Array.isArray(partRes.value)) {
         setParticipants(partRes.value);
+        if (initialCollabId) {
+          const matched = partRes.value.find((p: any) => p.id === initialCollabId);
+          if (matched) {
+            setManagingParticipant(matched);
+          }
+        }
       }
     } catch (err) {
       console.error('Failed to load campaign data', err);
@@ -121,6 +133,12 @@ export default function CampaignOverviewDashboard({
       ReviewService.getReviewStatus(campaignId).then(setReviewStatus).catch(() => {});
     }
   };
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   useEffect(() => {
     loadData();

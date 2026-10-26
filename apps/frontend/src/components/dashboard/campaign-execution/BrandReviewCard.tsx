@@ -25,32 +25,32 @@ function FloatingDeliverableBadge({ status }: { status: string }) {
 
   if (isApproved) {
     return (
-      <span className="px-4 py-1.5 rounded-full border border-emerald-400/50 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white text-xs sm:text-[13px] font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-emerald-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
-        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-200 shrink-0" />
+      <span className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-emerald-400/50 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white text-sm sm:text-[14px] font-black tracking-wide flex items-center gap-2 shadow-2xl shadow-emerald-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
+        <CheckCircle2 className="w-4 h-4 text-emerald-200 shrink-0" />
         <span>Approved</span>
       </span>
     );
   }
   if (isRevision) {
     return (
-      <span className="px-4 py-1.5 rounded-full border border-rose-400/50 bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 text-white text-xs sm:text-[13px] font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-rose-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
-        <X className="w-3.5 h-3.5 text-rose-200 shrink-0" />
+      <span className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-rose-400/50 bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 text-white text-sm sm:text-[14px] font-black tracking-wide flex items-center gap-2 shadow-2xl shadow-rose-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
+        <X className="w-4 h-4 text-rose-200 shrink-0" />
         <span>{norm === 'REVISION_REQUESTED' ? 'Revision Requested' : 'Rejected'}</span>
       </span>
     );
   }
   if (isSubmitted) {
     return (
-      <span className="px-4 py-1.5 rounded-full border border-purple-400/50 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 text-white text-xs sm:text-[13px] font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-purple-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
-        <Sparkles className="w-3.5 h-3.5 text-purple-200 animate-pulse shrink-0" />
+      <span className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-purple-400/50 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 text-white text-sm sm:text-[14px] font-black tracking-wide flex items-center gap-2 shadow-2xl shadow-purple-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
+        <Sparkles className="w-4 h-4 text-purple-200 animate-pulse shrink-0" />
         <span>Ready for Review</span>
       </span>
     );
   }
   // PENDING or default
   return (
-    <span className="px-4 py-1.5 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600 text-white text-xs sm:text-[13px] font-black tracking-wide flex items-center gap-1.5 shadow-xl shadow-amber-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
-      <Clock className="w-3.5 h-3.5 text-amber-200 animate-pulse shrink-0" />
+    <span className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600 text-white text-sm sm:text-[14px] font-black tracking-wide flex items-center gap-2 shadow-2xl shadow-amber-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
+      <Clock className="w-4 h-4 text-amber-200 animate-pulse shrink-0" />
       <span>Pending</span>
     </span>
   );
@@ -84,17 +84,17 @@ export default function BrandReviewCard({ deliverable: d, onRefresh }: { deliver
   };
 
   return (
-    <article className="relative overflow-visible mt-4 p-5 sm:p-6 pr-6 sm:pr-8 rounded-2xl bg-slate-950/60 border border-purple-500/20 hover:border-purple-500/40 backdrop-blur-2xl shadow-xl shadow-purple-950/20 hover:shadow-[0_16px_40px_rgba(168,85,247,0.16)] transition-all duration-300 space-y-4 group">
+    <article className="relative overflow-visible mt-6 sm:mt-7 p-5 sm:p-6 pr-6 sm:pr-8 rounded-2xl bg-slate-950/60 border border-purple-500/20 hover:border-purple-500/40 backdrop-blur-2xl shadow-xl shadow-purple-950/20 hover:shadow-[0_16px_40px_rgba(168,85,247,0.16)] transition-all duration-300 space-y-4 group">
       {/* Ambient Background Aura Clipped */}
       <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
         <div className="absolute -top-16 -right-16 w-56 h-56 bg-purple-600/10 rounded-full blur-2xl group-hover:bg-purple-600/20 transition-all duration-500" />
         <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-indigo-600/10 rounded-full blur-2xl group-hover:bg-indigo-600/15 transition-all duration-500" />
       </div>
 
-      {/* Floating Status Badge Overlapping Top-Right Corner - Shifted higher */}
+      {/* Floating Status Badge Overlapping Top-Right Corner - Shifted higher & bigger */}
       <div
         className="absolute right-5 sm:right-7 z-30 pointer-events-none"
-        style={{ top: '-10px', transform: 'translateY(-50%)' }}
+        style={{ top: '-16px', transform: 'translateY(-50%)' }}
       >
         <FloatingDeliverableBadge status={d.status} />
       </div>

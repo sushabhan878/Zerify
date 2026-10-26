@@ -62,6 +62,7 @@ export interface CreateOrderParams {
   paymentMethod?: 'upi' | 'card' | 'netbanking';
   card?: any;
   upiId?: string;
+  channel?: string;
   bankCode?: string;
 }
 
@@ -324,6 +325,95 @@ export class PaymentService {
         }
       }
 
+      // If direct UPI payment was submitted, execute the payment session
+      if (
+        (params.paymentMethod === 'upi' || params.upiId || params.channel === 'qrcode') &&
+        order.paymentSessionId
+      ) {
+        try {
+          const isSandbox = process.env.CASHFREE_ENVIRONMENT !== 'production';
+          const cleanUpi = (params.upiId || '').trim();
+
+          if (params.channel === 'qrcode') {
+            try {
+              const qrRes: any = await (provider as any).paySession(order.paymentSessionId, {
+                upi: { channel: 'qrcode' },
+              });
+              if (qrRes?.data?.payload?.qrcode) {
+                (updated as any).qrCode = qrRes.data.payload.qrcode;
+              }
+            } catch (qrErr: any) {
+              this.logger.warn(`Cashfree QR session note: ${qrErr.message}`);
+            }
+          } else if (cleanUpi) {
+            let cfPaymentId: string | null = null;
+            let isSimulatedSandboxUpi = false;
+
+            try {
+              const upiPayload = {
+                upi: {
+                  channel: 'collect',
+                  upi_id: cleanUpi,
+                },
+              };
+              const upiRes: any = await (provider as any).paySession(order.paymentSessionId, upiPayload);
+              cfPaymentId = upiRes?.cf_payment_id ? String(upiRes.cf_payment_id) : null;
+            } catch (paySessionErr: any) {
+              const errMsg = paySessionErr.message || '';
+              if (
+                isSandbox &&
+                (errMsg.includes('mode not enabled') ||
+                  errMsg.includes('not eligible') ||
+                  errMsg.includes('1005') ||
+                  errMsg.includes('disabled mode') ||
+                  errMsg.includes('feature is not enabled'))
+              ) {
+                this.logger.warn(
+                  `Cashfree sandbox UPI mode restriction: ${errMsg}. Activating Sandbox UPI simulation.`,
+                );
+                isSimulatedSandboxUpi = true;
+              } else {
+                throw paySessionErr;
+              }
+            }
+
+            if (isSimulatedSandboxUpi) {
+              const isFailure = cleanUpi.toLowerCase().includes('fail');
+              if (isFailure) {
+                await this.repository.updatePayment(
+                  payment.id,
+                  {
+                    status: PaymentStatus.FAILED,
+                    failureReason: 'Transaction declined: Test UPI simulator reported failure.',
+                  },
+                  client,
+                );
+                throw new BadRequestException('Transaction declined: Test UPI simulator reported failure.');
+              } else {
+                await this.repository.updatePayment(
+                  payment.id,
+                  {
+                    metadata: {
+                      ...((payment.metadata as any) || {}),
+                      simulatedSandboxUpi: true,
+                      upiId: cleanUpi,
+                    } as any,
+                  },
+                  client,
+                );
+              }
+            } else if (cfPaymentId && (provider as any).simulatePayment) {
+              const isFailure = cleanUpi.toLowerCase().includes('fail');
+              const simStatus = isFailure ? 'FAILED' : 'SUCCESS';
+              await (provider as any).simulatePayment(cfPaymentId, simStatus).catch(() => {});
+            }
+          }
+        } catch (err: any) {
+          this.logger.error(`Cashfree Campaign UPI payment error: ${err.message}`);
+          throw new BadRequestException(err.message || 'UPI payment initiation failed');
+        }
+      }
+
       return updated;
     });
 
@@ -368,16 +458,43 @@ export class PaymentService {
     const status = await provider.getOrder(payment.providerOrderId);
     status.source = 'api';
 
+    const isSandbox = process.env.CASHFREE_ENVIRONMENT !== 'production';
+    const metadata = (payment.metadata as any) || {};
+
     if (
       status.status !== 'SUCCESSFUL' &&
       status.status !== 'FAILED' &&
-      process.env.CASHFREE_ENVIRONMENT !== 'production' &&
-      ((payment.metadata as any)?.simulatedSandboxCard || (payment.metadata as any)?.simulatedSandboxNetBanking)
+      isSandbox &&
+      (metadata?.simulatedSandboxCard ||
+        metadata?.simulatedSandboxNetBanking ||
+        metadata?.simulatedSandboxUpi ||
+        metadata?.upiId?.toLowerCase()?.includes('success') ||
+        payment.idempotencyKey?.startsWith('dep-'))
     ) {
       status.status = 'SUCCESSFUL';
     }
 
     return this.applyProviderStatus(payment.id, status);
+  }
+
+  /**
+   * Simulates a successful payment for testing campaign escrow in sandbox mode.
+   */
+  async simulatePayment(paymentId: string) {
+    const isSandbox = process.env.CASHFREE_ENVIRONMENT !== 'production';
+    if (!isSandbox) {
+      throw new BadRequestException('Payment simulation is only available in sandbox mode');
+    }
+    const payment = await this.getPayment(paymentId);
+    if (payment.status === PaymentStatus.SUCCESSFUL) {
+      return payment;
+    }
+    return this.applyProviderStatus(payment.id, {
+      providerOrderId: payment.providerOrderId || payment.id,
+      status: 'SUCCESSFUL',
+      amountMinor: Number(payment.amountMinor),
+      source: 'api',
+    });
   }
 
   /**

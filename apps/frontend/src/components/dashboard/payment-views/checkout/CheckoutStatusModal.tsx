@@ -16,6 +16,7 @@ interface CheckoutStatusModalProps {
   timeLeftSeconds?: number;
   onRetry: () => void;
   onFinish: () => void;
+  onSimulate?: () => void;
 }
 
 export default function CheckoutStatusModal({
@@ -29,6 +30,7 @@ export default function CheckoutStatusModal({
   timeLeftSeconds = 300,
   onRetry,
   onFinish,
+  onSimulate,
 }: CheckoutStatusModalProps) {
   const { format } = useCurrency();
 
@@ -92,6 +94,17 @@ export default function CheckoutStatusModal({
               Expires in {timerDisplay}
             </span>
           </div>
+
+          {onSimulate && (
+            <button
+              type="button"
+              onClick={onSimulate}
+              className="w-full mt-2 py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 active:scale-[0.98] text-white text-xs font-bold transition-all shadow-md shadow-purple-600/20 flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <ShieldCheck className="w-4 h-4 text-purple-200" />
+              <span>Approve Test Payment (Simulator)</span>
+            </button>
+          )}
         </div>
       )}
 

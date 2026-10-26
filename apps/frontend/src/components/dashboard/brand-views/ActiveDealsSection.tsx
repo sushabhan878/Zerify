@@ -1,19 +1,19 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import DealsKpiBanner from './deals/DealsKpiBanner';
 import DealsFilterBar, { DealsTabFilter } from './deals/DealsFilterBar';
 import DealCard from './deals/DealCard';
 import DealDetailModal from './deals/DealDetailModal';
 import DeliverablePreviewModal from './deals/DeliverablePreviewModal';
 import DealsLoadingSkeleton from './deals/DealsLoadingSkeleton';
-import ParticipantDeliverablesPage from './campaigns/ParticipantDeliverablesPage';
 import { DealItem, mapParticipantToDealItem, MOCK_DEALS } from './deals/deal-types';
 import { CampaignService } from '@/services/campaign.service';
-import { DeliverableService } from '@/services/deliverable.service';
 import { useCurrency } from '@/context/CurrencyContext';
 
 export default function ActiveDealsSection() {
+  const router = useRouter();
   const { format, convert } = useCurrency();
   const [deals, setDeals] = useState<DealItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,11 +28,6 @@ export default function ActiveDealsSection() {
   const [selectedDealForPreview, setSelectedDealForPreview] = useState<DealItem | null>(null);
   const [campaignsList, setCampaignsList] = useState<{ id: string; title: string }[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  // Dedicated Deliverables Management State
-  const [managingDeal, setManagingDeal] = useState<DealItem | null>(null);
-  const [managingParticipant, setManagingParticipant] = useState<any | null>(null);
-  const [managingCampaign, setManagingCampaign] = useState<any | null>(null);
 
   // Fetch real deals and campaigns across all campaigns running by the brand
   const loadDealsAndCampaigns = useCallback(async () => {
@@ -91,57 +86,8 @@ export default function ActiveDealsSection() {
     loadDealsAndCampaigns();
   }, [loadDealsAndCampaigns]);
 
-  const handleManageDeliverables = async (deal: DealItem) => {
-    setManagingDeal(deal);
-
-    // Initial participant structure immediately available from deal
-    const initialParticipant = deal.rawParticipant || {
-      id: deal.id,
-      campaignId: deal.campaignId,
-      status: deal.status === 'COMPLETED' ? 'PARTICIPANT_COMPLETED' : 'PARTICIPANT_ACTIVE',
-      agreedAmount: deal.agreedAmount,
-      agreedCurrency: deal.agreedCurrency,
-      deliverables: deal.deliverables,
-      influencerProfile: {
-        id: deal.creator.id,
-        handle: deal.creator.handle,
-        user: {
-          name: deal.creator.name,
-          avatarUrl: deal.creator.avatarUrl,
-        },
-        avatarUrl: deal.creator.avatarUrl,
-        niches: [deal.creator.category],
-        collaborationTypes: deal.creator.platforms,
-      },
-      campaign: deal.rawCampaign || {
-        id: deal.campaignId,
-        title: deal.campaignTitle,
-      },
-    };
-
-    const initialCampaign = deal.rawCampaign || {
-      id: deal.campaignId,
-      title: deal.campaignTitle,
-    };
-
-    setManagingParticipant(initialParticipant);
-    setManagingCampaign(initialCampaign);
-
-    // Fetch fresh live participant and campaign details from database
-    try {
-      const [freshPart, freshCamp] = await Promise.allSettled([
-        DeliverableService.getParticipantDetails(deal.id),
-        CampaignService.getCampaignDetails(deal.campaignId),
-      ]);
-      if (freshPart.status === 'fulfilled' && freshPart.value) {
-        setManagingParticipant(freshPart.value);
-      }
-      if (freshCamp.status === 'fulfilled' && freshCamp.value) {
-        setManagingCampaign(freshCamp.value);
-      }
-    } catch (err) {
-      console.error('Error fetching participant deliverables page data:', err);
-    }
+  const handleManageDeliverables = (deal: DealItem) => {
+    router.push(`/dashboard/campaigns/${deal.campaignId}?tab=participants&collabId=${deal.id}`);
   };
 
   const showToast = (msg: string) => {
@@ -233,39 +179,6 @@ export default function ActiveDealsSection() {
         return 0; // Default newest
       });
   }, [deals, activeTab, selectedCampaignId, searchQuery, sortBy]);
-
-  // If brand is managing deliverables for a specific deal, show the dedicated ParticipantDeliverablesPage
-  if (managingDeal && managingParticipant) {
-    return (
-      <ParticipantDeliverablesPage
-        participant={managingParticipant}
-        campaign={managingCampaign}
-        onBack={() => {
-          setManagingDeal(null);
-          setManagingParticipant(null);
-          setManagingCampaign(null);
-          loadDealsAndCampaigns();
-        }}
-        onRefresh={async () => {
-          try {
-            const [freshPart, freshCamp] = await Promise.allSettled([
-              DeliverableService.getParticipantDetails(managingDeal.id),
-              CampaignService.getCampaignDetails(managingDeal.campaignId),
-            ]);
-            if (freshPart.status === 'fulfilled' && freshPart.value) {
-              setManagingParticipant(freshPart.value);
-            }
-            if (freshCamp.status === 'fulfilled' && freshCamp.value) {
-              setManagingCampaign(freshCamp.value);
-            }
-          } catch (e) {
-            console.error('Error refreshing deliverables page:', e);
-          }
-          loadDealsAndCampaigns();
-        }}
-      />
-    );
-  }
 
   return (
     <div className="space-y-6">
