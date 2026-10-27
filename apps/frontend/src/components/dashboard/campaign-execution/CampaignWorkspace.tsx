@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, Loader2, Calendar, Sparkles } from 'lucide-react';
 import { DeliverableService, ParticipantDeliverableItem } from '@/services/deliverable.service';
@@ -41,7 +41,21 @@ export default function CampaignWorkspace({ participantId, onBack, onNavigate }:
     catch (e) { setError(e instanceof Error ? e.message : 'Could not start the campaign'); }
     finally { setBusy(false); }
   };
-  const deliverables: ParticipantDeliverableItem[] = participant?.deliverables || [];
+  const rawDeliverables: ParticipantDeliverableItem[] = participant?.deliverables || [];
+  const deliverables = React.useMemo(() => {
+    return [...rawDeliverables].sort((a, b) => {
+      const titleA = a.title || '';
+      const titleB = b.title || '';
+      const cmp = titleA.localeCompare(titleB, undefined, { numeric: true, sensitivity: 'base' });
+      if (cmp !== 0) return cmp;
+      const timeA = (a as any).createdAt ? new Date((a as any).createdAt).getTime() : 0;
+      const timeB = (b as any).createdAt ? new Date((b as any).createdAt).getTime() : 0;
+      if (timeA && timeB && timeA !== timeB) return timeA - timeB;
+      const dueA = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+      const dueB = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+      return dueA - dueB;
+    });
+  }, [rawDeliverables]);
   const completed = deliverables.filter(isComplete).length;
   const campaign = participant?.campaign || {};
   const action = participant ? nextAction(participant) : null;
@@ -156,7 +170,17 @@ export default function CampaignWorkspace({ participantId, onBack, onNavigate }:
           )}
           <h3 className="font-bold text-white text-base">Your deliverables</h3>
           {!deliverables.length && <p className="text-sm text-slate-400">No deliverables are assigned. Contact the brand before beginning work.</p>}
-          {deliverables.map(d => <DeliverableCard key={d.id} deliverable={d} disabled={participant.status !== 'PARTICIPANT_ACTIVE' || !['OPEN', 'FILLING', 'ACTIVE'].includes(campaign.status)} onSubmit={() => setSelection({ d, publication: false })} onPublish={() => setSelection({ d, publication: true })} />)}
+          <div className="flex flex-col gap-12 sm:gap-14 pt-3">
+            {deliverables.map(d => (
+              <DeliverableCard
+                key={d.id}
+                deliverable={d}
+                disabled={participant.status !== 'PARTICIPANT_ACTIVE' || !['OPEN', 'FILLING', 'ACTIVE'].includes(campaign.status)}
+                onSubmit={() => setSelection({ d, publication: false })}
+                onPublish={() => setSelection({ d, publication: true })}
+              />
+            ))}
+          </div>
         </div>
         <aside className="space-y-4">
           <WorkspacePaymentEscrowCard

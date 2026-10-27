@@ -56,7 +56,21 @@ export default function ParticipantDeliverablesPage({
   const displayName = profile.user?.name || cleanHandle;
   const avatarUrl = profile.avatarUrl || profile.user?.avatarUrl;
 
-  const deliverables = participant.deliverables || [];
+  const rawDeliverables = participant.deliverables || [];
+  const deliverables = React.useMemo(() => {
+    return [...rawDeliverables].sort((a: any, b: any) => {
+      const titleA = a.title || '';
+      const titleB = b.title || '';
+      const cmp = titleA.localeCompare(titleB, undefined, { numeric: true, sensitivity: 'base' });
+      if (cmp !== 0) return cmp;
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      if (timeA && timeB && timeA !== timeB) return timeA - timeB;
+      const dueA = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+      const dueB = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+      return dueA - dueB;
+    });
+  }, [rawDeliverables]);
   const completedCount = deliverables.filter(isComplete).length;
   const isAllDone = deliverables.length > 0 && deliverables.every(isComplete);
   const isCompleted = participant.status === 'PARTICIPANT_COMPLETED';
@@ -266,7 +280,7 @@ export default function ParticipantDeliverablesPage({
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start pt-3">
             {/* Left: Deliverables Review Cards (Shorter Width) */}
-            <div className="lg:col-span-7 xl:col-span-7 space-y-6 sm:space-y-8">
+            <div className="lg:col-span-7 xl:col-span-7 flex flex-col gap-12 sm:gap-14 pt-3">
               {deliverables.length === 0 ? (
                 <div className="p-12 rounded-3xl bg-slate-950/50 border border-dashed border-white/10 text-center space-y-2">
                   <Layers className="w-8 h-8 text-slate-600 mx-auto" />

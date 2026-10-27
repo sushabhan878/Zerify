@@ -549,6 +549,7 @@ export class CampaignRepository {
           },
         },
         deliverables: {
+          orderBy: { createdAt: 'asc' },
           include: {
             revisions: { orderBy: { createdAt: 'desc' } },
           },
@@ -567,7 +568,10 @@ export class CampaignRepository {
             user: { select: { id: true, name: true, email: true } },
           },
         },
-        deliverables: { include: { revisions: { orderBy: { version: 'desc' } }, events: { orderBy: { createdAt: 'desc' } } } },
+        deliverables: {
+          orderBy: { createdAt: 'asc' },
+          include: { revisions: { orderBy: { version: 'desc' } }, events: { orderBy: { createdAt: 'desc' } } },
+        },
         payments: true,
       },
       orderBy: { joinedAt: 'desc' },
@@ -585,6 +589,7 @@ export class CampaignRepository {
           },
         },
         deliverables: {
+          orderBy: { createdAt: 'asc' },
           include: {
             revisions: { orderBy: { createdAt: 'desc' } },
           },

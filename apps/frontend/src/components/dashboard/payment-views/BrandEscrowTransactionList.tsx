@@ -12,6 +12,7 @@ import {
   Check,
   CreditCard,
   Wallet,
+  ShieldCheck,
 } from 'lucide-react';
 import DisputesListCard from './DisputesListCard';
 
@@ -21,7 +22,8 @@ export type TransactionCategory =
   | 'CAMPAIGN_ALLOCATION'
   | 'CREATOR_SETTLEMENT'
   | 'REFUND'
-  | 'DISPUTE';
+  | 'DISPUTE'
+  | 'ESCROW_DEPOSIT';
 
 export interface BrandEscrowTransaction {
   id: string;
@@ -34,12 +36,14 @@ export interface BrandEscrowTransaction {
   milestoneTitle?: string;
   category?: TransactionCategory;
   campaignTitle?: string;
+  campaignId?: string;
+  rawCreatedAt?: number;
 }
 
 interface BrandEscrowTransactionListProps {
   transactions: BrandEscrowTransaction[];
   isLoading?: boolean;
-  onApproveRelease: (txId: string) => void;
+  onApproveRelease?: (txId: string) => void;
   onRaiseDispute: (txId: string, campaign: string) => void;
   onWithdrawRefund: (txId: string, amount: string) => void;
   onExportInvoices: () => void;
@@ -68,90 +72,176 @@ export default function BrandEscrowTransactionList({
       desc.includes('payout') ||
       creator.includes('withdrawal');
 
-    const isTopUp =
-      tx.category === 'WALLET_TOPUP' ||
-      desc.includes('top-up') ||
-      desc.includes('deposit') ||
-      desc.includes('add money') ||
-      (creator.includes('wallet') && !isWithdrawal);
+    const isEscrowPayout =
+      tx.category === 'CREATOR_SETTLEMENT' ||
+      (tx.status === 'COMPLETED' &&
+        (desc.includes('payout to creator') ||
+          desc.includes('milestone release') ||
+          desc.includes('settled') ||
+          desc.includes('paid to')));
 
-    const isAllocated =
-      tx.status === 'IN_ESCROW' ||
-      tx.category === 'CAMPAIGN_ALLOCATION' ||
-      desc.includes('allocated') ||
-      desc.includes('escrow deposit');
+    const isEscrowDeposit =
+      !isEscrowPayout &&
+      (tx.category === 'ESCROW_DEPOSIT' ||
+        tx.category === 'CAMPAIGN_ALLOCATION' ||
+        tx.status === 'IN_ESCROW' ||
+        Boolean(tx.campaignTitle) ||
+        desc.includes('escrow') ||
+        creator.includes('escrow') ||
+        desc.includes('allocated to campaign') ||
+        desc.includes('campaign escrow'));
+
+    const isTopUp =
+      !isEscrowDeposit &&
+      !isEscrowPayout &&
+      (tx.category === 'WALLET_TOPUP' ||
+        desc.includes('top-up') ||
+        desc.includes('wallet top-up') ||
+        desc.includes('add money') ||
+        (creator.includes('wallet') && !isWithdrawal));
 
     const isDisputed = tx.status === 'DISPUTED' || tx.category === 'DISPUTE';
 
+    // 1. Withdrawal -> Gray or White
     if (isWithdrawal) {
       return {
+        cardStyle:
+          'p-3.5 sm:p-4 rounded-2xl bg-slate-900/60 hover:bg-slate-900/90 border border-white/10 hover:border-white/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all duration-200 shadow-md backdrop-blur-md',
         tag: 'Withdrawal',
-        tagStyle: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
+        tagStyle: 'bg-white/10 text-slate-200 border-white/20 font-bold',
         title: 'Zerify Wallet Withdrawal',
         icon: ArrowUpRight,
-        iconBoxStyle: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-        amountStyle: 'text-slate-200',
+        iconBoxStyle: 'bg-white/5 text-slate-200 border-white/10',
+        amountStyle: 'text-white font-black',
         amountPrefix: '-',
-        subLabel: 'Bank / UPI Payout',
+        subLabel: 'BANK / UPI PAYOUT',
+        isEscrow: false,
+        isEscrowPayout: false,
+        campaignName: '',
       };
     }
 
+    // 2. Escrow Payout (Released / paid to creator) -> Yellow
+    if (isEscrowPayout) {
+      const resolvedCampaignName =
+        tx.campaignTitle ||
+        tx.campaign.replace(/^(campaign:\s*|campaign\s*#?|platform escrow deposit:?\s*|escrow:\s*)/i, '').trim() ||
+        'Campaign Escrow';
+
+      const creatorName =
+        tx.creator &&
+        !tx.creator.includes('Wallet') &&
+        !tx.creator.includes('Zerify Escrow') &&
+        !tx.creator.includes('Campaign Escrow Deposit')
+          ? tx.creator
+          : 'Influencer Payout';
+
+      return {
+        cardStyle:
+          'p-3.5 sm:p-4 rounded-2xl bg-slate-900/70 hover:bg-slate-900/90 border border-amber-500/30 hover:border-amber-500/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all duration-200 shadow-md shadow-amber-950/20 backdrop-blur-md',
+        tag: 'Escrow Payout',
+        tagStyle: 'bg-amber-500/15 text-amber-300 border-amber-500/30 font-bold',
+        title: `Escrow Payout: ${creatorName}`,
+        icon: CheckCircle2,
+        iconBoxStyle: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+        amountStyle: 'text-amber-400 font-black',
+        amountPrefix: '-',
+        subLabel: 'ESCROW PAYOUT',
+        isEscrow: true,
+        isEscrowPayout: true,
+        campaignName: resolvedCampaignName,
+      };
+    }
+
+    // 3. User adds money to escrow -> Green with distinct "Deposited to Escrow" tag
+    if (isEscrowDeposit) {
+      const resolvedCampaignName =
+        tx.campaignTitle ||
+        tx.campaign.replace(/^(campaign:\s*|campaign\s*#?|platform escrow deposit:?\s*|escrow:\s*)/i, '').trim() ||
+        'Campaign Escrow';
+
+      return {
+        cardStyle:
+          'p-3.5 sm:p-4 rounded-2xl bg-slate-900/70 hover:bg-slate-900/90 border border-emerald-500/30 hover:border-emerald-500/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all duration-200 shadow-md shadow-emerald-950/20 backdrop-blur-md',
+        tag: 'Deposited to Escrow',
+        tagStyle: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 font-bold',
+        title:
+          tx.creator &&
+          !tx.creator.includes('Wallet') &&
+          !tx.creator.includes('Zerify Escrow') &&
+          !tx.creator.includes('Campaign Escrow Deposit')
+            ? tx.creator
+            : 'Campaign Escrow Deposit',
+        icon: ShieldCheck,
+        iconBoxStyle: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+        amountStyle: 'text-emerald-400 font-black',
+        amountPrefix: '+',
+        subLabel: 'LOCKED IN ESCROW',
+        isEscrow: true,
+        isEscrowPayout: false,
+        campaignName: resolvedCampaignName,
+      };
+    }
+
+    // 4. User adds money to Zerify wallet -> Green with distinct "Top-up to wallet" tag
     if (isTopUp) {
       return {
+        cardStyle:
+          'p-3.5 sm:p-4 rounded-2xl bg-slate-900/60 hover:bg-slate-900/90 border border-white/10 hover:border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all duration-200 shadow-md backdrop-blur-md',
         tag: 'Top-up to wallet',
-        tagStyle: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+        tagStyle: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 font-bold',
         title: 'Zerify Wallet (Self Top-up)',
         icon: Wallet,
         iconBoxStyle: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-        amountStyle: 'text-emerald-400',
+        amountStyle: 'text-emerald-400 font-black',
         amountPrefix: '+',
-        subLabel: 'Wallet Credited',
+        subLabel: 'WALLET CREDITED',
+        isEscrow: false,
+        isEscrowPayout: false,
+        campaignName: '',
       };
     }
 
-    if (isAllocated) {
-      const campaignName = tx.campaignTitle || tx.campaign.replace(/^(campaign:\s*|campaign\s*#?)/i, '') || 'Campaign';
-      return {
-        tag: `Allocated to ${campaignName}`,
-        tagStyle: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30',
-        title: tx.creator && !tx.creator.includes('Wallet') ? tx.creator : `Campaign Escrow: ${campaignName}`,
-        icon: Lock,
-        iconBoxStyle: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
-        amountStyle: 'text-amber-400',
-        amountPrefix: '',
-        subLabel: 'Locked in Escrow',
-      };
-    }
-
+    // 5. Dispute -> Rose
     if (isDisputed) {
       return {
+        cardStyle:
+          'p-3.5 sm:p-4 rounded-2xl bg-rose-950/20 hover:bg-rose-950/30 border border-rose-500/30 hover:border-rose-500/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all duration-200 shadow-md backdrop-blur-md',
         tag: 'Under Dispute',
-        tagStyle: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+        tagStyle: 'bg-rose-500/15 text-rose-300 border-rose-500/30 font-bold',
         title: tx.creator,
         icon: AlertTriangle,
         iconBoxStyle: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-        amountStyle: 'text-rose-400',
+        amountStyle: 'text-rose-400 font-black',
         amountPrefix: '',
-        subLabel: 'Escrow Frozen',
+        subLabel: 'ESCROW FROZEN',
+        isEscrow: false,
+        isEscrowPayout: false,
+        campaignName: '',
       };
     }
 
-    // Default: Settled / Paid to Creator
+    // Default: Paid to Creator -> Yellow
     const creatorName = tx.creator && !tx.creator.includes('Wallet') ? tx.creator : 'Creator';
     return {
+      cardStyle:
+        'p-3.5 sm:p-4 rounded-2xl bg-slate-900/60 hover:bg-slate-900/90 border border-amber-500/25 hover:border-amber-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all duration-200 shadow-md backdrop-blur-md',
       tag: `Paid to ${creatorName}`,
-      tagStyle: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+      tagStyle: 'bg-amber-500/15 text-amber-300 border-amber-500/30 font-bold',
       title: creatorName,
       icon: CheckCircle2,
-      iconBoxStyle: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-      amountStyle: 'text-emerald-400',
-      amountPrefix: '',
-      subLabel: 'Deliverable Approved',
+      iconBoxStyle: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+      amountStyle: 'text-amber-400 font-black',
+      amountPrefix: '-',
+      subLabel: 'ESCROW PAYOUT',
+      isEscrow: false,
+      isEscrowPayout: true,
+      campaignName: '',
     };
   };
 
   const filtered = transactions.filter((tx) => {
-    if (activeTab === 'IN_ESCROW' && tx.status !== 'IN_ESCROW') return false;
+    if (activeTab === 'IN_ESCROW' && tx.status !== 'IN_ESCROW' && tx.category !== 'ESCROW_DEPOSIT') return false;
     if (activeTab === 'COMPLETED' && tx.status !== 'COMPLETED') return false;
     if (activeTab === 'DISPUTES' && tx.status !== 'DISPUTED') return false;
     if (searchQuery.trim()) {
@@ -159,6 +249,7 @@ export default function BrandEscrowTransactionList({
       return (
         tx.creator.toLowerCase().includes(q) ||
         tx.campaign.toLowerCase().includes(q) ||
+        (tx.campaignTitle && tx.campaignTitle.toLowerCase().includes(q)) ||
         tx.id.toLowerCase().includes(q)
       );
     }
@@ -251,17 +342,14 @@ export default function BrandEscrowTransactionList({
               const Icon = meta.icon;
 
               return (
-                <div
-                  key={tx.id}
-                  className="p-3.5 sm:p-4 rounded-2xl bg-slate-900/60 hover:bg-slate-900/90 border border-white/10 hover:border-purple-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all duration-200 shadow-md backdrop-blur-md"
-                >
+                <div key={tx.id} className={meta.cardStyle}>
                   {/* Left Column: Icon + Details */}
                   <div className="flex items-start sm:items-center gap-3 min-w-0">
                     <div className={`p-2.5 rounded-xl border shrink-0 ${meta.iconBoxStyle}`}>
                       <Icon className="w-4 h-4" />
                     </div>
 
-                    <div className="space-y-0.5 min-w-0">
+                    <div className="space-y-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <h4 className="text-xs font-extrabold text-white truncate max-w-xs sm:max-w-md">
                           {meta.title}
@@ -269,16 +357,45 @@ export default function BrandEscrowTransactionList({
 
                         {/* Status Tag */}
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${meta.tagStyle}`}
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] border ${meta.tagStyle}`}
                         >
                           {meta.tag}
                         </span>
                       </div>
 
-                      {/* Clean slate description (Purple text removed) */}
-                      <p className="text-xs text-slate-300 font-medium leading-relaxed truncate max-w-sm sm:max-w-lg">
-                        {tx.campaign}
-                      </p>
+                      {/* Campaign Indicator or Transaction Description */}
+                      {meta.isEscrow ? (
+                        <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                          <div
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border shadow-sm ${
+                              meta.isEscrowPayout
+                                ? 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                                : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                            }`}
+                          >
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                                meta.isEscrowPayout ? 'bg-amber-400' : 'bg-emerald-400'
+                              }`}
+                            />
+                            <span className="text-[11px] font-semibold">Campaign:</span>
+                            <span className="text-xs font-bold text-white max-w-xs sm:max-w-md truncate">
+                              {meta.campaignName}
+                            </span>
+                          </div>
+
+                          {tx.milestoneTitle && (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[11px] font-semibold text-slate-300">
+                              <span className="text-slate-400">Milestone:</span>
+                              <span className="text-white">{tx.milestoneTitle}</span>
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-slate-300 font-medium leading-relaxed truncate max-w-sm sm:max-w-lg">
+                          {tx.campaign}
+                        </p>
+                      )}
 
                       <div className="text-[10px] text-slate-500 font-medium flex items-center gap-1.5 pt-0.5">
                         <span className="font-mono">{tx.id}</span>
@@ -291,7 +408,7 @@ export default function BrandEscrowTransactionList({
                   {/* Right Column: Amount + Actions */}
                   <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5 shrink-0">
                     <div className="text-left sm:text-right">
-                      <span className={`text-sm sm:text-base font-black tracking-tight ${meta.amountStyle}`}>
+                      <span className={`text-sm sm:text-base tracking-tight ${meta.amountStyle}`}>
                         {meta.amountPrefix} {tx.amount}
                       </span>
                       <span className="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">
@@ -299,20 +416,11 @@ export default function BrandEscrowTransactionList({
                       </span>
                     </div>
 
-                    {/* In-Escrow Specific Actions */}
+                    {/* In-Escrow Specific Actions: Only show dispute button, no release button */}
                     {tx.status === 'IN_ESCROW' && (
                       <div className="flex items-center gap-1.5">
                         <button
-                          onClick={() => onApproveRelease(tx.id)}
-                          className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1 transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
-                          title="Release funds to creator"
-                        >
-                          <Check className="w-3.5 h-3.5" />
-                          <span>Release</span>
-                        </button>
-
-                        <button
-                          onClick={() => onRaiseDispute(tx.id, tx.campaign)}
+                          onClick={() => onRaiseDispute(tx.id, tx.campaignTitle || tx.campaign)}
                           className="px-2.5 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
                           title="Open formal dispute"
                         >

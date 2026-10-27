@@ -51,10 +51,21 @@ export default function BrandPayoutsSection() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
       const headers = { Authorization: token ? `Bearer ${token}` : '' };
 
-      const [paymentsRes, walletRes] = await Promise.all([
+      const [paymentsRes, walletRes, campaignsRes] = await Promise.all([
         fetch(`${apiUrl}/payments/me`, { headers }).catch(() => null),
         fetch(`${apiUrl}/wallet`, { headers }).catch(() => null),
+        fetch(`${apiUrl}/campaigns`, { headers }).catch(() => null),
       ]);
+
+      const campaignMap = new Map<string, string>();
+      if (campaignsRes && campaignsRes.ok) {
+        const campaignsData = await campaignsRes.json().catch(() => []);
+        if (Array.isArray(campaignsData)) {
+          campaignsData.forEach((c: any) => {
+            if (c.id && c.title) campaignMap.set(c.id, c.title);
+          });
+        }
+      }
 
       let walletTxList: BrandEscrowTransaction[] = [];
 
@@ -73,22 +84,39 @@ export default function BrandPayoutsSection() {
             const isCampaignDebit =
               tx.type === 'CAMPAIGN_DEBIT' ||
               desc.includes('campaign') ||
-              desc.includes('allocation');
+              desc.includes('allocation') ||
+              desc.includes('escrow');
 
             const rawAmt = Number(tx.amount) || (tx.amountPaise ? Number(tx.amountPaise) / 100 : 0);
             const formattedAmt = `₹${rawAmt.toLocaleString('en-IN')}`;
 
+            let matchedCampaignTitle: string | undefined;
+            if (isCampaignDebit) {
+              const match = (tx.description || '').match(/(?:campaign|for|to):\s*([^,-]+)/i);
+              if (match && match[1]) {
+                matchedCampaignTitle = match[1].trim();
+              }
+            }
+
             return {
               id: tx.id ? (tx.id.length > 12 ? `WAL-${tx.id.slice(-8).toUpperCase()}` : tx.id) : 'WAL-TOPUP',
-              creator: isWithdrawal ? 'Wallet Withdrawal' : 'Zerify Wallet (Self Top-up)',
-              campaign: tx.description || (isWithdrawal ? 'Funds transfer to bank / UPI' : 'Wallet Top-up via Cashfree'),
+              creator: isWithdrawal
+                ? 'Wallet Withdrawal'
+                : (isCampaignDebit
+                  ? (matchedCampaignTitle ? `Campaign: ${matchedCampaignTitle}` : 'Campaign Escrow Allocation')
+                  : 'Zerify Wallet (Self Top-up)'),
+              campaign: tx.description || (isWithdrawal ? 'Funds transfer to bank / UPI' : (isCampaignDebit ? 'Escrow allocation for campaign' : 'Wallet Top-up via Cashfree')),
+              campaignTitle: matchedCampaignTitle,
               amount: formattedAmt,
               rawAmount: rawAmt,
               date: tx.createdAt
                 ? new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                 : 'Recent',
-              status: 'COMPLETED' as const,
-              category: isWithdrawal ? 'WITHDRAWAL' as const : (isCampaignDebit ? 'CAMPAIGN_ALLOCATION' as const : 'WALLET_TOPUP' as const),
+              rawCreatedAt: tx.createdAt ? new Date(tx.createdAt).getTime() : 0,
+              status: isCampaignDebit ? ('IN_ESCROW' as const) : ('COMPLETED' as const),
+              category: isWithdrawal
+                ? ('WITHDRAWAL' as const)
+                : (isCampaignDebit ? ('ESCROW_DEPOSIT' as const) : ('WALLET_TOPUP' as const)),
             };
           });
         }
@@ -101,25 +129,35 @@ export default function BrandPayoutsSection() {
           escrowMapped = data.map((p: any) => {
             const raw = Number(p.amount) || 0;
             const formattedAmt = `₹${raw.toLocaleString('en-IN')}`;
-            const isSettled = p.status === 'SUCCESSFUL' || p.status === 'RELEASED';
+            const isReleased = p.status === 'RELEASED';
             const isDisputed = p.status === 'REFUNDED' || p.status === 'FAILED' || p.status === 'DISPUTED';
 
-            const creatorName = p.creator || p.creatorName || (p.campaignTitle ? `Campaign: ${p.campaignTitle}` : 'Zerify Escrow');
-            const campaignName = p.campaignTitle || (p.campaignId ? `Campaign #${p.campaignId.slice(0, 8)}` : 'Platform Escrow Deposit');
+            const resolvedCampaignTitle =
+              p.campaignTitle ||
+              p.campaign?.title ||
+              (p.campaignId ? campaignMap.get(p.campaignId) : null) ||
+              'Campaign Escrow';
+
+            const creatorName =
+              p.creator ||
+              p.creatorName ||
+              `Campaign: ${resolvedCampaignTitle}`;
 
             return {
               id: p.id ? (p.id.length > 12 ? `ESC-${p.id.slice(0, 8).toUpperCase()}` : p.id) : 'ESC-UNKNOWN',
               creator: creatorName,
-              campaign: campaignName,
-              campaignTitle: p.campaignTitle,
+              campaign: `Campaign Escrow: ${resolvedCampaignTitle}`,
+              campaignTitle: resolvedCampaignTitle,
+              campaignId: p.campaignId,
               amount: formattedAmt,
               rawAmount: raw,
               date: p.createdAt
                 ? new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                 : 'Recent',
-              status: isSettled ? 'COMPLETED' as const : (isDisputed ? 'DISPUTED' as const : 'IN_ESCROW' as const),
+              rawCreatedAt: p.createdAt ? new Date(p.createdAt).getTime() : 0,
+              status: isReleased ? ('COMPLETED' as const) : (isDisputed ? ('DISPUTED' as const) : ('IN_ESCROW' as const)),
               milestoneTitle: p.milestoneTitle,
-              category: isSettled ? 'CREATOR_SETTLEMENT' as const : (isDisputed ? 'DISPUTE' as const : 'CAMPAIGN_ALLOCATION' as const),
+              category: isReleased ? ('CREATOR_SETTLEMENT' as const) : ('ESCROW_DEPOSIT' as const),
             };
           });
 
@@ -133,7 +171,11 @@ export default function BrandPayoutsSection() {
         }
       }
 
-      setTransactions([...walletTxList, ...escrowMapped]);
+      // Sort all transactions chronologically descending (newest first)
+      const combined = [...walletTxList, ...escrowMapped].sort(
+        (a, b) => (b.rawCreatedAt || 0) - (a.rawCreatedAt || 0)
+      );
+      setTransactions(combined);
     } catch (e) {
       console.error('Failed to load wallet & payments:', e);
     } finally {

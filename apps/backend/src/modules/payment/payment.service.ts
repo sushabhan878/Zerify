@@ -215,7 +215,7 @@ export class PaymentService {
               }
             }
 
-            if (isSimulatedSandboxCard) {
+            if (isSimulatedSandboxCard || order.paymentSessionId?.startsWith('sandbox_session_')) {
               const isFailure = cleanCardNumber.endsWith('0005') || cleanCardNumber.endsWith('1112');
               if (isFailure) {
                 await this.repository.updatePayment(
@@ -299,7 +299,7 @@ export class PaymentService {
               }
             }
 
-            if (isSimulatedSandboxNb) {
+            if (isSimulatedSandboxNb || order.paymentSessionId?.startsWith('sandbox_session_')) {
               await this.repository.updatePayment(
                 payment.id,
                 {
@@ -377,7 +377,7 @@ export class PaymentService {
               }
             }
 
-            if (isSimulatedSandboxUpi) {
+            if (isSimulatedSandboxUpi || order.paymentSessionId?.startsWith('sandbox_session_')) {
               const isFailure = cleanUpi.toLowerCase().includes('fail');
               if (isFailure) {
                 await this.repository.updatePayment(
@@ -415,7 +415,7 @@ export class PaymentService {
       }
 
       return updated;
-    });
+    }, { maxWait: 20000, timeout: 60000 });
 
     return created;
   }
@@ -469,6 +469,7 @@ export class PaymentService {
         metadata?.simulatedSandboxNetBanking ||
         metadata?.simulatedSandboxUpi ||
         metadata?.upiId?.toLowerCase()?.includes('success') ||
+        payment.providerSessionId?.startsWith('sandbox_session_') ||
         payment.idempotencyKey?.startsWith('dep-'))
     ) {
       status.status = 'SUCCESSFUL';

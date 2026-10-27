@@ -509,8 +509,14 @@ export class PaymentRepository {
    * (TRD §26). Callers already holding a `PrismaLike` should pass it down
    * rather than nesting a second transaction.
    */
-  async runInTransaction<T>(fn: (client: PrismaLike) => Promise<T>): Promise<T> {
-    return this.prisma.$transaction((tx) => fn(tx));
+  async runInTransaction<T>(
+    fn: (client: PrismaLike) => Promise<T>,
+    options?: { maxWait?: number; timeout?: number },
+  ): Promise<T> {
+    return this.prisma.$transaction((tx) => fn(tx), {
+      maxWait: options?.maxWait ?? 15000,
+      timeout: options?.timeout ?? 30000,
+    });
   }
 
   // ---------------------------------------------------------------- campaigns

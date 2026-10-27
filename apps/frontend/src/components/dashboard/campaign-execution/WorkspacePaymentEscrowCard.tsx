@@ -74,52 +74,11 @@ export default function WorkspacePaymentEscrowCard({
     processingAmount = Math.max(0, totalAmount - completedAmount);
   }
 
-  // Milestone allocation
-  const deliverableCount = deliverables.length || 1;
-  const milestoneShare = totalAmount / deliverableCount;
-
-  // Build Step-by-Step Payment Pipeline
-  const steps: PaymentTimelineStep[] = [
-    {
-      id: 'step-escrow-funded',
-      title: 'Escrow Deposit Secured',
-      subtitle: 'Brand locked 100% contract funds into Zerify Escrow',
-      amount: totalAmount,
-      status: 'COMPLETED',
-      badge: 'Escrow Locked',
-    },
-  ];
-
-  if (deliverables.length > 0) {
-    deliverables.forEach((d, index) => {
-      // Deliverable is considered complete once it is Ready to Publish, Approved, Published, or Verified!
-      const isDeliverableReadyOrDone =
-        ['READY_TO_PUBLISH', 'APPROVED', 'PUBLISHED', 'VERIFIED'].includes(d.status) || isComplete(d);
-      const isUnderReview = d.status === 'SUBMITTED';
-
-      const status: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING' = isDeliverableReadyOrDone
-        ? 'COMPLETED'
-        : isUnderReview
-        ? 'IN_PROGRESS'
-        : 'PENDING';
-
-      const subtitle = ['PUBLISHED', 'VERIFIED'].includes(d.status)
-        ? 'Deliverable published & verified'
-        : ['READY_TO_PUBLISH', 'APPROVED'].includes(d.status)
-        ? 'Deliverable approved & ready for release'
-        : isUnderReview
-        ? 'Submission submitted for brand review'
-        : 'Awaiting content submission by creator';
-
-      steps.push({
-        id: `step-deliverable-${d.id || index}`,
-        title: d.title || `Deliverable No. ${index + 1}`,
-        subtitle,
-        amount: milestoneShare,
-        status,
-      });
-    });
-  }
+  // Milestone allocation: Equal parts across all deliverables + 1 final campaign completion & published link
+  const deliverableCount = deliverables.length;
+  const totalParts = deliverableCount > 0 ? deliverableCount + 1 : 1;
+  const baseMilestoneShare = Math.floor((totalAmount / totalParts) * 100) / 100;
+  const finalMilestoneShare = totalAmount - baseMilestoneShare * deliverableCount;
 
   // Final Settlement Step: Once published URL is sent, complete the escrow flow!
   const hasPublishedUrlSent =
@@ -138,16 +97,90 @@ export default function WorkspacePaymentEscrowCard({
     processingAmount > 0 ||
     deliverables.some((d) => ['READY_TO_PUBLISH', 'APPROVED'].includes(d.status));
 
+  // Milestone-driven release accounting
+  const completedDeliverablesCount = deliverables.filter(
+    (d) => ['READY_TO_PUBLISH', 'APPROVED', 'PUBLISHED', 'VERIFIED'].includes(d.status) || isComplete(d)
+  ).length;
+
+  const milestoneReleasedAmount =
+    completedDeliverablesCount * baseMilestoneShare + (isSettled ? finalMilestoneShare : 0);
+  const releasedAmount = Math.max(completedAmount, milestoneReleasedAmount);
+  const remainingInEscrow = Math.max(0, totalAmount - releasedAmount);
+  const releasePercentage =
+    totalAmount > 0 ? Math.min(100, Math.round((releasedAmount / totalAmount) * 100)) : 0;
+
+  // Build Step-by-Step Payment Pipeline
+  const steps: PaymentTimelineStep[] = [
+    {
+      id: 'step-escrow-funded',
+      title: 'Escrow Deposit Secured',
+      subtitle: 'Brand locked 100% contract funds into Zerify Escrow',
+      amount: totalAmount,
+      status: 'COMPLETED',
+      badge: 'Escrow Locked',
+    },
+  ];
+
+  // Sort deliverables in natural sequential order (e.g. Reel #1 before Reel #2)
+  const sortedDeliverables = React.useMemo(() => {
+    return [...deliverables].sort((a, b) => {
+      const titleA = a.title || '';
+      const titleB = b.title || '';
+      const cmp = titleA.localeCompare(titleB, undefined, { numeric: true, sensitivity: 'base' });
+      if (cmp !== 0) return cmp;
+
+      const timeA = (a as any).createdAt ? new Date((a as any).createdAt).getTime() : 0;
+      const timeB = (b as any).createdAt ? new Date((b as any).createdAt).getTime() : 0;
+      if (timeA && timeB && timeA !== timeB) return timeA - timeB;
+
+      const dueA = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+      const dueB = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+      return dueA - dueB;
+    });
+  }, [deliverables]);
+
+  if (sortedDeliverables.length > 0) {
+    sortedDeliverables.forEach((d, index) => {
+      const isDeliverableReadyOrDone =
+        ['READY_TO_PUBLISH', 'APPROVED', 'PUBLISHED', 'VERIFIED'].includes(d.status) || isComplete(d);
+      const isUnderReview = d.status === 'SUBMITTED';
+
+      const status: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING' = isDeliverableReadyOrDone
+        ? 'COMPLETED'
+        : isUnderReview
+        ? 'IN_PROGRESS'
+        : 'PENDING';
+
+      const subtitle = ['PUBLISHED', 'VERIFIED'].includes(d.status)
+        ? 'Deliverable published & verified · Milestone unlocked'
+        : ['READY_TO_PUBLISH', 'APPROVED'].includes(d.status)
+        ? 'Deliverable accepted · Milestone released'
+        : isUnderReview
+        ? 'Submission submitted for brand review'
+        : 'Released after accepting deliverable';
+
+      steps.push({
+        id: `step-deliverable-${d.id || index}`,
+        title: d.title || `Deliverable No. ${index + 1}`,
+        subtitle,
+        amount: baseMilestoneShare,
+        status,
+        badge: `Milestone ${index + 1} of ${totalParts}`,
+      });
+    });
+  }
+
   steps.push({
     id: 'step-final-payout',
-    title: 'Final Payout Release',
+    title: 'Campaign Completion & Published Link',
     subtitle: isSettled
-      ? 'Published URL submitted · Escrow release authorized'
+      ? 'Published link submitted & verified · Final escrow released'
       : isSettlementProcessing
-      ? 'Processing final bank release to creator'
-      : 'Auto-released once all deliverables are verified',
-    amount: totalAmount,
+      ? 'Deliverables accepted · Awaiting published link to release final milestone'
+      : 'Released after completing campaign & submitting published link',
+    amount: finalMilestoneShare,
     status: isSettled ? 'COMPLETED' : isSettlementProcessing ? 'IN_PROGRESS' : 'PENDING',
+    badge: `Milestone ${totalParts} of ${totalParts}`,
   });
 
   return (
@@ -165,6 +198,26 @@ export default function WorkspacePaymentEscrowCard({
           <span className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight">
             {formatCurrency(totalAmount, agreedCurrency)}
           </span>
+        </div>
+      </div>
+
+      {/* Equal Breakdown Summary Callout */}
+      <div className="rounded-xl border border-purple-500/20 bg-purple-500/10 p-3.5 space-y-2">
+        <div className="flex items-center justify-between text-xs">
+          <span className="font-bold text-purple-200">Equal Milestone Breakdown</span>
+          <span className="text-[11px] font-semibold text-purple-300">
+            {totalParts} equal parts of {formatCurrency(baseMilestoneShare, agreedCurrency)}
+          </span>
+        </div>
+        <div className="flex items-center justify-between text-[11px] text-slate-300">
+          <span>Released: <strong className="text-emerald-400 font-bold">{formatCurrency(releasedAmount, agreedCurrency)}</strong></span>
+          <span>In Escrow: <strong className="text-slate-200 font-bold">{formatCurrency(remainingInEscrow, agreedCurrency)}</strong></span>
+        </div>
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-900/80">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-purple-500 via-indigo-500 to-emerald-400 transition-all duration-500"
+            style={{ width: `${releasePercentage}%` }}
+          />
         </div>
       </div>
 
@@ -214,17 +267,24 @@ export default function WorkspacePaymentEscrowCard({
                 {/* Step Content */}
                 <div className="min-w-0 flex-1 pt-0.5 space-y-0.5">
                   <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`text-xs sm:text-sm font-bold truncate ${
-                        isCompleted
-                          ? 'text-white'
-                          : isInProgress
-                          ? 'text-purple-300'
-                          : 'text-slate-400'
-                      }`}
-                    >
-                      {step.title}
-                    </span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className={`text-xs sm:text-sm font-bold truncate ${
+                          isCompleted
+                            ? 'text-white'
+                            : isInProgress
+                            ? 'text-purple-300'
+                            : 'text-slate-400'
+                        }`}
+                      >
+                        {step.title}
+                      </span>
+                      {step.badge && (
+                        <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-semibold text-slate-400 shrink-0">
+                          {step.badge}
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs sm:text-sm font-black text-slate-200 shrink-0">
                       {formatCurrency(step.amount, agreedCurrency)}
                     </span>
