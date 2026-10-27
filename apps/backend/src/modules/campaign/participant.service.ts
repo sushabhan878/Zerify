@@ -101,18 +101,21 @@ export class ParticipantService {
 
     if (!isInfluencer) throw new ForbiddenException('Only the assigned creator can start this campaign');
     if (participant.status !== 'CONFIRMED') throw new BadRequestException('Only a confirmed collaboration can be started');
-    return this.prisma.$transaction(async tx => {
-      await tx.$queryRaw`SELECT id FROM campaigns WHERE id = ${participant.campaignId} FOR UPDATE`;
-      const campaign = await tx.campaign.findUniqueOrThrow({ where: { id: participant.campaignId } });
-      if (!['OPEN', 'FILLING', 'ACTIVE'].includes(campaign.status)) throw new BadRequestException('Campaign is no longer active');
-      const changed = await tx.campaignParticipant.updateMany({ where: { id: participantId, status: 'CONFIRMED' }, data: { status: 'PARTICIPANT_ACTIVE', startedAt: new Date() } });
-      if (!changed.count) throw new BadRequestException('Campaign has already been started or cancelled');
-      await tx.participantDeliverable.updateMany({ where: { participantId, status: 'PENDING' }, data: { status: 'IN_PROGRESS' } });
-      await tx.deliverableEvent.createMany({ data: participant.deliverables.map(d => ({
-        deliverableId: d.id, actorId: userId, actorRole: 'INFLUENCER', eventType: 'CAMPAIGN_STARTED', previousState: d.status, newState: 'IN_PROGRESS',
-      })) });
-      return { started: true };
-    });
+    return this.prisma.$transaction(
+      async tx => {
+        await tx.$queryRaw`SELECT id FROM campaigns WHERE id = ${participant.campaignId} FOR UPDATE`;
+        const campaign = await tx.campaign.findUniqueOrThrow({ where: { id: participant.campaignId } });
+        if (!['OPEN', 'FILLING', 'ACTIVE'].includes(campaign.status)) throw new BadRequestException('Campaign is no longer active');
+        const changed = await tx.campaignParticipant.updateMany({ where: { id: participantId, status: 'CONFIRMED' }, data: { status: 'PARTICIPANT_ACTIVE', startedAt: new Date() } });
+        if (!changed.count) throw new BadRequestException('Campaign has already been started or cancelled');
+        await tx.participantDeliverable.updateMany({ where: { participantId, status: 'PENDING' }, data: { status: 'IN_PROGRESS' } });
+        await tx.deliverableEvent.createMany({ data: participant.deliverables.map(d => ({
+          deliverableId: d.id, actorId: userId, actorRole: 'INFLUENCER', eventType: 'CAMPAIGN_STARTED', previousState: d.status, newState: 'IN_PROGRESS',
+        })) });
+        return { started: true };
+      },
+      { maxWait: 15000, timeout: 30000 },
+    );
   }
 
   async completeParticipant(userId: string, participantId: string) {

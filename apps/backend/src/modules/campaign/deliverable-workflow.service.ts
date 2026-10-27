@@ -16,15 +16,18 @@ export class DeliverableWorkflowService {
   // creators and completion checks across a participant's deliverables.
   private async mutate(userId: string, id: string, role: 'creator' | 'brand', action: (tx: Prisma.TransactionClient, d: any) => Promise<unknown>) {
     const initial = await this.access.get(userId, id, role);
-    return this.prisma.$transaction(async tx => {
-      await tx.$queryRaw`SELECT id FROM campaigns WHERE id = ${initial.campaignId} FOR UPDATE`;
-      await tx.$queryRaw`SELECT id FROM campaign_participants WHERE id = ${initial.participantId} FOR UPDATE`;
-      const d = await tx.participantDeliverable.findUniqueOrThrow({ where: { id }, include: deliverableInclude });
-      this.access.authorize(userId, d.participant, role);
-      this.access.assertActive(d.participant);
-      await action(tx, d);
-      return tx.participantDeliverable.findUniqueOrThrow({ where: { id }, include: { revisions: { orderBy: { version: 'desc' } }, events: { orderBy: { createdAt: 'desc' } } } });
-    });
+    return this.prisma.$transaction(
+      async tx => {
+        await tx.$queryRaw`SELECT id FROM campaigns WHERE id = ${initial.campaignId} FOR UPDATE`;
+        await tx.$queryRaw`SELECT id FROM campaign_participants WHERE id = ${initial.participantId} FOR UPDATE`;
+        const d = await tx.participantDeliverable.findUniqueOrThrow({ where: { id }, include: deliverableInclude });
+        this.access.authorize(userId, d.participant, role);
+        this.access.assertActive(d.participant);
+        await action(tx, d);
+        return tx.participantDeliverable.findUniqueOrThrow({ where: { id }, include: { revisions: { orderBy: { version: 'desc' } }, events: { orderBy: { createdAt: 'desc' } } } });
+      },
+      { maxWait: 15000, timeout: 30000 },
+    );
   }
 
   private checkVersion(d: any, version: number) {
@@ -114,6 +117,10 @@ export class DeliverableWorkflowService {
           status: 'REVISION_REQUESTED', verificationStatus: 'VERIFICATION_FAILED', reviewComments: dto.comments?.trim(),
           revisionCount: { increment: 1 },
         } });
+        await tx.campaignParticipant.updateMany({
+          where: { id: d.participantId, status: 'PARTICIPANT_COMPLETED' },
+          data: { status: 'PARTICIPANT_ACTIVE', completedAt: null },
+        });
         // Preserve the original content approval; publication review is a separate audit event.
         await this.events.record(tx, d, userId, 'PUBLICATION_REVISION_REQUESTED', 'REVISION_REQUESTED', { feedback: dto.comments!.trim(), url: d.publishedUrl });
         return;

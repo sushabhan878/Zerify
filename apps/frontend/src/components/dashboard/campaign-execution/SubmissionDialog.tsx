@@ -8,6 +8,7 @@ import { DeliverableService, ParticipantDeliverableItem } from '@/services/deliv
 import { ActionButton, ErrorNotice, input } from './ExecutionUi';
 import SubmissionMediaInput from './SubmissionMediaInput';
 import ExecutionDropdown, { DropdownOption } from './ExecutionDropdown';
+import { validatePublishedUrl } from '@/utils/validatePublishedUrl';
 
 interface Props {
   deliverable: ParticipantDeliverableItem | null;
@@ -84,17 +85,30 @@ export default function SubmissionDialog({
     setError('');
     const cleanUrl = url.trim();
     if (!cleanUrl) {
-      setError('Please enter a deliverable content link.');
+      setError(
+        publicationOnly
+          ? 'Please enter your published live post link.'
+          : 'Please enter a deliverable content link.'
+      );
       return;
     }
-    try {
-      const parsed = new URL(cleanUrl);
-      if (parsed.protocol !== 'https:') {
-        throw new Error('Please enter a secure HTTPS link (e.g. Google Drive, Dropbox, Frame.io, Loom).');
+
+    if (publicationOnly) {
+      const validation = validatePublishedUrl(cleanUrl, d.platform, d.type);
+      if (!validation.isValid) {
+        setError(validation.error || 'Please enter a valid published post URL.');
+        return;
       }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Please enter a valid HTTPS URL.');
-      return;
+    } else {
+      try {
+        const parsed = new URL(cleanUrl);
+        if (parsed.protocol !== 'https:') {
+          throw new Error('Please enter a secure HTTPS link (e.g. Google Drive, Dropbox, Frame.io, Loom).');
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Please enter a valid HTTPS URL.');
+        return;
+      }
     }
 
     if (!confirmed) {
@@ -218,6 +232,7 @@ export default function SubmissionDialog({
               deliverable={d}
               url={url}
               busy={busy}
+              publicationOnly={publicationOnly}
               onUrl={setUrl}
             />
 
@@ -298,7 +313,11 @@ export default function SubmissionDialog({
 
             <div className="pt-2">
               <ActionButton
-                disabled={!confirmed || !url.trim()}
+                disabled={
+                  !confirmed ||
+                  !url.trim() ||
+                  (publicationOnly && !validatePublishedUrl(url, d.platform, d.type).isValid)
+                }
                 busy={busy}
                 onClick={submit}
                 className="w-full"

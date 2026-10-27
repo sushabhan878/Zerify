@@ -5,6 +5,6 @@ export class PublishDeliverableDto {
   publishedUrl: string;
 
   @IsInt()
-  @Min(1)
+  @Min(0)
   expectedVersion: number;
 }

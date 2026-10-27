@@ -2,7 +2,7 @@ import { Equals, IsInt, Min } from 'class-validator';
 
 export class VerifyDeliverableDto {
   @IsInt()
-  @Min(1)
+  @Min(0)
   expectedVersion: number;
 
   @Equals(true)

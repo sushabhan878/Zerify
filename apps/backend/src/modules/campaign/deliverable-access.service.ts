@@ -27,8 +27,17 @@ export class DeliverableAccessService {
   }
 
   assertActive(p: any) {
-    if (p.status !== 'PARTICIPANT_ACTIVE' || !['OPEN', 'FILLING', 'ACTIVE'].includes(p.campaign.status)) {
-      throw new BadRequestException('Start the campaign first; cancelled, paused or completed collaborations cannot be changed');
+    if (
+      !['PARTICIPANT_ACTIVE', 'PARTICIPANT_COMPLETED'].includes(p.status) ||
+      !['OPEN', 'FILLING', 'ACTIVE', 'COMPLETED'].includes(p.campaign.status)
+    ) {
+      if (p.status === 'CONFIRMED') {
+        throw new BadRequestException('Start the campaign first before working on deliverables');
+      }
+      if (p.status === 'PARTICIPANT_CANCELLED') {
+        throw new BadRequestException('This collaboration has been cancelled and cannot be changed');
+      }
+      throw new BadRequestException('Campaign is no longer active; cancelled, paused or deleted campaigns cannot be changed');
     }
   }
 }
