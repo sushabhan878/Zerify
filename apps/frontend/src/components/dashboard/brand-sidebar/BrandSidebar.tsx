@@ -130,7 +130,7 @@ export default function BrandSidebar({
                 className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-orange-950/40"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
-                <span>+ Add New Campaign</span>
+                <span>Add New Campaign</span>
               </button>
             </div>
           ) : (
