@@ -1045,12 +1045,15 @@ async function seedCampaigns() {
     const uniqueSlug = `${data.slug}-${Math.random().toString(36).substring(2, 7)}`;
     const deadline = new Date();
     deadline.setDate(deadline.getDate() + data.daysAhead);
+    deadline.setUTCHours(23, 59, 59, 999);
 
     const startDate = new Date();
     startDate.setDate(startDate.getDate() + data.daysAhead + 2);
+    startDate.setUTCHours(0, 0, 0, 0);
 
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + data.daysAhead + 30);
+    endDate.setUTCHours(23, 59, 59, 999);
 
     // Create Campaign with Product, Requirement, and Deliverables
     await prisma.campaign.create({

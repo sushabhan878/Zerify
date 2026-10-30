@@ -352,17 +352,29 @@ export default function CampaignPitchModal({
               </div>
             )}
 
+            {campaign.daysRemaining === 0 && campaign.deadline !== 'Rolling Deadline' && (
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
+                <Clock className="w-4 h-4 shrink-0 text-amber-400" />
+                <span>The deadline for this campaign has closed ({campaign.deadline}). New applications are no longer accepted.</span>
+              </div>
+            )}
+
             {/* Submit Button */}
             <div className="pt-2">
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || (campaign.daysRemaining === 0 && campaign.deadline !== 'Rolling Deadline')}
                 className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs sm:text-sm font-bold shadow-xl shadow-purple-950/50 flex items-center justify-center gap-2 transition-all disabled:opacity-50 hover:scale-[1.01] active:scale-[0.99]"
               >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Submitting Application...</span>
+                  </>
+                ) : campaign.daysRemaining === 0 && campaign.deadline !== 'Rolling Deadline' ? (
+                  <>
+                    <Clock className="w-4 h-4" />
+                    <span>Application Deadline Passed</span>
                   </>
                 ) : (
                   <>

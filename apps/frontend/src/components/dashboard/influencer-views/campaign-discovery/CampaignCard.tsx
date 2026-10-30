@@ -287,6 +287,15 @@ export default function CampaignCard({
             <CheckCircle2 className="w-4 h-4 text-emerald-400 group-hover/applied:scale-125 group-hover/applied:rotate-12 transition-transform duration-200 shrink-0" />
             <span>Applied</span>
           </button>
+        ) : campaign.daysRemaining === 0 && campaign.deadline !== 'Rolling Deadline' ? (
+          <button
+            type="button"
+            disabled
+            className="w-full py-3 px-4 rounded-2xl bg-slate-800/60 border border-slate-700/50 text-slate-400 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 cursor-not-allowed opacity-75"
+          >
+            <Clock className="w-3.5 h-3.5 text-slate-500" />
+            <span>Applications Closed</span>
+          </button>
         ) : (
           <button
             onClick={() => onApply(campaign)}

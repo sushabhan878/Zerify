@@ -115,13 +115,18 @@ export class ApplicationService {
       throw new NotFoundException('Campaign not found');
     }
 
-    if (![CampaignStatus.OPEN, CampaignStatus.FILLING].includes(campaign.status as any)) {
+    if (![CampaignStatus.OPEN, CampaignStatus.FILLING, CampaignStatus.ACTIVE].includes(campaign.status as any)) {
       throw new BadRequestException('Campaign is not open for applications');
     }
 
-
-    if (campaign.applicationDeadline && new Date() > new Date(campaign.applicationDeadline)) {
-      throw new BadRequestException('Application deadline for this campaign has passed');
+    if (campaign.applicationDeadline) {
+      const deadline = new Date(campaign.applicationDeadline);
+      if (deadline.getUTCHours() === 0 && deadline.getUTCMinutes() === 0 && deadline.getUTCSeconds() === 0) {
+        deadline.setUTCHours(23, 59, 59, 999);
+      }
+      if (new Date().getTime() > deadline.getTime()) {
+        throw new BadRequestException('Application deadline for this campaign has passed');
+      }
     }
 
     if (campaign.applicationsClosedAt) {
@@ -202,7 +207,7 @@ export class ApplicationService {
       async (tx) => {
         await tx.$queryRaw`SELECT id FROM campaigns WHERE id = ${campaignId} FOR UPDATE`;
         const currentCampaign = await tx.campaign.findUniqueOrThrow({ where: { id: campaignId } });
-        if (!['OPEN', 'FILLING'].includes(currentCampaign.status) || currentCampaign.applicationsClosedAt) {
+        if (!['OPEN', 'FILLING', 'ACTIVE'].includes(currentCampaign.status) || currentCampaign.applicationsClosedAt) {
           throw new BadRequestException('Campaign is no longer open for applications');
         }
         const application = await tx.campaignApplication.create({

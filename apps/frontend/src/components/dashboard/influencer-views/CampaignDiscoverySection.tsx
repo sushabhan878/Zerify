@@ -181,6 +181,9 @@ export function mapDbCampaignToItem(c: any, userCurrency = 'INR'): CampaignItem 
   let daysRemaining = 30;
   if (c.applicationDeadline) {
     const deadlineDate = new Date(c.applicationDeadline);
+    if (deadlineDate.getUTCHours() === 0 && deadlineDate.getUTCMinutes() === 0 && deadlineDate.getUTCSeconds() === 0) {
+      deadlineDate.setUTCHours(23, 59, 59, 999);
+    }
     deadlineStr = deadlineDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     daysRemaining = Math.max(0, Math.ceil((deadlineDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
   }
