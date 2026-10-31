@@ -137,9 +137,9 @@ export default function ProfileGallery({ creator }: ProfileGalleryProps) {
       )}
 
       {/* Media Count Badge at Top Right */}
-      <div className="absolute top-4 right-4 z-10 px-3 py-1.5 rounded-full bg-black/65 backdrop-blur-md border border-white/15 text-xs font-bold text-white flex items-center gap-1.5 shadow-lg pointer-events-none">
-        <ImageIcon className="w-3.5 h-3.5 text-purple-300" />
-        <span>
+      <div className="absolute top-4 right-4 z-10 px-3 py-1.5 rounded-full bg-black/65 backdrop-blur-md border border-white/15 text-xs font-bold text-white flex items-center gap-1.5 shadow-lg pointer-events-none keep-white">
+        <ImageIcon className="w-3.5 h-3.5 text-purple-300 keep-white" />
+        <span className="text-white keep-white">
           {activeIndex + 1} / {mediaItems.length}
         </span>
       </div>
@@ -156,7 +156,7 @@ export default function ProfileGallery({ creator }: ProfileGalleryProps) {
           return (
             <div
               key={item.id || idx}
-              className={`relative shrink-0 snap-start rounded-2xl sm:rounded-3xl overflow-hidden border border-white/10 bg-slate-900 shadow-xl group transition-all duration-300 ${
+              className={`relative shrink-0 snap-start rounded-2xl sm:rounded-3xl overflow-hidden border border-white/10 light:border-slate-200 bg-slate-900 light:bg-slate-100 shadow-xl light:shadow-md group transition-all duration-300 ${
                 isLandscape
                   ? 'w-[85vw] sm:w-[460px] md:w-[540px] lg:w-[620px]'
                   : 'w-[72vw] sm:w-[290px] md:w-[320px] lg:w-[360px]'
@@ -174,7 +174,7 @@ export default function ProfileGallery({ creator }: ProfileGalleryProps) {
 
               {/* Optional Bottom Caption */}
               {item.caption && (
-                <div className="absolute bottom-3.5 left-4 right-4 text-xs font-medium text-slate-200 truncate">
+                <div className="absolute bottom-3.5 left-4 right-4 text-xs font-medium text-slate-200 keep-white truncate">
                   {item.caption}
                 </div>
               )}

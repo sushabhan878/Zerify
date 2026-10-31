@@ -220,21 +220,21 @@ export default function InfluencerProfilePage() {
 
   if (!creator) {
     return (
-      <div className="p-12 rounded-3xl bg-slate-900/60 border border-dashed border-white/10 text-center space-y-4">
-        <div className="w-14 h-14 rounded-2xl bg-purple-500/15 text-purple-300 flex items-center justify-center mx-auto">
+      <div className="p-12 rounded-3xl bg-slate-900/60 light:bg-white border border-dashed border-white/10 light:border-slate-300 text-center space-y-4 light:shadow-sm">
+        <div className="w-14 h-14 rounded-2xl bg-purple-500/15 light:bg-purple-100 text-purple-300 light:text-purple-600 flex items-center justify-center mx-auto">
           <Users className="w-7 h-7" />
         </div>
-        <h3 className="text-lg font-black text-white">Creator Profile Not Found</h3>
-        <p className="text-xs text-slate-400 max-w-sm mx-auto">
+        <h3 className="text-lg font-black text-white light:text-slate-900">Creator Profile Not Found</h3>
+        <p className="text-xs text-slate-400 light:text-slate-500 max-w-sm mx-auto">
           The requested creator profile could not be located in the verified database.
         </p>
         <button
           onClick={() => router.push('/dashboard/find-influencer')}
           type="button"
-          className="px-4 py-2 rounded-xl bg-purple-600 text-xs font-bold text-white inline-flex items-center gap-1.5 shadow-md shadow-purple-950/40"
+          className="px-4 py-2 rounded-xl bg-purple-600 text-xs font-bold text-white keep-white inline-flex items-center gap-1.5 shadow-md shadow-purple-950/40"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to Find Influencers</span>
+          <ArrowLeft className="w-3.5 h-3.5 text-white keep-white" />
+          <span className="text-white keep-white">Back to Find Influencers</span>
         </button>
       </div>
     );

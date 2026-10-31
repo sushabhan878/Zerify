@@ -167,34 +167,34 @@ export default function ProfileMainInfo({ creator }: ProfileMainInfoProps) {
         <img
           src={creator.avatarUrl || defaultAvatar}
           alt={creator.name}
-          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-white/15 shadow-md shrink-0"
+          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-white/15 light:border-slate-200 shadow-md shrink-0"
         />
 
         <div className="space-y-1.5 min-w-0">
           {/* Name & Star Rating */}
           <div className="flex items-center gap-2.5 flex-wrap">
             <div className="flex items-center gap-1.5">
-              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-bold text-white light:text-slate-900 tracking-tight">
                 {creator.name}
               </h2>
               {isVerified && (
                 <span className="shrink-0 text-purple-400 inline-flex items-center" title="Verified Creator">
-                  <BadgeCheck className="w-5 h-5 fill-purple-600 text-[#090C15]" />
+                  <BadgeCheck className="w-5 h-5 fill-purple-600 text-[#090C15] light:text-white" />
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1 text-sm font-bold text-amber-400">
-              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+            <div className="flex items-center gap-1 text-sm font-bold text-amber-400 light:text-amber-500">
+              <Star className="w-4 h-4 fill-amber-400 light:fill-amber-500 text-amber-400 light:text-amber-500" />
               <span>{Number(creator.rating || 5.0).toFixed(1)}</span>
               <span className="text-slate-400 font-normal">·</span>
-              <span className="text-slate-300 font-semibold underline underline-offset-2">
+              <span className="text-slate-300 light:text-slate-600 font-semibold underline underline-offset-2">
                 4 Reviews
               </span>
             </div>
           </div>
 
           {/* Location */}
-          <div className="flex items-center gap-1.5 text-xs text-slate-400">
+          <div className="flex items-center gap-1.5 text-xs text-slate-400 light:text-slate-500">
             <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
             <span>{creator.location || 'United States'}</span>
           </div>
@@ -220,7 +220,7 @@ export default function ProfileMainInfo({ creator }: ProfileMainInfoProps) {
                     key={`${acc.platform}_${idx}`}
                     {...linkProps}
                     title={acc.handle ? `${acc.platform}: ${acc.handle}` : acc.platform}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-white/10 hover:border-purple-500/40 text-slate-200 text-xs font-semibold shadow-sm transition-all hover:scale-[1.02] group cursor-pointer"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/90 light:bg-white hover:bg-slate-800 light:hover:bg-slate-50 border border-white/10 light:border-slate-200 hover:border-purple-500/40 light:hover:border-purple-300 text-slate-200 light:text-slate-700 text-xs font-semibold shadow-sm transition-all hover:scale-[1.02] group cursor-pointer"
                   >
                     {logo ? (
                       <img
@@ -233,7 +233,7 @@ export default function ProfileMainInfo({ creator }: ProfileMainInfoProps) {
                         {acc.platform.charAt(0)}
                       </span>
                     )}
-                    <span className="font-extrabold text-white tracking-tight">
+                    <span className="font-extrabold text-white light:text-slate-900 tracking-tight">
                       {formattedNumber}
                     </span>
                     {acc.profileUrl && (
@@ -248,15 +248,15 @@ export default function ProfileMainInfo({ creator }: ProfileMainInfoProps) {
       </div>
 
       {/* Top Creator Rosette Badge */}
-      <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-900/60 border border-white/10 shadow-sm">
+      <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-900/60 light:bg-white border border-white/10 light:border-slate-200 shadow-sm light:shadow-sm">
         <div className="p-2 rounded-xl bg-pink-500/15 text-pink-400 border border-pink-500/25 shrink-0 mt-0.5">
           <Award className="w-5 h-5" />
         </div>
         <div>
-          <h3 className="text-sm sm:text-base font-bold text-white">
+          <h3 className="text-sm sm:text-base font-bold text-white light:text-slate-900">
             {creator.name} is a Top Creator
           </h3>
-          <p className="text-xs sm:text-sm text-slate-400 mt-0.5 leading-normal">
+          <p className="text-xs sm:text-sm text-slate-400 light:text-slate-500 mt-0.5 leading-normal">
             Top creators have completed multiple orders and have a high rating from brands.
           </p>
         </div>
@@ -264,7 +264,7 @@ export default function ProfileMainInfo({ creator }: ProfileMainInfoProps) {
 
       {/* Bio Description */}
       <div className="space-y-2">
-        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-300 light:text-slate-600 leading-relaxed">
           {creator.bio}
         </p>
       </div>

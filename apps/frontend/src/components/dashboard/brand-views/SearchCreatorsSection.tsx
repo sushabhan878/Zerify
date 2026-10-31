@@ -446,21 +446,21 @@ export default function SearchCreatorsSection() {
           <LottieLoader size={200} message="Discovering live creators from verified database..." />
         </div>
       ) : filteredCreators.length === 0 ? (
-        <div className="p-12 rounded-3xl bg-slate-900/60 border border-dashed border-white/10 text-center space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-purple-500/15 text-purple-300 flex items-center justify-center mx-auto">
+        <div className="p-12 rounded-3xl bg-slate-900/60 light:bg-white border border-dashed border-white/10 light:border-slate-300 text-center space-y-3 light:shadow-sm">
+          <div className="w-12 h-12 rounded-2xl bg-purple-500/15 light:bg-purple-100 text-purple-300 light:text-purple-600 flex items-center justify-center mx-auto">
             <Users className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-black text-white">No creators match your filters</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+          <h3 className="text-base font-black text-white light:text-slate-900">No creators match your filters</h3>
+          <p className="text-xs text-slate-400 light:text-slate-500 max-w-sm mx-auto">
             Try adjusting your search keywords, lowering the match threshold, or clearing specific filters.
           </p>
           <button
             onClick={handleResetFilters}
             type="button"
-            className="px-4 py-2 rounded-xl bg-purple-600 text-xs font-bold text-white inline-flex items-center gap-1.5 shadow-md shadow-purple-950/40"
+            className="px-4 py-2 rounded-xl bg-purple-600 text-xs font-bold text-white keep-white inline-flex items-center gap-1.5 shadow-md shadow-purple-950/40"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset All Filters</span>
+            <RotateCcw className="w-3.5 h-3.5 text-white keep-white" />
+            <span className="text-white keep-white">Reset All Filters</span>
           </button>
         </div>
       ) : (

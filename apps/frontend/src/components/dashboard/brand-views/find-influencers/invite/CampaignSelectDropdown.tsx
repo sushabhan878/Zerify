@@ -46,7 +46,7 @@ export default function CampaignSelectDropdown({
 
   return (
     <div className="relative space-y-1.5" ref={dropdownRef}>
-      <label className="text-xs font-bold text-slate-300 block">
+      <label className="text-xs font-bold text-slate-300 light:text-slate-700 block">
         Select Target Campaign
       </label>
 
@@ -59,14 +59,14 @@ export default function CampaignSelectDropdown({
             setIsOpen((prev) => !prev);
           }
         }}
-        className={`w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border transition-all duration-200 flex items-center justify-between gap-2.5 text-left text-xs font-semibold ${
+        className={`w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 light:bg-white border transition-all duration-200 flex items-center justify-between gap-2.5 text-left text-xs font-semibold light:shadow-sm ${
           errorMessage
-            ? 'border-amber-500/60 ring-2 ring-amber-500/20 bg-slate-900 text-white'
+            ? 'border-amber-500/60 ring-2 ring-amber-500/20 bg-slate-900 light:bg-white text-white light:text-slate-900'
             : isOpen
-            ? 'border-purple-500 ring-2 ring-purple-500/20 bg-slate-900 text-white'
+            ? 'border-purple-500 ring-2 ring-purple-500/20 bg-slate-900 light:bg-white text-white light:text-slate-900'
             : campaigns.length === 0
-            ? 'border-white/5 bg-slate-900/40 text-slate-500 cursor-not-allowed'
-            : 'border-white/10 hover:border-purple-500/40 hover:bg-slate-900 text-white cursor-pointer'
+            ? 'border-white/5 light:border-slate-200 bg-slate-900/40 light:bg-slate-100 text-slate-500 cursor-not-allowed'
+            : 'border-white/10 light:border-slate-200/80 hover:border-purple-500/40 hover:bg-slate-900 light:hover:bg-slate-50 text-white light:text-slate-900 cursor-pointer'
         }`}
       >
         <div className="flex items-center gap-2.5 min-w-0">
@@ -87,8 +87,8 @@ export default function CampaignSelectDropdown({
         </div>
 
         <ChevronDown
-          className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-purple-400' : ''
+          className={`w-4 h-4 text-slate-400 light:text-slate-500 shrink-0 transition-transform duration-200 ${
+            isOpen ? 'rotate-180 text-purple-400 light:text-purple-600' : ''
           }`}
         />
       </button>
@@ -124,7 +124,7 @@ export default function CampaignSelectDropdown({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.98 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-xl bg-[#0d0a21] border border-purple-500/30 shadow-2xl p-1.5 space-y-1 max-h-60 overflow-y-auto backdrop-blur-xl"
+            className="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-xl bg-[#0d0a21] light:bg-white border border-purple-500/30 light:border-slate-200 shadow-2xl light:shadow-xl p-1.5 space-y-1 max-h-60 overflow-y-auto backdrop-blur-xl"
           >
             {campaigns.length > 0 ? (
               campaigns.map((camp) => {
@@ -138,10 +138,10 @@ export default function CampaignSelectDropdown({
                     onClick={() => handleCampaignClick(camp)}
                     className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between gap-2 transition-all ${
                       isAlreadyInvited
-                        ? 'bg-slate-900/40 text-slate-400 border border-transparent hover:bg-amber-950/20 hover:border-amber-500/30 cursor-not-allowed'
+                        ? 'bg-slate-900/40 light:bg-slate-100 text-slate-400 border border-transparent hover:bg-amber-950/20 hover:border-amber-500/30 cursor-not-allowed'
                         : isSelected
-                        ? 'bg-purple-600/25 text-purple-200 font-bold border border-purple-500/30'
-                        : 'text-slate-200 hover:bg-white/5 hover:text-white border border-transparent cursor-pointer'
+                        ? 'bg-purple-600/25 light:bg-purple-100 text-purple-200 light:text-purple-700 font-bold border border-purple-500/30 light:border-purple-300'
+                        : 'text-slate-200 light:text-slate-700 hover:bg-white/5 light:hover:bg-purple-50 hover:text-white light:hover:text-purple-900 border border-transparent cursor-pointer'
                     }`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
@@ -164,7 +164,7 @@ export default function CampaignSelectDropdown({
                           <span>Already Invited</span>
                         </span>
                       ) : isSelected ? (
-                        <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                        <Check className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />
                       ) : null}
                     </div>
                   </button>
@@ -172,7 +172,7 @@ export default function CampaignSelectDropdown({
               })
             ) : (
               <div className="px-3 py-3 text-xs text-slate-400 text-center space-y-1">
-                <p className="font-semibold text-slate-300">No active campaigns available</p>
+                <p className="font-semibold text-slate-300 light:text-slate-700">No active campaigns available</p>
                 <p className="text-[11px] text-slate-500">Only published active campaigns can receive invitations.</p>
               </div>
             )}

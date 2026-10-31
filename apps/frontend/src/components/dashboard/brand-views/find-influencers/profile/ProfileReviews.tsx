@@ -68,17 +68,17 @@ export default function ProfileReviews({ creator }: ProfileReviewsProps) {
       {/* 1. Header: Reviews Count & Overall Star Rating */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white light:text-slate-900 tracking-tight">
             Brand Reviews
           </h2>
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-400 font-bold text-sm">
-            <Star className="w-4 h-4 fill-amber-400" />
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-400 light:text-amber-500 font-bold text-sm">
+            <Star className="w-4 h-4 fill-amber-400 light:fill-amber-500" />
             <span>5.0</span>
-            <span className="text-slate-400 font-normal">({reviews.length})</span>
+            <span className="text-slate-400 light:text-slate-500 font-normal">({reviews.length})</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 light:text-emerald-600">
           <ShieldCheck className="w-4 h-4" />
           <span>100% Verified Brand Collaborations</span>
         </div>
@@ -87,35 +87,35 @@ export default function ProfileReviews({ creator }: ProfileReviewsProps) {
       {/* 2. Top Metric Ratings: Communication, Timeliness, Satisfaction in 3 Columns */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Communication */}
-        <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-slate-900/70 border border-white/10 shadow-sm">
-          <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 shrink-0">
+        <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-slate-900/70 light:bg-white border border-white/10 light:border-slate-200/80 shadow-sm light:shadow-sm">
+          <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 light:text-purple-600 border border-purple-500/20 light:border-purple-200 shrink-0">
             <MessageCircle className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs text-slate-400 font-medium">Communication</div>
-            <div className="text-lg font-black text-white">5.0 / 5.0</div>
+            <div className="text-xs text-slate-400 light:text-slate-500 font-medium">Communication</div>
+            <div className="text-lg font-black text-white light:text-slate-900">5.0 / 5.0</div>
           </div>
         </div>
 
         {/* Timeliness */}
-        <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-slate-900/70 border border-white/10 shadow-sm">
-          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
+        <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-slate-900/70 light:bg-white border border-white/10 light:border-slate-200/80 shadow-sm light:shadow-sm">
+          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 light:text-blue-600 border border-blue-500/20 light:border-blue-200 shrink-0">
             <Clock className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs text-slate-400 font-medium">Timeliness</div>
-            <div className="text-lg font-black text-white">5.0 / 5.0</div>
+            <div className="text-xs text-slate-400 light:text-slate-500 font-medium">Timeliness</div>
+            <div className="text-lg font-black text-white light:text-slate-900">5.0 / 5.0</div>
           </div>
         </div>
 
         {/* Satisfaction */}
-        <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-slate-900/70 border border-white/10 shadow-sm">
-          <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+        <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-slate-900/70 light:bg-white border border-white/10 light:border-slate-200/80 shadow-sm light:shadow-sm">
+          <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 light:text-emerald-600 border border-emerald-500/20 light:border-emerald-200 shrink-0">
             <CheckCircle2 className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs text-slate-400 font-medium">Satisfaction</div>
-            <div className="text-lg font-black text-white">5.0 / 5.0</div>
+            <div className="text-xs text-slate-400 light:text-slate-500 font-medium">Satisfaction</div>
+            <div className="text-lg font-black text-white light:text-slate-900">5.0 / 5.0</div>
           </div>
         </div>
       </div>
@@ -125,7 +125,7 @@ export default function ProfileReviews({ creator }: ProfileReviewsProps) {
         {reviews.map((rev) => (
           <div
             key={rev.id}
-            className="p-5 sm:p-6 rounded-2xl bg-slate-900/60 border border-white/10 hover:border-purple-500/30 transition-all shadow-md flex flex-col justify-between space-y-4 group"
+            className="p-5 sm:p-6 rounded-2xl bg-slate-900/60 light:bg-white border border-white/10 light:border-slate-200/80 hover:border-purple-500/30 light:hover:border-purple-300 transition-all shadow-md light:shadow-sm flex flex-col justify-between space-y-4 group"
           >
             {/* Header: Author Avatar, Name, Deliverable Tag & Rating */}
             <div className="flex items-start justify-between gap-3">
@@ -137,10 +137,10 @@ export default function ProfileReviews({ creator }: ProfileReviewsProps) {
                 </div>
 
                 <div className="min-w-0">
-                  <div className="text-sm sm:text-base font-bold text-white leading-tight truncate">
+                  <div className="text-sm sm:text-base font-bold text-white light:text-slate-900 leading-tight truncate">
                     {rev.author}
                   </div>
-                  <div className="text-xs text-slate-400 font-medium truncate mt-0.5">
+                  <div className="text-xs text-slate-400 light:text-slate-500 font-medium truncate mt-0.5">
                     {rev.orderType}
                   </div>
                 </div>
@@ -160,17 +160,17 @@ export default function ProfileReviews({ creator }: ProfileReviewsProps) {
             </div>
 
             {/* Review Comment */}
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-300 light:text-slate-600 leading-relaxed">
               "{rev.comment}"
             </p>
 
             {/* Bottom Meta Pill */}
-            <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
-              <span className="inline-flex items-center gap-1 text-emerald-400 font-medium">
+            <div className="pt-2 border-t border-white/5 light:border-slate-200 flex items-center justify-between text-[11px] text-slate-400 light:text-slate-500">
+              <span className="inline-flex items-center gap-1 text-emerald-400 light:text-emerald-600 font-medium">
                 <CheckCircle2 className="w-3 h-3" />
                 <span>Verified Deliverable</span>
               </span>
-              <span className="text-slate-500">Order completed via Zerify</span>
+              <span className="text-slate-500 light:text-slate-400">Order completed via Zerify</span>
             </div>
           </div>
         ))}

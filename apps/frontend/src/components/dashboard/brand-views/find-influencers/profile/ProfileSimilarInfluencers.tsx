@@ -132,7 +132,7 @@ export default function ProfileSimilarInfluencers({
       {/* 1. Similar Influencers Header & Navigation Arrows */}
       <div className="space-y-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-bold text-white light:text-slate-900 tracking-tight">
             Influencers similar to {creator.name}
           </h2>
 
@@ -141,7 +141,7 @@ export default function ProfileSimilarInfluencers({
               type="button"
               onClick={() => handleScroll('left')}
               aria-label="Previous influencers"
-              className="w-8 h-8 rounded-lg border border-white/15 bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center transition-all shadow-sm cursor-pointer"
+              className="w-8 h-8 rounded-lg border border-white/15 light:border-slate-200 bg-slate-900/80 light:bg-white hover:bg-slate-800 light:hover:bg-slate-100 text-slate-300 light:text-slate-700 hover:text-white light:hover:text-slate-900 flex items-center justify-center transition-all shadow-sm cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -149,7 +149,7 @@ export default function ProfileSimilarInfluencers({
               type="button"
               onClick={() => handleScroll('right')}
               aria-label="Next influencers"
-              className="w-8 h-8 rounded-lg border border-white/15 bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center transition-all shadow-sm cursor-pointer"
+              className="w-8 h-8 rounded-lg border border-white/15 light:border-slate-200 bg-slate-900/80 light:bg-white hover:bg-slate-800 light:hover:bg-slate-100 text-slate-300 light:text-slate-700 hover:text-white light:hover:text-slate-900 flex items-center justify-center transition-all shadow-sm cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -169,7 +169,7 @@ export default function ProfileSimilarInfluencers({
               className="w-[240px] sm:w-[260px] shrink-0 space-y-2.5 cursor-pointer group"
             >
               {/* Image Container with Badges */}
-              <div className="relative h-[290px] rounded-2xl overflow-hidden border border-white/10 bg-slate-900 shadow-lg group-hover:border-purple-500/40 transition-colors">
+              <div className="relative h-[290px] rounded-2xl overflow-hidden border border-white/10 light:border-slate-200 bg-slate-900 light:bg-slate-100 shadow-lg group-hover:border-purple-500/40 transition-colors">
                 <img
                   src={item.avatarUrl}
                   alt={item.name}
@@ -178,7 +178,7 @@ export default function ProfileSimilarInfluencers({
 
                 {/* Top Badge: Top Creator */}
                 {item.isTopCreator && (
-                  <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/15 text-[11px] font-bold text-pink-300 flex items-center gap-1 shadow-md">
+                  <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/15 text-[11px] font-bold text-pink-300 flex items-center gap-1 shadow-md keep-white">
                     <Award className="w-3 h-3 text-pink-400" />
                     <span>Top Creator</span>
                   </div>
@@ -190,7 +190,7 @@ export default function ProfileSimilarInfluencers({
                 {/* Bottom Overlay Info on Photo */}
                 <div className="absolute bottom-2.5 left-2.5 right-2.5 space-y-1">
                   {/* Reach/UGC Pill */}
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md border border-white/15 text-[10.5px] font-semibold text-slate-200 shadow-sm">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md border border-white/15 text-[10.5px] font-semibold text-slate-200 shadow-sm keep-white">
                     {item.reachBadge === 'UGC' ? (
                       <Camera className="w-3 h-3 text-slate-300" />
                     ) : (
@@ -202,7 +202,7 @@ export default function ProfileSimilarInfluencers({
                   </span>
 
                   {/* Name & Star Rating */}
-                  <div className="flex items-center gap-1 text-sm font-bold text-white">
+                  <div className="flex items-center gap-1 text-sm font-bold text-white keep-white">
                     <span className="truncate">{item.name}</span>
                     <span className="flex items-center text-amber-400 text-xs shrink-0">
                       <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 mr-0.5" />
@@ -214,12 +214,12 @@ export default function ProfileSimilarInfluencers({
 
               {/* Text Info Below Photo */}
               <div className="space-y-1">
-                <p className="text-xs text-slate-400 truncate font-medium">
+                <p className="text-xs text-slate-400 light:text-slate-600 truncate font-medium">
                   {item.role}
                 </p>
                 <div className="flex items-center justify-between text-xs pt-0.5">
-                  <span className="font-bold text-white text-sm">{formatBudget(item.price)}</span>
-                  <span className="text-slate-400 truncate max-w-[130px]">
+                  <span className="font-bold text-white light:text-slate-900 text-sm">{formatBudget(item.price)}</span>
+                  <span className="text-slate-400 light:text-slate-500 truncate max-w-[130px]">
                     {item.location}
                   </span>
                 </div>
@@ -231,7 +231,7 @@ export default function ProfileSimilarInfluencers({
 
       {/* 2. Related Categories Pill Chips */}
       <div className="space-y-4 pt-4">
-        <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+        <h3 className="text-lg sm:text-xl font-bold text-white light:text-slate-900 tracking-tight">
           Related Categories
         </h3>
 
@@ -240,7 +240,7 @@ export default function ProfileSimilarInfluencers({
             <button
               key={idx}
               type="button"
-              className="px-3.5 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-white/10 hover:border-purple-500/30 text-xs font-medium text-slate-300 hover:text-white transition-all shadow-sm"
+              className="px-3.5 py-2 rounded-xl bg-slate-900/90 light:bg-white hover:bg-slate-800 light:hover:bg-purple-50 border border-white/10 light:border-slate-200/80 hover:border-purple-500/30 text-xs font-medium text-slate-300 light:text-slate-700 hover:text-white light:hover:text-purple-900 transition-all shadow-sm"
             >
               {cat}
             </button>

@@ -96,7 +96,7 @@ export function PlatformBadge({
       ? 'w-9 h-9 sm:w-10 sm:h-10'
       : 'w-8 h-8 sm:w-9 sm:h-9';
 
-  const baseClasses = `${sizeClasses} rounded-full ring-2 ring-[#090C15] flex items-center justify-center shadow-md transition-all shrink-0 cursor-pointer overflow-hidden bg-slate-900 border border-white/10 hover:ring-purple-400/60`;
+  const baseClasses = `${sizeClasses} rounded-full ring-2 ring-[#090C15] light:ring-white flex items-center justify-center shadow-md transition-all shrink-0 cursor-pointer overflow-hidden bg-slate-900 light:bg-white border border-white/10 light:border-slate-200/80 hover:ring-purple-400/60`;
 
   let iconSrc: string | null = null;
   if (p.includes('youtube')) iconSrc = SOCIAL_ICONS.youtube;
@@ -213,7 +213,7 @@ export default function CreatorCard({
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         onClick={() => onViewProfile(creator)}
-        className="p-5 rounded-3xl bg-[#0a0d14]/95 border border-white/10 backdrop-blur-xl hover:border-purple-500/40 transition-all flex flex-col xl:flex-row xl:items-center justify-between gap-5 group shadow-xl hover:shadow-purple-950/20 cursor-pointer"
+        className="p-5 rounded-3xl bg-[#0a0d14]/95 light:bg-white border border-white/10 light:border-slate-200/80 backdrop-blur-xl hover:border-purple-500/40 light:hover:border-purple-300 light:shadow-sm light:hover:shadow-md transition-all flex flex-col xl:flex-row xl:items-center justify-between gap-5 group shadow-xl hover:shadow-purple-950/20 cursor-pointer"
       >
         {/* Creator Identity */}
         <div className="flex items-center gap-4 min-w-0">
@@ -222,17 +222,17 @@ export default function CreatorCard({
               <img
                 src={creator.avatarUrl}
                 alt={creator.name}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl object-cover border-2 border-white/15 group-hover:border-purple-500/50 shadow-md transition-colors"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl object-cover border-2 border-white/15 light:border-slate-200 group-hover:border-purple-500/50 light:group-hover:border-purple-400 shadow-md transition-colors"
               />
             ) : (
               <div
-                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl ${creator.avatarBg || 'bg-purple-600'} text-white font-black text-xl flex items-center justify-center border-2 border-white/15 shadow-md`}
+                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl ${creator.avatarBg || 'bg-purple-600'} text-white font-black text-xl flex items-center justify-center border-2 border-white/15 light:border-slate-200 shadow-md`}
               >
                 {creator.name.charAt(0)}
               </div>
             )}
             {creator.isVerified && (
-              <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center border-2 border-[#090D16] shadow-sm">
+              <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center border-2 border-[#090D16] light:border-white shadow-sm">
                 <BadgeCheck className="w-3.5 h-3.5 fill-white text-purple-600" />
               </span>
             )}
@@ -240,18 +240,18 @@ export default function CreatorCard({
 
           <div className="min-w-0 flex flex-col justify-center">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-purple-300 transition-colors truncate">
+              <h3 className="text-base sm:text-lg font-bold text-white light:text-slate-900 group-hover:text-purple-300 light:group-hover:text-purple-600 transition-colors truncate">
                 {creator.name}
               </h3>
-              <span className="px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-[11px] font-black text-purple-300 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-purple-400" />
+              <span className="px-2.5 py-0.5 rounded-full bg-purple-500/15 light:bg-purple-100 border border-purple-500/30 light:border-purple-200 text-[11px] font-black text-purple-300 light:text-purple-700 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-purple-400 light:text-purple-600" />
                 {formatMaxOneDecimal(creator.matchScore)}% Match
               </span>
             </div>
 
             <div
               title={categoryRaw}
-              className="text-xs text-slate-400 font-medium truncate mt-0.5"
+              className="text-xs text-slate-400 light:text-purple-600 font-medium truncate mt-0.5"
             >
               {categoryDisplay}
             </div>
@@ -275,13 +275,13 @@ export default function CreatorCard({
         </div>
 
         {/* 3 Metric Numbers: Reach, Eng Rate, Rating separated by vertical lines only */}
-        <div className="grid grid-cols-3 divide-x divide-white/15 text-center py-1.5 shrink-0">
+        <div className="grid grid-cols-3 divide-x divide-white/15 light:divide-slate-200 text-center py-1.5 shrink-0">
           {/* REACH */}
           <div className="relative group/metric px-4 py-0.5 flex items-center justify-center cursor-default">
-            <span className="text-lg sm:text-xl font-black text-white group-hover/metric:text-purple-300 transition-colors">
+            <span className="text-lg sm:text-xl font-black text-white light:text-slate-900 group-hover/metric:text-purple-300 light:group-hover/metric:text-purple-600 transition-colors">
               {formatMaxOneDecimal(creator.reach)}
             </span>
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg bg-[#0d121f] border border-white/20 text-[11px] font-bold text-slate-200 shadow-xl opacity-0 pointer-events-none group-hover/metric:opacity-100 group-hover/metric:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap">
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg bg-[#0d121f] border border-white/20 text-[11px] font-bold text-slate-200 shadow-xl opacity-0 pointer-events-none group-hover/metric:opacity-100 group-hover/metric:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap keep-white">
               Reach
               <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 border-4 border-transparent border-t-[#0d121f]" />
             </div>
@@ -289,10 +289,10 @@ export default function CreatorCard({
 
           {/* ENG. RATE */}
           <div className="relative group/metric px-4 py-0.5 flex items-center justify-center cursor-default">
-            <span className="text-lg sm:text-xl font-black text-emerald-400 group-hover/metric:text-emerald-300 transition-colors">
+            <span className="text-lg sm:text-xl font-black text-emerald-400 light:text-emerald-600 group-hover/metric:text-emerald-300 light:group-hover/metric:text-emerald-500 transition-colors">
               {formatMaxOneDecimal(creator.engRate)}
             </span>
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg bg-[#0d121f] border border-white/20 text-[11px] font-bold text-slate-200 shadow-xl opacity-0 pointer-events-none group-hover/metric:opacity-100 group-hover/metric:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap">
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg bg-[#0d121f] border border-white/20 text-[11px] font-bold text-slate-200 shadow-xl opacity-0 pointer-events-none group-hover/metric:opacity-100 group-hover/metric:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap keep-white">
               Eng. Rate
               <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 border-4 border-transparent border-t-[#0d121f]" />
             </div>
@@ -300,10 +300,10 @@ export default function CreatorCard({
 
           {/* RATING */}
           <div className="relative group/metric px-4 py-0.5 flex items-center justify-center cursor-default">
-            <span className="text-lg sm:text-xl font-black text-amber-400 group-hover/metric:text-amber-300 transition-colors">
+            <span className="text-lg sm:text-xl font-black text-amber-400 light:text-amber-500 group-hover/metric:text-amber-300 transition-colors">
               {Number(creator.rating || 5.0).toFixed(1)}
             </span>
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg bg-[#0d121f] border border-white/20 text-[11px] font-bold text-slate-200 shadow-xl opacity-0 pointer-events-none group-hover/metric:opacity-100 group-hover/metric:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap">
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg bg-[#0d121f] border border-white/20 text-[11px] font-bold text-slate-200 shadow-xl opacity-0 pointer-events-none group-hover/metric:opacity-100 group-hover/metric:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap keep-white">
               Rating
               <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 border-4 border-transparent border-t-[#0d121f]" />
             </div>
@@ -315,10 +315,10 @@ export default function CreatorCard({
           <button
             onClick={() => onInvite(creator)}
             type="button"
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-500 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-purple-600/25 hover:shadow-purple-600/40 border border-purple-400/20 active:scale-[0.98]"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-500 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-purple-600/25 hover:shadow-purple-600/40 border border-purple-400/20 active:scale-[0.98] keep-white"
           >
-            <Send className="w-3.5 h-3.5" />
-            <span>Invite to Campaign</span>
+            <Send className="w-3.5 h-3.5 text-white keep-white" />
+            <span className="text-white keep-white">Invite to Campaign</span>
           </button>
 
           <button
@@ -326,8 +326,8 @@ export default function CreatorCard({
             type="button"
             aria-label="Save creator"
             className={`p-2.5 rounded-2xl border transition-all duration-300 ${creator.isBookmarked
-                ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 shadow-lg shadow-rose-500/30'
-                : 'bg-slate-900 text-slate-400 border-white/10 hover:text-rose-400'
+                ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 shadow-lg shadow-rose-500/30 light:bg-rose-50 light:text-rose-500 light:border-rose-300'
+                : 'bg-slate-900 text-slate-400 border-white/10 hover:text-rose-400 light:bg-slate-100 light:border-slate-200 light:text-slate-500 light:hover:text-rose-500 light:hover:border-rose-200'
               } ${isLiking ? 'scale-125' : ''}`}
           >
             <Heart className={`w-4 h-4 ${creator.isBookmarked ? 'fill-rose-500 text-rose-500' : ''}`} />
@@ -344,21 +344,21 @@ export default function CreatorCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
       onClick={() => onViewProfile(creator)}
-      className="p-5 sm:p-6 lg:p-7 rounded-[26px] bg-[#090C15]/95 border border-white/[0.08] backdrop-blur-2xl hover:border-purple-500/40 transition-all duration-300 group shadow-2xl hover:shadow-purple-950/30 relative overflow-visible flex flex-col md:flex-row gap-5 lg:gap-6 items-stretch cursor-pointer mt-3"
+      className="p-5 sm:p-6 lg:p-7 rounded-[26px] bg-[#090C15]/95 light:bg-white border border-white/[0.08] light:border-slate-200/80 backdrop-blur-2xl hover:border-purple-500/40 light:hover:border-purple-300 transition-all duration-300 group shadow-2xl light:shadow-sm light:hover:shadow-md hover:shadow-purple-950/30 relative overflow-visible flex flex-col md:flex-row gap-5 lg:gap-6 items-stretch cursor-pointer mt-3"
     >
       {/* Subtle background ambient purple glow */}
       <div className="absolute -top-32 -right-32 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl pointer-events-none group-hover:bg-purple-600/20 transition-all duration-500" />
 
       {/* Floating Match Rate Badge Overlapping Top-Right Corner */}
       <div className="absolute -top-3.5 right-6 sm:right-8 z-30 pointer-events-none">
-        <span className="px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 border border-purple-400/50 text-xs sm:text-sm font-black text-white flex items-center gap-1.5 shadow-xl shadow-purple-950/80 ring-4 ring-[#090C15] group-hover:scale-105 group-hover:shadow-purple-600/40 transition-all duration-300">
-          <Sparkles className="w-3.5 h-3.5 text-purple-200 animate-pulse shrink-0" />
-          <span>{formatMaxOneDecimal(creator.matchScore)}% Match</span>
+        <span className="px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 border border-purple-400/50 text-xs sm:text-sm font-black text-white flex items-center gap-1.5 shadow-xl shadow-purple-950/80 light:shadow-purple-500/25 ring-4 ring-[#090C15] light:ring-[#F1F3F7] group-hover:scale-105 group-hover:shadow-purple-600/40 transition-all duration-300 keep-white">
+          <Sparkles className="w-3.5 h-3.5 text-purple-200 animate-pulse shrink-0 keep-white" />
+          <span className="text-white keep-white">{formatMaxOneDecimal(creator.matchScore)}% Match</span>
         </span>
       </div>
 
       {/* LEFT COLUMN: Portrait Image with Overlapping Social Badges at Bottom */}
-      <div className="relative w-full md:w-[180px] lg:w-[195px] h-[250px] sm:h-[260px] md:h-auto min-h-[240px] lg:min-h-[260px] shrink-0 rounded-2xl overflow-hidden border border-white/10 group-hover:border-purple-500/40 bg-slate-900/60 shadow-md transition-colors flex flex-col justify-end">
+      <div className="relative w-full md:w-[180px] lg:w-[195px] h-[250px] sm:h-[260px] md:h-auto min-h-[240px] lg:min-h-[260px] shrink-0 rounded-2xl overflow-hidden border border-white/10 light:border-slate-200/80 group-hover:border-purple-500/40 bg-slate-900/60 light:bg-slate-100 shadow-md transition-colors flex flex-col justify-end">
         <img
           src={creator.avatarUrl || defaultAvatar}
           alt={creator.name}
@@ -392,18 +392,18 @@ export default function CreatorCard({
           <div className="flex items-start justify-between gap-3 mb-2">
             <div className="min-w-0 space-y-1">
               <div className="flex items-center gap-2">
-                <h3 className="text-2xl sm:text-[26px] font-black text-white group-hover:text-purple-300 transition-colors tracking-tight leading-snug truncate">
+                <h3 className="text-2xl sm:text-[26px] font-black text-white light:text-slate-900 group-hover:text-purple-300 light:group-hover:text-purple-600 transition-colors tracking-tight leading-snug truncate">
                   {creator.name}
                 </h3>
                 {creator.isVerified && (
                   <span className="shrink-0 text-purple-400" title="Verified Creator">
-                    <BadgeCheck className="w-5 h-5 fill-purple-600 text-[#090C15]" />
+                    <BadgeCheck className="w-5 h-5 fill-purple-600 text-[#090C15] light:text-white" />
                   </span>
                 )}
               </div>
               <p
                 title={categoryRaw}
-                className="text-sm sm:text-[15px] text-slate-300 font-medium truncate whitespace-nowrap"
+                className="text-sm sm:text-[15px] text-slate-300 light:text-purple-600 font-semibold truncate whitespace-nowrap"
               >
                 {categoryDisplay}
               </p>
@@ -414,8 +414,8 @@ export default function CreatorCard({
               type="button"
               aria-label="Bookmark creator"
               className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center shrink-0 transition-all duration-300 ${creator.isBookmarked
-                  ? 'bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-lg shadow-rose-500/30'
-                  : 'bg-white/[0.03] text-slate-400 border-white/15 hover:border-white/30 hover:text-rose-400'
+                  ? 'bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-lg shadow-rose-500/30 light:bg-rose-50 light:text-rose-500 light:border-rose-300'
+                  : 'bg-white/[0.03] text-slate-400 border-white/15 hover:border-white/30 hover:text-rose-400 light:bg-slate-100 light:border-slate-200 light:text-slate-500 light:hover:text-rose-500 light:hover:border-rose-200'
                 } ${isLiking ? 'scale-125' : ''}`}
             >
               <Heart className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${creator.isBookmarked ? 'fill-rose-500 text-rose-500' : ''}`} />
@@ -423,20 +423,20 @@ export default function CreatorCard({
           </div>
 
           {/* Bio / Description */}
-          <p className="text-sm text-slate-300/90 leading-relaxed mt-2.5 line-clamp-2">
+          <p className="text-sm text-slate-300/90 light:text-slate-600 leading-relaxed mt-2.5 line-clamp-2">
             {creator.bio}
           </p>
         </div>
 
         {/* Metrics & Action Button */}
         <div className="space-y-4 sm:space-y-5 pt-1">
-          <div className="grid grid-cols-3 divide-x divide-white/15 py-1 text-center">
+          <div className="grid grid-cols-3 divide-x divide-white/15 light:divide-slate-200 py-1 text-center">
             {/* REACH */}
             <div className="relative group/metric px-2 py-0.5 flex items-center justify-center cursor-default">
-              <span className="text-xl sm:text-2xl lg:text-[26px] font-black text-white leading-tight tracking-tight group-hover/metric:text-purple-300 transition-colors">
+              <span className="text-xl sm:text-2xl lg:text-[26px] font-black text-white light:text-slate-900 leading-tight tracking-tight group-hover/metric:text-purple-300 light:group-hover/metric:text-purple-600 transition-colors">
                 {formatMaxOneDecimal(creator.reach)}
               </span>
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg bg-[#0d121f] border border-white/20 text-[11px] font-bold text-slate-200 shadow-xl opacity-0 pointer-events-none group-hover/metric:opacity-100 group-hover/metric:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap">
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg bg-[#0d121f] border border-white/20 text-[11px] font-bold text-slate-200 shadow-xl opacity-0 pointer-events-none group-hover/metric:opacity-100 group-hover/metric:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap keep-white">
                 Reach
                 <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 border-4 border-transparent border-t-[#0d121f]" />
               </div>
@@ -444,10 +444,10 @@ export default function CreatorCard({
 
             {/* ENG. RATE */}
             <div className="relative group/metric px-2 py-0.5 flex items-center justify-center cursor-default">
-              <span className="text-xl sm:text-2xl lg:text-[26px] font-black text-emerald-400 leading-tight tracking-tight group-hover/metric:text-emerald-300 transition-colors">
+              <span className="text-xl sm:text-2xl lg:text-[26px] font-black text-emerald-400 light:text-emerald-600 leading-tight tracking-tight group-hover/metric:text-emerald-300 light:group-hover/metric:text-emerald-500 transition-colors">
                 {formatMaxOneDecimal(creator.engRate)}
               </span>
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg bg-[#0d121f] border border-white/20 text-[11px] font-bold text-slate-200 shadow-xl opacity-0 pointer-events-none group-hover/metric:opacity-100 group-hover/metric:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap">
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg bg-[#0d121f] border border-white/20 text-[11px] font-bold text-slate-200 shadow-xl opacity-0 pointer-events-none group-hover/metric:opacity-100 group-hover/metric:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap keep-white">
                 Eng. Rate
                 <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 border-4 border-transparent border-t-[#0d121f]" />
               </div>
@@ -455,10 +455,10 @@ export default function CreatorCard({
 
             {/* RATING */}
             <div className="relative group/metric px-2 py-0.5 flex items-center justify-center cursor-default">
-              <span className="text-xl sm:text-2xl lg:text-[26px] font-black text-amber-400 leading-tight tracking-tight group-hover/metric:text-amber-300 transition-colors">
+              <span className="text-xl sm:text-2xl lg:text-[26px] font-black text-amber-400 light:text-amber-500 leading-tight tracking-tight group-hover/metric:text-amber-300 transition-colors">
                 {Number(creator.rating || 5.0).toFixed(1)}
               </span>
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg bg-[#0d121f] border border-white/20 text-[11px] font-bold text-slate-200 shadow-xl opacity-0 pointer-events-none group-hover/metric:opacity-100 group-hover/metric:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap">
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg bg-[#0d121f] border border-white/20 text-[11px] font-bold text-slate-200 shadow-xl opacity-0 pointer-events-none group-hover/metric:opacity-100 group-hover/metric:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap keep-white">
                 Rating
                 <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 border-4 border-transparent border-t-[#0d121f]" />
               </div>
@@ -473,10 +473,10 @@ export default function CreatorCard({
                 onInvite(creator);
               }}
               type="button"
-              className="w-full py-2 sm:py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-500 hover:from-purple-500 hover:to-indigo-500 text-xs sm:text-sm font-bold text-white flex items-center justify-center gap-1.5 transition-all shadow-md shadow-purple-600/25 hover:shadow-purple-600/40 hover:scale-[1.01] active:scale-[0.98] border border-purple-400/30"
+              className="w-full py-2 sm:py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-500 hover:from-purple-500 hover:to-indigo-500 text-xs sm:text-sm font-bold text-white keep-white flex items-center justify-center gap-1.5 transition-all shadow-md shadow-purple-600/25 hover:shadow-purple-600/40 hover:scale-[1.01] active:scale-[0.98] border border-purple-400/30"
             >
-              <Send className="w-3.5 h-3.5" />
-              <span>Invite to Campaign</span>
+              <Send className="w-3.5 h-3.5 text-white keep-white" />
+              <span className="text-white keep-white">Invite to Campaign</span>
             </button>
           </div>
         </div>

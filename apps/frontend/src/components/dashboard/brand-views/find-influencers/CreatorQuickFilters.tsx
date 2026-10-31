@@ -98,15 +98,15 @@ export default function CreatorQuickFilters({
             type="button"
             className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
               filters.category !== 'All'
-                ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm'
-                : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
+                ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm light:bg-purple-100 light:text-purple-700 light:border-purple-300'
+                : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20 light:bg-white light:border-slate-200/80 light:text-slate-700 light:hover:border-purple-200 light:shadow-sm'
             }`}
           >
             <span>Category: {filters.category === 'All' ? 'All' : filters.category}</span>
             <ChevronDown className="w-3.5 h-3.5 opacity-70" />
           </button>
           {openDropdown === 'category' && (
-            <div className="absolute top-full left-0 mt-1.5 w-64 max-h-64 overflow-y-auto bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+            <div className="absolute top-full left-0 mt-1.5 w-64 max-h-64 overflow-y-auto bg-slate-950 light:bg-white border border-purple-500/30 light:border-slate-200 rounded-xl shadow-2xl light:shadow-xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
@@ -117,12 +117,12 @@ export default function CreatorQuickFilters({
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
                     filters.category === cat
-                      ? 'bg-purple-600/30 text-purple-200 font-bold'
-                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                      ? 'bg-purple-600/30 text-purple-200 font-bold light:bg-purple-100 light:text-purple-700'
+                      : 'text-slate-300 hover:bg-white/5 hover:text-white light:text-slate-700 light:hover:bg-purple-50 light:hover:text-purple-900'
                   }`}
                 >
                   <span className="truncate">{cat}</span>
-                  {filters.category === cat && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                  {filters.category === cat && <Check className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />}
                 </button>
               ))}
             </div>
@@ -136,15 +136,15 @@ export default function CreatorQuickFilters({
             type="button"
             className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
               filters.rateRange !== 'Any Rate'
-                ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm'
-                : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
+                ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm light:bg-purple-100 light:text-purple-700 light:border-purple-300'
+                : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20 light:bg-white light:border-slate-200/80 light:text-slate-700 light:hover:border-purple-200 light:shadow-sm'
             }`}
           >
             <span>Rate: {filters.rateRange}</span>
             <ChevronDown className="w-3.5 h-3.5 opacity-70" />
           </button>
           {openDropdown === 'rate' && (
-            <div className="absolute top-full left-0 mt-1.5 w-52 bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+            <div className="absolute top-full left-0 mt-1.5 w-52 bg-slate-950 light:bg-white border border-purple-500/30 light:border-slate-200 rounded-xl shadow-2xl light:shadow-xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
               {rateRanges.map((rate) => (
                 <button
                   key={rate}
@@ -155,12 +155,12 @@ export default function CreatorQuickFilters({
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
                     filters.rateRange === rate
-                      ? 'bg-purple-600/30 text-purple-200 font-bold'
-                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                      ? 'bg-purple-600/30 text-purple-200 font-bold light:bg-purple-100 light:text-purple-700'
+                      : 'text-slate-300 hover:bg-white/5 hover:text-white light:text-slate-700 light:hover:bg-purple-50 light:hover:text-purple-900'
                   }`}
                 >
                   <span>{rate}</span>
-                  {filters.rateRange === rate && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                  {filters.rateRange === rate && <Check className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />}
                 </button>
               ))}
             </div>
@@ -174,8 +174,8 @@ export default function CreatorQuickFilters({
             type="button"
             className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
               filters.minMatchScore > 0
-                ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm'
-                : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
+                ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm light:bg-purple-100 light:text-purple-700 light:border-purple-300'
+                : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20 light:bg-white light:border-slate-200/80 light:text-slate-700 light:hover:border-purple-200 light:shadow-sm'
             }`}
           >
             <span>
@@ -187,7 +187,7 @@ export default function CreatorQuickFilters({
             <ChevronDown className="w-3.5 h-3.5 opacity-70" />
           </button>
           {openDropdown === 'match' && (
-            <div className="absolute top-full left-0 mt-1.5 w-44 bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+            <div className="absolute top-full left-0 mt-1.5 w-44 bg-slate-950 light:bg-white border border-purple-500/30 light:border-slate-200 rounded-xl shadow-2xl light:shadow-xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
               {MATCH_SCORES.map((ms) => (
                 <button
                   key={ms.value}
@@ -198,13 +198,13 @@ export default function CreatorQuickFilters({
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
                     filters.minMatchScore === ms.value
-                      ? 'bg-purple-600/30 text-purple-200 font-bold'
-                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                      ? 'bg-purple-600/30 text-purple-200 font-bold light:bg-purple-100 light:text-purple-700'
+                      : 'text-slate-300 hover:bg-white/5 hover:text-white light:text-slate-700 light:hover:bg-purple-50 light:hover:text-purple-900'
                   }`}
                 >
                   <span>{ms.label}</span>
                   {filters.minMatchScore === ms.value && (
-                    <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                    <Check className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />
                   )}
                 </button>
               ))}
@@ -219,15 +219,15 @@ export default function CreatorQuickFilters({
             type="button"
             className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
               filters.platform !== 'All Platforms'
-                ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm'
-                : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
+                ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm light:bg-purple-100 light:text-purple-700 light:border-purple-300'
+                : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20 light:bg-white light:border-slate-200/80 light:text-slate-700 light:hover:border-purple-200 light:shadow-sm'
             }`}
           >
             <span>Platform: {filters.platform}</span>
             <ChevronDown className="w-3.5 h-3.5 opacity-70" />
           </button>
           {openDropdown === 'platform' && (
-            <div className="absolute top-full left-0 mt-1.5 w-48 bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+            <div className="absolute top-full left-0 mt-1.5 w-48 bg-slate-950 light:bg-white border border-purple-500/30 light:border-slate-200 rounded-xl shadow-2xl light:shadow-xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
               {PLATFORMS.map((plat) => (
                 <button
                   key={plat}
@@ -238,12 +238,12 @@ export default function CreatorQuickFilters({
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
                     filters.platform === plat
-                      ? 'bg-purple-600/30 text-purple-200 font-bold'
-                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                      ? 'bg-purple-600/30 text-purple-200 font-bold light:bg-purple-100 light:text-purple-700'
+                      : 'text-slate-300 hover:bg-white/5 hover:text-white light:text-slate-700 light:hover:bg-purple-50 light:hover:text-purple-900'
                   }`}
                 >
                   <span>{plat}</span>
-                  {filters.platform === plat && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                  {filters.platform === plat && <Check className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />}
                 </button>
               ))}
             </div>
@@ -257,15 +257,15 @@ export default function CreatorQuickFilters({
             type="button"
             className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
               filters.creatorTier !== 'All Tiers'
-                ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm'
-                : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
+                ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm light:bg-purple-100 light:text-purple-700 light:border-purple-300'
+                : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20 light:bg-white light:border-slate-200/80 light:text-slate-700 light:hover:border-purple-200 light:shadow-sm'
             }`}
           >
             <span>Tier: {filters.creatorTier}</span>
             <ChevronDown className="w-3.5 h-3.5 opacity-70" />
           </button>
           {openDropdown === 'tier' && (
-            <div className="absolute top-full left-0 mt-1.5 w-56 bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+            <div className="absolute top-full left-0 mt-1.5 w-56 bg-slate-950 light:bg-white border border-purple-500/30 light:border-slate-200 rounded-xl shadow-2xl light:shadow-xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
               {CREATOR_TIERS.map((tier) => (
                 <button
                   key={tier}
@@ -276,12 +276,12 @@ export default function CreatorQuickFilters({
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
                     filters.creatorTier === tier
-                      ? 'bg-purple-600/30 text-purple-200 font-bold'
-                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                      ? 'bg-purple-600/30 text-purple-200 font-bold light:bg-purple-100 light:text-purple-700'
+                      : 'text-slate-300 hover:bg-white/5 hover:text-white light:text-slate-700 light:hover:bg-purple-50 light:hover:text-purple-900'
                   }`}
                 >
                   <span className="truncate">{tier}</span>
-                  {filters.creatorTier === tier && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                  {filters.creatorTier === tier && <Check className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />}
                 </button>
               ))}
             </div>
@@ -293,10 +293,10 @@ export default function CreatorQuickFilters({
       <button
         onClick={onOpenAdvancedModal}
         type="button"
-        className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs flex items-center gap-2 transition-all shadow-lg shadow-purple-950/40 shrink-0 active:scale-95"
+        className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs flex items-center gap-2 transition-all shadow-lg shadow-purple-950/40 shrink-0 active:scale-95 keep-white"
       >
-        <SlidersHorizontal className="w-3.5 h-3.5" />
-        <span>All Filters</span>
+        <SlidersHorizontal className="w-3.5 h-3.5 text-white keep-white" />
+        <span className="text-white keep-white">All Filters</span>
         {activeCount > 0 && (
           <span className="w-5 h-5 rounded-full bg-white text-purple-700 font-black text-[10px] flex items-center justify-center shadow-sm">
             {activeCount}

@@ -40,24 +40,24 @@ export default function ProfileBookingCard({
   }, [creator.rawPrice, creator.rateNumber, creator.sourceCurrency, creator.startingRate, convert, format, formatBudget, currency]);
 
   return (
-    <div className="sticky top-20 rounded-2xl sm:rounded-3xl bg-[#090C15]/95 border border-white/10 p-5 sm:p-6 space-y-4 shadow-2xl backdrop-blur-xl">
+    <div className="sticky top-20 rounded-2xl sm:rounded-3xl bg-[#090C15]/95 light:bg-white border border-white/10 light:border-slate-200/80 p-5 sm:p-6 space-y-4 shadow-2xl light:shadow-sm backdrop-blur-xl">
       {/* Starting Rate Header */}
       <div className="space-y-1">
         <div className="flex items-baseline gap-2">
-          <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <span className="text-3xl sm:text-4xl font-extrabold text-white light:text-slate-900 tracking-tight">
             {startingRateDisplay}
           </span>
-          <span className="text-xs sm:text-sm font-semibold text-slate-400">
+          <span className="text-xs sm:text-sm font-semibold text-slate-400 light:text-slate-500">
             starting rate
           </span>
         </div>
-        <p className="text-xs text-slate-400 leading-relaxed">
+        <p className="text-xs text-slate-400 light:text-slate-500 leading-relaxed">
           Send a custom collaboration offer with your proposed deliverables and budget for {creator.name}.
         </p>
       </div>
 
       {/* Trust & Guarantee Row */}
-      <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-white/5">
+      <div className="flex items-center justify-between text-[11px] text-slate-400 light:text-slate-600 pt-1 border-t border-white/5 light:border-slate-200">
         <div className="flex items-center gap-1.5">
           <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
           <span>Avg. reply &lt; 24h</span>
@@ -72,10 +72,10 @@ export default function ProfileBookingCard({
       <button
         onClick={() => onInvite(creator)}
         type="button"
-        className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-lg shadow-purple-950/60 hover:scale-[1.01] active:scale-[0.98] transition-all cursor-pointer border border-purple-400/30"
+        className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-purple-950/60 hover:scale-[1.01] active:scale-[0.98] transition-all cursor-pointer border border-purple-400/30 keep-white"
       >
-        <Send className="w-3.5 h-3.5" />
-        <span>Send an Offer</span>
+        <Send className="w-3.5 h-3.5 text-white keep-white" />
+        <span className="text-white keep-white">Send an Offer</span>
       </button>
     </div>
   );

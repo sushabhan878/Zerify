@@ -602,8 +602,8 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
                 onClick={() => setActivePlatform(plat)}
                 className={`pb-3 text-sm sm:text-base font-bold flex items-center gap-2 transition-all relative shrink-0 cursor-pointer ${
                   isActive
-                    ? 'text-white'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'text-white light:text-slate-900'
+                    : 'text-slate-400 light:text-slate-500 hover:text-slate-200 light:hover:text-slate-900'
                 }`}
               >
                 {logo ? (
@@ -626,29 +626,29 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
       {/* 2. Top 3 KPI Stats */}
       <div className="grid grid-cols-3 gap-6 max-w-lg">
         <div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <div className="text-2xl sm:text-3xl font-extrabold text-white light:text-slate-900 tracking-tight">
             {followerDisplay}
           </div>
-          <div className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
+          <div className="text-xs sm:text-sm text-slate-400 light:text-slate-500 font-medium mt-0.5">
             {getMetricTerm(activePlatform)}
           </div>
         </div>
 
         <div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <div className="text-2xl sm:text-3xl font-extrabold text-white light:text-slate-900 tracking-tight">
             {avgViews}
           </div>
-          <div className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
+          <div className="text-xs sm:text-sm text-slate-400 light:text-slate-500 font-medium mt-0.5">
             Average Views
           </div>
         </div>
 
         <div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-1.5">
+          <div className="text-2xl sm:text-3xl font-extrabold text-white light:text-slate-900 tracking-tight flex items-center gap-1.5">
             <span>{engagement}</span>
-            <Info className="w-4 h-4 text-slate-400 cursor-help" />
+            <Info className="w-4 h-4 text-slate-400 light:text-slate-500 cursor-help" />
           </div>
-          <div className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
+          <div className="text-xs sm:text-sm text-slate-400 light:text-slate-500 font-medium mt-0.5">
             Engagement Rate
           </div>
         </div>
@@ -658,58 +658,58 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10 items-start pt-2">
         {/* 1. Audience Location: Countries first, hover to reveal cities */}
         <div className="space-y-4">
-          <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5">
+          <h3 className="text-sm sm:text-base font-bold text-white light:text-slate-900 flex items-center gap-1.5">
             <span>Audience Location</span>
-            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+            <Info className="w-3.5 h-3.5 text-slate-400 light:text-slate-500 cursor-help" />
           </h3>
 
           <div className="space-y-2.5">
             {locationItems.map((item, idx) => (
               <div
                 key={item.countryName}
-                className="relative group flex items-center justify-between text-xs sm:text-sm py-1 px-2 -mx-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                className="relative group flex items-center justify-between text-xs sm:text-sm py-1 px-2 -mx-2 rounded-lg hover:bg-white/5 light:hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2 truncate pr-2">
-                  <span className="text-slate-300 font-medium truncate group-hover:text-white transition-colors">
+                  <span className="text-slate-300 light:text-slate-700 font-medium truncate group-hover:text-white light:group-hover:text-slate-900 transition-colors">
                     {item.countryName}
                   </span>
                 </div>
-                <span className="font-bold text-white shrink-0">{item.pct}%</span>
+                <span className="font-bold text-white light:text-slate-900 shrink-0">{item.pct}%</span>
 
                 {/* Hover Popover showing top 6 cities in this country */}
                 <div
-                  className={`pointer-events-none group-hover:pointer-events-auto opacity-0 group-hover:opacity-100 transition-all duration-200 absolute z-50 w-72 bg-slate-900/95 backdrop-blur-xl border border-white/15 shadow-2xl shadow-purple-950/40 rounded-xl p-3.5 ${
+                  className={`pointer-events-none group-hover:pointer-events-auto opacity-0 group-hover:opacity-100 transition-all duration-200 absolute z-50 w-72 bg-slate-900/95 backdrop-blur-xl border border-white/15 shadow-2xl shadow-purple-950/40 rounded-xl p-3.5 keep-white ${
                     idx < 3 ? 'left-0 top-full mt-1.5' : 'left-0 bottom-full mb-1.5'
                   }`}
                 >
                   <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-2.5">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-white">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-white keep-white">
                       <MapPin className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                       <span className="truncate">Top Cities in {item.countryName}</span>
                     </div>
-                    <span className="text-[11px] font-black text-purple-300 shrink-0 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
+                    <span className="text-[11px] font-black text-purple-300 shrink-0 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20 keep-white">
                       {item.pct}%
                     </span>
                   </div>
 
                   {item.cities.length > 0 ? (
                     <div className="space-y-2">
-                      <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                      <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400 keep-white">
                         Top Cities
                       </div>
                       <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1 scrollbar-none">
                         {item.cities.slice(0, 6).map((city) => (
                           <div key={city.name} className="flex items-center justify-between text-xs">
-                            <span className="text-slate-300 font-medium truncate pr-2" title={city.name}>
+                            <span className="text-slate-300 keep-white font-medium truncate pr-2" title={city.name}>
                               {city.name}
                             </span>
-                            <span className="font-bold text-white shrink-0">{city.pct}%</span>
+                            <span className="font-bold text-white keep-white shrink-0">{city.pct}%</span>
                           </div>
                         ))}
                       </div>
                     </div>
                   ) : (
-                    <div className="text-[11px] text-slate-400 py-1 font-medium">
+                    <div className="text-[11px] text-slate-400 keep-white py-1 font-medium">
                       Nationwide audience (no regional city records)
                     </div>
                   )}
@@ -721,19 +721,19 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
 
         {/* 2. Audience Age: strictly 13 - 17, 18 - 24, 25 - 34, 35 - 54, 55 + */}
         <div className="space-y-4">
-          <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5">
+          <h3 className="text-sm sm:text-base font-bold text-white light:text-slate-900 flex items-center gap-1.5">
             <span>Audience Age</span>
-            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+            <Info className="w-3.5 h-3.5 text-slate-400 light:text-slate-500 cursor-help" />
           </h3>
 
           <div className="space-y-3">
             {ageItems.map((item) => (
               <div key={item.range} className="space-y-1">
                 <div className="flex items-center justify-between text-xs sm:text-sm">
-                  <span className="text-slate-300 font-medium">{item.range}</span>
-                  <span className="font-bold text-white">{item.displayPct}%</span>
+                  <span className="text-slate-300 light:text-slate-600 font-medium">{item.range}</span>
+                  <span className="font-bold text-white light:text-slate-900">{item.displayPct}%</span>
                 </div>
-                <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div className="w-full bg-slate-800 light:bg-slate-200 rounded-full h-1.5 overflow-hidden">
                   <div
                     className="bg-purple-500 h-1.5 rounded-full transition-all duration-500"
                     style={{ width: `${Math.min(100, Math.max(0, item.pct))}%` }}
@@ -746,9 +746,9 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
 
         {/* 3. Audience Gender: Bigger Pie Chart on top, Male, Female, Unspecified below */}
         <div className="space-y-4">
-          <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5">
+          <h3 className="text-sm sm:text-base font-bold text-white light:text-slate-900 flex items-center gap-1.5">
             <span>Audience Gender</span>
-            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+            <Info className="w-3.5 h-3.5 text-slate-400 light:text-slate-500 cursor-help" />
           </h3>
 
           <div className="flex flex-col items-center justify-center pt-2">
@@ -762,6 +762,7 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
                   fill="transparent"
                   stroke="#1e293b"
                   strokeWidth="16"
+                  className="stroke-[#1e293b] light:stroke-slate-200"
                 />
                 {/* Female Slice (Pink) */}
                 <circle
@@ -808,23 +809,23 @@ export default function ProfileAnalytics({ creator }: ProfileAnalyticsProps) {
             <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-4 w-full">
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-blue-500 shrink-0 shadow-sm shadow-blue-500/50" />
-                <span className="text-xs sm:text-sm text-slate-300 font-medium">Male</span>
-                <span className="text-xs sm:text-sm font-black text-white">
+                <span className="text-xs sm:text-sm text-slate-300 light:text-slate-600 font-medium">Male</span>
+                <span className="text-xs sm:text-sm font-black text-white light:text-slate-900">
                   {formatMaxOneDecimal(genderData.malePct)}%
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-pink-500 shrink-0 shadow-sm shadow-pink-500/50" />
-                <span className="text-xs sm:text-sm text-slate-300 font-medium">Female</span>
-                <span className="text-xs sm:text-sm font-black text-white">
+                <span className="text-xs sm:text-sm text-slate-300 light:text-slate-600 font-medium">Female</span>
+                <span className="text-xs sm:text-sm font-black text-white light:text-slate-900">
                   {formatMaxOneDecimal(genderData.femalePct)}%
                 </span>
               </div>
               {genderData.unspecifiedPct > 0 && (
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-purple-500 shrink-0 shadow-sm shadow-purple-500/50" />
-                  <span className="text-xs sm:text-sm text-slate-300 font-medium">Unspecified</span>
-                  <span className="text-xs sm:text-sm font-black text-white">
+                  <span className="text-xs sm:text-sm text-slate-300 light:text-slate-600 font-medium">Unspecified</span>
+                  <span className="text-xs sm:text-sm font-black text-white light:text-slate-900">
                     {formatMaxOneDecimal(genderData.unspecifiedPct)}%
                   </span>
                 </div>
