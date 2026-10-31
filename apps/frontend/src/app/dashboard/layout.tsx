@@ -62,22 +62,22 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className={`h-screen w-screen bg-[#07090E] text-slate-100 flex flex-col md:flex-row overflow-hidden selection:bg-purple-500 selection:text-white ${
+      className={`h-screen w-screen bg-[#07090E] light:bg-[#F1F3F7] text-slate-100 light:text-slate-800 flex flex-col md:flex-row overflow-hidden selection:bg-purple-500 selection:text-white ${
         isResizing ? 'select-none cursor-col-resize' : ''
       }`}
     >
       {/* Mobile Top Header */}
-      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-slate-950/90 border-b border-white/10 shrink-0 z-30">
+      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-slate-950/90 light:bg-white border-b border-white/10 light:border-slate-200 shrink-0 z-30">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg overflow-hidden relative">
             <Image src="/logo.png" alt="Zerify Logo" width={28} height={28} className="object-contain" />
           </div>
-          <span className="text-sm font-black text-white tracking-tight">Zerify</span>
+          <span className="text-sm font-black text-white light:text-slate-900 tracking-tight">Zerify</span>
         </div>
 
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 rounded-xl bg-slate-900 border border-white/10 text-slate-300 hover:text-white transition-colors"
+          className="p-2 rounded-xl bg-slate-900 light:bg-slate-100 border border-white/10 light:border-slate-200 text-slate-300 light:text-slate-700 hover:text-white light:hover:text-slate-900 transition-colors"
           aria-label="Toggle Navigation Menu"
         >
           {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -103,10 +103,10 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Resizable Divider Handle (Desktop) */}
       <div
         onMouseDown={startResizing}
-        className="hidden md:flex w-2 hover:w-2.5 bg-slate-950/40 hover:bg-purple-500/30 cursor-col-resize items-center justify-center transition-all shrink-0 z-20 group relative border-r border-white/5"
+        className="hidden md:flex w-2 hover:w-2.5 bg-slate-950/40 light:bg-slate-200/60 hover:bg-purple-500/30 cursor-col-resize items-center justify-center transition-all shrink-0 z-20 group relative border-r border-white/5 light:border-slate-200"
         title="Click & drag to resize sidebar width"
       >
-        <div className="w-[3px] h-10 rounded-full bg-slate-700/60 group-hover:bg-purple-400 transition-colors" />
+        <div className="w-[3px] h-10 rounded-full bg-slate-700/60 light:bg-slate-300 group-hover:bg-purple-400 transition-colors" />
       </div>
 
       {/* Mobile Sidebar Overlay Drawer */}
@@ -116,7 +116,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
             className="fixed inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div className="relative z-50 w-72 h-full bg-slate-950 border-r border-white/10 flex flex-col">
+          <div className="relative z-50 w-72 h-full bg-slate-950 light:bg-white border-r border-white/10 light:border-slate-200 flex flex-col">
             <DashboardSidebar
               userRole={userRole}
               userName={userName}
@@ -136,13 +136,13 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Main Content View - Right Independent Scroll Container with Purplish Grid Background */}
-      <div className="relative flex-1 h-full overflow-hidden bg-[#07090E] bg-gradient-to-b from-purple-950/25 via-[#07090E] to-[#05060a]">
+      <div className="relative flex-1 h-full overflow-hidden bg-[#07090E] light:bg-[#F1F3F7] bg-gradient-to-b from-purple-950/25 via-[#07090E] to-[#05060a] light:from-[#F1F3F7] light:via-[#EFF1F6] light:to-[#EAECEF]">
         {/* Right-Side Purple Glow Spotlights */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[130px] pointer-events-none" />
-        <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-600/10 light:bg-purple-500/[0.02] rounded-full blur-[130px] pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/10 light:bg-indigo-500/[0.015] rounded-full blur-[120px] pointer-events-none" />
 
         {/* Prominent High-Tech Grid Pattern Background */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(168,85,247,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(168,85,247,0.12)_1px,transparent_1px)] bg-[size:36px_36px] pointer-events-none" />
+        <div className="absolute inset-0 dashboard-grid-pattern pointer-events-none" />
 
         <main
           className={`relative z-10 h-full no-scrollbar ${

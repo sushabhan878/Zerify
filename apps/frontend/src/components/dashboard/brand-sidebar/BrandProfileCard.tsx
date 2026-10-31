@@ -46,7 +46,7 @@ export default function BrandProfileCard({
               </div>
             )}
           </div>
-          <span className="absolute -bottom-1 -right-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full border border-slate-950 shadow-md">
+          <span className="absolute -bottom-1 -right-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full border border-slate-950 light:border-white shadow-md keep-white">
             {completionPercentage}%
           </span>
         </div>
@@ -57,7 +57,7 @@ export default function BrandProfileCard({
   return (
     <div
       onClick={onCompleteProfile}
-      className="p-3 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-3 group cursor-pointer hover:border-purple-500/30 transition-all"
+      className="p-3 rounded-2xl bg-slate-900/80 light:bg-purple-50/40 border border-white/10 light:border-purple-100 backdrop-blur-xl shadow-xl light:shadow-sm flex items-center gap-3 group cursor-pointer hover:border-purple-500/30 transition-all"
     >
       {/* Avatar with Completion Percentage Badge */}
       <div className="relative shrink-0">
@@ -70,13 +70,13 @@ export default function BrandProfileCard({
               className="w-full h-full object-cover rounded-full"
             />
           ) : (
-            <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-white font-black text-sm">
+            <div className="w-full h-full rounded-full bg-slate-950 light:bg-white flex items-center justify-center text-white light:text-purple-700 font-black text-sm">
               {logoChar}
             </div>
           )}
         </div>
         <span
-          className="absolute -bottom-1 -right-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[8.5px] font-black px-1.5 py-0.5 rounded-full border border-slate-950 shadow-md"
+          className="absolute -bottom-1 -right-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[8.5px] font-black px-1.5 py-0.5 rounded-full border border-slate-950 light:border-white shadow-md keep-white"
           title={`Profile ${completionPercentage}% Complete`}
         >
           {completionPercentage}%
@@ -85,13 +85,13 @@ export default function BrandProfileCard({
 
       {/* Field & Name */}
       <div className="overflow-hidden min-w-0 flex-1">
-        <span className="text-[9.5px] font-extrabold uppercase tracking-widest text-purple-400/90 block truncate">
+        <span className="text-[9.5px] font-extrabold uppercase tracking-widest text-purple-400/90 light:text-purple-600 block truncate">
           {industry}
         </span>
         <div className="flex items-center gap-1.5 mt-0.5">
-          <h4 className="text-xs font-black text-white truncate tracking-tight">{companyName}</h4>
+          <h4 className="text-xs font-black text-white light:text-slate-900 truncate tracking-tight">{companyName}</h4>
           <span title="Verified Enterprise" className="inline-flex shrink-0">
-            <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 fill-purple-400/20" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 fill-purple-400/20" />
           </span>
         </div>
       </div>

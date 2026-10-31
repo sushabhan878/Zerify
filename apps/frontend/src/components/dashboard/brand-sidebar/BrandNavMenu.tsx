@@ -132,7 +132,7 @@ export default function BrandNavMenu({
     <div className="space-y-0.5">
       {!isCollapsed && (
         <div className="px-3 pt-1.5 pb-0.5">
-          <span className="text-[9.5px] font-black uppercase tracking-widest text-slate-500">
+          <span className="text-[9.5px] font-black uppercase tracking-widest text-slate-500 light:text-slate-400">
             {title}
           </span>
         </div>
@@ -154,8 +154,8 @@ export default function BrandNavMenu({
                   title={hasSubItems ? undefined : route.label}
                   className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 ${
                     isActive
-                      ? 'bg-gradient-to-tr from-purple-600/40 via-indigo-600/30 to-pink-600/40 border border-purple-500/50 text-white shadow-lg shadow-purple-950/40 scale-105'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
+                      ? 'bg-gradient-to-tr from-purple-600/40 via-indigo-600/30 to-pink-600/40 border border-purple-500/50 text-white shadow-lg shadow-purple-950/40 scale-105 light:bg-purple-600 light:border-purple-600 light:text-white light:shadow-md'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent light:text-slate-500 light:hover:text-slate-900 light:hover:bg-purple-50/60'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -216,20 +216,20 @@ export default function BrandNavMenu({
               <button
                 onClick={() => onSelectRoute(route.id)}
                 type="button"
-                className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 group ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 group ${
                   isActive
-                    ? 'bg-gradient-to-r from-purple-600/30 via-indigo-600/20 to-pink-600/30 border border-purple-500/40 text-white shadow-lg shadow-purple-950/40'
-                    : 'text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent'
+                    ? 'bg-gradient-to-r from-purple-600/30 via-indigo-600/20 to-pink-600/30 border border-purple-500/40 text-white shadow-lg shadow-purple-950/40 light:bg-purple-600 light:border-purple-600 light:text-white light:shadow-md light:shadow-purple-500/25 keep-white'
+                    : 'text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent light:text-slate-600 light:hover:text-slate-900 light:hover:bg-purple-50/60'
                 }`}
               >
                 <div className="flex items-center gap-2.5 truncate">
                   <Icon
                     className={`w-4 h-4 shrink-0 transition-colors ${
                       isActive
-                        ? 'text-purple-300'
+                        ? 'text-purple-300 light:text-white'
                         : route.isAi
-                        ? 'text-indigo-400 group-hover:text-indigo-300'
-                        : 'text-slate-400 group-hover:text-slate-200'
+                        ? 'text-indigo-400 group-hover:text-indigo-300 light:text-purple-600'
+                        : 'text-slate-400 group-hover:text-slate-200 light:text-slate-500 light:group-hover:text-slate-900'
                     }`}
                   />
                   <span className="truncate">{route.label}</span>
@@ -259,14 +259,14 @@ export default function BrandNavMenu({
               {hasSubItems && isActive && (
                 <div className="relative pl-6 ml-4 py-1 space-y-1">
                   {/* Continuous Vertical Branch Line */}
-                  <div className="absolute left-[7px] top-0 bottom-3.5 w-[1.5px] bg-slate-700/60 rounded-full" />
+                  <div className="absolute left-[7px] top-0 bottom-3.5 w-[1.5px] bg-slate-700/60 light:bg-slate-300 rounded-full" />
 
                   {route.subItems?.map((sub) => {
                     const isSubActive = activeSubTab === sub.id || activeRoute === sub.id;
                     return (
                       <div key={sub.id} className="relative flex items-center">
                         {/* Curved Elbow Branch Line */}
-                        <div className="absolute -left-[17px] top-0 w-3.5 h-3.5 border-l-[1.5px] border-b-[1.5px] border-slate-700/60 rounded-bl-lg pointer-events-none" />
+                        <div className="absolute -left-[17px] top-0 w-3.5 h-3.5 border-l-[1.5px] border-b-[1.5px] border-slate-700/60 light:border-slate-300 rounded-bl-lg pointer-events-none" />
 
                         <button
                           onClick={() => {
@@ -276,14 +276,14 @@ export default function BrandNavMenu({
                           type="button"
                           className={`relative w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs transition-colors duration-150 ${
                             isSubActive
-                              ? 'text-white font-black'
-                              : 'text-slate-400 hover:text-white font-medium hover:bg-white/5'
+                              ? 'text-white font-black light:text-purple-700'
+                              : 'text-slate-400 hover:text-white font-medium hover:bg-white/5 light:text-slate-600 light:hover:text-slate-900 light:hover:bg-purple-50/50'
                           }`}
                         >
                           {isSubActive && (
                             <motion.div
                               layoutId={`activeSubHighlight-${route.id}`}
-                              className="absolute inset-0 bg-purple-500/20 border border-purple-500/35 rounded-xl shadow-md shadow-purple-950/30 backdrop-blur-sm"
+                              className="absolute inset-0 bg-purple-500/20 border border-purple-500/35 rounded-xl shadow-md shadow-purple-950/30 backdrop-blur-sm light:bg-purple-100/70 light:border-purple-200"
                               transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                             />
                           )}

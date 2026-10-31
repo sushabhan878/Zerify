@@ -44,19 +44,29 @@ export default function OverviewKpiGrid({ campaigns, isLoading }: {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" aria-busy={isLoading}>
       {kpis.map(({ label, value, change, icon: Icon, color }, index) => (
-        <motion.div key={label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+        <motion.div
+          key={label}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: index * 0.04 }}
-          className="p-4 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl hover:border-purple-500/30 transition-all group relative overflow-hidden">
+          className="p-4 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl hover:border-purple-500/30 transition-all group relative overflow-hidden light:bg-white light:border-slate-200/80 light:shadow-sm light:hover:shadow-md light:hover:border-purple-200"
+        >
           <div className="flex items-center justify-between gap-2 mb-2.5">
-            <span className="text-xs font-semibold text-slate-400 group-hover:text-slate-200 transition-colors">{label}</span>
-            <div className={`${color} shrink-0 group-hover:scale-110 transition-transform duration-200`}>
+            <span className="text-xs font-semibold text-slate-400 group-hover:text-slate-200 light:text-slate-600 light:group-hover:text-slate-900 transition-colors">
+              {label}
+            </span>
+            <div className={`shrink-0 transition-transform duration-200 group-hover:scale-110 ${color} light:bg-purple-50 light:border light:border-purple-100 light:text-purple-600 light:p-1.5 light:rounded-xl`}>
               <Icon className="w-5 h-5" />
             </div>
           </div>
-          {isLoading
-            ? <div className="h-8 w-24 rounded-lg bg-white/10 animate-pulse" />
-            : <div className="text-2xl font-black text-white break-words">{value}</div>}
-          <span className="text-[11px] font-bold text-emerald-400 mt-1 inline-block">
+          {isLoading ? (
+            <div className="h-8 w-24 rounded-lg bg-white/10 light:bg-slate-200 animate-pulse" />
+          ) : (
+            <div className="text-2xl font-black text-white light:text-slate-900 break-words">
+              {value}
+            </div>
+          )}
+          <span className="text-[11px] font-bold text-emerald-400 light:text-emerald-600 mt-1 inline-block">
             {isLoading ? 'Loading records…' : change}
           </span>
           {isLoading && (

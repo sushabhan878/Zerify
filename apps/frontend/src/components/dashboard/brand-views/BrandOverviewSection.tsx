@@ -15,7 +15,7 @@ interface BrandOverviewSectionProps {
   onNavigate?: (routeId: string) => void;
 }
 
-const controlClass = 'px-3.5 py-2 rounded-xl bg-slate-950/60 border border-white/10 text-xs font-semibold text-slate-300 hover:text-white hover:border-purple-500/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 disabled:opacity-50 transition-all';
+const controlClass = 'px-3.5 py-2 rounded-xl bg-slate-950/60 light:bg-white border border-white/10 light:border-slate-200 text-xs font-semibold text-slate-300 light:text-slate-700 hover:text-white light:hover:text-slate-900 hover:border-purple-500/40 light:hover:border-purple-300 light:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 disabled:opacity-50 transition-all';
 
 export default function BrandOverviewSection({ onNavigate }: BrandOverviewSectionProps) {
   const [data, setData] = useState<BrandOverviewData | null>(null);
@@ -83,20 +83,20 @@ export default function BrandOverviewSection({ onNavigate }: BrandOverviewSectio
             campaigns={data?.campaigns ?? []}
             disabled={isLoading}
           />
-          <span className="text-xs text-slate-400">All-time totals</span>
+          <span className="text-xs text-slate-400 light:text-slate-600 font-medium">All-time totals</span>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
           <button type="button" onClick={() => void load()} disabled={isLoading} className={controlClass + ' flex items-center gap-2'}>
-            {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400" /> : <RefreshCw className="w-3.5 h-3.5 text-purple-400" />}
+            {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400 light:text-purple-600" /> : <RefreshCw className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />}
             {isLoading ? 'Syncing records…' : 'Refresh'}
           </button>
-          <button type="button" onClick={exportCsv} disabled={isLoading || !data} className={controlClass + ' bg-purple-600/20 border-purple-500/30 text-purple-200 flex items-center gap-2 active:scale-95'}>
-            <Download className="w-3.5 h-3.5 text-purple-400" />Export CSV
+          <button type="button" onClick={exportCsv} disabled={isLoading || !data} className={controlClass + ' bg-purple-600/20 light:bg-purple-50 border-purple-500/30 light:border-purple-200 text-purple-200 light:text-purple-700 hover:light:bg-purple-100 flex items-center gap-2 active:scale-95'}>
+            <Download className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />Export CSV
           </button>
         </div>
       </div>
-      {error && <div role="alert" className="flex items-center gap-2 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-sm text-rose-200"><AlertCircle className="w-4 h-4 shrink-0" />{error}{data ? ' Showing the last loaded records.' : ' Values are unavailable until the connection is restored.'}</div>}
-      {data && !isLoading && <p className="text-[11px] text-slate-500">Last updated {new Date(data.updatedAt).toLocaleString()} · Missing metrics are shown as —.</p>}
+      {error && <div role="alert" className="flex items-center gap-2 p-4 rounded-2xl bg-rose-500/10 light:bg-rose-50 border border-rose-500/20 light:border-rose-200 text-sm text-rose-200 light:text-rose-700"><AlertCircle className="w-4 h-4 shrink-0" />{error}{data ? ' Showing the last loaded records.' : ' Values are unavailable until the connection is restored.'}</div>}
+      {data && !isLoading && <p className="text-[11px] text-slate-500 light:text-slate-600">Last updated {new Date(data.updatedAt).toLocaleString()} · Missing metrics are shown as —.</p>}
       {data || isLoading ? <>
         <OverviewKpiGrid campaigns={campaigns} isLoading={isLoading} />
         <CampaignPerformanceTrend campaigns={campaigns} isLoading={isLoading} />

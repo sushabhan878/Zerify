@@ -195,18 +195,20 @@ export default function StatisticKpiCards({
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.04 }}
-            className="p-4 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl hover:border-purple-500/30 transition-all group"
+            className="p-4 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl hover:border-purple-500/30 transition-all group light:bg-white light:border-slate-200/80 light:shadow-sm light:hover:shadow-md light:hover:border-purple-200"
           >
             <div className="flex items-center justify-between mb-2.5">
-              <span className="text-xs font-semibold text-slate-400 group-hover:text-slate-200 transition-colors">
+              <span className="text-xs font-semibold text-slate-400 group-hover:text-slate-200 light:text-slate-600 light:group-hover:text-slate-900 transition-colors">
                 {kpi.label}
               </span>
-              <div className={`p-2 rounded-xl bg-slate-950/60 border border-white/10 ${kpi.color}`}>
+              <div className={`p-2 rounded-xl bg-slate-950/60 border border-white/10 light:bg-purple-50 light:border-purple-100 light:text-purple-600 ${kpi.color}`}>
                 <Icon className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-2xl font-black text-white">{kpi.val}</div>
-            <span className="text-[11px] font-bold text-emerald-400 mt-1 inline-block">
+            <div className="text-2xl font-black text-white light:text-slate-900">
+              {kpi.val}
+            </div>
+            <span className="text-[11px] font-bold text-emerald-400 light:text-emerald-600 mt-1 inline-block">
               {kpi.change}
             </span>
           </motion.div>

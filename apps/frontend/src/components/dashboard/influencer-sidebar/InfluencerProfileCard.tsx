@@ -50,7 +50,7 @@ export default function InfluencerProfileCard({
             )}
           </div>
           {showCompletion ? (
-            <span className="absolute -bottom-1 -right-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full border border-slate-950 shadow-md">
+            <span className="absolute -bottom-1 -right-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full border border-slate-950 light:border-white shadow-md keep-white">
               {completionPercentage}%
             </span>
           ) : (
@@ -64,7 +64,7 @@ export default function InfluencerProfileCard({
   return (
     <div
       onClick={onCompleteProfile}
-      className="p-3 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-3 group cursor-pointer hover:border-purple-500/30 transition-all"
+      className="p-3 rounded-2xl bg-slate-900/80 light:bg-purple-50/40 border border-white/10 light:border-purple-100 backdrop-blur-xl shadow-xl light:shadow-sm flex items-center gap-3 group cursor-pointer hover:border-purple-500/30 transition-all"
     >
       {/* Avatar with Completion Percentage Badge */}
       <div className="relative shrink-0">
@@ -84,7 +84,7 @@ export default function InfluencerProfileCard({
         </div>
         {showCompletion ? (
           <span
-            className="absolute -bottom-1 -right-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[8.5px] font-black px-1.5 py-0.5 rounded-full border border-slate-950 shadow-md"
+            className="absolute -bottom-1 -right-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[8.5px] font-black px-1.5 py-0.5 rounded-full border border-slate-950 light:border-white shadow-md keep-white"
             title={`Profile ${completionPercentage}% Complete`}
           >
             {completionPercentage}%

@@ -143,20 +143,39 @@ input[type='number'] {
   background: rgba(139, 92, 246, 0.4);
 }
 
-/* Light Mode Theme System Overrides */
+/* Light Mode Theme System - Milky Grayish Canvas with Crisp White Cards & Subtle Purple Accents */
 html.light {
   color-scheme: light;
 }
 
 html.light body {
-  background-color: #F8FAFC !important;
+  background-color: #F1F3F7 !important;
   color: #0F172A !important;
 }
 
-/* Background Inversions for Light Mode */
+html.light ::-webkit-scrollbar-track {
+  background: #E8ECF2 !important;
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: #CBD2DE !important;
+  border-radius: 4px;
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #94A0B4 !important;
+}
+
+/* Background Inversions for Light Mode: Milky Grayish Canvas & Clean White Surfaces */
+html.light .bg-\[\#07090E\],
+html.light .bg-\[\#05060a\] {
+  background-color: #F1F3F7 !important;
+}
+
 html.light .bg-slate-950,
 html.light .bg-slate-950\/90,
 html.light .bg-slate-950\/95,
+html.light .bg-slate-950\/60,
+html.light .bg-slate-950\/45,
+html.light .bg-slate-950\/40,
 html.light .bg-slate-900,
 html.light .bg-slate-900\/80,
 html.light .bg-slate-900\/90,
@@ -169,30 +188,15 @@ html.light .bg-slate-900\/50,
 html.light .bg-slate-900\/40,
 html.light .bg-slate-900\/60,
 html.light .bg-slate-800,
-html.light .bg-slate-800\/50 {
-  background-color: #F1F5F9 !important;
+html.light .bg-slate-800\/50,
+html.light .bg-slate-800\/60 {
+  background-color: #EEF1F6 !important;
 }
 
 html.light .glass-card {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(226, 232, 240, 0.9) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06) !important;
-}
-
-/* Text Color Inversions for Light Mode */
-html.light .text-white,
-html.light .text-slate-100,
-html.light .text-slate-200 {
-  color: #0F172A !important;
-}
-
-html.light .text-slate-300,
-html.light .text-slate-400 {
-  color: #475569 !important;
-}
-
-html.light .text-slate-500 {
-  color: #64748B !important;
+  background: #FFFFFF !important;
+  border-color: #E2E6EE !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04) !important;
 }
 
 /* Border Color Inversions for Light Mode */
@@ -201,16 +205,85 @@ html.light .border-white\/5,
 html.light .border-white\/20,
 html.light .border-white\/15,
 html.light .border-white\/30 {
-  border-color: #E2E8F0 !important;
+  border-color: #E2E6EE !important;
+}
+
+/* Strict Text Color Inversions for Light Mode - Never White on Light Surfaces */
+html.light .text-white {
+  color: #0F172A !important;
+}
+html.light .text-slate-100 {
+  color: #1E293B !important;
+}
+html.light .text-slate-200 {
+  color: #334155 !important;
+}
+html.light .text-slate-300 {
+  color: #475569 !important;
+}
+html.light .text-slate-400 {
+  color: #64748B !important;
+}
+html.light .text-slate-500 {
+  color: #64748B !important;
+}
+
+/* Explicit exemption: keep-white only for solid dark badges / active pills where white text is specifically required */
+html.light .keep-white,
+html.light .keep-white *,
+html.light [data-keep-white="true"],
+html.light [data-keep-white="true"] * {
+  color: #FFFFFF !important;
+}
+
+/* Light Mode Input Elements */
+html.light input:not([type="checkbox"]):not([type="radio"]),
+html.light select,
+html.light textarea {
+  background-color: #FFFFFF !important;
+  border-color: #E2E6EE !important;
+  color: #0F172A !important;
+}
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94A0B4 !important;
 }
 
 /* Hover State Inversions for Light Mode */
-html.light .hover\:bg-white\/5:hover {
-  background-color: rgba(241, 245, 249, 0.85) !important;
+html.light .hover\:bg-white\/5:hover,
+html.light .hover\:bg-white\/10:hover {
+  background-color: rgba(238, 241, 246, 0.85) !important;
 }
 
 html.light .hover\:text-white:hover {
   color: #0F172A !important;
+}
+
+/* Shadows in Light Mode */
+html.light .shadow-xl,
+html.light .shadow-2xl {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Modal Backdrops in Light Mode */
+html.light .bg-black\/70,
+html.light .bg-black\/80 {
+  background-color: rgba(15, 23, 42, 0.45) !important;
+}
+
+/* Dashboard High-Tech Grid Pattern */
+.dashboard-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(168, 85, 247, 0.12) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(168, 85, 247, 0.12) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+html.light .dashboard-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(124, 58, 237, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(124, 58, 237, 0.08) 1px, transparent 1px);
+  background-size: 36px 36px;
 }
 
 /* Hide Scrollbars Utility */

@@ -130,8 +130,8 @@ export default function InfluencerNavMenu({
                   title={hasSubItems ? undefined : route.label}
                   className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 ${
                     isActive
-                      ? 'bg-gradient-to-tr from-purple-600/40 via-pink-600/30 to-indigo-600/40 border border-purple-500/50 text-white shadow-lg shadow-purple-950/40 scale-105'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
+                      ? 'bg-gradient-to-tr from-purple-600/40 via-pink-600/30 to-indigo-600/40 border border-purple-500/50 text-white shadow-lg shadow-purple-950/40 scale-105 light:bg-purple-600 light:border-purple-600 light:text-white light:shadow-md'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent light:text-slate-500 light:hover:text-slate-900 light:hover:bg-purple-50/60'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -192,20 +192,20 @@ export default function InfluencerNavMenu({
               <button
                 onClick={() => onSelectRoute(route.id)}
                 type="button"
-                className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 group ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 group ${
                   isActive
-                    ? 'bg-gradient-to-r from-purple-600/30 via-pink-600/20 to-indigo-600/30 border border-purple-500/40 text-white shadow-lg shadow-purple-950/40'
-                    : 'text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent'
+                    ? 'bg-gradient-to-r from-purple-600/30 via-pink-600/20 to-indigo-600/30 border border-purple-500/40 text-white shadow-lg shadow-purple-950/40 light:bg-purple-600 light:border-purple-600 light:text-white light:shadow-md light:shadow-purple-500/25 keep-white'
+                    : 'text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent light:text-slate-600 light:hover:text-slate-900 light:hover:bg-purple-50/60'
                 }`}
               >
                 <div className="flex items-center gap-2.5 truncate">
                   <Icon
                     className={`w-4 h-4 shrink-0 transition-colors ${
                       isActive
-                        ? 'text-purple-300'
+                        ? 'text-purple-300 light:text-white'
                         : route.isAi
-                        ? 'text-pink-400 group-hover:text-pink-300'
-                        : 'text-slate-400 group-hover:text-slate-200'
+                        ? 'text-pink-400 group-hover:text-pink-300 light:text-purple-600'
+                        : 'text-slate-400 group-hover:text-slate-200 light:text-slate-500 light:group-hover:text-slate-900'
                     }`}
                   />
                   <span className="truncate">{route.label}</span>

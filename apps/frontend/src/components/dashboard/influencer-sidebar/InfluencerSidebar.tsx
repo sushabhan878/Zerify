@@ -54,12 +54,12 @@ export default function InfluencerSidebar({
   return (
     <aside
       style={isCollapsed ? { ...style, width: '80px' } : style}
-      className={`h-full bg-slate-950/90 border-r border-white/10 flex flex-col shrink-0 selection:bg-purple-500 selection:text-white transition-all duration-200 ${
+      className={`h-full bg-slate-950/90 light:bg-[#FAFBFD] border-r border-white/10 light:border-slate-200 flex flex-col shrink-0 selection:bg-purple-500 selection:text-white transition-all duration-200 ${
         isCollapsed ? 'w-20' : 'w-72'
       } ${isMobileDrawer ? 'flex w-full' : 'hidden md:flex'}`}
     >
       {/* Sticky Top Header: Zerify Logo + Collapse Button & Profile Card */}
-      <div className="sticky top-0 z-20 bg-slate-950/95 backdrop-blur-xl border-b border-white/10 p-4 pb-3.5 space-y-3.5 shrink-0 shadow-md">
+      <div className="sticky top-0 z-20 bg-slate-950/95 light:bg-[#FAFBFD]/95 backdrop-blur-xl border-b border-white/10 light:border-slate-200 p-4 pb-3.5 space-y-3.5 shrink-0 shadow-md light:shadow-sm">
         {/* Top Zerify Logo Header Row with Collapse Toggle Button right next to logo */}
         <div className={`flex items-center gap-2 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
           {!isCollapsed && (
@@ -75,12 +75,12 @@ export default function InfluencerSidebar({
               </div>
               <div className="truncate">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-black tracking-tight text-white block">Zerify</span>
-                  <span className="px-1.5 py-0.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-[8.5px] font-black text-white uppercase tracking-wider">
+                  <span className="text-sm font-black tracking-tight text-white light:text-slate-900 block">Zerify</span>
+                  <span className="px-1.5 py-0.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-[8.5px] font-black text-white uppercase tracking-wider keep-white">
                     Studio
                   </span>
                 </div>
-                <span className="text-[9.5px] font-bold text-slate-400 block truncate">Creator Dashboard</span>
+                <span className="text-[9.5px] font-bold text-slate-400 light:text-slate-500 block truncate">Creator Dashboard</span>
               </div>
             </Link>
           )}
@@ -90,7 +90,7 @@ export default function InfluencerSidebar({
             onClick={toggleCollapse}
             type="button"
             title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-            className="w-7 h-7 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-all border border-white/10 shrink-0 shadow-sm"
+            className="w-7 h-7 rounded-xl bg-slate-900 light:bg-slate-100 hover:bg-slate-800 light:hover:bg-slate-200 text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 flex items-center justify-center transition-all border border-white/10 light:border-slate-200 shrink-0 shadow-sm"
           >
             {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
@@ -122,15 +122,15 @@ export default function InfluencerSidebar({
         {/* Bottom CTA Action Card & User Sign Out */}
         <div className="pt-4 space-y-3 shrink-0">
           {!isCollapsed ? (
-            <div className="p-4 rounded-2xl bg-gradient-to-b from-purple-950/40 to-slate-900 border border-purple-500/20 text-center space-y-2.5 shadow-lg">
+            <div className="p-4 rounded-2xl bg-gradient-to-b from-purple-950/40 to-slate-900 light:bg-[#F3F5FA] light:bg-none border border-purple-500/20 light:border-purple-200/80 text-center space-y-2.5 shadow-lg light:shadow-sm">
               <div>
-                <h5 className="text-xs font-black text-white">Let&apos;s start!</h5>
-                <p className="text-[10px] text-slate-400 mt-0.5">Creating or applying for deals couldn&apos;t be easier</p>
+                <h5 className="text-xs font-black text-white light:text-slate-900">Let&apos;s start!</h5>
+                <p className="text-[10px] text-slate-400 light:text-slate-600 mt-0.5 font-medium">Creating or applying for deals couldn&apos;t be easier</p>
               </div>
               <button
                 onClick={() => handleSelectRoute('company-discovery')}
                 type="button"
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-orange-950/40"
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-orange-950/40 light:shadow-orange-500/20"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
                 <span>Add New Task</span>
@@ -150,16 +150,16 @@ export default function InfluencerSidebar({
           )}
 
           {/* User Account / Logout */}
-          <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+          <div className="pt-2 border-t border-white/10 light:border-slate-200 flex items-center justify-between">
             {!isCollapsed ? (
               <>
                 <div className="flex items-center gap-2.5 overflow-hidden">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-pink-600 to-indigo-600 text-white font-black text-xs flex items-center justify-center border border-white/20 shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-pink-600 to-indigo-600 text-white font-black text-xs flex items-center justify-center border border-white/20 light:border-purple-200 shrink-0 keep-white">
                     {avatarChar}
                   </div>
                   <div className="truncate">
-                    <span className="text-xs font-bold text-white truncate block">{userName}</span>
-                    <span className="text-[10px] text-slate-400 truncate block">{userEmail}</span>
+                    <span className="text-xs font-bold text-white light:text-slate-900 truncate block">{userName}</span>
+                    <span className="text-[10px] text-slate-400 light:text-slate-500 truncate block">{userEmail}</span>
                   </div>
                 </div>
 
@@ -167,7 +167,7 @@ export default function InfluencerSidebar({
                   onClick={onLogout}
                   title="Sign Out"
                   type="button"
-                  className="p-2 rounded-xl bg-slate-900 border border-white/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 transition-all shrink-0"
+                  className="p-2 rounded-xl bg-slate-900 light:bg-slate-100 border border-white/10 light:border-slate-200 hover:border-rose-500/40 text-slate-400 light:text-slate-500 hover:text-rose-400 transition-all shrink-0"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
