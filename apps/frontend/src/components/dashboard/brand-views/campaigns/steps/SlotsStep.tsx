@@ -58,12 +58,12 @@ function UrlTagInput({ urls = [], onChange, placeholder }: UrlTagInputProps) {
   return (
     <div
       onClick={() => inputRef.current?.focus()}
-      className="w-full min-h-[42px] px-3 py-1.5 bg-slate-900/90 border border-purple-400/20 focus-within:border-purple-400/80 rounded-xl flex flex-wrap items-center gap-1.5 cursor-text transition-colors"
+      className="w-full min-h-[42px] px-3 py-1.5 bg-slate-900/90 border border-purple-400/20 focus-within:border-purple-400/80 light:bg-white light:border-slate-300 light:focus-within:border-purple-500 rounded-xl flex flex-wrap items-center gap-1.5 cursor-text transition-colors"
     >
       {currentUrls.map((url, idx) => (
         <span
           key={idx}
-          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-purple-500/20 border border-purple-400/40 text-purple-200 text-xs font-semibold max-w-[280px]"
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-purple-500/20 border border-purple-400/40 text-purple-200 light:bg-purple-50 light:border-purple-200 light:text-purple-700 text-xs font-semibold max-w-[280px]"
         >
           <span className="truncate" title={url}>
             {url.replace(/^https?:\/\/(www\.)?/, '')}
@@ -74,7 +74,7 @@ function UrlTagInput({ urls = [], onChange, placeholder }: UrlTagInputProps) {
               e.stopPropagation();
               removeUrl(idx);
             }}
-            className="hover:text-white hover:bg-white/10 rounded-full p-0.5 transition-colors cursor-pointer flex-shrink-0"
+            className="hover:text-white hover:bg-white/10 light:hover:text-purple-900 light:hover:bg-purple-100 rounded-full p-0.5 transition-colors cursor-pointer flex-shrink-0"
             aria-label={`Remove ${url}`}
           >
             <X className="w-3 h-3 stroke-[2.5]" />
@@ -89,7 +89,7 @@ function UrlTagInput({ urls = [], onChange, placeholder }: UrlTagInputProps) {
         onChange={(e) => handleInputChange(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={() => addUrls(inputValue)}
-        className="bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none flex-1 min-w-[140px] py-1"
+        className="bg-transparent text-xs text-white placeholder-slate-500 light:text-slate-900 light:placeholder-slate-400 focus:outline-none flex-1 min-w-[140px] py-1"
       />
     </div>
   );
@@ -139,8 +139,8 @@ export default function SlotsStep({ formData, onChange }: SlotsStepProps) {
       <div className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-purple-300/70" />
+            <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-purple-300/70 light:text-purple-600" />
               <span>Target No. of Creators to Hire</span> <span className="text-pink-400">*</span>
             </label>
             <input
@@ -152,33 +152,33 @@ export default function SlotsStep({ formData, onChange }: SlotsStepProps) {
                 const val = e.target.value.replace(/[^0-9]/g, '');
                 onChange('targetParticipants', val ? Number(val) : '');
               }}
-              className="w-full px-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+              className="w-full px-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
             />
             {calculatedSlots && calculatedSlots > 0 ? (
-              <div className="text-[10px] text-slate-400 mt-1 flex items-center justify-between">
+              <div className="text-[10px] text-slate-400 light:text-slate-500 mt-1 flex items-center justify-between">
                 <span>
-                  Budget estimate: {budgetTotal.toLocaleString()} ÷ {perCreatorFee.toLocaleString()} = <strong className="text-purple-300 font-bold">{calculatedSlots} creators</strong>
+                  Budget estimate: {budgetTotal.toLocaleString()} ÷ {perCreatorFee.toLocaleString()} = <strong className="text-purple-300 light:text-purple-700 font-bold">{calculatedSlots} creators</strong>
                 </span>
                 {formData.targetParticipants !== calculatedSlots && (
                   <button
                     type="button"
                     onClick={() => onChange('targetParticipants', calculatedSlots)}
-                    className="text-[10px] text-purple-400 hover:text-purple-200 underline cursor-pointer ml-1"
+                    className="text-[10px] text-purple-400 hover:text-purple-200 light:text-purple-600 light:hover:text-purple-800 underline cursor-pointer ml-1"
                   >
                     Reset to {calculatedSlots}
                   </button>
                 )}
               </div>
             ) : (
-              <p className="text-[10px] text-slate-400/90 mt-1">
+              <p className="text-[10px] text-slate-400/90 light:text-slate-500 mt-1">
                 The targeted number of creators you want to onboard for this campaign.
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-purple-300/70" />
+            <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <Lock className="w-3.5 h-3.5 text-purple-300/70 light:text-purple-600" />
               <span>Maximum Creators Allowed</span>
             </label>
             <input
@@ -190,10 +190,10 @@ export default function SlotsStep({ formData, onChange }: SlotsStepProps) {
                 const val = e.target.value.replace(/[^0-9]/g, '');
                 onChange('maxParticipants', val ? Number(val) : '');
               }}
-              className={`w-full px-4 py-2.5 bg-slate-900/90 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 transition-colors ${
+              className={`w-full px-4 py-2.5 bg-slate-900/90 border rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 transition-colors ${
                 isMaxSlotsInvalid
                   ? 'border-rose-500/80 bg-rose-500/5 focus:border-rose-500'
-                  : 'border-purple-400/20 focus:border-white/20'
+                  : 'border-purple-400/20 light:border-slate-300 focus:border-white/20'
               }`}
             />
             {isMaxSlotsInvalid ? (
@@ -202,7 +202,7 @@ export default function SlotsStep({ formData, onChange }: SlotsStepProps) {
                 <span>Maximum Creators Allowed must be strictly greater than Target No. of Creators to Hire ({targetSlots || 1}).</span>
               </div>
             ) : (
-              <p className="text-[10px] text-slate-400/90 mt-1">
+              <p className="text-[10px] text-slate-400/90 light:text-slate-500 mt-1">
                 Hard ceiling limit — must be strictly greater than the target hiring goal.
               </p>
             )}
@@ -218,11 +218,11 @@ export default function SlotsStep({ formData, onChange }: SlotsStepProps) {
               onChange={(e) => onChange('autoCloseWhenFilled', e.target.checked)}
               className="sr-only peer"
             />
-            <div className="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
+            <div className="w-10 h-5 bg-slate-800 light:bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500 cursor-pointer"></div>
           </label>
           <div>
-            <span className="text-xs font-bold text-white block">Auto-close applications when filled</span>
-            <span className="text-[10px] text-slate-400 block">
+            <span className="text-xs font-bold text-white light:text-slate-900 block">Auto-close applications when filled</span>
+            <span className="text-[10px] text-slate-400 light:text-slate-500 block">
               Automatically stop accepting new applicant pitches once target slots are confirmed
             </span>
           </div>
@@ -230,11 +230,11 @@ export default function SlotsStep({ formData, onChange }: SlotsStepProps) {
       </div>
 
       {/* Brand Guidelines & Reference Links */}
-      <div className="pt-6 border-t border-purple-400/10 space-y-4">
+      <div className="pt-6 border-t border-purple-400/10 light:border-slate-200 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-              <Link2 className="w-3.5 h-3.5 text-purple-300/70" />
+            <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <Link2 className="w-3.5 h-3.5 text-purple-300/70 light:text-purple-600" />
               <span>Reference / Moodboard URLs</span>
             </label>
             <UrlTagInput
@@ -242,14 +242,14 @@ export default function SlotsStep({ formData, onChange }: SlotsStepProps) {
               onChange={(urls) => handleGuidelineChange('referenceUrls', urls)}
               placeholder="e.g. figma.com/..., pinterest.com/..."
             />
-            <p className="text-[10px] text-slate-400/80 mt-1">
+            <p className="text-[10px] text-slate-400/80 light:text-slate-500 mt-1">
               Press comma or space to add multiple reference links.
             </p>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-              <FolderOpen className="w-3.5 h-3.5 text-purple-300/70" />
+            <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <FolderOpen className="w-3.5 h-3.5 text-purple-300/70 light:text-purple-600" />
               <span>Brand Asset Folder / Logo Drive URL</span>
             </label>
             <UrlTagInput
@@ -257,7 +257,7 @@ export default function SlotsStep({ formData, onChange }: SlotsStepProps) {
               onChange={(urls) => handleGuidelineChange('assetUrls', urls)}
               placeholder="e.g. drive.google.com/..., dropbox.com/..."
             />
-            <p className="text-[10px] text-slate-400/80 mt-1">
+            <p className="text-[10px] text-slate-400/80 light:text-slate-500 mt-1">
               Press comma or space to add multiple asset drive links.
             </p>
           </div>

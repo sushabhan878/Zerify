@@ -89,7 +89,7 @@ export default function StartCampaignConfirmationModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-950/85 backdrop-blur-md light:bg-slate-900/50 animate-in fade-in duration-200 overflow-y-auto"
       onClick={onClose}
     >
       {/* Background ambient glow */}
@@ -100,14 +100,14 @@ export default function StartCampaignConfirmationModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="start-campaign-modal-title"
-        className="relative z-10 w-full max-w-xl rounded-3xl bg-slate-900/95 border border-purple-500/30 shadow-2xl shadow-purple-950/50 p-6 sm:p-7 space-y-6 animate-in fade-in zoom-in-95 duration-200"
+        className="relative z-10 w-full max-w-xl rounded-3xl bg-slate-900/95 border border-purple-500/30 shadow-2xl shadow-purple-950/50 light:bg-white light:border-slate-200 light:shadow-2xl p-6 sm:p-7 space-y-6 animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 cursor-pointer"
+          className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 light:text-slate-400 light:hover:text-slate-800 light:hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 cursor-pointer"
           aria-label="Close confirmation dialog"
         >
           <X className="w-5 h-5" />
@@ -115,42 +115,42 @@ export default function StartCampaignConfirmationModal({
 
         {/* Modal Header */}
         <div className="space-y-1 pr-8">
-          <h2 id="start-campaign-modal-title" className="text-xl sm:text-2xl font-black text-white tracking-tight">
+          <h2 id="start-campaign-modal-title" className="text-xl sm:text-2xl font-black text-white light:text-slate-900 tracking-tight">
             Confirm Campaign Activation
           </h2>
-          <p className="text-xs sm:text-sm text-purple-300 font-semibold">
+          <p className="text-xs sm:text-sm text-purple-300 light:text-purple-700 font-semibold">
             {campaign?.title || 'Campaign'}
           </p>
         </div>
 
         {/* Campaign & Escrow Financial Hero Card */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950/90 via-slate-900/70 to-purple-950/30 border border-purple-500/25 hover:border-purple-500/40 backdrop-blur-2xl shadow-xl shadow-purple-950/30 transition-all duration-300 group">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950/90 via-slate-900/70 to-purple-950/30 border border-purple-500/25 hover:border-purple-500/40 backdrop-blur-2xl shadow-xl shadow-purple-950/30 light:from-slate-50 light:via-white light:to-purple-50/40 light:border-slate-200 light:shadow-sm transition-all duration-300 group">
           {/* Ambient Lighting Aura */}
           <div className="absolute -top-12 -right-12 w-44 h-44 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/20 transition-all duration-500" />
           <div className="absolute -bottom-10 -left-10 w-36 h-36 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
 
           {/* Top Section: Escrow Commitment Hero */}
-          <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10 border-b border-white/5">
+          <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10 border-b border-white/5 light:border-slate-200">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="text-xs font-black uppercase tracking-wider text-slate-300">
+                <span className="text-xs font-black uppercase tracking-wider text-slate-300 light:text-slate-700">
                   Escrow Commitment
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-xs font-bold whitespace-nowrap shadow-sm shadow-emerald-950/40">
-                  <Lock className="w-3 h-3 text-emerald-400 shrink-0" />
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 light:bg-emerald-50 light:border-emerald-200 light:text-emerald-700 text-xs font-bold whitespace-nowrap shadow-sm shadow-emerald-950/40">
+                  <Lock className="w-3 h-3 text-emerald-400 light:text-emerald-600 shrink-0" />
                   100% Protected
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 light:text-slate-500">
                 Funds held safely until deliverables are approved
               </p>
             </div>
 
             <div className="text-left sm:text-right shrink-0">
-              <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight leading-none block drop-shadow-[0_0_15px_rgba(52,211,153,0.35)]">
+              <span className="text-2xl sm:text-3xl font-black text-emerald-400 light:text-emerald-600 tracking-tight leading-none block drop-shadow-[0_0_15px_rgba(52,211,153,0.35)]">
                 <Money amount={totalEscrowAmount} currency={currency} />
               </span>
-              <span className="text-[11px] font-medium text-slate-400 block pt-1.5">
+              <span className="text-[11px] font-medium text-slate-400 light:text-slate-500 block pt-1.5">
                 {candidateCount > 1
                   ? `Combined fee for ${candidateCount} active collabs`
                   : 'Agreed Creator Compensation'}
@@ -159,17 +159,17 @@ export default function StartCampaignConfirmationModal({
           </div>
 
           {/* Bottom Section: Slots Recruitment Status */}
-          <div className="px-4 sm:px-5 py-3 bg-slate-950/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
+          <div className="px-4 sm:px-5 py-3 bg-slate-950/50 light:bg-slate-50/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
             <div className="flex items-center gap-2 text-xs flex-wrap">
-              <Users className="w-4 h-4 text-purple-400 shrink-0" />
-              <span className="font-semibold text-slate-300">Creator Recruitment:</span>
-              <span className="font-black text-white">
+              <Users className="w-4 h-4 text-purple-400 light:text-purple-600 shrink-0" />
+              <span className="font-semibold text-slate-300 light:text-slate-700">Creator Recruitment:</span>
+              <span className="font-black text-white light:text-slate-900">
                 {filledSlots} of {totalSlots} Slots Filled
               </span>
             </div>
 
             {/* Mini Progress Bar */}
-            <div className="w-full sm:w-44 bg-slate-800/60 h-2 rounded-full overflow-hidden shrink-0 border border-white/5">
+            <div className="w-full sm:w-44 bg-slate-800/60 light:bg-slate-200 h-2 rounded-full overflow-hidden shrink-0 border border-white/5 light:border-slate-300">
               <div
                 className="bg-gradient-to-r from-purple-500 via-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]"
                 style={{
@@ -183,13 +183,13 @@ export default function StartCampaignConfirmationModal({
         {/* Checkbox Acknowledgements */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-400 light:text-slate-600">
               Required Confirmations
             </span>
             <button
               type="button"
               onClick={handleSelectAll}
-              className="text-xs font-bold text-purple-300 hover:text-purple-200 transition-colors cursor-pointer"
+              className="text-xs font-bold text-purple-300 hover:text-purple-200 light:text-purple-700 light:hover:text-purple-900 transition-colors cursor-pointer"
             >
               {allAgreed ? 'Deselect all' : 'Select all'}
             </button>
@@ -207,14 +207,14 @@ export default function StartCampaignConfirmationModal({
               <div
                 className={`w-4 h-4 mt-0.5 rounded-md flex items-center justify-center shrink-0 border transition-all pointer-events-none ${
                   agreedTerms
-                    ? 'bg-purple-600 border-purple-500 text-white shadow-sm shadow-purple-600/30'
-                    : 'bg-slate-900/60 border-slate-700 group-hover:border-purple-400 text-transparent'
+                    ? 'bg-purple-600 border-purple-500 text-white keep-white shadow-sm shadow-purple-600/30'
+                    : 'bg-slate-900/60 border-slate-700 light:bg-white light:border-slate-300 group-hover:border-purple-400 text-transparent'
                 }`}
               >
                 <Check className="w-3 h-3 stroke-[3]" />
               </div>
-              <span className="text-xs text-slate-300 leading-snug group-hover:text-slate-200 transition-colors">
-                I have read and agree to the <span className="text-purple-300 font-semibold underline">Terms & Conditions</span>, platform guidelines, and mutual dispute resolution rules.
+              <span className="text-xs text-slate-300 light:text-slate-700 leading-snug group-hover:text-slate-200 light:group-hover:text-slate-900 transition-colors">
+                I have read and agree to the <span className="text-purple-300 light:text-purple-700 font-semibold underline">Terms & Conditions</span>, platform guidelines, and mutual dispute resolution rules.
               </span>
             </label>
 
@@ -229,14 +229,14 @@ export default function StartCampaignConfirmationModal({
               <div
                 className={`w-4 h-4 mt-0.5 rounded-md flex items-center justify-center shrink-0 border transition-all pointer-events-none ${
                   agreedPrivacy
-                    ? 'bg-purple-600 border-purple-500 text-white shadow-sm shadow-purple-600/30'
-                    : 'bg-slate-900/60 border-slate-700 group-hover:border-purple-400 text-transparent'
+                    ? 'bg-purple-600 border-purple-500 text-white keep-white shadow-sm shadow-purple-600/30'
+                    : 'bg-slate-900/60 border-slate-700 light:bg-white light:border-slate-300 group-hover:border-purple-400 text-transparent'
                 }`}
               >
                 <Check className="w-3.5 h-3.5 stroke-[3]" />
               </div>
-              <span className="text-xs text-slate-300 leading-snug group-hover:text-slate-200 transition-colors">
-                I accept the <span className="text-purple-300 font-semibold underline">Privacy Policy</span> and acknowledge commercial usage licensing for all verified creator deliverables.
+              <span className="text-xs text-slate-300 light:text-slate-700 leading-snug group-hover:text-slate-200 light:group-hover:text-slate-900 transition-colors">
+                I accept the <span className="text-purple-300 light:text-purple-700 font-semibold underline">Privacy Policy</span> and acknowledge commercial usage licensing for all verified creator deliverables.
               </span>
             </label>
 
@@ -251,14 +251,14 @@ export default function StartCampaignConfirmationModal({
               <div
                 className={`w-4 h-4 mt-0.5 rounded-md flex items-center justify-center shrink-0 border transition-all pointer-events-none ${
                   agreedContract
-                    ? 'bg-purple-600 border-purple-500 text-white shadow-sm shadow-purple-600/30'
-                    : 'bg-slate-900/60 border-slate-700 group-hover:border-purple-400 text-transparent'
+                    ? 'bg-purple-600 border-purple-500 text-white keep-white shadow-sm shadow-purple-600/30'
+                    : 'bg-slate-900/60 border-slate-700 light:bg-white light:border-slate-300 group-hover:border-purple-400 text-transparent'
                 }`}
               >
                 <Check className="w-3 h-3 stroke-[3]" />
               </div>
-              <span className="text-xs text-slate-300 leading-snug group-hover:text-slate-200 transition-colors">
-                I approve the <span className="text-white font-semibold">Contract & Deliverables Scope</span>, revision count limits, and publishing requirements for participating creators.
+              <span className="text-xs text-slate-300 light:text-slate-700 leading-snug group-hover:text-slate-200 light:group-hover:text-slate-900 transition-colors">
+                I approve the <span className="text-white light:text-slate-900 font-semibold">Contract & Deliverables Scope</span>, revision count limits, and publishing requirements for participating creators.
               </span>
             </label>
 
@@ -273,14 +273,14 @@ export default function StartCampaignConfirmationModal({
               <div
                 className={`w-4 h-4 mt-0.5 rounded-md flex items-center justify-center shrink-0 border transition-all pointer-events-none ${
                   agreedEscrow
-                    ? 'bg-purple-600 border-purple-500 text-white shadow-sm shadow-purple-600/30'
-                    : 'bg-slate-900/60 border-slate-700 group-hover:border-purple-400 text-transparent'
+                    ? 'bg-purple-600 border-purple-500 text-white keep-white shadow-sm shadow-purple-600/30'
+                    : 'bg-slate-900/60 border-slate-700 light:bg-white light:border-slate-300 group-hover:border-purple-400 text-transparent'
                 }`}
               >
                 <Check className="w-3 h-3 stroke-[3]" />
               </div>
-              <span className="text-xs text-slate-300 leading-snug group-hover:text-slate-200 transition-colors">
-                I understand that campaign funds will be <span className="text-emerald-400 font-semibold">safely reserved in Smart Escrow</span> and released to creators only upon review and approval.
+              <span className="text-xs text-slate-300 light:text-slate-700 leading-snug group-hover:text-slate-200 light:group-hover:text-slate-900 transition-colors">
+                I understand that campaign funds will be <span className="text-emerald-400 light:text-emerald-600 font-semibold">safely reserved in Smart Escrow</span> and released to creators only upon review and approval.
               </span>
             </label>
           </div>
@@ -291,7 +291,7 @@ export default function StartCampaignConfirmationModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white light:bg-slate-100 light:border light:border-slate-200 light:text-slate-700 light:hover:bg-slate-200 transition-all cursor-pointer"
           >
             Cancel
           </button>
@@ -300,11 +300,11 @@ export default function StartCampaignConfirmationModal({
             type="button"
             disabled={!allAgreed}
             onClick={onProceedToEscrow}
-            className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-black text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-500 disabled:opacity-40 disabled:pointer-events-none shadow-lg shadow-purple-950/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-black text-white keep-white bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-500 disabled:opacity-40 disabled:pointer-events-none shadow-lg shadow-purple-950/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
-            <Lock className="w-3.5 h-3.5 text-purple-200" />
-            <span>Continue with Escrow Reservation</span>
-            <ArrowRight className="w-4 h-4 text-purple-200" />
+            <Lock className="w-3.5 h-3.5 text-purple-200 keep-white" />
+            <span className="text-white keep-white">Continue with Escrow Reservation</span>
+            <ArrowRight className="w-4 h-4 text-purple-200 keep-white" />
           </button>
         </div>
       </div>

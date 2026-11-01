@@ -186,34 +186,34 @@ export default function WorkspacePaymentEscrowCard({
   return (
     <section id="campaign-payment" className={`${panel} space-y-5 p-6 sm:p-7 shadow-2xl shadow-purple-950/20`}>
       {/* Card Header */}
-      <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div className="flex items-center justify-between gap-4 border-b border-white/10 light:border-slate-200 pb-4">
         <div>
-          <h3 className="font-extrabold text-white text-base sm:text-lg leading-snug">Payment & escrow</h3>
-          <span className="text-xs font-semibold text-purple-400 block mt-0.5">
+          <h3 className="font-extrabold text-white light:text-slate-900 text-base sm:text-lg leading-snug">Payment & escrow</h3>
+          <span className="text-xs font-semibold text-purple-400 light:text-purple-700 block mt-0.5">
             Protected by Zerify Escrow
           </span>
         </div>
         <div className="text-right shrink-0">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Value</span>
-          <span className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 light:text-slate-500 block">Total Value</span>
+          <span className="text-xl sm:text-2xl font-black text-emerald-400 light:text-emerald-600 tracking-tight">
             {formatCurrency(totalAmount, agreedCurrency)}
           </span>
         </div>
       </div>
 
       {/* Equal Breakdown Summary Callout */}
-      <div className="rounded-xl border border-purple-500/20 bg-purple-500/10 p-3.5 space-y-2">
+      <div className="rounded-xl border border-purple-500/20 bg-purple-500/10 light:bg-purple-50 light:border-purple-200 p-3.5 space-y-2">
         <div className="flex items-center justify-between text-xs">
-          <span className="font-bold text-purple-200">Equal Milestone Breakdown</span>
-          <span className="text-[11px] font-semibold text-purple-300">
+          <span className="font-bold text-purple-200 light:text-purple-900">Equal Milestone Breakdown</span>
+          <span className="text-[11px] font-semibold text-purple-300 light:text-purple-700">
             {totalParts} equal parts of {formatCurrency(baseMilestoneShare, agreedCurrency)}
           </span>
         </div>
-        <div className="flex items-center justify-between text-[11px] text-slate-300">
-          <span>Released: <strong className="text-emerald-400 font-bold">{formatCurrency(releasedAmount, agreedCurrency)}</strong></span>
-          <span>In Escrow: <strong className="text-slate-200 font-bold">{formatCurrency(remainingInEscrow, agreedCurrency)}</strong></span>
+        <div className="flex items-center justify-between text-[11px] text-slate-300 light:text-slate-600">
+          <span>Released: <strong className="text-emerald-400 light:text-emerald-600 font-bold">{formatCurrency(releasedAmount, agreedCurrency)}</strong></span>
+          <span>In Escrow: <strong className="text-slate-200 light:text-slate-800 font-bold">{formatCurrency(remainingInEscrow, agreedCurrency)}</strong></span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-900/80">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-900/80 light:bg-slate-200">
           <div
             className="h-full rounded-full bg-gradient-to-r from-purple-500 via-indigo-500 to-emerald-400 transition-all duration-500"
             style={{ width: `${releasePercentage}%` }}
@@ -224,8 +224,8 @@ export default function WorkspacePaymentEscrowCard({
       {/* Step-by-Step Vertical Payment Stepper */}
       <div className="space-y-3 pt-1">
         <div className="flex items-center justify-between text-xs">
-          <span className="font-bold text-slate-200">Payment Progression</span>
-          <span className="text-xs font-semibold text-purple-400">Step-by-Step Releases</span>
+          <span className="font-bold text-slate-200 light:text-slate-900">Payment Progression</span>
+          <span className="text-xs font-semibold text-purple-400 light:text-purple-700">Step-by-Step Releases</span>
         </div>
 
         <div className="relative pt-2 pl-1">
@@ -242,7 +242,7 @@ export default function WorkspacePaymentEscrowCard({
                     className={`absolute left-[13px] top-[26px] w-[2px] bottom-0 transition-colors duration-300 ${
                       isCompleted
                         ? 'bg-gradient-to-b from-purple-500 to-purple-600 shadow-[0_0_8px_rgba(168,85,247,0.4)]'
-                        : 'bg-white/10'
+                        : 'bg-white/10 light:bg-slate-200'
                     }`}
                   />
                 )}
@@ -250,16 +250,16 @@ export default function WorkspacePaymentEscrowCard({
                 {/* Node Indicator */}
                 <div className="relative z-10 shrink-0">
                   {isCompleted ? (
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 border border-purple-400/60 shadow-lg shadow-purple-950/80 ring-4 ring-[#080B14] flex items-center justify-center text-white">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 border border-purple-400/60 shadow-lg shadow-purple-950/80 ring-4 ring-[#080B14] light:ring-white flex items-center justify-center text-white keep-white">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-white keep-white stroke-[2.5]" />
                     </div>
                   ) : isInProgress ? (
-                    <div className="w-7 h-7 rounded-full bg-slate-950 border-2 border-purple-400 ring-4 ring-purple-500/25 shadow-lg shadow-purple-950/80 flex items-center justify-center relative">
+                    <div className="w-7 h-7 rounded-full bg-slate-950 light:bg-purple-50 border-2 border-purple-400 ring-4 ring-purple-500/25 shadow-lg shadow-purple-950/80 flex items-center justify-center relative">
                       <span className="w-2.5 h-2.5 rounded-full border-2 border-purple-400 animate-pulse" />
                     </div>
                   ) : (
-                    <div className="w-7 h-7 rounded-full bg-slate-950 border border-white/20 ring-4 ring-[#080B14] flex items-center justify-center">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />
+                    <div className="w-7 h-7 rounded-full bg-slate-950 border border-white/20 ring-4 ring-[#080B14] light:bg-white light:border-slate-300 light:ring-white flex items-center justify-center">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-600 light:bg-slate-400" />
                     </div>
                   )}
                 </div>
@@ -271,26 +271,26 @@ export default function WorkspacePaymentEscrowCard({
                       <span
                         className={`text-xs sm:text-sm font-bold truncate ${
                           isCompleted
-                            ? 'text-white'
+                            ? 'text-white light:text-slate-900'
                             : isInProgress
-                            ? 'text-purple-300'
-                            : 'text-slate-400'
+                            ? 'text-purple-300 light:text-purple-700'
+                            : 'text-slate-400 light:text-slate-500'
                         }`}
                       >
                         {step.title}
                       </span>
                       {step.badge && (
-                        <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-semibold text-slate-400 shrink-0">
+                        <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-semibold text-slate-400 light:bg-slate-100 light:border-slate-200 light:text-slate-600 shrink-0">
                           {step.badge}
                         </span>
                       )}
                     </div>
-                    <span className="text-xs sm:text-sm font-black text-slate-200 shrink-0">
+                    <span className="text-xs sm:text-sm font-black text-slate-200 light:text-slate-800 shrink-0">
                       {formatCurrency(step.amount, agreedCurrency)}
                     </span>
                   </div>
 
-                  <p className="text-xs text-slate-400 leading-relaxed">
+                  <p className="text-xs text-slate-400 light:text-slate-600 leading-relaxed">
                     {step.subtitle}
                   </p>
                 </div>
@@ -301,8 +301,8 @@ export default function WorkspacePaymentEscrowCard({
       </div>
 
       {/* Safety Notice Footer */}
-      <div className="border-t border-white/10 pt-3.5 flex items-center gap-2.5 text-xs text-slate-400">
-        <Lock className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+      <div className="border-t border-white/10 light:border-slate-200 pt-3.5 flex items-center gap-2.5 text-xs text-slate-400 light:text-slate-600">
+        <Lock className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />
         <p className="leading-relaxed">
           Protected by Zerify Escrow. Funds are safely locked in custody and released upon verified deliverable approval.
         </p>

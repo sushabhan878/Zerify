@@ -128,14 +128,14 @@ export default function ApplicantCard({
   })();
 
   return (
-    <div className="relative overflow-visible px-5 pb-5 pt-3 sm:px-6 sm:pb-6 sm:pt-3.5 rounded-3xl bg-slate-950/75 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 space-y-3.5 shadow-xl shadow-purple-950/20 backdrop-blur-xl group">
+    <div className="relative overflow-visible px-5 pb-5 pt-3 sm:px-6 sm:pb-6 sm:pt-3.5 rounded-3xl bg-slate-950/75 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 space-y-3.5 shadow-xl shadow-purple-950/20 backdrop-blur-xl group light:bg-white light:border-slate-200/80 light:hover:border-purple-300 light:shadow-sm light:hover:shadow-md">
       {/* Floating Status Badge Overlapping Top-Right Corner */}
       <div className="absolute -top-2.5 sm:-top-3 right-5 sm:right-6 z-30 pointer-events-none">
         <span
-          className={`px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full ${statusBadge.gradient} border ${statusBadge.border} text-xs sm:text-sm font-black text-white flex items-center gap-1.5 shadow-xl ${statusBadge.shadow} ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300`}
+          className={`px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full ${statusBadge.gradient} border ${statusBadge.border} text-xs sm:text-sm font-black text-white keep-white flex items-center gap-1.5 shadow-xl ${statusBadge.shadow} ring-4 ring-[#090C15] light:ring-[#F1F3F7] group-hover:scale-105 transition-all duration-300`}
         >
           <span className={`w-2 h-2 rounded-full ${statusBadge.dot}`} />
-          <span className="uppercase tracking-wider">{statusBadge.label}</span>
+          <span className="uppercase tracking-wider keep-white text-white">{statusBadge.label}</span>
         </span>
       </div>
 
@@ -147,7 +147,7 @@ export default function ApplicantCard({
             type="button"
             onClick={handleOpenProfile}
             title={`View ${creatorItem.name}'s platform profile`}
-            className="w-12 h-12 rounded-2xl overflow-hidden border border-purple-500/30 hover:border-purple-400 bg-slate-900 shrink-0 shadow-md flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 group/avatar cursor-pointer text-left relative"
+            className="w-12 h-12 rounded-2xl overflow-hidden border border-purple-500/30 hover:border-purple-400 bg-slate-900 light:bg-slate-100 light:border-slate-200 shrink-0 shadow-md flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 group/avatar cursor-pointer text-left relative"
           >
             {creatorItem.avatarUrl && !imageError ? (
               <img
@@ -157,8 +157,8 @@ export default function ApplicantCard({
                 className="w-full h-full object-cover group-hover/avatar:scale-110 transition-transform duration-300"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 flex items-center justify-center text-white font-black text-base shadow-inner select-none">
-                {creatorItem.name ? creatorItem.name.charAt(0).toUpperCase() : 'C'}
+              <div className="w-full h-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 flex items-center justify-center text-white keep-white font-black text-base shadow-inner select-none">
+                <span className="keep-white text-white">{creatorItem.name ? creatorItem.name.charAt(0).toUpperCase() : 'C'}</span>
               </div>
             )}
           </button>
@@ -171,15 +171,15 @@ export default function ApplicantCard({
               title={`View ${creatorItem.name}'s platform profile`}
               className="inline-flex items-center gap-1.5 min-w-0 group/name cursor-pointer max-w-full text-left"
             >
-              <h4 className="text-sm sm:text-base font-bold text-white group-hover/name:text-purple-300 transition-colors truncate">
+              <h4 className="text-sm sm:text-base font-bold text-white group-hover/name:text-purple-300 light:text-slate-900 light:group-hover/name:text-purple-700 transition-colors truncate">
                 {creatorItem.name}
               </h4>
-              <span className="p-0.5 rounded-md bg-purple-500/10 group-hover/name:bg-purple-500/25 border border-purple-500/20 text-purple-400 group-hover/name:text-purple-300 transition-all flex items-center justify-center shrink-0">
+              <span className="p-0.5 rounded-md bg-purple-500/10 group-hover/name:bg-purple-500/25 border border-purple-500/20 text-purple-400 group-hover/name:text-purple-300 light:text-purple-600 transition-all flex items-center justify-center shrink-0">
                 <ArrowUpRight className="w-3.5 h-3.5 group-hover/name:translate-x-0.5 group-hover/name:-translate-y-0.5 transition-transform" />
               </span>
             </button>
 
-            <p className="text-xs text-slate-400 font-medium truncate">
+            <p className="text-xs text-slate-400 light:text-slate-500 font-medium truncate">
               {creatorItem.category || creatorItem.role || 'Verified Creator'}
             </p>
           </div>
@@ -187,28 +187,28 @@ export default function ApplicantCard({
       </div>
 
       {/* Snapshot Stats (Followers, Engagement, Proposed Quote) - Clean Minimal Layout (No Horizontal Lines) */}
-      <div className="grid grid-cols-3 divide-x divide-purple-500/20 py-2 text-center">
+      <div className="grid grid-cols-3 divide-x divide-purple-500/20 light:divide-slate-200 py-2 text-center">
         <div className="px-2">
-          <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-0.5">
+          <span className="text-[10px] text-slate-400 light:text-slate-500 block uppercase font-bold tracking-wider mb-0.5">
             Followers
           </span>
-          <span className="text-lg sm:text-xl md:text-2xl font-black text-white tracking-tight">
+          <span className="text-lg sm:text-xl md:text-2xl font-black text-white light:text-slate-900 tracking-tight">
             {followersDisplay}
           </span>
         </div>
         <div className="px-2">
-          <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-0.5">
+          <span className="text-[10px] text-slate-400 light:text-slate-500 block uppercase font-bold tracking-wider mb-0.5">
             Engagement
           </span>
-          <span className="text-lg sm:text-xl md:text-2xl font-black text-emerald-400 tracking-tight">
+          <span className="text-lg sm:text-xl md:text-2xl font-black text-emerald-400 light:text-emerald-600 tracking-tight">
             {engagementDisplay}
           </span>
         </div>
         <div className="px-2">
-          <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-0.5">
+          <span className="text-[10px] text-slate-400 light:text-slate-500 block uppercase font-bold tracking-wider mb-0.5">
             {application.reviewNotes === 'COUNTER_OFFER' ? 'Counter Quote' : 'Pitch Quote'}
           </span>
-          <span className={`text-lg sm:text-xl md:text-2xl font-black tracking-tight ${application.reviewNotes === 'COUNTER_OFFER' ? 'text-amber-400' : 'text-purple-300'}`}>
+          <span className={`text-lg sm:text-xl md:text-2xl font-black tracking-tight ${application.reviewNotes === 'COUNTER_OFFER' ? 'text-amber-400 light:text-amber-600' : 'text-purple-300 light:text-purple-700'}`}>
             {application.proposedAmount ? (
               <Money
                 amount={application.proposedAmount}
@@ -223,8 +223,8 @@ export default function ApplicantCard({
 
       {/* Pitch Snippet */}
       {application.applicationMessage && (
-        <div className="flex items-start gap-2 px-1 text-xs text-slate-300 leading-relaxed">
-          <MessageSquare className="w-3.5 h-3.5 text-purple-400/80 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-2 px-1 text-xs text-slate-300 light:text-slate-600 leading-relaxed">
+          <MessageSquare className="w-3.5 h-3.5 text-purple-400/80 light:text-purple-600 shrink-0 mt-0.5" />
           <p className="line-clamp-2 italic">
             &quot;{application.applicationMessage}&quot;
           </p>
@@ -237,10 +237,10 @@ export default function ApplicantCard({
         <button
           onClick={() => onViewDetails(application)}
           type="button"
-          className="group/pitch inline-flex items-center gap-1.5 py-1 text-xs sm:text-sm font-bold text-purple-400 hover:text-purple-300 transition-colors duration-200 cursor-pointer select-none"
+          className="group/pitch inline-flex items-center gap-1.5 py-1 text-xs sm:text-sm font-bold text-purple-400 hover:text-purple-300 light:text-purple-700 light:hover:text-purple-900 transition-colors duration-200 cursor-pointer select-none"
         >
           <span>Detailed Pitch</span>
-          <ArrowRight className="w-4 h-4 text-purple-400 group-hover/pitch:text-purple-300 group-hover/pitch:translate-x-1 transition-transform duration-200 shrink-0" />
+          <ArrowRight className="w-4 h-4 text-purple-400 group-hover/pitch:text-purple-300 light:text-purple-700 group-hover/pitch:translate-x-1 transition-transform duration-200 shrink-0" />
         </button>
 
         <div className="flex items-center gap-2 flex-wrap pr-16 sm:pr-20">
@@ -252,7 +252,7 @@ export default function ApplicantCard({
               <button
                 onClick={() => onReject(application.id)}
                 type="button"
-                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 hover:text-rose-300 border border-white/5 hover:border-rose-500/30 text-xs font-bold text-slate-400 transition-all cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 hover:text-rose-300 light:bg-slate-100 light:border-slate-200 light:text-slate-700 light:hover:bg-rose-50 light:hover:text-rose-600 border border-white/5 hover:border-rose-500/30 text-xs font-bold text-slate-400 transition-all cursor-pointer"
               >
                 Reject
               </button>
@@ -261,9 +261,9 @@ export default function ApplicantCard({
               <button
                 onClick={() => (onCounterOffer ? onCounterOffer(application) : onSendOffer(application))}
                 type="button"
-                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-600/20 via-orange-600/20 to-amber-600/20 hover:from-amber-600 hover:to-orange-600 border border-amber-500/40 hover:border-transparent text-xs font-bold text-amber-200 hover:text-white transition-all flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-600/20 via-orange-600/20 to-amber-600/20 hover:from-amber-600 hover:to-orange-600 light:bg-amber-50 light:border-amber-300 light:text-amber-800 border border-amber-500/40 hover:border-transparent text-xs font-bold text-amber-200 hover:text-white transition-all flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
-                <RefreshCw className="w-3.5 h-3.5 text-amber-300" />
+                <RefreshCw className="w-3.5 h-3.5 text-amber-300 light:text-amber-700" />
                 <span>Counter Offer</span>
               </button>
 
@@ -271,10 +271,10 @@ export default function ApplicantCard({
               <button
                 onClick={() => (onAccept ? onAccept(application) : onSendOffer(application))}
                 type="button"
-                className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs font-bold text-white flex items-center gap-1.5 shadow-md shadow-emerald-950/40 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs font-bold text-white keep-white flex items-center gap-1.5 shadow-md shadow-emerald-950/40 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Accept</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-white keep-white" />
+                <span className="keep-white text-white">Accept</span>
               </button>
             </>
           ) : application.status === 'SHORTLISTED' ? (
@@ -282,36 +282,36 @@ export default function ApplicantCard({
               <button
                 onClick={() => onReject(application.id)}
                 type="button"
-                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 hover:text-rose-300 border border-white/5 hover:border-rose-500/30 text-xs font-bold text-slate-400 transition-all cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 hover:text-rose-300 light:bg-slate-100 light:border-slate-200 light:text-slate-700 light:hover:bg-rose-50 light:hover:text-rose-600 border border-white/5 hover:border-rose-500/30 text-xs font-bold text-slate-400 transition-all cursor-pointer"
               >
                 Reject
               </button>
               <button
                 onClick={() => onSendOffer(application)}
                 type="button"
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white flex items-center gap-1.5 shadow-lg shadow-purple-950/40 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white keep-white flex items-center gap-1.5 shadow-lg shadow-purple-950/40 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
-                <Send className="w-3.5 h-3.5" />
-                <span>Send Offer</span>
+                <Send className="w-3.5 h-3.5 text-white keep-white" />
+                <span className="keep-white text-white">Send Offer</span>
               </button>
             </>
           ) : application.status === 'OFFER_SENT' ? (
-            <span className="px-3.5 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/25 text-xs font-bold text-indigo-300 flex items-center gap-1.5">
-              <Send className="w-3.5 h-3.5 text-indigo-400" />
+            <span className="px-3.5 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/25 light:bg-indigo-50 light:border-indigo-200 text-xs font-bold text-indigo-300 light:text-indigo-700 flex items-center gap-1.5">
+              <Send className="w-3.5 h-3.5 text-indigo-400 light:text-indigo-600" />
               <span>Offer Sent • Awaiting Response</span>
             </span>
           ) : application.status === 'OFFER_ACCEPTED' ? null : application.status === 'REJECTED' || application.status === 'OFFER_DECLINED' ? (
-            <span className="px-3.5 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/25 text-xs font-bold text-rose-400">
+            <span className="px-3.5 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/25 light:bg-rose-50 light:border-rose-200 text-xs font-bold text-rose-400 light:text-rose-700">
               Application Declined
             </span>
           ) : (
             <button
               onClick={() => onSendOffer(application)}
               type="button"
-              className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white flex items-center gap-1.5 shadow-lg shadow-purple-950/40 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white keep-white flex items-center gap-1.5 shadow-lg shadow-purple-950/40 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
-              <Send className="w-3.5 h-3.5" />
-              <span>Send Offer</span>
+              <Send className="w-3.5 h-3.5 text-white keep-white" />
+              <span className="keep-white text-white">Send Offer</span>
             </button>
           )}
         </div>

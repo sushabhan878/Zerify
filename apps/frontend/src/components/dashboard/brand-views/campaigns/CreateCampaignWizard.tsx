@@ -433,16 +433,35 @@ export default function CreateCampaignWizard({
   if (!mounted) return null;
 
   const modalContent = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 light:bg-slate-900/35 backdrop-blur-md overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         className="relative w-full max-w-4xl flex flex-col my-auto max-h-[96vh] space-y-3 sm:space-y-4"
       >
-        {/* Step Indicator OUT of the card, on top of the card */}
-        <div className="w-full px-2 sm:px-6">
-          {initialCampaign && <p className="text-sm font-bold text-white mb-3">Edit campaign · {initialCampaign.title}</p>}
+        {/* Step Indicator Header Card */}
+        <div className="relative w-full px-4 sm:px-8 py-3.5 sm:py-4 rounded-3xl bg-slate-900/90 light:bg-white border border-white/10 light:border-slate-200/80 shadow-xl light:shadow-sm backdrop-blur-xl">
+          <div className="flex items-center justify-between mb-2 pb-2 border-b border-white/5 light:border-slate-100 pr-8">
+            <p className="text-xs font-black uppercase tracking-wider text-purple-400 light:text-purple-700">
+              {initialCampaign ? (
+                <>Edit Campaign · <span className="text-white light:text-slate-900 font-bold normal-case text-xs sm:text-sm">{initialCampaign.title}</span></>
+              ) : (
+                <>Create New Campaign · <span className="text-slate-400 light:text-slate-500 font-semibold normal-case text-xs">Step {currentStep} of {STEPS.length}</span></>
+              )}
+            </p>
+          </div>
+
+          {/* Close Button on Top Right of Header */}
+          <button
+            onClick={onClose}
+            disabled={isPublishing || isSavingDraft}
+            className="group absolute top-3.5 right-3.5 z-40 w-8 h-8 rounded-full bg-slate-800/80 light:bg-slate-100 hover:bg-slate-700 light:hover:bg-slate-200 border border-white/10 light:border-slate-200 flex items-center justify-center text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 transition-all cursor-pointer"
+            aria-label="Close"
+          >
+            <X className="w-4 h-4 transition-transform duration-200 group-hover:rotate-90 stroke-[2.2]" />
+          </button>
+
           <CampaignWizardStepIndicator
             steps={initialCampaign ? STEPS.map((step) => step.id === 7 ? { ...step, description: 'Save changes' } : step) : STEPS}
             currentStep={currentStep}
@@ -451,20 +470,10 @@ export default function CreateCampaignWizard({
           />
         </div>
 
-        {/* Main Card Container with Overlapping Close Button on Top Right Corner */}
+        {/* Main Card Container */}
         <div className="relative w-full flex-1">
-          {/* Overlapping Close Button */}
-          <button
-            onClick={onClose}
-            disabled={isPublishing || isSavingDraft}
-            className="group absolute -top-3 -right-3 sm:-top-3.5 sm:-right-3.5 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-900/90 hover:bg-slate-800/90 backdrop-blur-xl border border-white/15 hover:border-purple-500/50 flex items-center justify-center text-slate-400 hover:text-white transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.6)] hover:shadow-[0_0_20px_rgba(168,85,247,0.35)] hover:scale-105 active:scale-95 cursor-pointer ring-1 ring-white/5"
-            aria-label="Close"
-          >
-            <X className="w-4 h-4 transition-transform duration-200 group-hover:rotate-90 group-hover:scale-110 stroke-[2.2]" />
-          </button>
-
           {/* Card Body Container */}
-          <div className="relative w-full bg-slate-900 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[76vh]">
+          <div className="relative w-full bg-slate-900 light:bg-white border border-white/10 light:border-slate-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[76vh]">
             <div className="p-6 sm:p-8 overflow-y-auto flex-1 space-y-6 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <AnimatePresence mode="wait">
               <motion.div
@@ -511,14 +520,14 @@ export default function CreateCampaignWizard({
 
             {/* Next Step Button Revealed After Scrolling the Form (No Previous Button) */}
             {currentStep < STEPS.length && (
-              <div className="flex justify-end pt-4 pb-2 border-t border-white/5">
+              <div className="flex justify-end pt-4 pb-2 border-t border-white/5 light:border-slate-200">
                 <button
                   type="button"
                   onClick={handleNextStep}
-                  className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white flex items-center gap-2 shadow-lg shadow-purple-900/30 transition-all cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white keep-white flex items-center gap-2 shadow-lg shadow-purple-900/30 transition-all cursor-pointer"
                 >
-                  <span>Next Step</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span className="keep-white text-white">Next Step</span>
+                  <ArrowRight className="w-4 h-4 text-white keep-white" />
                 </button>
               </div>
             )}

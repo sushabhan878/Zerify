@@ -107,9 +107,9 @@ export default function ManageDeliverableOverviewCard({
     [];
 
   return (
-    <div className="relative overflow-visible mt-6 sm:mt-7 p-5 sm:p-6 pr-6 sm:pr-8 rounded-2xl bg-slate-950/60 border border-purple-500/20 hover:border-purple-500/40 backdrop-blur-2xl shadow-xl shadow-purple-950/20 hover:shadow-[0_16px_40px_rgba(168,85,247,0.16)] transition-all duration-300 space-y-5 group">
+    <div className="relative overflow-visible mt-6 sm:mt-7 p-5 sm:p-6 pr-6 sm:pr-8 rounded-2xl bg-slate-950/60 light:bg-white border border-purple-500/20 light:border-slate-200/80 hover:border-purple-500/40 light:hover:border-purple-300 backdrop-blur-2xl shadow-xl shadow-purple-950/20 light:shadow-sm hover:shadow-[0_16px_40px_rgba(168,85,247,0.16)] light:hover:shadow-md transition-all duration-300 space-y-5 group">
       {/* Ambient Background Aura Clipped */}
-      <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none light:opacity-30">
         <div className="absolute -top-16 -right-16 w-56 h-56 bg-purple-600/10 rounded-full blur-2xl group-hover:bg-purple-600/20 transition-all duration-500" />
         <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-indigo-600/10 rounded-full blur-2xl group-hover:bg-indigo-600/15 transition-all duration-500" />
       </div>
@@ -120,27 +120,27 @@ export default function ManageDeliverableOverviewCard({
         style={{ top: '-16px', transform: 'translateY(-50%)' }}
       >
         {isCompleted ? (
-          <span className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-emerald-400/50 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white text-sm sm:text-[14px] font-black tracking-wide flex items-center gap-2 shadow-2xl shadow-emerald-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
-            <CheckCircle className="w-4 h-4 text-emerald-200 shrink-0" />
-            <span>Completed</span>
+          <span className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-emerald-400/50 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white keep-white text-sm sm:text-[14px] font-black tracking-wide flex items-center gap-2 shadow-2xl shadow-emerald-950/80 ring-4 ring-[#090C15] light:ring-white group-hover:scale-105 transition-all duration-300">
+            <CheckCircle className="w-4 h-4 text-emerald-200 keep-white shrink-0" />
+            <span className="keep-white text-white">Completed</span>
           </span>
         ) : (
-          <span className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-purple-400/50 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 text-white text-sm sm:text-[14px] font-black tracking-wide flex items-center gap-2 shadow-2xl shadow-purple-950/80 ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300">
-            <Sparkles className="w-4 h-4 text-purple-200 animate-pulse shrink-0" />
-            <span>In Production</span>
+          <span className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-purple-400/50 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 text-white keep-white text-sm sm:text-[14px] font-black tracking-wide flex items-center gap-2 shadow-2xl shadow-purple-950/80 ring-4 ring-[#090C15] light:ring-white group-hover:scale-105 transition-all duration-300">
+            <Sparkles className="w-4 h-4 text-purple-200 keep-white animate-pulse shrink-0" />
+            <span className="keep-white text-white">In Production</span>
           </span>
         )}
       </div>
 
       {/* Header Row: Creator Information, Operating Platforms, and Agreed Amount */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 border-b border-white/10 pb-5 relative z-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 border-b border-white/10 light:border-slate-200 pb-5 relative z-10">
         {/* Creator Identity & Operating Platforms */}
         <div className="flex items-center gap-4 min-w-0">
-          <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-tr from-purple-600 via-indigo-600 to-purple-500 flex items-center justify-center text-white font-black text-base shrink-0 border border-purple-400/30 shadow-lg shadow-purple-950/40">
+          <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-tr from-purple-600 via-indigo-600 to-purple-500 flex items-center justify-center text-white keep-white font-black text-base shrink-0 border border-purple-400/30 shadow-lg shadow-purple-950/40">
             {avatarUrl ? (
               <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
             ) : (
-              <span>{displayName.charAt(0).toUpperCase()}</span>
+              <span className="keep-white text-white">{displayName.charAt(0).toUpperCase()}</span>
             )}
           </div>
 
@@ -151,16 +151,16 @@ export default function ManageDeliverableOverviewCard({
                 onClick={onOpenProfile}
                 className="inline-flex items-center gap-1.5 group/name text-left cursor-pointer"
               >
-                <h2 className="text-lg sm:text-xl font-black text-white group-hover/name:text-purple-300 transition-colors truncate">
+                <h2 className="text-lg sm:text-xl font-black text-white group-hover/name:text-purple-300 light:text-slate-900 light:group-hover/name:text-purple-700 transition-colors truncate">
                   {displayName}
                 </h2>
-                <ArrowUpRight className="w-4 h-4 text-purple-400 group-hover/name:text-purple-300 transition-transform group-hover/name:translate-x-0.5 group-hover/name:-translate-y-0.5" />
+                <ArrowUpRight className="w-4 h-4 text-purple-400 group-hover/name:text-purple-300 light:text-purple-600 transition-transform group-hover/name:translate-x-0.5 group-hover/name:-translate-y-0.5" />
               </button>
             </div>
 
             {/* Operating Platforms with Logos & Joined Date */}
-            <div className="flex items-center gap-2.5 flex-wrap text-xs text-slate-400">
-              <span className="font-medium text-slate-400">
+            <div className="flex items-center gap-2.5 flex-wrap text-xs text-slate-400 light:text-slate-500">
+              <span className="font-medium text-slate-400 light:text-slate-500">
                 Joined{' '}
                 {new Date(participant.joinedAt || Date.now()).toLocaleDateString(undefined, {
                   month: 'short',
@@ -171,7 +171,7 @@ export default function ManageDeliverableOverviewCard({
 
               {operatingPlatforms.length > 0 && (
                 <>
-                  <span className="text-slate-600">•</span>
+                  <span className="text-slate-600 light:text-slate-400">•</span>
                   <div className="flex items-center gap-1.5" title="Operating Platforms">
                     {operatingPlatforms.map((plat) => (
                       <PlatformBadge key={plat} platform={plat} size="sm" />
@@ -185,10 +185,10 @@ export default function ManageDeliverableOverviewCard({
 
         {/* Agreed Amount */}
         <div className="text-left sm:text-right shrink-0">
-          <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight leading-none block">
+          <span className="text-2xl sm:text-3xl font-black text-emerald-400 light:text-emerald-600 tracking-tight leading-none block">
             <Money amount={participant.agreedAmount} currency={participant.agreedCurrency || 'USD'} />
           </span>
-          <span className="text-[11px] text-slate-400 font-semibold block pt-1">
+          <span className="text-[11px] text-slate-400 light:text-slate-500 font-semibold block pt-1">
             Agreed Collaboration Fee
           </span>
         </div>
@@ -197,24 +197,24 @@ export default function ManageDeliverableOverviewCard({
       {/* Main Grid: Left Side Description vs Right Side Deliverables & Progress */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 items-stretch">
         {/* Left Side: Campaign Description & Scope */}
-        <div className="lg:col-span-6 flex flex-col justify-between p-4 rounded-xl bg-slate-900/40 border border-white/5 space-y-3">
+        <div className="lg:col-span-6 flex flex-col justify-between p-4 rounded-xl bg-slate-900/40 light:bg-slate-50 border border-white/5 light:border-slate-200 space-y-3">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <FileText className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <FileText className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 light:text-slate-600">
                 Campaign Brief & Scope
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal whitespace-pre-line">
+            <p className="text-xs sm:text-sm text-slate-300 light:text-slate-700 leading-relaxed font-normal whitespace-pre-line">
               {description}
             </p>
           </div>
 
           {/* Product & Hashtags metadata if available */}
           {(productName || hashtags.length > 0) && (
-            <div className="pt-2 border-t border-white/5 flex flex-wrap gap-1.5 items-center">
+            <div className="pt-2 border-t border-white/5 light:border-slate-200 flex flex-wrap gap-1.5 items-center">
               {productName && (
-                <span className="px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20 text-[11px] font-medium">
+                <span className="px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-300 light:bg-purple-100 light:text-purple-800 border border-purple-500/20 text-[11px] font-medium">
                   Product: {productName}
                 </span>
               )}
@@ -258,17 +258,17 @@ export default function ManageDeliverableOverviewCard({
                   return (
                     <div
                       key={del.id || idx}
-                      className="p-2.5 rounded-xl bg-slate-900/60 border border-purple-500/20 hover:border-purple-500/40 transition-colors flex items-center justify-between gap-2 shadow-sm"
+                      className="p-2.5 rounded-xl bg-slate-900/60 light:bg-white border border-purple-500/20 light:border-slate-200 hover:border-purple-500/40 light:hover:border-purple-300 transition-colors flex items-center justify-between gap-2 shadow-sm"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <PlatformBadge platform={del.platform || 'Instagram'} size="sm" />
-                        <span className="text-xs font-bold text-white truncate">
+                        <span className="text-xs font-bold text-white light:text-slate-900 truncate">
                           {del.quantity || 1}x {delName}
                         </span>
                       </div>
                       <div className="shrink-0">
                         <span
-                          className="px-2 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-200 text-[10px] font-bold tracking-tight"
+                          className="px-2 py-0.5 rounded-md bg-purple-500/15 light:bg-purple-50 border border-purple-500/30 light:border-purple-200 text-purple-200 light:text-purple-700 text-[10px] font-bold tracking-tight"
                           title={`${revisionCount} revisions out of ${revisionLimit} allowed`}
                         >
                           {revisionCount}/{revisionLimit} Revs
@@ -285,12 +285,12 @@ export default function ManageDeliverableOverviewCard({
           <div className="space-y-2.5 pt-1">
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-slate-400">Overall Deliverables Progress</span>
-                <span className="font-black text-purple-300">
+                <span className="font-semibold text-slate-400 light:text-slate-500">Overall Deliverables Progress</span>
+                <span className="font-black text-purple-300 light:text-purple-700">
                   {completedCount} / {deliverables.length} Completed
                 </span>
               </div>
-              <div className="w-full bg-slate-800/50 h-2 rounded-full overflow-hidden">
+              <div className="w-full bg-slate-800/50 light:bg-slate-200 h-2 rounded-full overflow-hidden">
                 <div
                   className="bg-gradient-to-r from-purple-500 via-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]"
                   style={{
@@ -306,17 +306,17 @@ export default function ManageDeliverableOverviewCard({
                 type="button"
                 disabled={isFinalizing}
                 onClick={onFinalize}
-                className="w-full mt-2 px-5 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-950/40 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full mt-2 px-5 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white keep-white shadow-lg shadow-emerald-950/40 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {isFinalizing ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Finalizing...</span>
+                    <Loader2 className="w-4 h-4 animate-spin text-white keep-white" />
+                    <span className="keep-white text-white">Finalizing...</span>
                   </>
                 ) : (
                   <>
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>Finalize Collaboration & Mark Completed</span>
+                    <ShieldCheck className="w-4 h-4 text-white keep-white" />
+                    <span className="keep-white text-white">Finalize Collaboration & Mark Completed</span>
                   </>
                 )}
               </button>

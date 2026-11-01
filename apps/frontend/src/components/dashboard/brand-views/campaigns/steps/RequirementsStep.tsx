@@ -139,11 +139,11 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
       {/* Target Platforms */}
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
-          <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider">
+          <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider">
             Target Social Platforms <span className="text-pink-400">*</span>
           </label>
-          <span className="text-[11px] font-semibold text-purple-300/80 flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-purple-300" />
+          <span className="text-[11px] font-semibold text-purple-300/80 light:text-purple-700 flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-purple-300 light:text-purple-600" />
             <span>Select multiple</span>
           </span>
         </div>
@@ -158,15 +158,15 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
                 type="button"
                 key={plat.id}
                 onClick={() => togglePlatform(plat.id)}
-                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-2 ${isSelected
-                    ? 'bg-purple-500/20 border border-purple-400/60 text-purple-100 shadow-[0_0_10px_rgba(192,132,252,0.25)]'
-                    : 'bg-slate-900/90 border border-white/10 text-slate-400 hover:border-purple-400/30 hover:text-purple-200 hover:bg-slate-800/80'
+                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-2 cursor-pointer ${isSelected
+                    ? 'bg-purple-500/20 border border-purple-400/60 text-purple-100 shadow-[0_0_10px_rgba(192,132,252,0.25)] light:bg-purple-100 light:border-purple-300 light:text-purple-800 light:shadow-sm'
+                    : 'bg-slate-900/90 border border-white/10 text-slate-400 hover:border-purple-400/30 hover:text-purple-200 hover:bg-slate-800/80 light:bg-white light:border-slate-300 light:text-slate-700 light:hover:bg-purple-50 light:hover:text-purple-700'
                   }`}
               >
                 {isSelected ? (
-                  <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />
+                  <Check className="w-3.5 h-3.5 text-purple-300 light:text-purple-700 stroke-[2.5]" />
                 ) : (
-                  <Plus className="w-3.5 h-3.5 text-slate-500" />
+                  <Plus className="w-3.5 h-3.5 text-slate-500 light:text-slate-400" />
                 )}
                 <span>{plat.label}</span>
               </button>
@@ -180,27 +180,27 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
         {/* Minimum Followers Custom Dropdown */}
         <div className="relative sm:col-span-5 md:col-span-4" ref={followersDropdownRef}>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider">
               Minimum Followers
             </label>
-            <span className="text-[11px] text-slate-400 font-medium">
+            <span className="text-[11px] text-slate-400 light:text-slate-500 font-medium">
               {selectedFollowerTier ? selectedFollowerTier.label.split(' ')[0] : 'Any'}
             </span>
           </div>
           <button
             type="button"
             onClick={() => setIsFollowersOpen((prev) => !prev)}
-            className="w-full px-4 py-2.5 bg-slate-900/90 border border-purple-400/20 hover:border-purple-400/40 rounded-xl text-xs text-white flex items-center justify-between focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+            className="w-full px-4 py-2.5 bg-slate-900/90 border border-purple-400/20 hover:border-purple-400/40 rounded-xl text-xs text-white light:bg-white light:border-slate-300 light:text-slate-900 flex items-center justify-between focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
           >
-            <span className={selectedFollowerTier ? 'text-white font-medium' : 'text-slate-500'}>
+            <span className={selectedFollowerTier ? 'text-white light:text-slate-900 font-medium' : 'text-slate-500 light:text-slate-400'}>
               {selectedFollowerTier ? selectedFollowerTier.label : 'Select Minimum Followers...'}
             </span>
             <ChevronDown
-              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isFollowersOpen ? 'rotate-180 text-purple-300' : ''
+              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isFollowersOpen ? 'rotate-180 text-purple-300 light:text-purple-600' : ''
                 }`}
             />
           </button>
-          <p className="text-[10px] text-slate-400/90 mt-2">
+          <p className="text-[10px] text-slate-400/90 light:text-slate-500 mt-2">
             Filter creator tiers by audience size (Nano, Micro, Mid-Tier, or Macro).
           </p>
 
@@ -211,7 +211,7 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.15 }}
-                className="absolute z-50 left-0 right-0 min-w-[260px] mt-1.5 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl max-h-56 overflow-y-auto p-1.5 space-y-0.5 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                className="absolute z-50 left-0 right-0 min-w-[260px] mt-1.5 bg-slate-900 border border-white/10 light:bg-white light:border-slate-200 light:shadow-2xl rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl max-h-56 overflow-y-auto p-1.5 space-y-0.5 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
               >
                 <button
                   type="button"
@@ -219,13 +219,13 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
                     handleSocialChange('minFollowers', undefined);
                     setIsFollowersOpen(false);
                   }}
-                  className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between ${!socialReq.minFollowers
-                      ? 'bg-purple-500/20 text-purple-200 font-bold'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${!socialReq.minFollowers
+                      ? 'bg-purple-500/20 text-purple-200 font-bold light:bg-purple-50 light:text-purple-700'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white light:text-slate-700 light:hover:bg-slate-100 light:hover:text-slate-900'
                     }`}
                 >
                   <span>Any / No Minimum Requirement</span>
-                  {!socialReq.minFollowers && <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />}
+                  {!socialReq.minFollowers && <Check className="w-3.5 h-3.5 text-purple-300 light:text-purple-700 stroke-[2.5]" />}
                 </button>
                 {FOLLOWER_TIERS.map((tier) => {
                   const isSelected = socialReq.minFollowers === tier.value;
@@ -237,13 +237,13 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
                         handleSocialChange('minFollowers', tier.value);
                         setIsFollowersOpen(false);
                       }}
-                      className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between ${isSelected
-                          ? 'bg-purple-500/20 text-purple-200 font-bold'
-                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${isSelected
+                          ? 'bg-purple-500/20 text-purple-200 font-bold light:bg-purple-50 light:text-purple-700'
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white light:text-slate-700 light:hover:bg-slate-100 light:hover:text-slate-900'
                         }`}
                     >
                       <span>{tier.label}</span>
-                      {isSelected && <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />}
+                      {isSelected && <Check className="w-3.5 h-3.5 text-purple-300 light:text-purple-700 stroke-[2.5]" />}
                     </button>
                   );
                 })}
@@ -255,10 +255,10 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
         {/* Minimum Engagement Rate Slider (Extended Width) */}
         <div className="space-y-1.5 sm:col-span-7 md:col-span-8">
           <div className="flex items-center justify-between mb-0.5">
-            <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider">
               Min Engagement Rate
             </label>
-            <span className="px-2.5 py-0.5 rounded-md bg-purple-500/20 border border-purple-500/40 text-purple-300 text-[11px] font-black">
+            <span className="px-2.5 py-0.5 rounded-md bg-purple-500/20 border border-purple-500/40 text-purple-300 light:bg-purple-50 light:border-purple-200 light:text-purple-700 text-[11px] font-black">
               {Number(socialReq.minEngagementRate || 0) > 0
                 ? `${Number(socialReq.minEngagementRate).toFixed(1)}%`
                 : 'Any (0%)'}
@@ -276,21 +276,21 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
                 const val = parseFloat(e.target.value);
                 handleSocialChange('minEngagementRate', val > 0 ? val : undefined);
               }}
-              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-400"
+              className="w-full h-2 bg-slate-800 light:bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-400"
               style={{
                 background: `linear-gradient(to right, #a855f7 0%, #a855f7 ${(Number(socialReq.minEngagementRate || 0) / 5) * 100}%, #1e293b ${(Number(socialReq.minEngagementRate || 0) / 5) * 100}%, #1e293b 100%)`,
               }}
             />
           </div>
 
-          <div className="flex justify-between text-[10px] text-slate-400 font-semibold px-0.5 select-none">
-            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', undefined)}>Any (0%)</span>
-            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 1.5)}>1.5%</span>
-            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 2.5)}>2.5% (Avg)</span>
-            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 3.5)}>3.5%</span>
-            <span className="hover:text-purple-300 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 5.0)}>5.0% (Max)</span>
+          <div className="flex justify-between text-[10px] text-slate-400 light:text-slate-500 font-semibold px-0.5 select-none">
+            <span className="hover:text-purple-300 light:hover:text-purple-700 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', undefined)}>Any (0%)</span>
+            <span className="hover:text-purple-300 light:hover:text-purple-700 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 1.5)}>1.5%</span>
+            <span className="hover:text-purple-300 light:hover:text-purple-700 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 2.5)}>2.5% (Avg)</span>
+            <span className="hover:text-purple-300 light:hover:text-purple-700 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 3.5)}>3.5%</span>
+            <span className="hover:text-purple-300 light:hover:text-purple-700 transition-colors cursor-pointer" onClick={() => handleSocialChange('minEngagementRate', 5.0)}>5.0% (Max)</span>
           </div>
-          <p className="text-[10px] text-slate-400/90 pt-0.5">
+          <p className="text-[10px] text-slate-400/90 light:text-slate-500 pt-0.5">
             Industry standard: 1.5%–3.5% healthy average; 5.0% represents top-tier creator engagement.
           </p>
         </div>
@@ -299,11 +299,11 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
       {/* Target Creator Locations - Multiple Choice Tag Cloud */}
       <div className="space-y-2.5 pt-1">
         <div className="flex items-center justify-between">
-          <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider">
+          <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider">
             Target Creator Country / Region
           </label>
-          <span className="text-[11px] font-semibold text-purple-300/80 flex items-center gap-1">
-            <Globe className="w-3 h-3 text-purple-300" />
+          <span className="text-[11px] font-semibold text-purple-300/80 light:text-purple-700 flex items-center gap-1">
+            <Globe className="w-3 h-3 text-purple-300 light:text-purple-600" />
             <span>Multiple selection</span>
           </span>
         </div>
@@ -318,15 +318,15 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
                 type="button"
                 key={country}
                 onClick={() => toggleCountry(country)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${isSelected
-                    ? 'bg-purple-500/20 border border-purple-400/60 text-purple-100 shadow-[0_0_10px_rgba(192,132,252,0.25)]'
-                    : 'bg-slate-900/90 border border-white/10 text-slate-400 hover:border-purple-400/30 hover:text-purple-200 hover:bg-slate-800/80'
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${isSelected
+                    ? 'bg-purple-500/20 border border-purple-400/60 text-purple-100 shadow-[0_0_10px_rgba(192,132,252,0.25)] light:bg-purple-100 light:border-purple-300 light:text-purple-800 light:shadow-sm'
+                    : 'bg-slate-900/90 border border-white/10 text-slate-400 hover:border-purple-400/30 hover:text-purple-200 hover:bg-slate-800/80 light:bg-white light:border-slate-300 light:text-slate-700 light:hover:bg-purple-50 light:hover:text-purple-700'
                   }`}
               >
                 {isSelected ? (
-                  <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />
+                  <Check className="w-3.5 h-3.5 text-purple-300 light:text-purple-700 stroke-[2.5]" />
                 ) : (
-                  <Plus className="w-3.5 h-3.5 text-slate-500" />
+                  <Plus className="w-3.5 h-3.5 text-slate-500 light:text-slate-400" />
                 )}
                 <span>{country}</span>
               </button>
@@ -337,39 +337,39 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
         {/* Custom Location Input */}
         <div className="pt-1 flex items-center gap-2 max-w-sm">
           <div className="relative w-full">
-            <MapPin className="w-3.5 h-3.5 text-purple-300/60 absolute left-3 top-3" />
+            <MapPin className="w-3.5 h-3.5 text-purple-300/60 light:text-purple-600 absolute left-3 top-3" />
             <input
               type="text"
               placeholder="Add other country/city (press Enter)..."
               value={customCountryInput}
               onChange={(e) => setCustomCountryInput(e.target.value)}
               onKeyDown={handleAddCustomCountry}
-              className="w-full pl-9 pr-3 py-2 bg-slate-900/60 border border-purple-400/20 rounded-full text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+              className="w-full pl-9 pr-3 py-2 bg-slate-900/60 border border-purple-400/20 rounded-full text-xs text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
             />
           </div>
         </div>
       </div>
 
       {/* Verified Creators Only - Bottom Feature Banner */}
-      <div className="pt-5 border-t border-purple-400/10 flex items-center justify-between">
+      <div className="pt-5 border-t border-purple-400/10 light:border-slate-200 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-400/25 text-purple-300 flex items-center justify-center flex-shrink-0">
-            <BadgeCheck className="w-5 h-5 text-purple-300" />
+          <div className="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-400/25 text-purple-300 light:bg-purple-50 light:border-purple-200 light:text-purple-700 flex items-center justify-center flex-shrink-0">
+            <BadgeCheck className="w-5 h-5 text-purple-300 light:text-purple-700" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-white block">Verified Creators Only</span>
+              <span className="text-xs font-bold text-white light:text-slate-900 block">Verified Creators Only</span>
               <span
                 className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
                   socialReq.verifiedOnly
-                    ? 'bg-purple-500/20 text-purple-200 border-purple-400/30'
-                    : 'bg-slate-800/60 text-slate-400 border-white/10'
+                    ? 'bg-purple-500/20 text-purple-200 border-purple-400/30 light:bg-purple-50 light:text-purple-700 light:border-purple-200'
+                    : 'bg-slate-800/60 text-slate-400 border-white/10 light:bg-slate-100 light:text-slate-600 light:border-slate-200'
                 }`}
               >
                 {socialReq.verifiedOnly ? 'Blue Badge Required' : 'Open to All Creators'}
               </span>
             </div>
-            <span className="text-[11px] text-slate-400 block mt-0.5">
+            <span className="text-[11px] text-slate-400 light:text-slate-500 block mt-0.5">
               Require blue badge authentication. Restricts campaign pitch proposals exclusively to verified platform creators.
             </span>
           </div>
@@ -382,7 +382,7 @@ export default function RequirementsStep({ formData, onChange }: RequirementsSte
             onChange={(e) => handleSocialChange('verifiedOnly', e.target.checked)}
             className="sr-only peer"
           />
-          <div className="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500 cursor-pointer"></div>
+          <div className="w-10 h-5 bg-slate-800 light:bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500 cursor-pointer"></div>
         </label>
       </div>
     </div>

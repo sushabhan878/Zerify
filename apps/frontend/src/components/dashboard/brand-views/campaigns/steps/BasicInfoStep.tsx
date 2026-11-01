@@ -106,7 +106,7 @@ export default function BasicInfoStep({
       {/* Campaign Title & Industry */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="sm:col-span-2">
-          <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
             Campaign Name <span className="text-pink-400">*</span>
           </label>
           <input
@@ -114,10 +114,10 @@ export default function BasicInfoStep({
             placeholder="e.g. Q3 Next-Gen AI Workspace Launch"
             value={formData.title || ''}
             onChange={(e) => onChange('title', e.target.value)}
-            className={`w-full px-4 py-3 bg-slate-900/90 border rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-0 transition-colors ${
+            className={`w-full px-4 py-3 bg-slate-900/90 light:bg-white border rounded-xl text-sm text-white light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 focus:outline-none focus:ring-0 transition-colors ${
               isDuplicateName
                 ? 'border-rose-500/80 bg-rose-500/5 focus:border-rose-500'
-                : 'border-purple-400/20 focus:border-white/20'
+                : 'border-purple-400/20 light:border-slate-300 focus:border-white/20 light:focus:border-purple-500'
             }`}
           />
           {isDuplicateName && (
@@ -130,19 +130,19 @@ export default function BasicInfoStep({
 
         {/* Custom Searchable Industry Dropdown */}
         <div className="relative sm:col-span-2" ref={dropdownRef}>
-          <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
             Industry / Vertical <span className="text-pink-400">*</span>
           </label>
           <button
             type="button"
             onClick={() => setIsIndustryDropdownOpen((prev) => !prev)}
-            className="w-full px-4 py-3 bg-slate-900/90 border border-purple-400/20 rounded-xl text-sm text-white flex items-center justify-between focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+            className="w-full px-4 py-3 bg-slate-900/90 light:bg-white border border-purple-400/20 light:border-slate-300 rounded-xl text-sm text-white light:text-slate-900 flex items-center justify-between focus:outline-none focus:ring-0 focus:border-white/20 light:focus:border-purple-500 transition-colors"
           >
-            <span className={formData.industry ? 'text-white font-medium' : 'text-slate-500'}>
+            <span className={formData.industry ? 'text-white light:text-slate-900 font-medium' : 'text-slate-500 light:text-slate-400'}>
               {formData.industry || 'Select Industry / Vertical...'}
             </span>
             <ChevronDown
-              className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isIndustryDropdownOpen ? 'rotate-180 text-purple-300' : ''
+              className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isIndustryDropdownOpen ? 'rotate-180 text-purple-300 light:text-purple-600' : ''
                 }`}
             />
           </button>
@@ -155,24 +155,24 @@ export default function BasicInfoStep({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.15 }}
-                className="absolute z-50 left-0 right-0 mt-2 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl max-h-72 flex flex-col"
+                className="absolute z-50 left-0 right-0 mt-2 bg-slate-900 light:bg-white border border-white/10 light:border-slate-200 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl max-h-72 flex flex-col"
               >
                 {/* Search in Dropdown */}
-                <div className="p-2.5 border-b border-white/10 bg-slate-950/60 sticky top-0 z-10 flex items-center gap-2">
-                  <Search className="w-3.5 h-3.5 text-purple-300/70 ml-1 flex-shrink-0" />
+                <div className="p-2.5 border-b border-white/10 light:border-slate-200 bg-slate-950/60 light:bg-slate-50 sticky top-0 z-10 flex items-center gap-2">
+                  <Search className="w-3.5 h-3.5 text-purple-300/70 light:text-purple-600 ml-1 flex-shrink-0" />
                   <input
                     type="text"
                     placeholder="Search industries (e.g. AI, Fashion, Crypto, Gaming)..."
                     value={industrySearchQuery}
                     onChange={(e) => setIndustrySearchQuery(e.target.value)}
-                    className="w-full bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none"
+                    className="w-full bg-transparent text-xs text-white light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 focus:outline-none"
                     autoFocus
                   />
                   {industrySearchQuery && (
                     <button
                       type="button"
                       onClick={() => setIndustrySearchQuery('')}
-                      className="p-1 text-slate-500 hover:text-slate-300"
+                      className="p-1 text-slate-500 hover:text-slate-300 light:hover:text-slate-800"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -188,7 +188,7 @@ export default function BasicInfoStep({
                   ) : (
                     filteredIndustryGroups.map((group) => (
                       <div key={group.category} className="space-y-1">
-                        <span className="text-[10px] font-black tracking-wider text-purple-300/70 uppercase px-2.5 py-0.5 block">
+                        <span className="text-[10px] font-black tracking-wider text-purple-300/70 light:text-purple-700 uppercase px-2.5 py-0.5 block">
                           {group.category}
                         </span>
                         <div className="space-y-0.5">
@@ -204,12 +204,12 @@ export default function BasicInfoStep({
                                   setIndustrySearchQuery('');
                                 }}
                                 className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between ${isSelected
-                                    ? 'bg-purple-500/20 text-purple-200 font-bold'
-                                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                                    ? 'bg-purple-500/20 light:bg-purple-100 text-purple-200 light:text-purple-900 font-bold'
+                                    : 'text-slate-300 light:text-slate-700 hover:bg-slate-800 light:hover:bg-purple-50 hover:text-white light:hover:text-purple-900'
                                   }`}
                               >
                                 <span>{item}</span>
-                                {isSelected && <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />}
+                                {isSelected && <Check className="w-3.5 h-3.5 text-purple-300 light:text-purple-600 stroke-[2.5]" />}
                               </button>
                             );
                           })}
@@ -227,11 +227,11 @@ export default function BasicInfoStep({
       {/* Campaign Objectives - Multiple Tags Picker */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider">
+          <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider">
             Campaign Objectives & Goals <span className="text-pink-400">*</span>
           </label>
-          <span className="text-[11px] font-semibold text-purple-300/80 flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-purple-300" />
+          <span className="text-[11px] font-semibold text-purple-300/80 light:text-purple-700 flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-purple-300 light:text-purple-600" />
             <span>Select multiple tags</span>
           </span>
         </div>
@@ -247,14 +247,14 @@ export default function BasicInfoStep({
                 key={tag}
                 onClick={() => toggleTag(tag)}
                 className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-2 ${isSelected
-                    ? 'bg-purple-500/20 border border-purple-400/60 text-purple-100 shadow-[0_0_10px_rgba(192,132,252,0.25)]'
-                    : 'bg-slate-900/90 border border-white/10 text-slate-400 hover:border-purple-400/30 hover:text-purple-200 hover:bg-slate-800/80'
+                    ? 'bg-purple-500/20 light:bg-purple-100 border border-purple-400/60 light:border-purple-300 text-purple-100 light:text-purple-800 shadow-[0_0_10px_rgba(192,132,252,0.25)]'
+                    : 'bg-slate-900/90 light:bg-slate-100 border border-white/10 light:border-slate-200 text-slate-400 light:text-slate-600 hover:border-purple-400/30 hover:text-purple-200 light:hover:text-purple-700 hover:bg-slate-800/80 light:hover:bg-purple-50'
                   }`}
               >
                 {isSelected ? (
-                  <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />
+                  <Check className="w-3.5 h-3.5 text-purple-300 light:text-purple-600 stroke-[2.5]" />
                 ) : (
-                  <Plus className="w-3.5 h-3.5 text-slate-500" />
+                  <Plus className="w-3.5 h-3.5 text-slate-500 light:text-slate-400" />
                 )}
                 <span>{tag}</span>
               </button>
@@ -265,14 +265,14 @@ export default function BasicInfoStep({
         {/* Custom Tag Input */}
         <div className="pt-2 flex items-center gap-2 max-w-sm">
           <div className="relative w-full">
-            <Tag className="w-3.5 h-3.5 text-purple-300/60 absolute left-3 top-3" />
+            <Tag className="w-3.5 h-3.5 text-purple-300/60 light:text-purple-600 absolute left-3 top-3" />
             <input
               type="text"
               placeholder="Add custom objective (press Enter)..."
               value={customTagInput}
               onChange={(e) => setCustomTagInput(e.target.value)}
               onKeyDown={handleAddCustomTag}
-              className="w-full pl-9 pr-3 py-2 bg-slate-900/60 border border-purple-400/20 rounded-full text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+              className="w-full pl-9 pr-3 py-2 bg-slate-900/60 light:bg-white border border-purple-400/20 light:border-slate-300 rounded-full text-xs text-white light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 light:focus:border-purple-500 transition-colors"
             />
           </div>
         </div>
@@ -280,7 +280,7 @@ export default function BasicInfoStep({
 
       {/* Description / Brief */}
       <div>
-        <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+        <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
           Campaign Description & Brief <span className="text-pink-400">*</span>
         </label>
         <textarea
@@ -288,14 +288,14 @@ export default function BasicInfoStep({
           placeholder="Explain your campaign goals, brand background, tone of voice, and what you expect creators to communicate..."
           value={formData.description || ''}
           onChange={(e) => onChange('description', e.target.value)}
-          className="w-full px-4 py-3 bg-slate-900/90 border border-purple-400/20 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+          className="w-full px-4 py-3 bg-slate-900/90 light:bg-white border border-purple-400/20 light:border-slate-300 rounded-xl text-sm text-white light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 light:focus:border-purple-500 transition-colors"
         />
       </div>
 
       {/* Timeline Dates */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
             Application Deadline
           </label>
           <CustomDatePicker
@@ -316,7 +316,7 @@ export default function BasicInfoStep({
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
             Campaign Start Date
           </label>
           <CustomDatePicker
@@ -335,7 +335,7 @@ export default function BasicInfoStep({
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
             Campaign End Date
           </label>
           <CustomDatePicker

@@ -61,7 +61,7 @@ export default function MyCampaignsSection({ initialCampaignId }: { initialCampa
       {/* Top Action Bar (Clean Toolbar without clunky Title) */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-1">
         {/* Status Filters */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-900/80 border border-white/10 rounded-2xl backdrop-blur-xl">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-900/80 border border-white/10 light:bg-white light:border-slate-200/80 light:shadow-sm rounded-2xl backdrop-blur-xl">
           {[
             { id: 'ALL', label: 'All Campaigns', count: campaigns.length },
             {
@@ -78,14 +78,14 @@ export default function MyCampaignsSection({ initialCampaignId }: { initialCampa
                 key={tab.id}
                 onClick={() => setStatusFilter(tab.id)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${isSelected
-                    ? 'bg-purple-600 text-white shadow-md shadow-purple-900/30'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                    ? 'bg-purple-600 text-white keep-white shadow-md shadow-purple-900/30'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60 light:text-slate-600 light:hover:text-slate-900 light:hover:bg-slate-100'
                   }`}
               >
-                <span>{tab.label}</span>
+                <span className={isSelected ? 'keep-white text-white' : ''}>{tab.label}</span>
                 {tab.count > 0 && (
                   <span
-                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${isSelected ? 'bg-purple-950/60 text-purple-200' : 'bg-slate-800 text-slate-400'
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${isSelected ? 'bg-purple-950/60 text-purple-200 light:bg-purple-700 light:text-white keep-white' : 'bg-slate-800 text-slate-400 light:bg-slate-100 light:text-slate-600'
                       }`}
                   >
                     {tab.count}
@@ -100,10 +100,10 @@ export default function MyCampaignsSection({ initialCampaignId }: { initialCampa
         <button
           type="button"
           onClick={() => setIsWizardOpen(true)}
-          className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-black text-white flex items-center gap-2 transition-all duration-200 shadow-lg shadow-purple-950/50 hover:shadow-purple-700/25 hover:scale-[1.02] active:scale-[0.98]"
+          className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-black text-white keep-white flex items-center gap-2 transition-all duration-200 shadow-lg shadow-purple-950/50 hover:shadow-purple-700/25 hover:scale-[1.02] active:scale-[0.98]"
         >
-          <Plus className="w-4 h-4 stroke-[3]" />
-          <span>Create Campaign</span>
+          <Plus className="w-4 h-4 stroke-[3] text-white keep-white" />
+          <span className="keep-white text-white">Create Campaign</span>
         </button>
       </div>
 
@@ -133,25 +133,25 @@ export default function MyCampaignsSection({ initialCampaignId }: { initialCampa
           </button>
         </div>
       ) : filteredCampaigns.length === 0 ? (
-        <div className="p-12 rounded-3xl bg-slate-900/60 border border-dashed border-white/10 text-center space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-purple-500/15 border border-purple-400/20 text-purple-300 flex items-center justify-center mx-auto">
+        <div className="p-12 rounded-3xl bg-slate-900/60 border border-dashed border-white/10 light:bg-white light:border-slate-200/80 light:shadow-sm text-center space-y-4">
+          <div className="w-12 h-12 rounded-2xl bg-purple-500/15 border border-purple-400/20 text-purple-300 light:bg-purple-50 light:border-purple-200 light:text-purple-600 flex items-center justify-center mx-auto">
             <Megaphone className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-base font-black text-white">
+            <h3 className="text-base font-black text-white light:text-slate-900">
               {statusFilter === 'ALL' ? 'No campaigns created yet' : `No ${statusFilter.toLowerCase()} campaigns found`}
             </h3>
-            <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto">
+            <p className="text-xs text-slate-400 light:text-slate-500 mt-1 max-w-md mx-auto">
               Launch your creator campaign to invite pitches from vetted influencers, manage deliverables, and secure payouts with Zerify Escrow.
             </p>
           </div>
           <button
             type="button"
             onClick={() => setIsWizardOpen(true)}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-xs font-black text-white inline-flex items-center gap-2 shadow-lg shadow-purple-950/50 hover:opacity-95 transition-opacity"
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-xs font-black text-white keep-white inline-flex items-center gap-2 shadow-lg shadow-purple-950/50 hover:opacity-95 transition-opacity"
           >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Launch New Campaign</span>
+            <Plus className="w-4 h-4 stroke-[2.5] text-white keep-white" />
+            <span className="keep-white text-white">Launch New Campaign</span>
           </button>
         </div>
       ) : (

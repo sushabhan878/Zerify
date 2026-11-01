@@ -116,14 +116,14 @@ export default function SendOfferModal({
   const modalContent = (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/85 light:bg-slate-900/50 backdrop-blur-md overflow-y-auto"
     >
       <motion.div
         onClick={(e) => e.stopPropagation()}
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
-        className="w-full max-w-lg bg-[#0c0a1d] border border-purple-500/30 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden"
+        className="w-full max-w-lg bg-[#0c0a1d] light:bg-white border border-purple-500/30 light:border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden"
       >
         {/* Glow Header Accent */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent blur-sm" />
@@ -131,17 +131,17 @@ export default function SendOfferModal({
         {/* Title */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-300">
+            <div className="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-300 light:bg-purple-50 light:border-purple-200 light:text-purple-700">
               <Send className="w-4 h-4" />
             </div>
-            <h3 className="text-lg font-bold text-white tracking-tight">
+            <h3 className="text-lg font-bold text-white light:text-slate-900 tracking-tight">
               Send Official Offer
             </h3>
           </div>
           <button
             onClick={onClose}
             type="button"
-            className="text-slate-400 hover:text-white transition-colors text-xs font-bold px-2 py-1 rounded-lg hover:bg-white/5"
+            className="text-slate-400 hover:text-white light:text-slate-500 light:hover:text-slate-900 transition-colors text-xs font-bold px-2 py-1 rounded-lg hover:bg-white/5 light:hover:bg-slate-100"
           >
             Cancel
           </button>
@@ -155,7 +155,7 @@ export default function SendOfferModal({
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-rose-300 text-xs flex items-center gap-2"
+                className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-rose-300 light:bg-rose-50 light:border-rose-200 light:text-rose-700 text-xs flex items-center gap-2"
               >
                 <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
                 <span className="flex-1 font-medium">{error}</span>
@@ -164,14 +164,14 @@ export default function SendOfferModal({
           </AnimatePresence>
 
           {/* In-Platform Creator Info Snippet */}
-          <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/5">
+          <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/5 light:border-slate-200">
             <button
               type="button"
               onClick={handleOpenCreatorProfile}
               title={`View ${creatorItem.name}'s platform profile`}
               className="flex items-center gap-3 group/creator cursor-pointer text-left min-w-0"
             >
-              <div className="w-10 h-10 rounded-xl overflow-hidden border border-purple-500/30 bg-slate-950 flex items-center justify-center text-white font-bold shrink-0 shadow-md group-hover/creator:scale-105 transition-transform">
+              <div className="w-10 h-10 rounded-xl overflow-hidden border border-purple-500/30 bg-slate-950 light:bg-slate-100 light:border-slate-200 flex items-center justify-center text-white font-bold shrink-0 shadow-md group-hover/creator:scale-105 transition-transform">
                 {creatorItem.avatarUrl ? (
                   <img
                     src={creatorItem.avatarUrl}
@@ -187,12 +187,12 @@ export default function SendOfferModal({
 
               <div className="min-w-0">
                 <div className="flex items-center gap-1">
-                  <span className="text-sm font-bold text-white group-hover/creator:text-purple-300 transition-colors truncate">
+                  <span className="text-sm font-bold text-white group-hover/creator:text-purple-300 light:text-slate-900 light:group-hover/creator:text-purple-700 transition-colors truncate">
                     Offer for {creatorItem.name}
                   </span>
                   <ArrowUpRight className="w-3.5 h-3.5 text-purple-400 group-hover/creator:translate-x-0.5 group-hover/creator:-translate-y-0.5 transition-transform shrink-0" />
                 </div>
-                <span className="text-[11px] text-purple-300/80 font-medium block truncate">
+                <span className="text-[11px] text-purple-300/80 light:text-purple-600 font-medium block truncate">
                   Click to inspect in-platform profile
                 </span>
               </div>
@@ -201,21 +201,21 @@ export default function SendOfferModal({
             <div className="flex items-center gap-3 shrink-0">
               {sourceAmount > 0 && (
                 <div className="text-right">
-                  <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">
+                  <span className="text-[10px] text-slate-400 light:text-slate-500 uppercase font-bold tracking-wider block">
                     Pitch Quote
                   </span>
-                  <span className="text-xs font-black text-purple-300">
+                  <span className="text-xs font-black text-purple-300 light:text-purple-700">
                     {format(convertedCurrentAmount)}
                   </span>
                   {sourceCurrency.toUpperCase() !== currency.toUpperCase() && (
-                    <span className="text-[10px] text-slate-400 font-medium block">
+                    <span className="text-[10px] text-slate-400 light:text-slate-500 font-medium block">
                       ≈ {formatCurrency(sourceAmount, sourceCurrency)}
                     </span>
                   )}
                 </div>
               )}
-              <span className="px-2.5 py-1 rounded-xl bg-purple-500/15 border border-purple-500/30 text-[11px] font-bold text-purple-300 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-purple-400" />
+              <span className="px-2.5 py-1 rounded-xl bg-purple-500/15 border border-purple-500/30 text-[11px] font-bold text-purple-300 light:bg-purple-50 light:border-purple-200 light:text-purple-700 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-purple-400 light:text-purple-600" />
                 <span>{creatorItem.matchScore}% Match</span>
               </span>
             </div>
@@ -223,7 +223,7 @@ export default function SendOfferModal({
 
           {/* Agreed Compensation Amount */}
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-slate-300 light:text-slate-700 uppercase tracking-wider mb-1.5">
               Agreed Compensation Amount ({currency}) <span className="text-pink-500">*</span>
             </label>
             <div className="relative">
@@ -237,16 +237,16 @@ export default function SendOfferModal({
                   setHasUserEdited(true);
                   setCompensationAmount(Number(e.target.value));
                 }}
-                className="w-full pl-9 pr-4 py-3 bg-slate-900/60 border border-purple-500/20 hover:border-purple-500/40 focus:border-purple-400 focus:bg-purple-950/20 rounded-2xl text-sm font-semibold text-white placeholder:text-slate-500 focus:outline-none transition-all"
+                className="w-full pl-9 pr-4 py-3 bg-slate-900/60 light:bg-white border border-purple-500/20 light:border-slate-300 hover:border-purple-500/40 focus:border-purple-400 focus:bg-purple-950/20 light:focus:bg-white rounded-2xl text-sm font-semibold text-white light:text-slate-900 placeholder:text-slate-500 light:placeholder:text-slate-400 focus:outline-none transition-all"
               />
-              <span className="text-purple-400 font-bold text-sm absolute left-3.5 top-3.5 select-none">{symbol}</span>
+              <span className="text-purple-400 light:text-purple-600 font-bold text-sm absolute left-3.5 top-3.5 select-none">{symbol}</span>
             </div>
           </div>
 
           {/* Date Range */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+              <label className="block text-[10px] font-bold text-slate-400 light:text-slate-600 uppercase mb-1">
                 Campaign Start Date
               </label>
               <CustomDatePicker
@@ -259,7 +259,7 @@ export default function SendOfferModal({
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+              <label className="block text-[10px] font-bold text-slate-400 light:text-slate-600 uppercase mb-1">
                 Content Due Date
               </label>
               <CustomDatePicker
@@ -275,7 +275,7 @@ export default function SendOfferModal({
 
           {/* Expiration Date */}
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+            <label className="block text-[10px] font-bold text-slate-400 light:text-slate-600 uppercase mb-1">
               Offer Response Expiration Date
             </label>
             <CustomDatePicker
@@ -291,7 +291,7 @@ export default function SendOfferModal({
 
           {/* Custom Notes / Scope Additions */}
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+            <label className="block text-[10px] font-bold text-slate-400 light:text-slate-600 uppercase mb-1">
               Custom Notes / Scope Additions
             </label>
             <textarea
@@ -299,13 +299,13 @@ export default function SendOfferModal({
               placeholder="e.g. Delighted by your concept! We will ship the product sample immediately upon your acceptance."
               value={customNotes}
               onChange={(e) => setCustomNotes(e.target.value)}
-              className="w-full px-3.5 py-3 bg-slate-900/60 border border-purple-500/20 hover:border-purple-500/40 focus:border-purple-400 focus:bg-purple-950/20 rounded-2xl text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none transition-all resize-none leading-relaxed"
+              className="w-full px-3.5 py-3 bg-slate-900/60 light:bg-white border border-purple-500/20 light:border-slate-300 hover:border-purple-500/40 focus:border-purple-400 focus:bg-purple-950/20 light:focus:bg-white rounded-2xl text-xs text-slate-200 light:text-slate-900 placeholder:text-slate-500 light:placeholder:text-slate-400 focus:outline-none transition-all resize-none leading-relaxed"
             />
           </div>
 
           {/* Confirmation Notice */}
-          <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center gap-2.5 text-xs text-purple-300 font-medium">
-            <ShieldCheck className="w-4 h-4 text-purple-400 flex-shrink-0" />
+          <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 light:bg-purple-50 light:border-purple-200 flex items-center gap-2.5 text-xs text-purple-300 light:text-purple-700 font-medium">
+            <ShieldCheck className="w-4 h-4 text-purple-400 light:text-purple-600 flex-shrink-0" />
             <span>Upon creator acceptance, a confirmed campaign participant contract is created.</span>
           </div>
 
@@ -314,24 +314,24 @@ export default function SendOfferModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition-all cursor-pointer"
+              className="px-5 py-2.5 rounded-2xl bg-slate-900/90 light:bg-slate-100 hover:bg-slate-800 light:hover:bg-slate-200 border border-white/10 light:border-slate-200 text-xs font-bold text-slate-300 light:text-slate-700 hover:text-white light:hover:text-slate-900 transition-all cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSending}
-              className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-black text-white flex items-center gap-2 shadow-lg shadow-purple-950/50 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
+              className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-black text-white keep-white flex items-center gap-2 shadow-lg shadow-purple-950/50 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
             >
               {isSending ? (
                 <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Sending Offer...</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white keep-white" />
+                  <span className="keep-white text-white">Sending Offer...</span>
                 </>
               ) : (
                 <>
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Send Formal Offer</span>
+                  <Send className="w-3.5 h-3.5 text-white keep-white" />
+                  <span className="keep-white text-white">Send Formal Offer</span>
                 </>
               )}
             </button>

@@ -192,18 +192,18 @@ export default function ParticipantDeliverablesPage({
         <button
           onClick={onBack}
           type="button"
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-400 hover:text-white transition-colors cursor-pointer group"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-400 hover:text-white light:text-slate-600 light:hover:text-slate-900 transition-colors cursor-pointer group"
         >
           <ArrowLeft className="w-4 h-4 text-purple-400 group-hover:-translate-x-0.5 transition-transform" />
           <span>Back to Collaborations</span>
         </button>
 
-        <div className="flex items-center gap-2 text-xs text-slate-400">
-          <span className="truncate max-w-[200px] text-purple-300 font-semibold">
+        <div className="flex items-center gap-2 text-xs text-slate-400 light:text-slate-600">
+          <span className="truncate max-w-[200px] text-purple-300 light:text-purple-700 font-semibold">
             {currentCampaign?.title || 'Campaign'}
           </span>
           <span>/</span>
-          <span className="text-white font-bold">{displayName}</span>
+          <span className="text-white light:text-slate-900 font-bold">{displayName}</span>
         </div>
       </div>
 
@@ -226,42 +226,42 @@ export default function ParticipantDeliverablesPage({
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2.5">
-            <h3 className="text-lg sm:text-xl font-black text-white tracking-tight">
+            <h3 className="text-lg sm:text-xl font-black text-white light:text-slate-900 tracking-tight">
               Deliverables Pipeline
             </h3>
-            <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-300 text-xs sm:text-sm font-black border border-purple-500/25">
+            <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-300 light:bg-purple-100 light:text-purple-800 text-xs sm:text-sm font-black border border-purple-500/25 light:border-purple-200">
               {deliverables.length}
             </span>
           </div>
-          <span className="text-xs sm:text-sm text-slate-400">
+          <span className="text-xs sm:text-sm text-slate-400 light:text-slate-500">
             Review drafts, request revisions, and verify live publications
           </span>
         </div>
 
         {/* If campaign has not started (e.g. slots not filled or waiting for escrow launch) */}
         {!isCampaignStarted ? (
-          <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-slate-950/60 border border-purple-500/20 hover:border-purple-500/40 backdrop-blur-2xl shadow-xl shadow-purple-950/20 transition-all duration-300 flex flex-col sm:flex-row items-center justify-between gap-6 group">
-            <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+          <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-slate-950/60 light:bg-white border border-purple-500/20 light:border-slate-200/80 hover:border-purple-500/40 light:hover:border-purple-300 backdrop-blur-2xl shadow-xl shadow-purple-950/20 light:shadow-sm transition-all duration-300 flex flex-col sm:flex-row items-center justify-between gap-6 group">
+            <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none light:opacity-30">
               <div className="absolute -top-16 -left-16 w-56 h-56 bg-purple-600/10 rounded-full blur-2xl group-hover:bg-purple-600/20 transition-all duration-500" />
               <div className="absolute -bottom-16 -right-16 w-48 h-48 bg-indigo-600/10 rounded-full blur-2xl group-hover:bg-indigo-600/15 transition-all duration-500" />
             </div>
 
             <div className="space-y-2 text-center sm:text-left relative z-10 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-bold">
-                <Sparkles className="w-3.5 h-3.5 text-purple-300 animate-pulse" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 light:bg-purple-50 border border-purple-500/20 light:border-purple-200 text-purple-300 light:text-purple-700 text-xs font-bold">
+                <Sparkles className="w-3.5 h-3.5 text-purple-300 light:text-purple-600 animate-pulse" />
                 <span>Campaign Pre-Activation Phase</span>
               </div>
-              <h4 className="text-lg sm:text-xl font-black text-white tracking-tight">
+              <h4 className="text-lg sm:text-xl font-black text-white light:text-slate-900 tracking-tight">
                 {filledSlots} out of {targetSlots} slots filled
                 {remainingSlots > 0 ? (
-                  <span className="text-purple-300 font-semibold">
+                  <span className="text-purple-300 light:text-purple-700 font-semibold">
                     {' '}· {remainingSlots} remaining to start campaign
                   </span>
                 ) : (
-                  <span className="text-emerald-400 font-semibold"> · All slots filled!</span>
+                  <span className="text-emerald-400 light:text-emerald-600 font-semibold"> · All slots filled!</span>
                 )}
               </h4>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-400 light:text-slate-600 leading-relaxed">
                 Deliverable draft submissions and review controls will activate once the campaign is officially started with smart escrow reservation. You can start the campaign now with currently confirmed creators or wait for remaining slots.
               </p>
             </div>
@@ -270,10 +270,10 @@ export default function ParticipantDeliverablesPage({
               <button
                 type="button"
                 onClick={() => setIsConfirmModalOpen(true)}
-                className="px-6 py-3 rounded-2xl text-xs sm:text-sm font-black text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-500 shadow-xl shadow-purple-950/60 hover:scale-[1.03] active:scale-[0.98] transition-all flex items-center gap-2.5 cursor-pointer ring-2 ring-purple-400/40"
+                className="px-6 py-3 rounded-2xl text-xs sm:text-sm font-black text-white keep-white bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-500 shadow-xl shadow-purple-950/60 hover:scale-[1.03] active:scale-[0.98] transition-all flex items-center gap-2.5 cursor-pointer ring-2 ring-purple-400/40"
               >
-                <Sparkles className="w-4 h-4 text-purple-200" />
-                <span>Start Campaign</span>
+                <Sparkles className="w-4 h-4 text-purple-200 keep-white" />
+                <span className="keep-white text-white">Start Campaign</span>
               </button>
             </div>
           </div>

@@ -113,7 +113,7 @@ export function BrandWorkedRibbonBadge({ size = 'default' }: { size?: 'default' 
       </svg>
 
       {/* Hover Floating Tooltip */}
-      <div className="absolute top-full left-0 mt-1 hidden group-hover/ribbon:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-950/95 border border-purple-500/40 text-[10px] font-black text-purple-200 shadow-xl whitespace-nowrap z-50 pointer-events-none">
+      <div className="absolute top-full left-0 mt-1 hidden group-hover/ribbon:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-950/95 light:bg-white border border-purple-500/40 light:border-slate-200 text-[10px] font-black text-purple-200 light:text-slate-800 shadow-xl whitespace-nowrap z-50 pointer-events-none">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
         <span>Worked with Brand</span>
       </div>
@@ -184,7 +184,7 @@ export default function ShortlistApplicantCard({
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         onClick={handleOpenProfile}
-        className="p-5 rounded-3xl bg-[#0a0d14]/95 border border-white/10 backdrop-blur-xl hover:border-purple-500/40 transition-[border-color,box-shadow] duration-300 flex flex-col xl:flex-row xl:items-center justify-between gap-5 group shadow-xl hover:shadow-purple-950/20 cursor-pointer"
+        className="p-5 rounded-3xl bg-[#0a0d14]/95 border border-white/10 backdrop-blur-xl hover:border-purple-500/40 transition-[border-color,box-shadow] duration-300 flex flex-col xl:flex-row xl:items-center justify-between gap-5 group shadow-xl hover:shadow-purple-950/20 light:bg-white light:border-slate-200/80 light:hover:border-purple-300 light:shadow-sm light:hover:shadow-md cursor-pointer"
       >
         {/* Creator Identity */}
         <div className="flex items-center gap-4 min-w-0">
@@ -201,25 +201,25 @@ export default function ShortlistApplicantCard({
                 src={creatorItem.avatarUrl}
                 alt={creatorItem.name}
                 onError={() => setImageError(true)}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl object-cover border-2 border-white/15 group-hover:border-purple-500/50 shadow-md transition-colors"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl object-cover border-2 border-white/15 light:border-slate-200 group-hover:border-purple-500/50 shadow-md transition-colors"
               />
             ) : (
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-purple-700 via-indigo-700 to-pink-700 text-white font-black text-xl flex items-center justify-center border-2 border-white/15 shadow-md">
-                {creatorItem.name ? creatorItem.name.charAt(0).toUpperCase() : 'C'}
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-purple-700 via-indigo-700 to-pink-700 text-white font-black text-xl flex items-center justify-center border-2 border-white/15 light:border-slate-200 shadow-md keep-white">
+                <span className="keep-white text-white">{creatorItem.name ? creatorItem.name.charAt(0).toUpperCase() : 'C'}</span>
               </div>
             )}
-            <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center border-2 border-[#090D16] shadow-sm">
+            <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center border-2 border-[#090D16] light:border-white shadow-sm">
               <BadgeCheck className="w-3.5 h-3.5 fill-white text-purple-600" />
             </span>
           </div>
 
           <div className="min-w-0 flex flex-col justify-center space-y-1">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-purple-300 transition-colors truncate">
+              <h3 className="text-base sm:text-lg font-bold text-white light:text-slate-900 group-hover:text-purple-300 light:group-hover:text-purple-700 transition-colors truncate">
                 {creatorItem.name}
               </h3>
-              <span className="px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-[11px] font-black text-purple-300 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-purple-400" />
+              <span className="px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-[11px] font-black text-purple-300 light:bg-purple-50 light:border-purple-200 light:text-purple-700 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-purple-400 light:text-purple-600" />
                 {formatMaxOneDecimal(matchScore)}% Match
               </span>
               <button
@@ -228,19 +228,19 @@ export default function ShortlistApplicantCard({
                   e.stopPropagation();
                   campaignId && onFilterByCampaign?.(campaignId);
                 }}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-950/60 hover:bg-purple-900/70 border border-purple-500/30 text-[10.5px] font-bold text-purple-300 transition-colors truncate max-w-[170px]"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-950/60 hover:bg-purple-900/70 border border-purple-500/30 text-[10.5px] font-bold text-purple-300 light:bg-purple-50 light:border-purple-200 light:text-purple-700 light:hover:bg-purple-100 transition-colors truncate max-w-[170px]"
                 title={`Campaign: ${campaignTitle}`}
               >
-                <Target className="w-2.5 h-2.5 text-purple-400 shrink-0" />
+                <Target className="w-2.5 h-2.5 text-purple-400 light:text-purple-600 shrink-0" />
                 <span className="truncate">{campaignTitle}</span>
               </button>
             </div>
 
-            <div className="text-xs text-slate-300 font-medium truncate">
+            <div className="text-xs text-slate-300 light:text-slate-500 font-medium truncate">
               {creatorItem.category || 'Content Creator'}
             </div>
 
-            <p className="text-xs text-slate-300/80 italic line-clamp-2 pt-0.5">
+            <p className="text-xs text-slate-300/80 light:text-slate-600 italic line-clamp-2 pt-0.5">
               &quot;{application.applicationMessage || creatorItem.bio || 'No pitch description provided.'}&quot;
             </p>
 
@@ -260,10 +260,10 @@ export default function ShortlistApplicantCard({
 
         {/* Amount Display */}
         <div className="flex flex-col items-end justify-center shrink-0 pr-2">
-          <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+          <span className="text-[10px] text-slate-400 light:text-slate-500 uppercase font-bold tracking-wider">
             Pitch Quote
           </span>
-          <span className="text-lg sm:text-2xl font-black text-purple-300">
+          <span className="text-lg sm:text-2xl font-black text-purple-300 light:text-purple-700">
             {quoteDisplay}
           </span>
         </div>
@@ -273,36 +273,36 @@ export default function ShortlistApplicantCard({
           <button
             onClick={() => onViewDetails(application)}
             type="button"
-            className="group/pitch relative h-9 w-20 sm:w-24 rounded-xl bg-slate-900/90 hover:bg-slate-800 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/50 text-xs font-bold text-slate-200 hover:text-white flex items-center justify-center transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-purple-900/30 cursor-pointer shrink-0 select-none overflow-hidden"
+            className="group/pitch relative h-9 w-20 sm:w-24 rounded-xl bg-slate-900/90 hover:bg-slate-800 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/50 text-xs font-bold text-slate-200 hover:text-white light:bg-white light:border-slate-200 light:text-slate-700 light:hover:bg-purple-50 light:hover:border-purple-300 light:hover:text-purple-700 flex items-center justify-center transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-purple-900/30 cursor-pointer shrink-0 select-none overflow-hidden"
           >
             <span className="transition-transform duration-200 group-hover/pitch:-translate-x-2">
               Pitch
             </span>
-            <ArrowRight className="w-3.5 h-3.5 text-purple-400 absolute right-2.5 opacity-0 translate-x-2 group-hover/pitch:opacity-100 group-hover/pitch:translate-x-0 transition-all duration-200" />
+            <ArrowRight className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 absolute right-2.5 opacity-0 translate-x-2 group-hover/pitch:opacity-100 group-hover/pitch:translate-x-0 transition-all duration-200" />
           </button>
 
           {hasExistingOffer && application.status !== 'OFFER_ACCEPTED' ? (
             <button
               onClick={() => onSendOffer(application)}
               type="button"
-              className="px-4 py-2 rounded-xl bg-purple-600/30 hover:bg-purple-600 text-xs font-bold text-purple-200 hover:text-white border border-purple-400/30 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-purple-600/30 hover:bg-purple-600 text-xs font-bold text-purple-200 hover:text-white border border-purple-400/30 light:bg-purple-50 light:border-purple-200 light:text-purple-700 light:hover:bg-purple-600 light:hover:text-white light:hover:border-purple-600 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Change Offer</span>
             </button>
           ) : application.status === 'OFFER_ACCEPTED' ? (
-            <span className="px-3.5 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xs font-bold text-emerald-300 flex items-center gap-1.5 shadow-sm">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="px-3.5 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xs font-bold text-emerald-300 light:bg-emerald-50 light:border-emerald-200 light:text-emerald-700 flex items-center gap-1.5 shadow-sm">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600" />
               <span>Offer Accepted</span>
             </span>
           ) : (
             <button
               onClick={() => onSendOffer(application)}
               type="button"
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-500 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-purple-600/25 hover:shadow-purple-600/40 border border-purple-400/20 active:scale-[0.98] cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-500 hover:from-purple-500 hover:to-indigo-500 text-white keep-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-purple-600/25 hover:shadow-purple-600/40 border border-purple-400/20 active:scale-[0.98] cursor-pointer"
             >
-              <Send className="w-3.5 h-3.5" />
-              <span>Send Offer</span>
+              <Send className="w-3.5 h-3.5 text-white keep-white" />
+              <span className="keep-white text-white">Send Offer</span>
             </button>
           )}
         </div>
@@ -317,21 +317,21 @@ export default function ShortlistApplicantCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
       onClick={handleOpenProfile}
-      className="p-5 sm:p-6 lg:p-7 rounded-[26px] bg-[#090C15]/95 border border-white/[0.08] backdrop-blur-2xl hover:border-purple-500/40 transition-[border-color,box-shadow] duration-300 group shadow-2xl hover:shadow-purple-950/30 relative overflow-visible flex flex-col md:flex-row gap-5 lg:gap-6 items-stretch cursor-pointer mt-3"
+      className="p-5 sm:p-6 lg:p-7 rounded-[26px] bg-[#090C15]/95 border border-white/[0.08] backdrop-blur-2xl hover:border-purple-500/40 transition-[border-color,box-shadow] duration-300 group shadow-2xl hover:shadow-purple-950/30 light:bg-white light:border-slate-200/80 light:hover:border-purple-300 light:shadow-sm light:hover:shadow-md relative overflow-visible flex flex-col md:flex-row gap-5 lg:gap-6 items-stretch cursor-pointer mt-3"
     >
       {/* Background ambient purple glow */}
       <div className="absolute -top-32 -right-32 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl pointer-events-none group-hover:bg-purple-600/20 transition-all duration-500" />
 
       {/* Floating Match Rate Badge Overlapping Top-Right Corner */}
       <div className="absolute -top-3.5 right-6 sm:right-8 z-30 pointer-events-none">
-        <span className="px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 border border-purple-400/50 text-xs sm:text-sm font-black text-white flex items-center gap-1.5 shadow-xl shadow-purple-950/80 ring-4 ring-[#090C15] group-hover:scale-105 group-hover:shadow-purple-600/40 transition-all duration-300">
-          <Sparkles className="w-3.5 h-3.5 text-purple-200 animate-pulse shrink-0" />
-          <span>{formatMaxOneDecimal(matchScore)}% Match</span>
+        <span className="px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 border border-purple-400/50 text-xs sm:text-sm font-black text-white keep-white flex items-center gap-1.5 shadow-xl shadow-purple-950/80 light:shadow-sm ring-4 ring-[#090C15] light:ring-[#F1F3F7] group-hover:scale-105 group-hover:shadow-purple-600/40 transition-all duration-300">
+          <Sparkles className="w-3.5 h-3.5 text-purple-200 keep-white animate-pulse shrink-0" />
+          <span className="keep-white text-white">{formatMaxOneDecimal(matchScore)}% Match</span>
         </span>
       </div>
 
       {/* LEFT COLUMN: Portrait Image with Overlapping Badges */}
-      <div className="relative w-full md:w-[180px] lg:w-[195px] h-[250px] sm:h-[260px] md:h-auto min-h-[240px] lg:min-h-[260px] shrink-0 rounded-2xl border border-white/10 group-hover:border-purple-500/40 bg-slate-900/60 shadow-md transition-colors flex flex-col justify-end">
+      <div className="relative w-full md:w-[180px] lg:w-[195px] h-[250px] sm:h-[260px] md:h-auto min-h-[240px] lg:min-h-[260px] shrink-0 rounded-2xl border border-white/10 light:border-slate-200 group-hover:border-purple-500/40 bg-slate-900/60 light:bg-slate-100 shadow-md transition-colors flex flex-col justify-end">
         {/* Overlapping Rosette Ribbon Award Medal on top-left corner */}
         {workedWithBrand && (
           <div className="absolute -top-4 -left-4 z-30 pointer-events-auto">
@@ -349,8 +349,8 @@ export default function ShortlistApplicantCard({
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-tr from-purple-700 via-indigo-700 to-pink-700 flex items-center justify-center text-white font-black text-4xl">
-              {creatorItem.name ? creatorItem.name.charAt(0).toUpperCase() : 'C'}
+            <div className="w-full h-full bg-gradient-to-tr from-purple-700 via-indigo-700 to-pink-700 flex items-center justify-center text-white keep-white font-black text-4xl">
+              <span className="keep-white text-white">{creatorItem.name ? creatorItem.name.charAt(0).toUpperCase() : 'C'}</span>
             </div>
           )}
 
@@ -386,10 +386,10 @@ export default function ShortlistApplicantCard({
                 e.stopPropagation();
                 campaignId && onFilterByCampaign?.(campaignId);
               }}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-purple-950/60 hover:bg-purple-900/70 border border-purple-500/30 text-[11px] font-bold text-purple-200 transition-colors truncate max-w-[240px] text-left cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-purple-950/60 hover:bg-purple-900/70 border border-purple-500/30 text-[11px] font-bold text-purple-200 light:bg-purple-50 light:border-purple-200 light:text-purple-700 light:hover:bg-purple-100 transition-colors truncate max-w-[240px] text-left cursor-pointer"
               title={`Campaign: ${campaignTitle}`}
             >
-              <Target className="w-3 h-3 text-purple-400 shrink-0" />
+              <Target className="w-3 h-3 text-purple-400 light:text-purple-600 shrink-0" />
               <span className="truncate">{campaignTitle}</span>
             </button>
           </div>
@@ -397,22 +397,22 @@ export default function ShortlistApplicantCard({
           {/* Name & Category without @handle and without Zerify Creator tag */}
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-2xl sm:text-[26px] font-black text-white group-hover:text-purple-300 transition-colors tracking-tight leading-snug truncate">
+              <h3 className="text-2xl sm:text-[26px] font-black text-white group-hover:text-purple-300 light:text-slate-900 light:group-hover:text-purple-700 transition-colors tracking-tight leading-snug truncate">
                 {creatorItem.name}
               </h3>
               {creatorItem.isVerified && (
                 <span className="shrink-0 text-purple-400" title="Verified Creator">
-                  <BadgeCheck className="w-5 h-5 fill-purple-600 text-[#090C15]" />
+                  <BadgeCheck className="w-5 h-5 fill-purple-600 text-[#090C15] light:text-white" />
                 </span>
               )}
             </div>
-            <p className="text-sm text-slate-300 font-medium truncate whitespace-nowrap mt-0.5">
+            <p className="text-sm text-slate-300 light:text-slate-500 font-medium truncate whitespace-nowrap mt-0.5">
               {creatorItem.category || 'Content Creator'}
             </p>
           </div>
 
           {/* Description shown normally in italic and truncated to 2 lines with ellipsis */}
-          <p className="text-sm text-slate-300/80 leading-relaxed italic line-clamp-2">
+          <p className="text-sm text-slate-300/80 light:text-slate-600 leading-relaxed italic line-clamp-2">
             &quot;{application.applicationMessage || creatorItem.bio || 'No pitch description provided.'}&quot;
           </p>
         </div>
@@ -420,12 +420,12 @@ export default function ShortlistApplicantCard({
         {/* Pitch Quote Amount & Action Buttons */}
         <div className="space-y-4 pt-1">
           {/* Amount Only Display */}
-          <div className="flex items-center justify-between py-2 px-1 border-t border-white/[0.08]">
-            <span className="text-xs uppercase font-extrabold tracking-wider text-slate-400">
+          <div className="flex items-center justify-between py-2 px-1 border-t border-white/[0.08] light:border-slate-200">
+            <span className="text-xs uppercase font-extrabold tracking-wider text-slate-400 light:text-slate-500">
               Pitch Quote
             </span>
             <div className="flex flex-col items-end">
-              <span className="text-2xl sm:text-[28px] font-black text-purple-300 tracking-tight">
+              <span className="text-2xl sm:text-[28px] font-black text-purple-300 light:text-purple-700 tracking-tight">
                 {quoteDisplay}
               </span>
             </div>
@@ -436,36 +436,36 @@ export default function ShortlistApplicantCard({
             <button
               onClick={() => onViewDetails(application)}
               type="button"
-              className="group/pitch relative h-10 sm:h-11 w-24 sm:w-28 rounded-xl bg-slate-900/90 hover:bg-slate-800 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/50 text-xs sm:text-sm font-bold text-slate-200 hover:text-white flex items-center justify-center transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-purple-900/30 cursor-pointer shrink-0 select-none overflow-hidden"
+              className="group/pitch relative h-10 sm:h-11 w-24 sm:w-28 rounded-xl bg-slate-900/90 hover:bg-slate-800 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/50 text-xs sm:text-sm font-bold text-slate-200 hover:text-white light:bg-white light:border-slate-200 light:text-slate-700 light:hover:bg-purple-50 light:hover:border-purple-300 light:hover:text-purple-700 flex items-center justify-center transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-purple-900/30 cursor-pointer shrink-0 select-none overflow-hidden"
             >
               <span className="transition-transform duration-200 group-hover/pitch:-translate-x-2">
                 Pitch
               </span>
-              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400 absolute right-3 opacity-0 translate-x-2 group-hover/pitch:opacity-100 group-hover/pitch:translate-x-0 transition-all duration-200" />
+              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400 light:text-purple-600 absolute right-3 opacity-0 translate-x-2 group-hover/pitch:opacity-100 group-hover/pitch:translate-x-0 transition-all duration-200" />
             </button>
 
             {hasExistingOffer && application.status !== 'OFFER_ACCEPTED' ? (
               <button
                 onClick={() => onSendOffer(application)}
                 type="button"
-                className="flex-1 py-2 sm:py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-500 hover:from-purple-500 hover:to-indigo-500 text-xs sm:text-sm font-bold text-white flex items-center justify-center gap-1.5 transition-all shadow-md shadow-purple-600/25 hover:shadow-purple-600/40 hover:scale-[1.01] active:scale-[0.98] border border-purple-400/30 cursor-pointer"
+                className="flex-1 py-2 sm:py-2.5 px-4 rounded-xl bg-purple-600/30 hover:bg-purple-600 text-xs sm:text-sm font-bold text-purple-200 hover:text-white border border-purple-400/30 light:bg-purple-50 light:border-purple-200 light:text-purple-700 light:hover:bg-purple-600 light:hover:text-white light:hover:border-purple-600 flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>Change Offer</span>
               </button>
             ) : application.status === 'OFFER_ACCEPTED' ? (
-              <div className="flex-1 py-2 sm:py-2.5 px-4 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xs sm:text-sm font-bold text-emerald-300 flex items-center justify-center gap-1.5 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <div className="flex-1 py-2 sm:py-2.5 px-4 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xs sm:text-sm font-bold text-emerald-300 light:bg-emerald-50 light:border-emerald-200 light:text-emerald-700 flex items-center justify-center gap-1.5 shadow-sm">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 light:text-emerald-600" />
                 <span>Offer Accepted</span>
               </div>
             ) : (
               <button
                 onClick={() => onSendOffer(application)}
                 type="button"
-                className="flex-1 py-2 sm:py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-500 hover:from-purple-500 hover:to-indigo-500 text-xs sm:text-sm font-bold text-white flex items-center justify-center gap-1.5 transition-all shadow-md shadow-purple-600/25 hover:shadow-purple-600/40 hover:scale-[1.01] active:scale-[0.98] border border-purple-400/30 cursor-pointer"
+                className="flex-1 py-2 sm:py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-500 hover:from-purple-500 hover:to-indigo-500 text-xs sm:text-sm font-bold text-white keep-white flex items-center justify-center gap-1.5 transition-all shadow-md shadow-purple-600/25 hover:shadow-purple-600/40 hover:scale-[1.01] active:scale-[0.98] border border-purple-400/30 cursor-pointer"
               >
-                <Send className="w-3.5 h-3.5" />
-                <span>Send Offer</span>
+                <Send className="w-3.5 h-3.5 text-white keep-white" />
+                <span className="keep-white text-white">Send Offer</span>
               </button>
             )}
           </div>

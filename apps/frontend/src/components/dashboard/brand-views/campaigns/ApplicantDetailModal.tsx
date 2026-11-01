@@ -68,14 +68,14 @@ export default function ApplicantDetailModal({
   const modalContent = (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/85 backdrop-blur-md"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/85 light:bg-slate-900/50 backdrop-blur-md"
     >
       <motion.div
         onClick={(e) => e.stopPropagation()}
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.96 }}
-        className="w-full max-w-2xl bg-[#090D16] border border-purple-500/25 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] backdrop-blur-2xl p-6 sm:p-8 space-y-6 relative"
+        className="w-full max-w-2xl bg-[#090D16] light:bg-white border border-purple-500/25 light:border-slate-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] backdrop-blur-2xl p-6 sm:p-8 space-y-6 relative"
       >
         {/* Top Header: In-Platform Creator Info */}
         <div className="flex items-start justify-between gap-4">
@@ -87,7 +87,7 @@ export default function ApplicantDetailModal({
               title={`View ${creatorItem.name}'s platform profile`}
               className="relative shrink-0 block group/avatar cursor-pointer text-left"
             >
-              <div className="w-20 h-20 sm:w-[84px] sm:h-[84px] rounded-2xl overflow-hidden border-2 border-purple-500/40 group-hover/avatar:border-purple-400 bg-slate-950 flex items-center justify-center text-white font-black shadow-xl shadow-purple-950/50 transition-all group-hover/avatar:scale-105">
+              <div className="w-20 h-20 sm:w-[84px] sm:h-[84px] rounded-2xl overflow-hidden border-2 border-purple-500/40 group-hover/avatar:border-purple-400 bg-slate-950 light:bg-slate-100 light:border-purple-300 flex items-center justify-center text-white font-black shadow-xl shadow-purple-950/50 transition-all group-hover/avatar:scale-105">
                 {creatorItem.avatarUrl && !imageError ? (
                   <img
                     src={creatorItem.avatarUrl}
@@ -96,12 +96,12 @@ export default function ApplicantDetailModal({
                     className="w-full h-full object-cover group-hover/avatar:scale-110 transition-transform duration-300"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 flex items-center justify-center text-white font-black text-2xl shadow-inner select-none">
-                    {creatorItem.name ? creatorItem.name.charAt(0).toUpperCase() : 'C'}
+                  <div className="w-full h-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 flex items-center justify-center text-white keep-white font-black text-2xl shadow-inner select-none">
+                    <span className="keep-white text-white">{creatorItem.name ? creatorItem.name.charAt(0).toUpperCase() : 'C'}</span>
                   </div>
                 )}
               </div>
-              <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-purple-500 text-white flex items-center justify-center border-2 border-[#090D16] shadow-sm">
+              <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-purple-500 text-white flex items-center justify-center border-2 border-[#090D16] light:border-white shadow-sm">
                 <CheckCircle2 className="w-3.5 h-3.5 fill-white text-purple-600" />
               </span>
             </button>
@@ -115,10 +115,10 @@ export default function ApplicantDetailModal({
                   title={`View ${creatorItem.name}'s platform profile`}
                   className="inline-flex items-center gap-2 min-w-0 group/name cursor-pointer max-w-full text-left"
                 >
-                  <h3 className="text-2xl sm:text-3xl font-black text-white group-hover/name:text-purple-300 tracking-tight leading-tight truncate transition-colors">
+                  <h3 className="text-2xl sm:text-3xl font-black text-white group-hover/name:text-purple-300 light:text-slate-900 light:group-hover/name:text-purple-700 tracking-tight leading-tight truncate transition-colors">
                     {creatorItem.name}
                   </h3>
-                  <span className="p-1 rounded-lg bg-purple-500/10 group-hover/name:bg-purple-500/25 border border-purple-500/20 text-purple-400 group-hover/name:text-purple-300 transition-all flex items-center justify-center shrink-0">
+                  <span className="p-1 rounded-lg bg-purple-500/10 group-hover/name:bg-purple-500/25 border border-purple-500/20 text-purple-400 group-hover/name:text-purple-300 light:text-purple-600 transition-all flex items-center justify-center shrink-0">
                     <ArrowUpRight className="w-4 h-4 group-hover/name:translate-x-0.5 group-hover/name:-translate-y-0.5 transition-transform" />
                   </span>
                 </button>
@@ -126,7 +126,7 @@ export default function ApplicantDetailModal({
 
               {/* In-Platform Creator Details */}
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 light:bg-emerald-50 light:border-emerald-200 light:text-emerald-700 text-xs font-bold">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Verified Creator</span>
                 </span>
@@ -137,14 +137,14 @@ export default function ApplicantDetailModal({
                 {(creatorItem.categories || [creatorItem.category]).slice(0, 2).map((n) => (
                   <span
                     key={n}
-                    className="inline-block px-2.5 py-0.5 rounded-lg bg-slate-900/90 border border-white/10 text-[11px] font-semibold text-slate-300 shadow-sm shrink-0"
+                    className="inline-block px-2.5 py-0.5 rounded-lg bg-slate-900/90 border border-white/10 text-[11px] font-semibold text-slate-300 light:bg-purple-50 light:border-purple-200 light:text-purple-700 shadow-sm shrink-0"
                   >
                     {n}
                   </span>
                 ))}
                 {(creatorItem.categories || [creatorItem.category]).length > 2 && (
                   <span
-                    className="text-slate-400 text-xs font-black tracking-widest px-0.5 select-none shrink-0"
+                    className="text-slate-400 light:text-slate-500 text-xs font-black tracking-widest px-0.5 select-none shrink-0"
                     title={(creatorItem.categories || [creatorItem.category]).slice(2).join(', ')}
                   >
                     ...
@@ -156,8 +156,8 @@ export default function ApplicantDetailModal({
 
           {/* Right: Match Score Badge */}
           <div className="flex items-center shrink-0">
-            <div className="px-3.5 py-1.5 rounded-2xl bg-purple-500/15 border border-purple-500/30 flex items-center gap-1.5 text-xs font-black text-purple-300 shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
+            <div className="px-3.5 py-1.5 rounded-2xl bg-purple-500/15 border border-purple-500/30 flex items-center gap-1.5 text-xs font-black text-purple-300 light:bg-purple-50 light:border-purple-200 light:text-purple-700 shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 animate-pulse" />
               <span>{match.score || 100}% Match</span>
             </div>
           </div>
@@ -169,18 +169,18 @@ export default function ApplicantDetailModal({
         >
           {/* Counter Offer Highlight Banner */}
           {application.reviewNotes === 'COUNTER_OFFER' && (
-            <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between gap-3">
+            <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 light:bg-amber-50 light:border-amber-200 flex items-center justify-between gap-3">
               <div className="space-y-0.5">
-                <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                <span className="text-[10px] uppercase font-bold text-amber-400 light:text-amber-700 tracking-wider flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 light:text-amber-600 animate-pulse" />
                   Creator Counter Proposal
                 </span>
-                <p className="text-xs text-slate-300">
+                <p className="text-xs text-slate-300 light:text-slate-600">
                   Creator proposed custom rate for this collaboration.
                 </p>
               </div>
               <div className="text-right">
-                <span className="text-sm sm:text-base font-black text-amber-400">
+                <span className="text-sm sm:text-base font-black text-amber-400 light:text-amber-700">
                   <Money
                     amount={application.proposedAmount}
                     currency={application.proposedCurrency || (application as any).influencerProfile?.currency || 'USD'}
@@ -192,10 +192,10 @@ export default function ApplicantDetailModal({
 
           {/* Application Pitch */}
           <div className="space-y-1">
-            <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            <h4 className="text-[11px] font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
               {application.reviewNotes === 'COUNTER_OFFER' ? 'Creator Pitch & Terms Note' : 'Application Pitch'}
             </h4>
-            <p className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">
+            <p className="text-xs text-slate-200 light:text-slate-700 leading-relaxed whitespace-pre-wrap">
               {application.applicationMessage || 'No pitch text provided.'}
             </p>
           </div>
@@ -203,10 +203,10 @@ export default function ApplicantDetailModal({
           {/* Proposed Content Concept */}
           {application.contentIdea && (
             <div className="space-y-1">
-              <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <h4 className="text-[11px] font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
                 Proposed Content Concept
               </h4>
-              <p className="text-xs text-slate-200 leading-relaxed">
+              <p className="text-xs text-slate-200 light:text-slate-700 leading-relaxed">
                 {application.contentIdea}
               </p>
             </div>
@@ -214,10 +214,10 @@ export default function ApplicantDetailModal({
 
           {/* Proposed Compensation */}
           <div className="flex items-center justify-between py-1">
-            <span className="text-xs font-bold text-slate-400">
+            <span className="text-xs font-bold text-slate-400 light:text-slate-500">
               Proposed Compensation:
             </span>
-            <span className="text-base sm:text-lg font-black text-emerald-400 tracking-tight">
+            <span className="text-base sm:text-lg font-black text-emerald-400 light:text-emerald-600 tracking-tight">
               {application.proposedAmount ? (
                 <Money
                   amount={application.proposedAmount}
@@ -232,7 +232,7 @@ export default function ApplicantDetailModal({
           {/* Relevant Past Work & Portfolio Links */}
           {application.portfolioUrls && application.portfolioUrls.length > 0 && (
             <div className="space-y-1.5">
-              <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <h4 className="text-[11px] font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
                 Relevant Past Work & Portfolio Links
               </h4>
               <div className="space-y-1.5">
@@ -242,7 +242,7 @@ export default function ApplicantDetailModal({
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1.5 hover:underline transition-all group font-medium"
+                    className="text-xs text-purple-400 hover:text-purple-300 light:text-purple-700 light:hover:text-purple-900 flex items-center gap-1.5 hover:underline transition-all group font-medium"
                   >
                     <span className="truncate">{url}</span>
                     <ExternalLink className="w-3.5 h-3.5 shrink-0 group-hover:translate-x-0.5 transition-transform" />
@@ -257,22 +257,22 @@ export default function ApplicantDetailModal({
         <div className="flex items-center justify-between pt-2 shrink-0">
           <div className="flex items-center gap-2.5">
             {application.status === 'SHORTLISTED' ? (
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold shadow-sm">
-                <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 light:bg-indigo-50 light:border-indigo-200 light:text-indigo-700 text-xs font-bold shadow-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400 light:text-indigo-600" />
                 <span>Shortlisted Applicant</span>
               </span>
             ) : application.status === 'REJECTED' ? (
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-bold shadow-sm">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 light:bg-rose-50 light:border-rose-200 light:text-rose-700 text-xs font-bold shadow-sm">
                 <span>Application Rejected</span>
               </span>
             ) : application.status === 'OFFER_SENT' ? (
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-bold shadow-sm">
-                <Send className="w-3.5 h-3.5 text-purple-400" />
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300 light:bg-purple-50 light:border-purple-200 light:text-purple-700 text-xs font-bold shadow-sm">
+                <Send className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />
                 <span>Offer Sent</span>
               </span>
             ) : application.status === 'OFFER_ACCEPTED' ? (
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold shadow-sm">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 light:bg-emerald-50 light:border-emerald-200 light:text-emerald-700 text-xs font-bold shadow-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600" />
                 <span>Offer Accepted (Confirmed Participant)</span>
               </span>
             ) : isCounter ? (
@@ -283,7 +283,7 @@ export default function ApplicantDetailModal({
                     onClose();
                   }}
                   type="button"
-                  className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 hover:text-rose-400 text-xs font-bold text-slate-400 border border-white/10 hover:border-rose-500/30 transition-all cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 hover:text-rose-400 text-xs font-bold text-slate-400 light:bg-slate-100 light:border-slate-200 light:text-slate-700 light:hover:bg-rose-50 light:hover:text-rose-600 border border-white/10 hover:border-rose-500/30 transition-all cursor-pointer"
                 >
                   Reject
                 </button>
@@ -294,7 +294,7 @@ export default function ApplicantDetailModal({
                     onClose();
                   }}
                   type="button"
-                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600/20 via-orange-600/20 to-amber-600/20 hover:from-amber-600 hover:to-orange-600 border border-amber-500/40 text-xs font-bold text-amber-200 hover:text-white transition-all cursor-pointer shadow-sm"
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600/20 via-orange-600/20 to-amber-600/20 hover:from-amber-600 hover:to-orange-600 light:bg-amber-50 light:border-amber-300 light:text-amber-800 border border-amber-500/40 text-xs font-bold text-amber-200 hover:text-white transition-all cursor-pointer shadow-sm"
                 >
                   Counter Offer
                 </button>
@@ -307,7 +307,7 @@ export default function ApplicantDetailModal({
                     onClose();
                   }}
                   type="button"
-                  className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 hover:text-rose-400 text-xs font-bold text-slate-400 border border-white/10 hover:border-rose-500/30 transition-all cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 hover:text-rose-400 text-xs font-bold text-slate-400 light:bg-slate-100 light:border-slate-200 light:text-slate-700 light:hover:bg-rose-50 light:hover:text-rose-600 border border-white/10 hover:border-rose-500/30 transition-all cursor-pointer"
                 >
                   Reject
                 </button>
@@ -317,7 +317,7 @@ export default function ApplicantDetailModal({
                     onClose();
                   }}
                   type="button"
-                  className="px-4 py-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-xs font-bold text-indigo-300 hover:text-white border border-indigo-500/35 transition-all cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-xs font-bold text-indigo-300 hover:text-white light:bg-indigo-50 light:border-indigo-300 light:text-indigo-800 border border-indigo-500/35 transition-all cursor-pointer"
                 >
                   Shortlist
                 </button>
@@ -334,10 +334,10 @@ export default function ApplicantDetailModal({
                   onClose();
                 }}
                 type="button"
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs font-black text-white flex items-center gap-2 shadow-lg shadow-emerald-950/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs font-black text-white keep-white flex items-center gap-2 shadow-lg shadow-emerald-950/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
               >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Accept Counter Offer</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-white keep-white" />
+                <span className="keep-white text-white">Accept Counter Offer</span>
               </button>
             ) : (
               <button
@@ -346,10 +346,10 @@ export default function ApplicantDetailModal({
                   onClose();
                 }}
                 type="button"
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-black text-white flex items-center gap-2 shadow-lg shadow-purple-950/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-black text-white keep-white flex items-center gap-2 shadow-lg shadow-purple-950/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
               >
-                <Send className="w-3.5 h-3.5" />
-                <span>Send Collaboration Offer</span>
+                <Send className="w-3.5 h-3.5 text-white keep-white" />
+                <span className="keep-white text-white">Send Collaboration Offer</span>
               </button>
             )
           )}

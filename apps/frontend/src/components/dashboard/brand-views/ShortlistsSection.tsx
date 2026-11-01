@@ -379,13 +379,13 @@ export default function ShortlistsSection() {
           })}
         </div>
       ) : (
-        <div className="p-12 text-center rounded-3xl bg-slate-900/40 border border-purple-500/15 backdrop-blur-xl space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 mx-auto flex items-center justify-center">
+        <div className="p-12 text-center rounded-3xl bg-slate-900/40 light:bg-white border border-purple-500/15 light:border-slate-200/80 backdrop-blur-xl space-y-4 light:shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 light:bg-purple-50 light:border-purple-200 light:text-purple-600 mx-auto flex items-center justify-center">
             <Users className="w-8 h-8 opacity-75" />
           </div>
           <div className="max-w-md mx-auto space-y-1.5">
-            <h3 className="text-base font-extrabold text-white">No shortlisted candidates found</h3>
-            <p className="text-xs text-slate-400">
+            <h3 className="text-base font-extrabold text-white light:text-slate-900">No shortlisted candidates found</h3>
+            <p className="text-xs text-slate-400 light:text-slate-500">
               {applications.length === 0
                 ? 'When you shortlist creators from campaign applicant pitches or discover candidates, they will appear here.'
                 : 'No shortlisted candidates match your current search and filter criteria. Try resetting filters.'}
@@ -395,7 +395,7 @@ export default function ShortlistsSection() {
             <button
               type="button"
               onClick={handleResetFilters}
-              className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-purple-950/40"
+              className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white keep-white transition-all cursor-pointer shadow-md shadow-purple-950/40"
             >
               Reset Filters
             </button>

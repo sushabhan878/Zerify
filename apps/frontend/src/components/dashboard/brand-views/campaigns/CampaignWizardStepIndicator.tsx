@@ -23,7 +23,7 @@ export default function CampaignWizardStepIndicator({
     <div className="w-full py-2 select-none">
       <div className="relative flex items-center justify-between">
         {/* Continuous Connecting Line between circle centers */}
-        <div className="absolute top-5 left-5 right-5 h-[2px] bg-slate-800 rounded-full z-0 overflow-hidden">
+        <div className="absolute top-5 left-5 right-5 h-[2px] bg-slate-800 light:bg-slate-200 rounded-full z-0 overflow-hidden">
           <motion.div
             className="h-full bg-purple-600 rounded-full"
             initial={false}
@@ -56,18 +56,18 @@ export default function CampaignWizardStepIndicator({
                 transition={{ type: 'spring', stiffness: 350, damping: 24 }}
                 className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-200 ${
                   isCompleted
-                    ? 'bg-purple-600 text-white shadow-md shadow-purple-900/30'
+                    ? 'bg-purple-600 text-white keep-white shadow-md shadow-purple-900/30'
                     : isCurrent
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/40 border-2 border-purple-400'
+                    ? 'bg-purple-600 text-white keep-white shadow-lg shadow-purple-600/40 border-2 border-purple-400'
                     : isUnfilledPastStep
-                    ? 'bg-slate-900 border-2 border-purple-500/40 text-slate-300 hover:border-purple-400 hover:text-white'
-                    : 'bg-slate-900 border border-purple-500/25 text-slate-400 hover:border-purple-500/60 hover:text-white'
+                    ? 'bg-slate-900 light:bg-white border-2 border-purple-500/40 light:border-purple-300 text-slate-300 light:text-slate-700 hover:border-purple-400 hover:text-white light:hover:text-purple-700'
+                    : 'bg-slate-900 light:bg-white border border-purple-500/25 light:border-slate-300 text-slate-400 light:text-slate-500 hover:border-purple-500/60 hover:text-white light:hover:text-purple-700'
                 }`}
               >
                 {isCompleted ? (
-                  <Check className="w-4 h-4 stroke-[2.5]" />
+                  <Check className="w-4 h-4 stroke-[2.5] text-white keep-white" />
                 ) : (
-                  <span>{step.id}</span>
+                  <span className={isCurrent ? 'keep-white text-white' : ''}>{step.id}</span>
                 )}
               </motion.div>
 
@@ -76,16 +76,16 @@ export default function CampaignWizardStepIndicator({
                 <span
                   className={`block text-[11px] font-bold tracking-tight transition-colors ${
                     isCurrent
-                      ? 'text-purple-300'
+                      ? 'text-purple-300 light:text-purple-700'
                       : isCompleted
-                      ? 'text-slate-200'
-                      : 'text-slate-400 group-hover:text-slate-200'
+                      ? 'text-slate-200 light:text-slate-800'
+                      : 'text-slate-400 group-hover:text-slate-200 light:text-slate-500 light:group-hover:text-slate-800'
                   }`}
                 >
                   {step.label}
                 </span>
                 {step.description && (
-                  <span className="hidden md:block text-[9.5px] text-slate-500 font-medium leading-tight mt-0.5">
+                  <span className="hidden md:block text-[9.5px] text-slate-500 light:text-slate-500 font-medium leading-tight mt-0.5">
                     {step.description}
                   </span>
                 )}

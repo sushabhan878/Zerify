@@ -137,7 +137,7 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
     <div className="space-y-6">
       {/* Payment Model Selection */}
       <div className="space-y-2.5">
-        <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider">
+        <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider">
           Payment & Compensation Model <span className="text-pink-400">*</span>
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
@@ -152,12 +152,12 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                 onClick={() => onChange('budgetPaymentModel', pm.value === selectedModel ? '' : pm.value)}
                 className={`relative p-4 rounded-2xl text-left border transition-all duration-200 group flex flex-col justify-between overflow-hidden cursor-pointer ${
                   isSelected
-                    ? 'bg-gradient-to-b from-purple-950/40 to-slate-900/90 border-purple-400/50 shadow-[0_0_15px_rgba(168,85,247,0.15)] ring-1 ring-purple-400/30'
-                    : 'bg-slate-900/60 border-white/10 hover:border-purple-400/30 hover:bg-slate-900/90 hover:-translate-y-0.5'
+                    ? 'bg-gradient-to-b from-purple-950/40 to-slate-900/90 border-purple-400/50 shadow-[0_0_15px_rgba(168,85,247,0.15)] ring-1 ring-purple-400/30 light:bg-none light:bg-purple-50/90 light:border-purple-400 light:shadow-sm light:ring-2 light:ring-purple-400/30'
+                    : 'bg-slate-900/60 border-white/10 hover:border-purple-400/30 hover:bg-slate-900/90 hover:-translate-y-0.5 light:bg-white light:border-slate-200 light:hover:border-purple-300 light:hover:bg-purple-50/30'
                 }`}
               >
                 {isSelected && (
-                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-400 to-transparent" />
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-400 to-transparent light:via-purple-500" />
                 )}
 
                 <div>
@@ -165,8 +165,8 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                     <div
                       className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
                         isSelected
-                          ? 'bg-purple-500/25 text-purple-200 border border-purple-400/40 shadow-[0_0_10px_rgba(192,132,252,0.25)]'
-                          : 'bg-slate-800/80 text-slate-400 border border-white/5 group-hover:text-purple-300 group-hover:border-purple-400/20'
+                          ? 'bg-purple-500/25 text-purple-200 border border-purple-400/40 shadow-[0_0_10px_rgba(192,132,252,0.25)] light:bg-purple-100 light:text-purple-700 light:border-purple-300'
+                          : 'bg-slate-800/80 text-slate-400 border border-white/5 group-hover:text-purple-300 group-hover:border-purple-400/20 light:bg-slate-100 light:text-slate-600 light:border-slate-200'
                       }`}
                     >
                       <Icon className="w-4 h-4" />
@@ -175,20 +175,20 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                     <div
                       className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
                         isSelected
-                          ? 'bg-purple-500 text-white shadow-sm'
-                          : 'border border-white/15 group-hover:border-purple-400/30'
+                          ? 'bg-purple-500 text-white keep-white shadow-sm'
+                          : 'border border-white/15 light:border-slate-300 light:bg-slate-50 group-hover:border-purple-400/30'
                       }`}
                     >
-                      {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                      {isSelected && <Check className="w-3 h-3 text-white keep-white stroke-[3]" />}
                     </div>
                   </div>
 
-                  <span className="block text-xs font-bold text-white tracking-tight">
+                  <span className="block text-xs font-bold text-white light:text-slate-900 tracking-tight">
                     {pm.label}
                   </span>
                 </div>
 
-                <span className="block text-[11px] text-slate-400 mt-2 leading-relaxed">
+                <span className="block text-[11px] text-slate-400 light:text-slate-600 mt-2 leading-relaxed">
                   {pm.desc}
                 </span>
               </button>
@@ -200,19 +200,19 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
       {/* Model Specific Dynamic Input Fields */}
       <div className="pt-2 space-y-4">
         {/* Currency Dropdown Component */}
-        <div className="flex items-center justify-between border-b border-purple-400/10 pb-3">
-          <span className="text-xs font-bold text-purple-200 uppercase tracking-wider">
+        <div className="flex items-center justify-between border-b border-purple-400/10 light:border-slate-200 pb-3">
+          <span className="text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider">
             Campaign Budget Configuration
           </span>
           <div className="relative" ref={currencyDropdownRef}>
             <button
               type="button"
               onClick={() => setIsCurrencyOpen((prev) => !prev)}
-              className="px-3 py-1.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white flex items-center gap-2 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+              className="px-3 py-1.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white light:bg-white light:border-slate-300 light:text-slate-900 flex items-center gap-2 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors cursor-pointer"
             >
-              <span className="font-bold text-purple-300">{selectedCurrency.symbol}</span>
-              <span className="font-medium text-white">{selectedCurrency.code}</span>
-              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isCurrencyOpen ? 'rotate-180 text-purple-300' : ''}`} />
+              <span className="font-bold text-purple-300 light:text-purple-700">{selectedCurrency.symbol}</span>
+              <span className="font-medium text-white light:text-slate-900">{selectedCurrency.code}</span>
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isCurrencyOpen ? 'rotate-180 text-purple-300 light:text-purple-600' : ''}`} />
             </button>
 
             <AnimatePresence>
@@ -222,7 +222,7 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute z-50 right-0 mt-1.5 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl max-h-56 overflow-y-auto p-1.5 space-y-0.5 w-56 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                  className="absolute z-50 right-0 mt-1.5 bg-slate-900 border border-white/10 light:bg-white light:border-slate-200 light:shadow-2xl rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl max-h-56 overflow-y-auto p-1.5 space-y-0.5 w-56 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                 >
                   {CURRENCIES.map((c) => {
                     const isSelected = selectedCurrency.code === c.code;
@@ -244,23 +244,23 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                         }}
                         className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${
                           isSelected
-                            ? 'bg-purple-500/20 text-purple-200 font-bold'
+                            ? 'bg-purple-500/20 text-purple-200 font-bold light:bg-purple-50 light:text-purple-700'
                             : isAvailable
-                            ? 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                            : 'text-slate-400 hover:bg-slate-800/60 opacity-80 hover:opacity-100'
+                            ? 'text-slate-300 hover:bg-slate-800 hover:text-white light:text-slate-700 light:hover:bg-slate-100 light:hover:text-slate-900'
+                            : 'text-slate-400 hover:bg-slate-800/60 opacity-80 hover:opacity-100 light:text-slate-400 light:hover:bg-slate-50'
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-purple-300 w-4">{c.symbol}</span>
-                          <span className="text-white font-medium">{c.code}</span>
+                          <span className="font-bold text-purple-300 light:text-purple-700 w-4">{c.symbol}</span>
+                          <span className="text-white light:text-slate-900 font-medium">{c.code}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           {!isAvailable && (
-                            <span className="text-[9px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 rounded-md">
+                            <span className="text-[9px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 light:bg-amber-50 light:border-amber-200 light:text-amber-800 px-1.5 py-0.5 rounded-md">
                               Coming Soon
                             </span>
                           )}
-                          {isSelected && <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />}
+                          {isSelected && <Check className="w-3.5 h-3.5 text-purple-300 light:text-purple-700 stroke-[2.5]" />}
                         </div>
                       </button>
                     );
@@ -273,14 +273,14 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
 
         {/* 0. NO MODEL SELECTED EMPTY STATE */}
         {!selectedModel && (
-          <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="p-6 rounded-2xl bg-slate-900/60 border border-dashed border-purple-400/20 text-center space-y-2">
-            <div className="w-10 h-10 rounded-2xl bg-purple-500/15 border border-purple-400/20 text-purple-300 flex items-center justify-center mx-auto">
+          <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="p-6 rounded-2xl bg-slate-900/60 border border-dashed border-purple-400/20 light:bg-white light:border-slate-200/80 light:shadow-sm text-center space-y-2">
+            <div className="w-10 h-10 rounded-2xl bg-purple-500/15 border border-purple-400/20 text-purple-300 light:bg-purple-50 light:border-purple-200 light:text-purple-700 flex items-center justify-center mx-auto">
               <DollarSign className="w-5 h-5" />
             </div>
-            <p className="text-xs font-bold text-white">
+            <p className="text-xs font-bold text-white light:text-slate-900">
               No Payment Model Selected
             </p>
-            <p className="text-[11px] text-slate-400 max-w-md mx-auto">
+            <p className="text-[11px] text-slate-400 light:text-slate-500 max-w-md mx-auto">
               Choose a payment and compensation model above (e.g. Fixed Fee, Budget Range, Negotiable, Barter) to configure creator payout rates and budget pools.
             </p>
           </motion.div>
@@ -291,7 +291,7 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Fixed Fee Payout Per Creator ({selectedCurrency.code}) <span className="text-pink-400">*</span>
                 </label>
                 <div className="relative">
@@ -305,16 +305,16 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       onChange('budgetMinPerInfluencer', val ? Number(val) : undefined);
                       onChange('budgetMaxPerInfluencer', val ? Number(val) : undefined);
                     }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
                   />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
+                  <span className="text-purple-300/70 light:text-slate-500 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Total Campaign Budget Pool ({selectedCurrency.code}) <span className="text-pink-400">*</span>
                 </label>
                 <div className="relative">
@@ -327,11 +327,11 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       onChange('budgetTotalAmount', val ? Number(val) : undefined);
                     }}
-                    className={`w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition-colors ${
-                      budgetPoolError ? 'border-rose-500/80 bg-rose-500/5' : 'border-purple-400/20 focus:border-white/20'
+                    className={`w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:text-slate-900 light:placeholder-slate-400 focus:outline-none transition-colors ${
+                      budgetPoolError ? 'border-rose-500/80 bg-rose-500/5' : 'border-purple-400/20 light:border-slate-300 focus:border-white/20'
                     }`}
                   />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
+                  <span className="text-purple-300/70 light:text-slate-500 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
@@ -343,7 +343,7 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                 )}
               </div>
             </div>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-400 light:text-slate-500">
               Each accepted creator will receive this exact fixed payout held in secure escrow.
             </p>
           </motion.div>
@@ -354,7 +354,7 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Maximum Payout Cap Per Creator ({selectedCurrency.code})
                 </label>
                 <div className="relative">
@@ -367,16 +367,16 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       onChange('budgetMaxPerInfluencer', val ? Number(val) : undefined);
                     }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
                   />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
+                  <span className="text-purple-300/70 light:text-slate-500 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Estimated Total Budget Pool ({selectedCurrency.code}) <span className="text-pink-400">*</span>
                 </label>
                 <div className="relative">
@@ -389,11 +389,11 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       onChange('budgetTotalAmount', val ? Number(val) : undefined);
                     }}
-                    className={`w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition-colors ${
-                      budgetPoolError ? 'border-rose-500/80 bg-rose-500/5' : 'border-purple-400/20 focus:border-white/20'
+                    className={`w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:text-slate-900 light:placeholder-slate-400 focus:outline-none transition-colors ${
+                      budgetPoolError ? 'border-rose-500/80 bg-rose-500/5' : 'border-purple-400/20 light:border-slate-300 focus:border-white/20'
                     }`}
                   />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
+                  <span className="text-purple-300/70 light:text-slate-500 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
@@ -405,7 +405,7 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                 )}
               </div>
             </div>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-400 light:text-slate-500">
               Creators will propose their custom fee when submitting proposals. You can counter-offer or accept upon review.
             </p>
           </motion.div>
@@ -413,9 +413,9 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
 
         {/* 6. CUSTOM PACKAGE FIELDS (COMING SOON) */}
         {selectedModel === 'CUSTOM_PACKAGE' && (
-          <div className="p-6 rounded-2xl bg-slate-900/60 border border-white/10 text-center space-y-1.5">
-            <p className="text-sm font-semibold text-white">Custom Package is Coming Soon</p>
-            <p className="text-xs text-slate-400">
+          <div className="p-6 rounded-2xl bg-slate-900/60 border border-white/10 light:bg-white light:border-slate-200/80 light:shadow-sm text-center space-y-1.5">
+            <p className="text-sm font-semibold text-white light:text-slate-900">Custom Package is Coming Soon</p>
+            <p className="text-xs text-slate-400 light:text-slate-500">
               Custom milestone-based contracts and enterprise creator packages will be available in an upcoming release.
             </p>
           </div>
@@ -427,18 +427,18 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {/* Performance Metric Selector */}
               <div className="relative" ref={metricDropdownRef}>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Performance Metric
                 </label>
                 <button
                   type="button"
                   onClick={() => setIsMetricOpen((prev) => !prev)}
-                  className="w-full px-3.5 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white flex items-center justify-between focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                  className="w-full px-3.5 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white light:bg-white light:border-slate-300 light:text-slate-900 flex items-center justify-between focus:outline-none focus:ring-0 focus:border-white/20 transition-colors cursor-pointer"
                 >
-                  <span className={selectedMetric ? 'font-medium text-white truncate' : 'text-slate-500 truncate'}>
+                  <span className={selectedMetric ? 'font-medium text-white light:text-slate-900 truncate' : 'text-slate-500 light:text-slate-400 truncate'}>
                     {selectedMetric ? selectedMetric.label : 'Select performance metric...'}
                   </span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isMetricOpen ? 'rotate-180 text-purple-300' : ''}`} />
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isMetricOpen ? 'rotate-180 text-purple-300 light:text-purple-600' : ''}`} />
                 </button>
 
                 <AnimatePresence>
@@ -448,7 +448,7 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -4 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute z-50 left-0 right-0 mt-1.5 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl max-h-56 overflow-y-auto p-1.5 space-y-0.5 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                      className="absolute z-50 left-0 right-0 mt-1.5 bg-slate-900 border border-white/10 light:bg-white light:border-slate-200 light:shadow-2xl rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl max-h-56 overflow-y-auto p-1.5 space-y-0.5 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                     >
                       {PERFORMANCE_METRICS.map((m) => {
                         const isSelected = formData.performanceMetric === m.id;
@@ -460,14 +460,14 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                               onChange('performanceMetric', m.id);
                               setIsMetricOpen(false);
                             }}
-                            className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between ${
+                            className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${
                               isSelected
-                                ? 'bg-purple-500/20 text-purple-200 font-bold'
-                                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                                ? 'bg-purple-500/20 text-purple-200 font-bold light:bg-purple-50 light:text-purple-700'
+                                : 'text-slate-300 hover:bg-slate-800 hover:text-white light:text-slate-700 light:hover:bg-slate-100 light:hover:text-slate-900'
                             }`}
                           >
                             <span>{m.label}</span>
-                            {isSelected && <Check className="w-3.5 h-3.5 text-purple-300 stroke-[2.5]" />}
+                            {isSelected && <Check className="w-3.5 h-3.5 text-purple-300 light:text-purple-700 stroke-[2.5]" />}
                           </button>
                         );
                       })}
@@ -477,7 +477,7 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Payout Rate per Unit ({selectedCurrency.code})
                 </label>
                 <div className="relative">
@@ -490,16 +490,16 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       onChange('performanceRate', val ? Number(val) : undefined);
                     }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
                   />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
+                  <span className="text-purple-300/70 light:text-slate-500 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Guaranteed Base Fee (Optional)
                 </label>
                 <div className="relative">
@@ -512,9 +512,9 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       onChange('budgetMinPerInfluencer', val ? Number(val) : undefined);
                     }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
                   />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
+                  <span className="text-purple-300/70 light:text-slate-500 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
@@ -523,7 +523,7 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Max Payout Cap Per Creator ({selectedCurrency.code})
                 </label>
                 <div className="relative">
@@ -536,16 +536,16 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       onChange('budgetMaxPerInfluencer', val ? Number(val) : undefined);
                     }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
                   />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
+                  <span className="text-purple-300/70 light:text-slate-500 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Total Budget Pool ({selectedCurrency.code}) <span className="text-pink-400">*</span>
                 </label>
                 <div className="relative">
@@ -558,11 +558,11 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       onChange('budgetTotalAmount', val ? Number(val) : undefined);
                     }}
-                    className={`w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition-colors ${
-                      budgetPoolError ? 'border-rose-500/80 bg-rose-500/5' : 'border-purple-400/20 focus:border-white/20'
+                    className={`w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:text-slate-900 light:placeholder-slate-400 focus:outline-none transition-colors ${
+                      budgetPoolError ? 'border-rose-500/80 bg-rose-500/5' : 'border-purple-400/20 light:border-slate-300 focus:border-white/20'
                     }`}
                   />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
+                  <span className="text-purple-300/70 light:text-slate-500 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
@@ -582,7 +582,7 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Estimated Retail Value of Gifting Package ({selectedCurrency.code}) <span className="text-pink-400">*</span>
                 </label>
                 <div className="relative">
@@ -595,16 +595,16 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       onChange('freeProductValue', val ? Number(val) : undefined);
                     }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
                   />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
+                  <span className="text-purple-300/70 light:text-slate-500 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Gift Package Details / Items Included
                 </label>
                 <input
@@ -612,7 +612,7 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                   placeholder="e.g. Full 3-piece Skincare Set + Branded Hoodie"
                   value={formData.barterItems || ''}
                   onChange={(e) => onChange('barterItems', e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                  className="w-full px-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
                 />
               </div>
             </div>
@@ -625,11 +625,11 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                   onChange={(e) => onChange('shippingCovered', e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
+                <div className="w-10 h-5 bg-slate-800 light:bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
               </label>
               <div>
-                <span className="text-xs font-bold text-white block">Brand Covers Shipping & Customs</span>
-                <span className="text-[10px] text-slate-400 block">Creators will not be charged any delivery fees</span>
+                <span className="text-xs font-bold text-white light:text-slate-900 block">Brand Covers Shipping & Customs</span>
+                <span className="text-[10px] text-slate-400 light:text-slate-500 block">Creators will not be charged any delivery fees</span>
               </div>
             </div>
           </motion.div>
@@ -640,7 +640,7 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Guaranteed Cash Payout ({selectedCurrency.code}) <span className="text-pink-400">*</span>
                 </label>
                 <div className="relative">
@@ -654,16 +654,16 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       onChange('budgetMinPerInfluencer', val ? Number(val) : undefined);
                       onChange('budgetMaxPerInfluencer', val ? Number(val) : undefined);
                     }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
                   />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
+                  <span className="text-purple-300/70 light:text-slate-500 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Product Sample Value ({selectedCurrency.code}) <span className="text-pink-400">*</span>
                 </label>
                 <div className="relative">
@@ -676,16 +676,16 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       onChange('freeProductValue', val ? Number(val) : undefined);
                     }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
                   />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
+                  <span className="text-purple-300/70 light:text-slate-500 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Total Financial Budget ({selectedCurrency.code}) <span className="text-pink-400">*</span>
                 </label>
                 <div className="relative">
@@ -698,11 +698,11 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       onChange('budgetTotalAmount', val ? Number(val) : undefined);
                     }}
-                    className={`w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition-colors ${
-                      budgetPoolError ? 'border-rose-500/80 bg-rose-500/5' : 'border-purple-400/20 focus:border-white/20'
+                    className={`w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:text-slate-900 light:placeholder-slate-400 focus:outline-none transition-colors ${
+                      budgetPoolError ? 'border-rose-500/80 bg-rose-500/5' : 'border-purple-400/20 light:border-slate-300 focus:border-white/20'
                     }`}
                   />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
+                  <span className="text-purple-300/70 light:text-slate-500 font-bold text-xs absolute left-3.5 top-3">
                     {selectedCurrency.symbol}
                   </span>
                 </div>
@@ -714,7 +714,7 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
                 )}
               </div>
             </div>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-400 light:text-slate-500">
               Creators receive both the guaranteed cash payment in Escrow and the free product shipped to their door.
             </p>
           </motion.div>
@@ -723,18 +723,18 @@ export default function BudgetStep({ formData, onChange }: BudgetStepProps) {
       </div>
 
       {/* Escrow Guarantee Banner */}
-      <div className="pt-6 border-t border-purple-400/10 flex items-start gap-3.5">
-        <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-400/25 text-emerald-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+      <div className="pt-6 border-t border-purple-400/10 light:border-slate-200 flex items-start gap-3.5">
+        <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-400/25 text-emerald-400 light:bg-emerald-50 light:border-emerald-200 light:text-emerald-700 flex items-center justify-center flex-shrink-0 mt-0.5">
           <ShieldCheck className="w-5 h-5" />
         </div>
         <div>
-          <h5 className="text-xs font-bold text-white flex items-center gap-1.5">
+          <h5 className="text-xs font-bold text-white light:text-slate-900 flex items-center gap-1.5">
             <span>Escrow Payment Protection</span>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/25 light:bg-emerald-50 light:border-emerald-200 light:text-emerald-700">
               Automated & Secure
             </span>
           </h5>
-          <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+          <p className="text-[11px] text-slate-400 light:text-slate-500 mt-1 leading-relaxed">
             Campaign funds are held safely in Zerify Escrow upon offer acceptance and only released to creators after you review and approve their submitted deliverables.
           </p>
         </div>

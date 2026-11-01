@@ -44,11 +44,11 @@ export default function ApplicationListView({
 
   if (applications.length === 0) {
     return (
-      <div className="p-12 rounded-2xl bg-slate-950/40 border border-dashed border-white/10 text-center space-y-3">
-        <Users className="w-8 h-8 text-slate-600 mx-auto" />
+      <div className="p-12 rounded-2xl bg-slate-950/40 border border-dashed border-white/10 text-center space-y-3 light:bg-white light:border-slate-200/80 light:shadow-sm">
+        <Users className="w-8 h-8 text-slate-600 light:text-slate-400 mx-auto" />
         <div className="space-y-1">
-          <h4 className="text-sm font-bold text-slate-300">No applications received yet</h4>
-          <p className="text-xs text-slate-500 max-w-md mx-auto">
+          <h4 className="text-sm font-bold text-slate-300 light:text-slate-900">No applications received yet</h4>
+          <p className="text-xs text-slate-500 light:text-slate-500 max-w-md mx-auto">
             When influencers apply to this campaign, their application cards will appear here with their live status. You can also directly invite creators from the Find Influencers tab.
           </p>
         </div>
@@ -60,17 +60,17 @@ export default function ApplicationListView({
     <div className="space-y-4">
       {/* Compare Floating Toolbar (only when 2+ applicants selected) */}
       {selectedForCompare.length > 1 && (
-        <div className="flex items-center justify-between p-3 rounded-2xl bg-indigo-950/60 border border-indigo-500/30 backdrop-blur-xl">
-          <span className="text-xs font-bold text-indigo-200">
+        <div className="flex items-center justify-between p-3 rounded-2xl bg-indigo-950/60 border border-indigo-500/30 backdrop-blur-xl light:bg-white light:border-purple-200 light:shadow-lg">
+          <span className="text-xs font-bold text-indigo-200 light:text-purple-900">
             {selectedForCompare.length} applicants selected for comparison
           </span>
           <button
             onClick={handleCompareClick}
             type="button"
-            className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-black text-white flex items-center gap-1.5 shadow-md transition-all shrink-0 cursor-pointer"
+            className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-black text-white keep-white flex items-center gap-1.5 shadow-md transition-all shrink-0 cursor-pointer"
           >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Compare Selected ({selectedForCompare.length})</span>
+            <Layers className="w-3.5 h-3.5 text-white keep-white" />
+            <span className="text-white keep-white">Compare Selected ({selectedForCompare.length})</span>
           </button>
         </div>
       )}

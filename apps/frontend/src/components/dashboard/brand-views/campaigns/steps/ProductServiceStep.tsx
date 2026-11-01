@@ -34,7 +34,7 @@ export default function ProductServiceStep({ formData, onChange }: ProductServic
 
       {/* Product Type Selector */}
       <div className="space-y-2.5">
-        <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider">
+        <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider">
           Product / Offering Type <span className="text-pink-400">*</span>
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
@@ -48,21 +48,21 @@ export default function ProductServiceStep({ formData, onChange }: ProductServic
                 key={pt.value}
                 onClick={() => handleTypeSelect(pt.value)}
                 className={`relative p-4 rounded-2xl text-left border transition-all duration-200 group flex flex-col justify-between overflow-hidden cursor-pointer ${isSelected
-                    ? 'bg-gradient-to-b from-purple-950/40 to-slate-900/90 border-purple-400/50 shadow-[0_0_20px_rgba(168,85,247,0.15)] ring-1 ring-purple-400/30'
-                    : 'bg-slate-900/60 border-white/10 hover:border-purple-400/30 hover:bg-slate-900/90 hover:-translate-y-0.5'
+                    ? 'bg-gradient-to-b from-purple-950/40 to-slate-900/90 border-purple-400/50 shadow-[0_0_20px_rgba(168,85,247,0.15)] ring-1 ring-purple-400/30 light:bg-none light:bg-purple-50/90 light:border-purple-400 light:shadow-sm light:ring-2 light:ring-purple-400/30'
+                    : 'bg-slate-900/60 border-white/10 hover:border-purple-400/30 hover:bg-slate-900/90 hover:-translate-y-0.5 light:bg-white light:border-slate-200 light:hover:border-purple-300 light:hover:bg-purple-50/30'
                   }`}
               >
                 {/* Subtle Top Accent Highlight for active card */}
                 {isSelected && (
-                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-400 to-transparent" />
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-400 to-transparent light:via-purple-500" />
                 )}
 
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <div
                       className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${isSelected
-                          ? 'bg-purple-500/25 text-purple-200 border border-purple-400/40 shadow-[0_0_10px_rgba(192,132,252,0.25)]'
-                          : 'bg-slate-800/80 text-slate-400 border border-white/5 group-hover:text-purple-300 group-hover:border-purple-400/20'
+                          ? 'bg-purple-500/25 text-purple-200 border border-purple-400/40 shadow-[0_0_10px_rgba(192,132,252,0.25)] light:bg-purple-100 light:text-purple-700 light:border-purple-300'
+                          : 'bg-slate-800/80 text-slate-400 border border-white/5 group-hover:text-purple-300 group-hover:border-purple-400/20 light:bg-slate-100 light:text-slate-600 light:border-slate-200'
                         }`}
                     >
                       <Icon className="w-4 h-4" />
@@ -70,20 +70,20 @@ export default function ProductServiceStep({ formData, onChange }: ProductServic
 
                     <div
                       className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${isSelected
-                          ? 'bg-purple-500 text-white shadow-sm'
-                          : 'border border-white/15 group-hover:border-purple-400/30'
+                          ? 'bg-purple-600 text-white keep-white shadow-sm'
+                          : 'border border-white/15 light:border-slate-300 light:bg-slate-50 group-hover:border-purple-400/30'
                         }`}
                     >
-                      {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                      {isSelected && <Check className="w-3 h-3 text-white keep-white stroke-[3]" />}
                     </div>
                   </div>
 
-                  <span className="block text-xs font-bold text-white tracking-tight">
+                  <span className="block text-xs font-bold text-white light:text-slate-900 tracking-tight">
                     {pt.label}
                   </span>
                 </div>
 
-                <span className="block text-[11px] text-slate-400 mt-2.5 leading-relaxed">
+                <span className="block text-[11px] text-slate-400 light:text-slate-600 mt-2.5 leading-relaxed">
                   {pt.desc}
                 </span>
               </button>
@@ -96,7 +96,7 @@ export default function ProductServiceStep({ formData, onChange }: ProductServic
       {/* Core Product Information */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
             Product / Service Name <span className="text-pink-400">*</span>
           </label>
           <input
@@ -104,22 +104,22 @@ export default function ProductServiceStep({ formData, onChange }: ProductServic
             placeholder="e.g. Zerify AI Studio Pro"
             value={formData.productName || ''}
             onChange={(e) => onChange('productName', e.target.value)}
-            className="w-full px-4 py-3 bg-slate-900/90 border border-purple-400/20 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+            className="w-full px-4 py-3 bg-slate-900/90 border border-purple-400/20 rounded-xl text-sm text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
             Landing Page / Product Store URL
           </label>
           <div className="relative">
-            <Globe className="w-4 h-4 text-purple-300/60 absolute left-3.5 top-3.5" />
+            <Globe className="w-4 h-4 text-purple-300/60 light:text-purple-600 absolute left-3.5 top-3.5" />
             <input
               type="url"
               placeholder="https://yourbrand.com/products/pro"
               value={formData.landingPageUrl || ''}
               onChange={(e) => onChange('landingPageUrl', e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-slate-900/90 border border-purple-400/20 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+              className="w-full pl-10 pr-4 py-3 bg-slate-900/90 border border-purple-400/20 rounded-xl text-sm text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
             />
           </div>
         </div>
@@ -136,17 +136,17 @@ export default function ProductServiceStep({ formData, onChange }: ProductServic
 
 
       {/* Free Product Sample / Gifting Section */}
-      <div className="pt-6 border-t border-purple-400/10 space-y-4">
+      <div className="pt-6 border-t border-purple-400/10 light:border-slate-200 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-purple-500/15 border border-purple-400/20 text-purple-300 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-purple-500/15 border border-purple-400/20 text-purple-300 light:bg-purple-50 light:border-purple-200 light:text-purple-700 flex items-center justify-center flex-shrink-0">
               <Gift className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-xs font-bold text-white block">
+              <span className="text-xs font-bold text-white light:text-slate-900 block">
                 Free Product Sample / Access for Creators
               </span>
-              <span className="text-[11px] text-slate-400 block">
+              <span className="text-[11px] text-slate-400 light:text-slate-500 block">
                 Provide physical sample units, software credentials, or VIP event access to confirmed creators
               </span>
             </div>
@@ -159,7 +159,7 @@ export default function ProductServiceStep({ formData, onChange }: ProductServic
               onChange={(e) => onChange('hasFreeProduct', e.target.checked)}
               className="sr-only peer"
             />
-            <div className="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
+            <div className="w-10 h-5 bg-slate-800 light:bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
           </label>
         </div>
 
@@ -167,7 +167,7 @@ export default function ProductServiceStep({ formData, onChange }: ProductServic
           <div className="space-y-4 pt-1">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Estimated Retail Value ({currencyCode})
                 </label>
                 <div className="relative">
@@ -180,9 +180,9 @@ export default function ProductServiceStep({ formData, onChange }: ProductServic
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       onChange('freeProductValue', val ? Number(val) : '');
                     }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
                   />
-                  <span className="text-purple-300/70 font-bold text-xs absolute left-3.5 top-3">
+                  <span className="text-purple-300/70 light:text-slate-500 font-bold text-xs absolute left-3.5 top-3">
                     {currencySymbol}
                   </span>
                 </div>
@@ -191,7 +191,7 @@ export default function ProductServiceStep({ formData, onChange }: ProductServic
 
 
               <div>
-                <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                   Shipping & Fulfillment Method
                 </label>
                 <input
@@ -199,13 +199,13 @@ export default function ProductServiceStep({ formData, onChange }: ProductServic
                   placeholder="e.g. Worldwide courier tracking provided / instant portal login"
                   value={formData.shippingDetails || ''}
                   onChange={(e) => onChange('shippingDetails', e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                  className="w-full px-4 py-2.5 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-purple-200 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-purple-200 light:text-slate-700 uppercase tracking-wider mb-1.5">
                 Product Handling & Creator Instructions
               </label>
               <textarea
@@ -213,7 +213,7 @@ export default function ProductServiceStep({ formData, onChange }: ProductServic
                 placeholder="Specify any unboxing instructions, product testing requirements, return conditions, or features creators must showcase..."
                 value={formData.productInstructions || ''}
                 onChange={(e) => onChange('productInstructions', e.target.value)}
-                className="w-full px-4 py-3 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
+                className="w-full px-4 py-3 bg-slate-900/90 border border-purple-400/20 rounded-xl text-xs text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-white/20 transition-colors"
               />
             </div>
           </div>

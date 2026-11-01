@@ -138,7 +138,7 @@ export default function CounterOfferModal({
   const modalContent = (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/85 light:bg-slate-900/50 backdrop-blur-md overflow-y-auto"
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
@@ -146,23 +146,23 @@ export default function CounterOfferModal({
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
         transition={{ duration: 0.2 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg rounded-3xl bg-slate-950 border border-amber-500/30 shadow-2xl shadow-amber-950/30 overflow-hidden flex flex-col my-auto"
+        className="w-full max-w-lg rounded-3xl bg-slate-950 light:bg-white border border-amber-500/30 light:border-amber-300 shadow-2xl shadow-amber-950/30 overflow-hidden flex flex-col my-auto"
       >
         {/* Header */}
-        <div className="p-6 border-b border-white/5 flex items-center justify-between bg-gradient-to-r from-amber-950/40 via-slate-950 to-slate-950">
+        <div className="p-6 border-b border-white/5 light:border-slate-200 flex items-center justify-between bg-gradient-to-r from-amber-950/40 via-slate-950 to-slate-950 light:from-amber-50 light:via-white light:to-white">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-300">
-              <RefreshCw className="w-5 h-5 text-amber-400" />
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-300 light:bg-amber-100 light:border-amber-300 light:text-amber-700">
+              <RefreshCw className="w-5 h-5 text-amber-400 light:text-amber-600" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Propose Counter Offer</h3>
-              <p className="text-xs text-slate-400">Negotiate deliverables & compensation with creator</p>
+              <h3 className="text-base font-bold text-white light:text-slate-900">Propose Counter Offer</h3>
+              <p className="text-xs text-slate-400 light:text-slate-500">Negotiate deliverables & compensation with creator</p>
             </div>
           </div>
           <button
             onClick={onClose}
             type="button"
-            className="w-8 h-8 rounded-xl bg-slate-900 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-xl bg-slate-900 light:bg-slate-100 border border-white/5 light:border-slate-200 flex items-center justify-center text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -171,7 +171,7 @@ export default function CounterOfferModal({
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-500/30 flex items-center gap-2 text-xs text-rose-300">
+            <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-500/30 flex items-center gap-2 text-xs text-rose-300 light:bg-rose-50 light:border-rose-200 light:text-rose-700">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -179,14 +179,14 @@ export default function CounterOfferModal({
 
           {/* Counter Amount */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
+            <label className="text-xs font-bold text-slate-300 light:text-slate-700 flex items-center justify-between">
               <span>Counter Offer Amount ({currency})</span>
-              <span className="text-[11px] text-amber-400 font-medium">
+              <span className="text-[11px] text-amber-400 light:text-amber-600 font-medium">
                 {sourceAmount > 0 ? 'Adjust proposed rate' : 'New proposed rate'}
               </span>
             </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-black text-amber-400">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-black text-amber-400 light:text-amber-600">
                 {symbol}
               </span>
               <input
@@ -199,7 +199,7 @@ export default function CounterOfferModal({
                   setCounterAmount(Number(e.target.value));
                 }}
                 placeholder="Enter counter offer amount"
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-900 border border-amber-500/30 focus:border-amber-400 text-sm font-black text-white focus:outline-none transition-all placeholder:text-slate-600"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-900 light:bg-white border border-amber-500/30 light:border-slate-300 focus:border-amber-400 text-sm font-black text-white light:text-slate-900 focus:outline-none transition-all placeholder:text-slate-600 light:placeholder:text-slate-400"
                 required
               />
             </div>
@@ -208,7 +208,7 @@ export default function CounterOfferModal({
           {/* Dates */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-slate-400">Campaign Start Date</label>
+              <label className="text-[11px] font-bold text-slate-400 light:text-slate-600">Campaign Start Date</label>
               <CustomDatePicker
                 value={startDate}
                 onChange={setStartDate}
@@ -216,7 +216,7 @@ export default function CounterOfferModal({
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-slate-400">Content Due Date</label>
+              <label className="text-[11px] font-bold text-slate-400 light:text-slate-600">Content Due Date</label>
               <CustomDatePicker
                 value={endDate}
                 onChange={setEndDate}
@@ -227,7 +227,7 @@ export default function CounterOfferModal({
 
           {/* Response Expiration */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-bold text-slate-400">Counter Offer Expiry</label>
+            <label className="text-[11px] font-bold text-slate-400 light:text-slate-600">Counter Offer Expiry</label>
             <CustomDatePicker
               value={responseDeadline}
               onChange={setResponseDeadline}
@@ -237,7 +237,7 @@ export default function CounterOfferModal({
 
           {/* Notes / Message to Creator */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300">
+            <label className="text-xs font-bold text-slate-300 light:text-slate-700">
               Counter Offer Note / Revision Details
             </label>
             <textarea
@@ -245,34 +245,34 @@ export default function CounterOfferModal({
               value={customNotes}
               onChange={(e) => setCustomNotes(e.target.value)}
               placeholder="Explain your counter proposal (e.g. We love your concept! Our campaign budget tier for this slot is $8,500. Let us know if this works for you.)"
-              className="w-full p-3 rounded-xl bg-slate-900 border border-white/10 focus:border-amber-500/40 text-xs text-white focus:outline-none transition-all placeholder:text-slate-600 resize-none"
+              className="w-full p-3 rounded-xl bg-slate-900 light:bg-white border border-white/10 light:border-slate-300 focus:border-amber-500/40 text-xs text-white light:text-slate-900 focus:outline-none transition-all placeholder:text-slate-600 light:placeholder:text-slate-400 resize-none"
             />
           </div>
 
           {/* Footer Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/5">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/5 light:border-slate-200">
             <button
               onClick={onClose}
               type="button"
               disabled={isSubmitting}
-              className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-slate-900 light:bg-slate-100 hover:bg-slate-800 text-xs font-bold text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 transition-all cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600 hover:from-amber-500 hover:to-orange-500 text-xs font-black text-white flex items-center gap-2 shadow-lg shadow-amber-950/50 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer disabled:opacity-50"
+              className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600 hover:from-amber-500 hover:to-orange-500 text-xs font-black text-white keep-white flex items-center gap-2 shadow-lg shadow-amber-950/50 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Sending Counter Offer...</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white keep-white" />
+                  <span className="keep-white text-white">Sending Counter Offer...</span>
                 </>
               ) : (
                 <>
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Send Counter Offer</span>
+                  <RefreshCw className="w-3.5 h-3.5 text-white keep-white" />
+                  <span className="keep-white text-white">Send Counter Offer</span>
                 </>
               )}
             </button>

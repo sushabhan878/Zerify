@@ -145,10 +145,10 @@ export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: B
       whileHover={{ y: -3 }}
       transition={{ duration: 0.2 }}
       onClick={onClick}
-      className="group relative rounded-3xl bg-slate-950/45 border border-purple-500/20 hover:border-purple-500/40 px-6 pb-6 pt-3.5 sm:pt-4 backdrop-blur-2xl shadow-xl shadow-purple-950/20 hover:shadow-[0_16px_48px_rgba(168,85,247,0.18)] transition-all duration-300 cursor-pointer space-y-5"
+      className="group relative rounded-3xl bg-slate-950/45 border border-purple-500/20 hover:border-purple-500/40 px-6 pb-6 pt-3.5 sm:pt-4 backdrop-blur-2xl shadow-xl shadow-purple-950/20 hover:shadow-[0_16px_48px_rgba(168,85,247,0.18)] transition-all duration-300 cursor-pointer space-y-5 light:bg-white light:border-slate-200/80 light:hover:border-purple-300 light:shadow-sm light:hover:shadow-md"
     >
       {/* Ambient Purplish Glow Background Aura Clipped */}
-      <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none light:opacity-30">
         <div className="absolute -top-24 -right-24 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl group-hover:bg-purple-600/20 transition-all duration-500" />
         <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl group-hover:bg-indigo-600/15 transition-all duration-500" />
       </div>
@@ -156,10 +156,10 @@ export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: B
       {/* Floating Status Badge Overlapping Top-Right Corner - Shifted a bit more top */}
       <div className="absolute -top-8 sm:-top-9 right-6 sm:right-8 z-30 pointer-events-none">
         <span
-          className={`px-4 py-1.5 rounded-full ${statusConfig.gradient} border ${statusConfig.border} text-xs sm:text-sm font-black text-white flex items-center gap-1.5 shadow-xl ${statusConfig.shadow} ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300`}
+          className={`px-4 py-1.5 rounded-full ${statusConfig.gradient} border ${statusConfig.border} text-xs sm:text-sm font-black text-white keep-white flex items-center gap-1.5 shadow-xl ${statusConfig.shadow} ring-4 ring-[#090C15] light:ring-[#F1F3F7] group-hover:scale-105 transition-all duration-300`}
         >
           <span className={`w-2 h-2 rounded-full ${statusConfig.dot}`} />
-          <span>{statusConfig.label}</span>
+          <span className="keep-white text-white">{statusConfig.label}</span>
         </span>
       </div>
 
@@ -169,8 +169,8 @@ export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: B
         <div className="flex items-center gap-2 flex-nowrap overflow-hidden min-w-0 max-w-full -mt-1 sm:-mt-1.5">
           {/* Industry Tag */}
           {c.industry && (
-            <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-purple-950/40 border border-purple-500/25 text-purple-200 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-              <Layers className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+            <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-purple-950/40 border border-purple-500/25 text-purple-200 light:bg-purple-50 light:border-purple-200 light:text-purple-700 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+              <Layers className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />
               <span>{c.industry}</span>
             </span>
           )}
@@ -179,7 +179,7 @@ export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: B
           {visibleObjectives.map((obj) => (
             <span
               key={obj}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold bg-purple-600/15 border border-purple-500/25 text-purple-200 shrink-0 whitespace-nowrap"
+              className="px-3 py-1.5 rounded-full text-xs font-semibold bg-purple-600/15 border border-purple-500/25 text-purple-200 light:bg-purple-50 light:border-purple-200 light:text-purple-700 shrink-0 whitespace-nowrap"
             >
               {obj}
             </span>
@@ -188,7 +188,7 @@ export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: B
           {/* Truncated ... indicator if more objectives */}
           {hiddenObjectives.length > 0 && (
             <span
-              className="px-3 py-1.5 rounded-full text-xs font-black bg-purple-950/60 border border-purple-500/30 text-purple-300 shrink-0 whitespace-nowrap cursor-help hover:bg-purple-900/60 hover:text-white transition-colors tracking-wider"
+              className="px-3 py-1.5 rounded-full text-xs font-black bg-purple-950/60 border border-purple-500/30 text-purple-300 light:bg-purple-100 light:border-purple-200 light:text-purple-700 shrink-0 whitespace-nowrap cursor-help hover:bg-purple-900/60 hover:text-white transition-colors tracking-wider"
               title={`More tags: ${hiddenObjectives.join(', ')}`}
             >
               ...
@@ -197,7 +197,7 @@ export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: B
 
           {/* Payment Model Tag */}
           {c.budgetPaymentModel && (
-            <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-950/40 border border-indigo-400/25 text-indigo-200 shrink-0 whitespace-nowrap">
+            <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-950/40 border border-indigo-400/25 text-indigo-200 light:bg-slate-100 light:border-slate-200 light:text-slate-700 shrink-0 whitespace-nowrap">
               {formatPaymentModel(c.budgetPaymentModel)}
             </span>
           )}
@@ -205,17 +205,17 @@ export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: B
 
         {/* Large Pricing Display */}
         <div className="sm:text-right flex sm:flex-col items-baseline sm:items-end justify-between gap-0.5 flex-shrink-0">
-          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">
+          <span className="text-[10px] font-extrabold text-slate-400 light:text-slate-500 uppercase tracking-widest">
             Total Budget
           </span>
-          <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight leading-none flex items-baseline gap-1">
+          <span className="text-2xl sm:text-3xl font-black text-emerald-400 light:text-emerald-600 tracking-tight leading-none flex items-baseline gap-1">
             <span>
               {c.budgetPaymentModel === 'BARTER'
                 ? 'Product Barter'
                 : formatCurrency(c.budgetTotalAmount, c.budgetCurrency)}
             </span>
             {c.budgetPaymentModel !== 'BARTER' && (
-              <span className="text-xs font-bold text-emerald-300/70 uppercase">
+              <span className="text-xs font-bold text-emerald-300/70 light:text-emerald-700/70 uppercase">
                 {userCurrency || 'INR'}
               </span>
             )}
@@ -225,13 +225,13 @@ export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: B
 
       {/* Row 2: Campaign Title, Description & Platforms */}
       <div className="space-y-3 sm:space-y-3.5 relative z-10 -mt-2.5 sm:-mt-3">
-        <h3 className="text-xl sm:text-2xl font-black text-white group-hover:text-purple-200 transition-colors tracking-tight flex items-center gap-2">
+        <h3 className="text-xl sm:text-2xl font-black text-white group-hover:text-purple-200 light:text-slate-900 light:group-hover:text-purple-700 transition-colors tracking-tight flex items-center gap-2">
           <span>{c.title}</span>
-          <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-purple-300 opacity-0 group-hover:opacity-100 transition-all -translate-y-0.5 group-hover:translate-x-0.5" />
+          <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-purple-300 light:group-hover:text-purple-600 opacity-0 group-hover:opacity-100 transition-all -translate-y-0.5 group-hover:translate-x-0.5" />
         </h3>
 
         {c.description && (
-          <p className="text-xs sm:text-sm text-slate-300 line-clamp-2 leading-relaxed font-normal w-full max-w-full">
+          <p className="text-xs sm:text-sm text-slate-300 light:text-slate-600 line-clamp-2 leading-relaxed font-normal w-full max-w-full">
             {c.description}
           </p>
         )}
@@ -251,7 +251,7 @@ export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: B
             {c.platforms.length > 6 && (
               <div
                 style={{ zIndex: 20 }}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full ring-2 ring-[#090C15] flex items-center justify-center text-xs font-bold bg-slate-900 border border-white/10 text-purple-300"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full ring-2 ring-[#090C15] light:ring-white flex items-center justify-center text-xs font-bold bg-slate-900 light:bg-slate-100 border border-white/10 light:border-slate-200 text-purple-300 light:text-purple-700"
                 title={c.platforms.slice(6).join(', ')}
               >
                 +{c.platforms.length - 6}
@@ -266,62 +266,62 @@ export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: B
         {/* Metric 1: Creators Hired */}
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 light:text-slate-500">
               Creators Hired
             </span>
-            <Users className="w-3.5 h-3.5 text-purple-400" />
+            <Users className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <span className="text-2xl sm:text-3xl font-black text-white light:text-slate-900 tracking-tight">
               {hired}
             </span>
-            <span className="text-xs font-semibold text-slate-400">
+            <span className="text-xs font-semibold text-slate-400 light:text-slate-500">
               / {targetParticipants} slots
             </span>
           </div>
-          <span className="text-[11px] text-purple-300/80 font-medium block">
+          <span className="text-[11px] text-purple-300/80 light:text-purple-700 font-semibold block">
             {hired >= targetParticipants ? 'Roster full' : `${progressPercent}% filled`}
           </span>
         </div>
 
         {/* Metric 2: Pitches Received */}
-        <div className="space-y-1.5 sm:border-l sm:border-purple-500/20 sm:pl-6">
+        <div className="space-y-1.5 sm:border-l sm:border-purple-500/20 light:border-slate-200 sm:pl-6">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 light:text-slate-500">
               Pitches Received
             </span>
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400 light:text-teal-600" />
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl sm:text-3xl font-black text-cyan-300 tracking-tight">
+            <span className="text-2xl sm:text-3xl font-black text-cyan-300 light:text-cyan-700 tracking-tight">
               {applicants}
             </span>
-            <span className="text-xs font-semibold text-slate-400">
+            <span className="text-xs font-semibold text-slate-400 light:text-slate-500">
               {applicants === 1 ? 'pitch' : 'pitches'}
             </span>
           </div>
-          <span className="text-[11px] text-cyan-400/80 font-medium block">
+          <span className="text-[11px] text-cyan-400/80 light:text-teal-700 font-semibold block">
             {applicants > 0 ? `${applicants} to review` : 'Accepting pitches'}
           </span>
         </div>
 
         {/* Metric 3: Escrow Status */}
-        <div className="space-y-1.5 sm:border-l sm:border-purple-500/20 sm:pl-6">
+        <div className="space-y-1.5 sm:border-l sm:border-purple-500/20 light:border-slate-200 sm:pl-6">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 light:text-slate-500">
               Escrow Protection
             </span>
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600" />
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">
+            <span className="text-2xl sm:text-3xl font-black text-emerald-400 light:text-emerald-600 tracking-tight">
               100%
             </span>
-            <span className="text-xs font-semibold text-slate-400">
+            <span className="text-xs font-semibold text-slate-400 light:text-slate-500">
               Protected
             </span>
           </div>
-          <span className="text-[11px] text-emerald-300/80 font-medium block">
+          <span className="text-[11px] text-emerald-300/80 light:text-emerald-700 font-semibold block">
             Automated smart escrow
           </span>
         </div>
@@ -329,17 +329,17 @@ export default function BrandCampaignCard({ campaign: c, onClick, onUpdated }: B
 
       {/* Row 4: Footer Meta Dates */}
       <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
-        <div className="flex items-center gap-4 text-xs text-slate-400 font-medium">
+        <div className="flex items-center gap-4 text-xs text-slate-400 light:text-slate-500 font-medium">
           {formattedDate && (
             <span className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-purple-400" />
+              <Calendar className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />
               <span>Created {formattedDate}</span>
             </span>
           )}
 
           {formattedDeadline && (
-            <span className="flex items-center gap-1.5 text-slate-400">
-              <Clock className="w-3.5 h-3.5 text-amber-400" />
+            <span className="flex items-center gap-1.5 text-slate-400 light:text-slate-500">
+              <Clock className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
               <span>Deadline: {formattedDeadline}</span>
             </span>
           )}

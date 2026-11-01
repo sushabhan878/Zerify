@@ -142,10 +142,10 @@ export default function OfferManagementView({
         return (
           <div
             key={offer.id}
-            className="relative p-5 sm:p-6 rounded-2xl bg-slate-950/60 border border-purple-500/20 hover:border-purple-500/40 backdrop-blur-2xl shadow-xl shadow-purple-950/20 hover:shadow-[0_16px_40px_rgba(168,85,247,0.16)] transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-5 group"
+            className="relative p-5 sm:p-6 rounded-2xl bg-slate-950/60 light:bg-white border border-purple-500/20 light:border-slate-200/80 hover:border-purple-500/40 light:hover:border-purple-300 backdrop-blur-2xl shadow-xl shadow-purple-950/20 light:shadow-sm hover:shadow-[0_16px_40px_rgba(168,85,247,0.16)] light:hover:shadow-md transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-5 group"
           >
             {/* Ambient Background Aura Clipped */}
-            <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+            <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none light:opacity-30">
               <div className="absolute -top-16 -right-16 w-56 h-56 bg-purple-600/10 rounded-full blur-2xl group-hover:bg-purple-600/20 transition-all duration-500" />
               <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-indigo-600/10 rounded-full blur-2xl group-hover:bg-indigo-600/15 transition-all duration-500" />
             </div>
@@ -156,42 +156,42 @@ export default function OfferManagementView({
               style={{ top: '0px', transform: 'translateY(-50%)' }}
             >
               <span
-                className={`px-4 py-1.5 rounded-full ${badge.gradient} border ${badge.border} text-xs sm:text-[13px] font-black text-white flex items-center gap-1.5 shadow-xl ${badge.shadow} ring-4 ring-[#090C15] group-hover:scale-105 transition-all duration-300`}
+                className={`px-4 py-1.5 rounded-full ${badge.gradient} border ${badge.border} text-xs sm:text-[13px] font-black text-white keep-white flex items-center gap-1.5 shadow-xl ${badge.shadow} ring-4 ring-[#090C15] light:ring-white group-hover:scale-105 transition-all duration-300`}
                 title={badge.desc}
               >
                 <span className={`w-2 h-2 rounded-full ${badge.dot} shrink-0`} />
-                <span>{badge.label}</span>
+                <span className="keep-white text-white">{badge.label}</span>
               </span>
             </div>
 
             {/* Creator Avatar & Info */}
             <div className="flex items-center gap-4 min-w-0 relative z-10">
-              <div className="w-12 h-12 rounded-2xl overflow-hidden bg-gradient-to-tr from-purple-600 via-indigo-600 to-purple-500 flex items-center justify-center text-white font-black text-sm shrink-0 border border-purple-400/30 shadow-md shadow-purple-950/40 group-hover:scale-105 transition-transform duration-300">
+              <div className="w-12 h-12 rounded-2xl overflow-hidden bg-gradient-to-tr from-purple-600 via-indigo-600 to-purple-500 flex items-center justify-center text-white keep-white font-black text-sm shrink-0 border border-purple-400/30 shadow-md shadow-purple-950/40 group-hover:scale-105 transition-transform duration-300">
                 {avatarUrl ? (
                   <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
                 ) : (
-                  <span>{displayName.charAt(0).toUpperCase()}</span>
+                  <span className="keep-white text-white">{displayName.charAt(0).toUpperCase()}</span>
                 )}
               </div>
 
               <div className="min-w-0 space-y-1.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="text-sm sm:text-base font-black text-white truncate group-hover:text-purple-300 transition-colors">
+                  <h4 className="text-sm sm:text-base font-black text-white light:text-slate-900 truncate group-hover:text-purple-300 light:group-hover:text-purple-700 transition-colors">
                     {displayName}
                   </h4>
                   {isDirectInvite && (
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-500/15 text-indigo-300 border border-indigo-400/30 shadow-sm">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-500/15 text-indigo-300 light:bg-indigo-50 light:border-indigo-200 light:text-indigo-700 border border-indigo-400/30 shadow-sm">
                       Direct Invite
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 text-[11px] text-slate-400 flex-wrap">
+                <div className="flex items-center gap-2 text-[11px] text-slate-400 light:text-slate-500 flex-wrap">
                   <span>Sent {new Date(offer.sentAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                   {offer.customNotes && (
                     <>
                       <span>•</span>
-                      <span className="text-slate-300/80 italic truncate max-w-[280px]" title={offer.customNotes}>
+                      <span className="text-slate-300/80 light:text-slate-600 italic truncate max-w-[280px]" title={offer.customNotes}>
                         &ldquo;{offer.customNotes}&rdquo;
                       </span>
                     </>
@@ -201,12 +201,12 @@ export default function OfferManagementView({
             </div>
 
             {/* Right Side: Compensation & Actions */}
-            <div className="flex items-center justify-between md:justify-end gap-5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-white/5 relative z-10">
+            <div className="flex items-center justify-between md:justify-end gap-5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-white/5 light:border-slate-200 relative z-10">
               <div className="text-left md:text-right">
-                <span className="text-[10px] text-slate-400 uppercase font-black tracking-widest block">
+                <span className="text-[10px] text-slate-400 light:text-slate-500 uppercase font-black tracking-widest block">
                   Offered Fee
                 </span>
-                <span className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight leading-none block pt-0.5">
+                <span className="text-xl sm:text-2xl font-black text-emerald-400 light:text-emerald-600 tracking-tight leading-none block pt-0.5">
                   <Money amount={offer.compensationAmount} currency={offer.compensationCurrency || 'USD'} />
                 </span>
               </div>
@@ -217,18 +217,18 @@ export default function OfferManagementView({
                   onClick={() => handleCancel(offer.id)}
                   disabled={cancellingOfferId === offer.id}
                   type="button"
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 via-rose-600 to-red-600 hover:from-rose-500 hover:via-rose-500 hover:to-red-500 text-white border border-rose-400/30 hover:border-rose-300/60 shadow-md shadow-rose-950/40 hover:shadow-lg hover:shadow-rose-600/30 text-xs font-bold transition-all duration-200 flex items-center gap-1.5 hover:scale-[1.03] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer group/btn"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 via-rose-600 to-red-600 hover:from-rose-500 hover:via-rose-500 hover:to-red-500 text-white keep-white border border-rose-400/30 hover:border-rose-300/60 shadow-md shadow-rose-950/40 hover:shadow-lg hover:shadow-rose-600/30 text-xs font-bold transition-all duration-200 flex items-center gap-1.5 hover:scale-[1.03] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer group/btn"
                   title="Withdraw this offer"
                 >
                   {cancellingOfferId === offer.id ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
-                      <span>Cancelling...</span>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-white keep-white" />
+                      <span className="keep-white text-white">Cancelling...</span>
                     </>
                   ) : (
                     <>
-                      <X className="w-3.5 h-3.5 text-white group-hover/btn:rotate-90 transition-transform duration-300" />
-                      <span>Cancel</span>
+                      <X className="w-3.5 h-3.5 text-white keep-white group-hover/btn:rotate-90 transition-transform duration-300" />
+                      <span className="keep-white text-white">Cancel</span>
                     </>
                   )}
                 </button>
