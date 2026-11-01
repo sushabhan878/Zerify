@@ -41,23 +41,23 @@ export default function PaymentsKpiBar({
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="p-5 rounded-2xl bg-gradient-to-br from-purple-950/60 via-slate-900 to-slate-950 border border-purple-500/40 backdrop-blur-xl shadow-xl space-y-3 relative overflow-hidden flex flex-col justify-between"
+        className="p-5 rounded-2xl bg-gradient-to-br from-purple-950/60 via-slate-900 to-slate-950 border border-purple-500/40 backdrop-blur-xl shadow-xl space-y-3 relative overflow-hidden flex flex-col justify-between light:bg-none light:bg-white light:border-slate-200/80 light:shadow-sm"
       >
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-purple-300">Available Balance</span>
-          <div className="p-2 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30">
+          <span className="text-xs font-bold text-purple-300 light:text-slate-500">Available Balance</span>
+          <div className="p-2 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 light:bg-purple-50 light:border-purple-200 light:text-purple-600">
             <Wallet className="w-4 h-4" />
           </div>
         </div>
         <div>
-          <div className="text-2xl font-black text-white">{availableBalance}</div>
-          <span className="text-[11px] font-bold text-emerald-400 mt-0.5 block">Cleared for instant claim</span>
+          <div className="text-2xl font-black text-white light:text-slate-900">{availableBalance}</div>
+          <span className="text-[11px] font-bold text-emerald-400 light:text-emerald-600 mt-0.5 block">Cleared for instant claim</span>
         </div>
         <button
           onClick={onWithdraw}
-          className="w-full py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-xs font-extrabold text-white shadow-lg shadow-purple-950/50 transition-all flex items-center justify-center gap-1.5"
+          className="w-full py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-xs font-extrabold text-white keep-white shadow-lg shadow-purple-950/50 light:shadow-purple-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
         >
-          <ArrowUpRight className="w-4 h-4" />
+          <ArrowUpRight className="w-4 h-4 text-white" />
           <span>Claim Earnings</span>
         </button>
       </motion.div>
@@ -67,19 +67,19 @@ export default function PaymentsKpiBar({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
-        className="p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-3 flex flex-col justify-between"
+        className="p-5 rounded-2xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200/80 backdrop-blur-xl shadow-xl light:shadow-sm space-y-3 flex flex-col justify-between"
       >
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-400">Locked in Escrow</span>
-          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <span className="text-xs font-bold text-slate-400 light:text-slate-500">Locked in Escrow</span>
+          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 light:bg-amber-50 light:border-amber-200 light:text-amber-600">
             <Lock className="w-4 h-4" />
           </div>
         </div>
         <div>
-          <div className="text-2xl font-black text-amber-400">{inEscrow}</div>
-          <span className="text-[11px] font-bold text-slate-400 mt-0.5 block">Released upon deliverable approval</span>
+          <div className="text-2xl font-black text-amber-400 light:text-amber-600">{inEscrow}</div>
+          <span className="text-[11px] font-bold text-slate-400 light:text-slate-500 mt-0.5 block">Released upon deliverable approval</span>
         </div>
-        <div className="pt-2 border-t border-white/5 text-[11px] font-semibold text-slate-400">
+        <div className="pt-2 border-t border-white/5 light:border-slate-100 text-[11px] font-semibold text-slate-400 light:text-slate-500">
           Milestones held in Cashfree escrow
         </div>
       </motion.div>
@@ -89,35 +89,35 @@ export default function PaymentsKpiBar({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-3 flex flex-col justify-between"
+        className="p-5 rounded-2xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200/80 backdrop-blur-xl shadow-xl light:shadow-sm space-y-3 flex flex-col justify-between"
       >
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-400">Payout Credentials</span>
-          <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+          <span className="text-xs font-bold text-slate-400 light:text-slate-500">Payout Credentials</span>
+          <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 light:bg-blue-50 light:border-blue-200 light:text-blue-600">
             <Building2 className="w-4 h-4" />
           </div>
         </div>
         <div>
           {hasBeneficiary ? (
             <>
-              <div className="text-sm font-bold text-white truncate">
+              <div className="text-sm font-bold text-white light:text-slate-900 truncate">
                 {activeBeneficiary.bankName ? `${activeBeneficiary.bankName}` : 'UPI Account'}
               </div>
-              <span className="text-[11px] font-mono text-slate-400 mt-0.5 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span className="text-[11px] font-mono text-slate-400 light:text-slate-500 mt-0.5 flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600" />
                 <span>{activeBeneficiary.accountLast4 ? `•••• ${activeBeneficiary.accountLast4}` : activeBeneficiary.upiId || 'Verified'}</span>
               </span>
             </>
           ) : (
             <>
-              <div className="text-xs font-bold text-amber-400">No Account Linked</div>
-              <span className="text-[10px] text-slate-400 mt-0.5 block">Link bank to receive payouts</span>
+              <div className="text-xs font-bold text-amber-400 light:text-amber-600">No Account Linked</div>
+              <span className="text-[10px] text-slate-400 light:text-slate-500 mt-0.5 block">Link bank to receive payouts</span>
             </>
           )}
         </div>
         <button
           onClick={handleOpenLink}
-          className="w-full py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-purple-300 border border-white/10 transition-colors"
+          className="w-full py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-purple-300 border border-white/10 light:bg-slate-100 light:hover:bg-slate-200 light:text-slate-700 light:border-slate-200 transition-colors cursor-pointer"
         >
           {hasBeneficiary ? 'Edit Account' : 'Link Payout Account'}
         </button>
@@ -128,31 +128,31 @@ export default function PaymentsKpiBar({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
-        className="p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-3 flex flex-col justify-between"
+        className="p-5 rounded-2xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200/80 backdrop-blur-xl shadow-xl light:shadow-sm space-y-3 flex flex-col justify-between"
       >
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-400">Total Settled</span>
-          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span className="text-xs font-bold text-slate-400 light:text-slate-500">Total Settled</span>
+          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 light:bg-emerald-50 light:border-emerald-200 light:text-emerald-600">
             <TrendingUp className="w-4 h-4" />
           </div>
         </div>
         <div>
-          <div className="text-2xl font-black text-white">{lifetimeEarnings}</div>
+          <div className="text-2xl font-black text-white light:text-slate-900">{lifetimeEarnings}</div>
           {disputeCount > 0 ? (
             <button
               onClick={onViewDisputes}
-              className="text-[11px] font-bold text-amber-400 hover:underline flex items-center gap-1 mt-0.5"
+              className="text-[11px] font-bold text-amber-400 light:text-amber-600 hover:underline flex items-center gap-1 mt-0.5 cursor-pointer"
             >
               <AlertTriangle className="w-3 h-3" />
               <span>{disputeCount} active dispute{disputeCount > 1 ? 's' : ''}</span>
             </button>
           ) : (
-            <span className="text-[11px] font-bold text-emerald-400 mt-0.5 block">100% on-time settlement</span>
+            <span className="text-[11px] font-bold text-emerald-400 light:text-emerald-600 mt-0.5 block">100% on-time settlement</span>
           )}
         </div>
-        <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] font-semibold text-slate-400">
+        <div className="pt-2 border-t border-white/5 light:border-slate-100 flex items-center justify-between text-[11px] font-semibold text-slate-400 light:text-slate-500">
           <span>Escrow Protected</span>
-          <span className="text-purple-400 font-bold">Cashfree Verified</span>
+          <span className="text-purple-400 light:text-purple-600 font-bold">Cashfree Verified</span>
         </div>
       </motion.div>
     </div>

@@ -207,15 +207,15 @@ export default function StatisticView() {
       {/* Filter & Action Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Platform filter pills */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-950/60 border border-white/10 backdrop-blur-xl overflow-x-auto">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-950/60 light:bg-slate-100 border border-white/10 light:border-slate-200 backdrop-blur-xl overflow-x-auto">
           {['all', 'instagram', 'youtube', 'twitter', 'threads', 'linkedin'].map((plat) => (
             <button
               key={plat}
               onClick={() => setSelectedPlatform(plat)}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all whitespace-nowrap ${
                 selectedPlatform === plat
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-purple-600 text-white keep-white shadow-md'
+                  : 'text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 hover:bg-white/5 light:hover:bg-white'
               }`}
             >
               {plat === 'twitter' ? 'X (Twitter)' : plat}
@@ -226,8 +226,8 @@ export default function StatisticView() {
         {/* Timeframe & Export side by side */}
         <div className="flex items-center gap-2.5 shrink-0">
           {isLoading && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs font-semibold text-purple-300">
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400" />
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-500/10 light:bg-purple-50 border border-purple-500/20 light:border-purple-200 text-xs font-semibold text-purple-300 light:text-purple-700">
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400 light:text-purple-600" />
               <span className="hidden sm:inline">Syncing live statistics...</span>
             </div>
           )}
@@ -239,9 +239,9 @@ export default function StatisticView() {
 
           <button
             type="button"
-            className="px-3.5 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 active:scale-95 border border-purple-500/30 hover:border-purple-400/60 text-xs font-semibold text-purple-200 hover:text-white flex items-center gap-2 transition-all duration-200 shadow-sm shadow-purple-950/20 group cursor-pointer whitespace-nowrap"
+            className="px-3.5 py-2 rounded-xl bg-purple-600/20 light:bg-purple-50 hover:bg-purple-600/30 light:hover:bg-purple-100 active:scale-95 border border-purple-500/30 light:border-purple-200 hover:border-purple-400/60 light:hover:border-purple-300 text-xs font-semibold text-purple-200 light:text-purple-700 hover:text-white light:hover:text-purple-900 flex items-center gap-2 transition-all duration-200 shadow-sm shadow-purple-950/20 group cursor-pointer whitespace-nowrap"
           >
-            <Download className="w-3.5 h-3.5 text-purple-400 group-hover:-translate-y-0.5 transition-transform" />
+            <Download className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 group-hover:-translate-y-0.5 transition-transform" />
             <span>Export CSV</span>
           </button>
         </div>
@@ -306,37 +306,37 @@ export default function StatisticView() {
       />
 
       {/* 5. AI Performance Takeaways Card */}
-      <div className="p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-3">
-        <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-purple-400" />
+      <div className="p-5 rounded-2xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200/90 backdrop-blur-xl shadow-xl light:shadow-sm space-y-3">
+        <h3 className="text-sm font-extrabold text-white light:text-slate-900 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-purple-400 light:text-purple-600" />
           <span>AI Insight Engine Takeaways</span>
         </h3>
         <ul className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-300">
           {isLoading ? (
             [1, 2, 3].map((i) => (
-              <li key={i} className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-2">
-                <div className="h-4 w-28 bg-white/10 rounded animate-pulse" />
-                <div className="h-3 w-full bg-white/5 rounded animate-pulse" />
-                <div className="h-3 w-3/4 bg-white/5 rounded animate-pulse" />
+              <li key={i} className="p-3 rounded-xl bg-slate-950/60 light:bg-slate-50 border border-white/5 light:border-slate-200 space-y-2">
+                <div className="h-4 w-28 bg-white/10 light:bg-slate-200 rounded animate-pulse" />
+                <div className="h-3 w-full bg-white/5 light:bg-slate-100 rounded animate-pulse" />
+                <div className="h-3 w-3/4 bg-white/5 light:bg-slate-100 rounded animate-pulse" />
               </li>
             ))
           ) : (
             <>
-              <li className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-1">
-                <span className="font-bold text-purple-300 block">Video Format Dominance</span>
-                <p className="text-[11px] text-slate-400">
+              <li className="p-3 rounded-xl bg-slate-950/60 light:bg-slate-50 border border-white/5 light:border-slate-200 space-y-1">
+                <span className="font-bold text-purple-300 light:text-purple-700 block">Video Format Dominance</span>
+                <p className="text-[11px] text-slate-400 light:text-slate-600">
                   Video posts outperform static images by 41% higher engagement on Instagram & YouTube.
                 </p>
               </li>
-              <li className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-1">
-                <span className="font-bold text-pink-300 block">Optimal Posting Schedule</span>
-                <p className="text-[11px] text-slate-400">
+              <li className="p-3 rounded-xl bg-slate-950/60 light:bg-slate-50 border border-white/5 light:border-slate-200 space-y-1">
+                <span className="font-bold text-pink-300 light:text-pink-700 block">Optimal Posting Schedule</span>
+                <p className="text-[11px] text-slate-400 light:text-slate-600">
                   Wednesday & Friday evenings between 7-9 PM generate 2.3x more initial reel saves.
                 </p>
               </li>
-              <li className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-1">
-                <span className="font-bold text-emerald-300 block">High Converting Niche</span>
-                <p className="text-[11px] text-slate-400">
+              <li className="p-3 rounded-xl bg-slate-950/60 light:bg-slate-50 border border-white/5 light:border-slate-200 space-y-1">
+                <span className="font-bold text-emerald-300 light:text-emerald-700 block">High Converting Niche</span>
+                <p className="text-[11px] text-slate-400 light:text-slate-600">
                   Tech review reels drive 3.8% link click conversions to brand campaign landing pages.
                 </p>
               </li>

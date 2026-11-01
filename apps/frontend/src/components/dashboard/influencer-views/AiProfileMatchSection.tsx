@@ -14,22 +14,22 @@ export default function AiProfileMatchSection() {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-purple-950/60 via-pink-950/40 to-slate-900 border border-purple-500/40 backdrop-blur-xl relative overflow-hidden">
+      <div className="p-6 rounded-3xl bg-gradient-to-r from-purple-950/60 via-pink-950/40 to-slate-900 light:from-purple-50 light:via-pink-50/50 light:to-white border border-purple-500/40 light:border-purple-200 backdrop-blur-xl relative overflow-hidden shadow-sm">
         <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 rounded-xl bg-purple-600/20 border border-purple-500/40 text-purple-400">
+          <div className="p-2 rounded-xl bg-purple-600/20 light:bg-purple-100 border border-purple-500/40 light:border-purple-200 text-purple-400 light:text-purple-600">
             <Brain className="w-5 h-5 animate-pulse" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-white">AI Profile Matching Engine</h2>
-            <p className="text-xs text-slate-300">Predictive AI algorithms analyze your audience metrics and brand campaign briefs</p>
+            <h2 className="text-xl font-black text-white light:text-slate-900">AI Profile Matching Engine</h2>
+            <p className="text-xs text-slate-300 light:text-slate-600">Predictive AI algorithms analyze your audience metrics and brand campaign briefs</p>
           </div>
         </div>
       </div>
 
       {/* Recommended Matches List */}
       <div className="space-y-4">
-        <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-          <Zap className="w-4 h-4 text-purple-400" />
+        <h3 className="text-sm font-bold text-slate-300 light:text-slate-700 uppercase tracking-wider flex items-center gap-2">
+          <Zap className="w-4 h-4 text-purple-400 light:text-purple-600" />
           <span>Top AI-Recommended Deals for You</span>
         </h3>
 
@@ -39,26 +39,26 @@ export default function AiProfileMatchSection() {
             initial={{ opacity: 0, x: -15 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: idx * 0.1 }}
-            className="p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-purple-500/40 transition-all"
+            className="p-5 rounded-2xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200/90 backdrop-blur-xl shadow-xl light:shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-purple-500/40 light:hover:border-purple-300 light:hover:shadow-md transition-all"
           >
             <div className="space-y-1.5 flex-1">
               <div className="flex items-center gap-2.5">
-                <span className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-[10px] font-black text-white">
+                <span className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-[10px] font-black text-white keep-white">
                   {item.score}% Match
                 </span>
-                <span className="text-xs font-bold text-slate-400">{item.brand}</span>
+                <span className="text-xs font-bold text-slate-400 light:text-slate-500">{item.brand}</span>
               </div>
-              <h4 className="text-base font-extrabold text-white">{item.title}</h4>
-              <p className="text-xs text-slate-300">{item.reason}</p>
+              <h4 className="text-base font-extrabold text-white light:text-slate-900">{item.title}</h4>
+              <p className="text-xs text-slate-300 light:text-slate-600">{item.reason}</p>
             </div>
 
-            <div className="flex items-center justify-between md:justify-end gap-6 pt-3 md:pt-0 border-t md:border-t-0 border-white/5">
+            <div className="flex items-center justify-between md:justify-end gap-6 pt-3 md:pt-0 border-t md:border-t-0 border-white/5 light:border-slate-200">
               <div className="text-right">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">Suggested Rate</span>
-                <span className="text-base font-black text-emerald-400">{item.rate}</span>
+                <span className="text-[10px] text-slate-500 light:text-slate-500 uppercase tracking-wider block font-bold">Suggested Rate</span>
+                <span className="text-base font-black text-emerald-400 light:text-emerald-700">{item.rate}</span>
               </div>
 
-              <button className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-extrabold text-white flex items-center gap-2 transition-all shadow-lg shadow-purple-950/50">
+              <button className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-extrabold text-white keep-white flex items-center gap-2 transition-all shadow-lg shadow-purple-950/50 hover:scale-105">
                 <span>View Brief</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>

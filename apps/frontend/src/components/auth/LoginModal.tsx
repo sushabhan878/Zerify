@@ -9,6 +9,7 @@ import AuthAlert from './subcomponents/AuthAlert';
 import AuthGoogleButton from './subcomponents/AuthGoogleButton';
 import LoginSuccessScreen from './subcomponents/LoginSuccessScreen';
 import LoginForm from './subcomponents/LoginForm';
+import { authenticateWithGoogle } from '@/lib/google-auth';
 
 export default function LoginModal() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function LoginModal() {
 
   // Status State
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [success, setSuccess] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState<any>(null);
@@ -73,14 +75,46 @@ export default function LoginModal() {
     }
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setErrorMessage('');
-    setLoading(true);
+    setGoogleLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
-      setErrorMessage('Demo Mode: Google OAuth authentication successfully simulated.');
-    }, 1000);
+    try {
+      const res = await authenticateWithGoogle({ action: 'login' });
+      if (!res.success && res.error) {
+        setErrorMessage(res.error);
+        return;
+      }
+
+      if (res.requiresRegistration && res.googleProfile) {
+        const query = new URLSearchParams({
+          googleEmail: res.googleProfile.email,
+          googleName: res.googleProfile.name || '',
+        }).toString();
+        router.push(`/register?${query}`);
+        return;
+      }
+
+      if (res.accessToken) {
+        localStorage.setItem('zerify_token', res.accessToken);
+        document.cookie = `zerify_token=${res.accessToken}; path=/; max-age=604800; SameSite=Lax`;
+      }
+      if (res.user) {
+        localStorage.setItem('zerify_user', JSON.stringify(res.user));
+        setLoggedInUser(res.user);
+      }
+
+      window.dispatchEvent(new Event('zerify_auth_change'));
+      setSuccess(true);
+
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1500);
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Google sign-in failed. Please try again.');
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   return (
@@ -131,7 +165,7 @@ export default function LoginModal() {
               </span>
             </div>
 
-            <AuthGoogleButton onClick={handleGoogleLogin} />
+            <AuthGoogleButton onClick={handleGoogleLogin} isLoading={googleLoading} />
 
             <div className="mt-8 text-center">
               <p className="text-xs text-slate-400 light:text-slate-600">

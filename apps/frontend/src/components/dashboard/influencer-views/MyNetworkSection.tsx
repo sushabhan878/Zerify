@@ -148,18 +148,18 @@ export default function MyNetworkSection() {
       {/* 2. Controls Bar: Search & Relationship Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 light:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search past brand partners by company, industry, or contact..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-950/80 border border-white/10 text-xs font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50"
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-950/80 light:bg-white border border-white/10 light:border-slate-200 text-xs font-semibold text-white light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 focus:outline-none focus:border-purple-500/50 light:focus:border-purple-400 shadow-sm"
           />
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-white/10 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 light:bg-slate-100 border border-white/10 light:border-slate-200 overflow-x-auto no-scrollbar">
           {[
             { id: 'ALL', label: 'All Partners' },
             { id: 'PREFERRED', label: 'Preferred Partners' },
@@ -170,8 +170,8 @@ export default function MyNetworkSection() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
                 activeTab === tab.id
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-purple-600 text-white keep-white shadow-md'
+                  : 'text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 hover:bg-white/5 light:hover:bg-white'
               }`}
             >
               {tab.label}
@@ -183,19 +183,19 @@ export default function MyNetworkSection() {
       {/* 3. Brand Partner Cards List */}
       <div className="space-y-4">
         {isLoading ? (
-          <div className="p-12 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center gap-3">
-            <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
-            <span className="text-xs font-semibold text-slate-400">Loading your brand partner network...</span>
+          <div className="p-12 rounded-2xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200 backdrop-blur-xl flex flex-col items-center justify-center gap-3 shadow-sm">
+            <Loader2 className="w-8 h-8 text-purple-400 light:text-purple-600 animate-spin" />
+            <span className="text-xs font-semibold text-slate-400 light:text-slate-500">Loading your brand partner network...</span>
           </div>
         ) : filteredBrands.length > 0 ? (
           filteredBrands.map((brand) => (
             <BrandPartnerCardItem key={brand.id} brand={brand} onProposePitch={handleProposePitch} />
           ))
         ) : (
-          <div className="p-8 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl text-center space-y-2">
+          <div className="p-8 rounded-2xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200 backdrop-blur-xl text-center space-y-2 shadow-sm">
             <Building2 className="w-8 h-8 text-slate-500 mx-auto" />
-            <h3 className="text-sm font-bold text-white">No Brand Partners Found</h3>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">
+            <h3 className="text-sm font-bold text-white light:text-slate-900">No Brand Partners Found</h3>
+            <p className="text-xs text-slate-400 light:text-slate-600 max-w-sm mx-auto">
               No previous brand collaborations match your search criteria. Completed campaigns will automatically populate here.
             </p>
           </div>

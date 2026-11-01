@@ -7,6 +7,7 @@ import { RegisterInfluencerDto } from './dto/register-influencer.dto';
 import { LoginDto } from './dto/login.dto';
 import { SendVerificationOtpDto } from './dto/send-verification-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { GoogleAuthDto } from './dto/google-auth.dto';
 import { ConnectCallbackQueryDto } from '../social/dto/connect-callback-query.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
@@ -92,6 +93,81 @@ export class AuthController {
   @ApiOperation({ summary: 'Generic login for any account role' })
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  // Google OAuth & Google One-Tap Endpoints
+  @Post('google')
+  @ApiOperation({ summary: 'Google One-Tap or Google Identity Services authentication / registration' })
+  @ApiResponse({ status: 200, description: 'Google authentication successful.' })
+  @ApiResponse({ status: 400, description: 'Invalid Google credential token or restricted domain.' })
+  async googleAuth(@Body() dto: GoogleAuthDto) {
+    return this.authService.googleAuth(dto);
+  }
+
+  @Get('google/url')
+  @ApiOperation({ summary: 'Generate Google OAuth 2.0 authorization URL' })
+  async getGoogleAuthUrl(
+    @Query('redirectUri') redirectUri: string,
+    @Query('state') state: string,
+  ) {
+    const fallbackRedirect =
+      redirectUri ||
+      process.env.GOOGLE_REDIRECT_URI ||
+      'http://localhost:3000/social/callback';
+    const authUrl = this.authService.getGoogleAuthUrl(fallbackRedirect, state || 'google_login');
+    return { url: authUrl };
+  }
+
+  @Get('google/callback')
+  @ApiOperation({ summary: 'Google OAuth callback handler' })
+  async googleCallback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Res() res: Response,
+  ) {
+    const frontendBaseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    try {
+      const redirectUri = `${process.env.BACKEND_URL || 'http://localhost:4000/api/v1'}/auth/google/callback`;
+      let role: any = undefined;
+      let action: any = 'login';
+
+      if (state) {
+        try {
+          const parsed = JSON.parse(decodeURIComponent(state));
+          role = parsed.role;
+          action = parsed.action || action;
+        } catch {
+          if (state.includes('BRAND')) role = 'BRAND';
+          if (state.includes('INFLUENCER')) role = 'INFLUENCER';
+          if (state.includes('register')) action = 'register';
+        }
+      }
+
+      const result = await this.authService.googleAuth({
+        code,
+        redirectUri,
+        role,
+        action,
+      });
+
+      if (result.accessToken) {
+        return res.redirect(
+          `${frontendBaseUrl}/social/callback?status=success&token=${result.accessToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`,
+        );
+      }
+
+      if (result.requiresRegistration && result.googleProfile) {
+        return res.redirect(
+          `${frontendBaseUrl}/register?googleEmail=${encodeURIComponent(result.googleProfile.email)}&googleName=${encodeURIComponent(result.googleProfile.name)}&googleAvatar=${encodeURIComponent(result.googleProfile.avatarUrl || '')}`,
+        );
+      }
+
+      return res.redirect(`${frontendBaseUrl}/login?error=Google+authentication+failed`);
+    } catch (err: any) {
+      return res.redirect(
+        `${frontendBaseUrl}/login?error=${encodeURIComponent(err.message || 'Google authentication error')}`,
+      );
+    }
   }
 
   @Get('me')

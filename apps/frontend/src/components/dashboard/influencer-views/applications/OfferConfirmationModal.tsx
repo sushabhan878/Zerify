@@ -66,14 +66,14 @@ export default function OfferConfirmationModal({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-md rounded-3xl bg-slate-950/95 border border-white/15 p-6 shadow-2xl backdrop-blur-2xl z-10 space-y-5 overflow-hidden"
+          className="relative w-full max-w-md rounded-3xl bg-slate-950/95 light:bg-white border border-white/15 light:border-slate-200/90 p-6 shadow-2xl light:shadow-xl backdrop-blur-2xl z-10 space-y-5 overflow-hidden"
         >
           {/* Close button */}
           <button
             type="button"
             disabled={isProcessing}
             onClick={onCancel}
-            className="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50"
+            className="absolute top-4 right-4 p-2 rounded-xl text-slate-400 light:text-slate-500 hover:text-white light:hover:text-slate-900 hover:bg-white/5 light:hover:bg-slate-100 transition-colors disabled:opacity-50"
           >
             <X className="w-4 h-4" />
           </button>
@@ -83,8 +83,8 @@ export default function OfferConfirmationModal({
             <div
               className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${
                 isAccept
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                  : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                  ? 'bg-emerald-500/10 light:bg-emerald-50 border-emerald-500/30 light:border-emerald-200 text-emerald-400 light:text-emerald-600'
+                  : 'bg-rose-500/10 light:bg-rose-50 border-rose-500/30 light:border-rose-200 text-rose-400 light:text-rose-600'
               }`}
             >
               {isAccept ? (
@@ -94,10 +94,10 @@ export default function OfferConfirmationModal({
               )}
             </div>
             <div>
-              <h3 className="text-base font-black text-white">
+              <h3 className="text-base font-black text-white light:text-slate-900">
                 {isAccept ? 'Accept Campaign Offer?' : 'Decline Campaign Offer?'}
               </h3>
-              <p className="text-xs text-slate-400 font-medium">
+              <p className="text-xs text-slate-400 light:text-slate-500 font-medium">
                 {brand.companyName || 'Verified Brand'} &bull; {campaign.title || 'Campaign'}
               </p>
             </div>
@@ -105,26 +105,26 @@ export default function OfferConfirmationModal({
 
           {/* Details / Notice Box */}
           {isAccept ? (
-            <div className="p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/20 space-y-2 text-xs">
+            <div className="p-4 rounded-2xl bg-emerald-950/20 light:bg-emerald-50 border border-emerald-500/20 light:border-emerald-200 space-y-2 text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-slate-300 font-medium">Escrow Payout:</span>
+                <span className="text-slate-300 light:text-slate-700 font-medium">Escrow Payout:</span>
                 <div className="text-right">
-                  <span className="font-black text-emerald-400 text-sm block">{payoutStr}</span>
+                  <span className="font-black text-emerald-400 light:text-emerald-700 text-sm block">{payoutStr}</span>
                   {originalPayoutStr && (
-                    <span className="text-[10px] text-slate-400 font-semibold block">≈ {originalPayoutStr}</span>
+                    <span className="text-[10px] text-slate-400 light:text-slate-500 font-semibold block">≈ {originalPayoutStr}</span>
                   )}
                 </div>
               </div>
-              <p className="text-slate-400 leading-relaxed text-[11px] pt-1 border-t border-emerald-500/10">
+              <p className="text-slate-400 light:text-slate-600 leading-relaxed text-[11px] pt-1 border-t border-emerald-500/10 light:border-emerald-200">
                 By accepting, you commit to delivering the content outlined in the campaign brief. Your payout will be locked in Zerify Escrow and automatically released upon brand approval.
               </p>
             </div>
           ) : (
-            <div className="p-4 rounded-2xl bg-rose-950/20 border border-rose-500/20 space-y-1.5 text-xs">
-              <p className="text-slate-300 font-medium">
+            <div className="p-4 rounded-2xl bg-rose-950/20 light:bg-rose-50 border border-rose-500/20 light:border-rose-200 space-y-1.5 text-xs">
+              <p className="text-slate-300 light:text-slate-700 font-medium">
                 Are you sure you want to decline this collaboration offer?
               </p>
-              <p className="text-slate-400 text-[11px] leading-relaxed">
+              <p className="text-slate-400 light:text-slate-600 text-[11px] leading-relaxed">
                 This action cannot be undone. The brand will be notified that you are unable to participate in this campaign.
               </p>
             </div>
@@ -136,7 +136,7 @@ export default function OfferConfirmationModal({
               type="button"
               disabled={isProcessing}
               onClick={onCancel}
-              className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-slate-300 hover:text-white border border-white/10 transition-colors disabled:opacity-50"
+              className="px-4 py-2 rounded-xl bg-slate-900 light:bg-white hover:bg-slate-800 light:hover:bg-slate-50 text-xs font-bold text-slate-300 light:text-slate-700 hover:text-white light:hover:text-slate-900 border border-white/10 light:border-slate-200 transition-colors disabled:opacity-50"
             >
               {isAccept ? 'Cancel' : 'Keep Offer'}
             </button>
@@ -145,7 +145,7 @@ export default function OfferConfirmationModal({
               type="button"
               disabled={isProcessing}
               onClick={onConfirm}
-              className={`px-5 py-2 rounded-xl text-xs font-black text-white shadow-lg transition-all flex items-center gap-1.5 disabled:opacity-50 ${
+              className={`px-5 py-2 rounded-xl text-xs font-black text-white keep-white shadow-lg transition-all flex items-center gap-1.5 disabled:opacity-50 ${
                 isAccept
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-950/40'
                   : 'bg-rose-600 hover:bg-rose-500 shadow-rose-950/40'

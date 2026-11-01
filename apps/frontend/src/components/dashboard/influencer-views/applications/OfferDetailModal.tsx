@@ -80,11 +80,11 @@ export default function OfferDetailModal({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-xl bg-slate-900 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="w-full max-w-xl bg-slate-900 light:bg-white border border-white/10 light:border-slate-200/90 rounded-3xl shadow-2xl light:shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
       >
-        <div className="p-6 border-b border-white/10 flex items-center justify-between bg-slate-950/40">
+        <div className="p-6 border-b border-white/10 light:border-slate-200 flex items-center justify-between bg-slate-950/40 light:bg-slate-50/70">
           <div>
-            <span className="text-[10px] font-black text-purple-400 uppercase tracking-wider">
+            <span className="text-[10px] font-black text-purple-400 light:text-purple-600 uppercase tracking-wider">
               {isBrandRejectedCounter
                 ? 'Counter Offer Rejected'
                 : isInfluencerCounter
@@ -93,11 +93,11 @@ export default function OfferDetailModal({
                 ? 'Brand Counter Offer'
                 : 'Offer Contract Scope'}
             </span>
-            <h3 className="text-base font-black text-white">{campaign.title}</h3>
+            <h3 className="text-base font-black text-white light:text-slate-900">{campaign.title}</h3>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-xl text-slate-400 light:text-slate-500 hover:text-white light:hover:text-slate-900 hover:bg-slate-800 light:hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -106,45 +106,45 @@ export default function OfferDetailModal({
         <div className="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
           {/* Rejection Notice Banner */}
           {isBrandRejectedCounter && (
-            <div className="p-3.5 rounded-2xl bg-rose-950/40 border border-rose-500/30 flex items-center gap-2.5 text-xs text-rose-300 font-medium">
-              <X className="w-4 h-4 text-rose-400 shrink-0" />
+            <div className="p-3.5 rounded-2xl bg-rose-950/40 light:bg-rose-50 border border-rose-500/30 light:border-rose-200 flex items-center gap-2.5 text-xs text-rose-300 light:text-rose-700 font-medium">
+              <X className="w-4 h-4 text-rose-400 light:text-rose-600 shrink-0" />
               <span>The brand has reviewed and rejected your counter offer proposal.</span>
             </div>
           )}
 
           {/* Compensation Card */}
-          <div className="p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-emerald-950/20 light:bg-emerald-50 border border-emerald-500/30 light:border-emerald-200 flex items-center justify-between">
             <div>
-              <span className="text-[10px] text-emerald-400 font-bold uppercase block">
+              <span className="text-[10px] text-emerald-400 light:text-emerald-700 font-bold uppercase block">
                 {isInfluencerCounter ? 'Your Counter Rate' : 'Agreed Compensation'}
               </span>
-              <span className="text-xl font-black text-white">
+              <span className="text-xl font-black text-white light:text-slate-900">
                 {payoutStr}
               </span>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-slate-400 font-bold block">Escrow Protected</span>
-              <span className="text-xs font-bold text-emerald-400">100% Guaranteed</span>
+              <span className="text-[10px] text-slate-400 light:text-slate-500 font-bold block">Escrow Protected</span>
+              <span className="text-xs font-bold text-emerald-400 light:text-emerald-600">100% Guaranteed</span>
             </div>
           </div>
 
           {/* Deliverables Required */}
           <div className="space-y-2">
-            <h4 className="font-bold text-slate-300 uppercase tracking-wider text-[11px]">
+            <h4 className="font-bold text-slate-300 light:text-slate-700 uppercase tracking-wider text-[11px]">
               Deliverables Required
             </h4>
             <div className="space-y-2">
               {deliverables.map((d: any, idx: number) => (
-                <div key={idx} className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-1">
+                <div key={idx} className="p-3 rounded-xl bg-slate-950/60 light:bg-slate-50 border border-white/5 light:border-slate-200 space-y-1">
                   <div className="flex justify-between items-center">
-                    <span className="font-bold text-white flex items-center gap-1.5">
-                      <Video className="w-3.5 h-3.5 text-purple-400" />
+                    <span className="font-bold text-white light:text-slate-900 flex items-center gap-1.5">
+                      <Video className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />
                       {d.quantity}x {d.type}
                     </span>
-                    <span className="text-[10px] text-slate-400">{d.revisionLimit || 2} revisions included</span>
+                    <span className="text-[10px] text-slate-400 light:text-slate-500">{d.revisionLimit || 2} revisions included</span>
                   </div>
                   {d.requiredCta && (
-                    <p className="text-[10px] text-slate-400">
+                    <p className="text-[10px] text-slate-400 light:text-slate-600">
                       <strong>CTA:</strong> {d.requiredCta}
                     </p>
                   )}
@@ -156,10 +156,10 @@ export default function OfferDetailModal({
           {/* Counter proposal notes */}
           {isInfluencerCounter && terms.counterNotes && (
             <div className="space-y-1">
-              <h4 className="font-bold text-amber-400 uppercase tracking-wider text-[11px]">
+              <h4 className="font-bold text-amber-400 light:text-amber-700 uppercase tracking-wider text-[11px]">
                 Your Counter Note
               </h4>
-              <p className="p-3 rounded-xl bg-amber-950/30 border border-amber-500/20 text-amber-200 italic">
+              <p className="p-3 rounded-xl bg-amber-950/30 light:bg-amber-50 border border-amber-500/20 light:border-amber-200 text-amber-200 light:text-amber-800 italic">
                 {terms.counterNotes}
               </p>
             </div>
@@ -167,10 +167,10 @@ export default function OfferDetailModal({
 
           {isBrandCounter && terms.counterNotes && (
             <div className="space-y-1">
-              <h4 className="font-bold text-purple-400 uppercase tracking-wider text-[11px]">
+              <h4 className="font-bold text-purple-400 light:text-purple-700 uppercase tracking-wider text-[11px]">
                 Brand Counter Note
               </h4>
-              <p className="p-3 rounded-xl bg-purple-950/30 border border-purple-500/20 text-purple-200 italic">
+              <p className="p-3 rounded-xl bg-purple-950/30 light:bg-purple-50 border border-purple-500/20 light:border-purple-200 text-purple-200 light:text-purple-700 italic">
                 {terms.counterNotes}
               </p>
             </div>
@@ -179,10 +179,10 @@ export default function OfferDetailModal({
           {/* Notes */}
           {offer.customNotes && (
             <div className="space-y-1">
-              <h4 className="font-bold text-slate-300 uppercase tracking-wider text-[11px]">
+              <h4 className="font-bold text-slate-300 light:text-slate-700 uppercase tracking-wider text-[11px]">
                 Brand Notes
               </h4>
-              <p className="p-3 rounded-xl bg-slate-950/60 border border-white/5 text-slate-300 italic">
+              <p className="p-3 rounded-xl bg-slate-950/60 light:bg-slate-50 border border-white/5 light:border-slate-200 text-slate-300 light:text-slate-600 italic">
                 {offer.customNotes}
               </p>
             </div>
@@ -190,7 +190,7 @@ export default function OfferDetailModal({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-white/10 bg-slate-950/40 flex items-center justify-between gap-2 flex-wrap">
+        <div className="p-4 border-t border-white/10 light:border-slate-200 bg-slate-950/40 light:bg-slate-50/70 flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
             {offer.status === 'PENDING' && campaign.status !== 'DELETED' && (
               <>

@@ -133,8 +133,8 @@ export default function CampaignQuickFilters({
           type="button"
           className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
             filters.category !== 'All'
-              ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm'
-              : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
+              ? 'bg-purple-500/15 light:bg-purple-50 text-purple-200 light:text-purple-700 border-purple-500/40 light:border-purple-300 shadow-sm'
+              : 'bg-slate-900 light:bg-white border-white/10 light:border-slate-200 text-slate-300 light:text-slate-700 hover:border-white/20 light:hover:border-purple-300 light:shadow-sm'
           }`}
         >
           <span>Category: {filters.category === 'All' ? 'All' : filters.category}</span>
@@ -142,22 +142,22 @@ export default function CampaignQuickFilters({
         </button>
 
         {openDropdown === 'category' && (
-          <div className="absolute top-full left-0 mt-1.5 w-72 sm:w-80 max-h-80 overflow-y-auto bg-slate-950 border border-purple-500/30 rounded-2xl shadow-2xl p-2 z-50 space-y-1.5 backdrop-blur-xl">
+          <div className="absolute top-full left-0 mt-1.5 w-72 sm:w-80 max-h-80 overflow-y-auto bg-slate-950 light:bg-white border border-purple-500/30 light:border-slate-200 rounded-2xl shadow-2xl light:shadow-xl p-2 z-50 space-y-1.5 backdrop-blur-xl">
             {/* Search within Category Dropdown */}
             <div className="relative mb-1">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-slate-400 light:text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search category or subcategory..."
                 value={categorySearch}
                 onChange={(e) => setCategorySearch(e.target.value)}
-                className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-slate-900 light:bg-slate-50 border border-white/10 light:border-slate-200 text-xs font-medium text-white light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 focus:outline-none focus:border-purple-500"
               />
               {categorySearch && (
                 <button
                   type="button"
                   onClick={() => setCategorySearch('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 light:text-slate-500 hover:text-white light:hover:text-slate-900"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -173,16 +173,16 @@ export default function CampaignQuickFilters({
               }}
               className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
                 filters.category === 'All'
-                  ? 'bg-purple-500/20 text-purple-200 border border-purple-500/30'
-                  : 'text-slate-300 hover:bg-slate-800/80'
+                  ? 'bg-purple-500/20 light:bg-purple-50 text-purple-200 light:text-purple-700 border border-purple-500/30 light:border-purple-200'
+                  : 'text-slate-300 light:text-slate-700 hover:bg-slate-800/80 light:hover:bg-slate-100'
               }`}
             >
               <span>All Categories</span>
-              {filters.category === 'All' && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+              {filters.category === 'All' && <Check className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />}
             </button>
 
             {/* Categorized Accordion Groups */}
-            <div className="space-y-1 pt-1 border-t border-white/5 max-h-56 overflow-y-auto pr-1">
+            <div className="space-y-1 pt-1 border-t border-white/5 light:border-slate-200 max-h-56 overflow-y-auto pr-1">
               {filteredCategoryGroups.map((group) => {
                 const isGroupSelected = filters.category === group.category;
                 return (
@@ -195,12 +195,12 @@ export default function CampaignQuickFilters({
                       }}
                       className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
                         isGroupSelected
-                          ? 'bg-purple-500/25 text-purple-100 font-bold border border-purple-500/30'
-                          : 'text-slate-200 hover:bg-slate-800/80'
+                          ? 'bg-purple-500/25 light:bg-purple-100 text-purple-100 light:text-purple-800 font-bold border border-purple-500/30 light:border-purple-200'
+                          : 'text-slate-200 light:text-slate-700 hover:bg-slate-800/80 light:hover:bg-slate-100'
                       }`}
                     >
                       <span className="truncate">{group.category}</span>
-                      {isGroupSelected && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                      {isGroupSelected && <Check className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />}
                     </button>
 
                     {/* Subcategories (Pills) */}
@@ -217,12 +217,12 @@ export default function CampaignQuickFilters({
                             }}
                             className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
                               isSubSelected
-                                ? 'bg-purple-600/30 text-purple-200 font-semibold'
-                                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                                ? 'bg-purple-600/30 light:bg-purple-50 text-purple-200 light:text-purple-700 font-semibold'
+                                : 'text-slate-400 light:text-slate-600 hover:text-slate-200 light:hover:text-purple-700 hover:bg-slate-800/50 light:hover:bg-purple-50/50'
                             }`}
                           >
                             <span className="truncate">{sub}</span>
-                            {isSubSelected && <Check className="w-3 h-3 text-purple-400 shrink-0" />}
+                            {isSubSelected && <Check className="w-3 h-3 text-purple-400 light:text-purple-600 shrink-0" />}
                           </button>
                         );
                       })}
@@ -242,15 +242,15 @@ export default function CampaignQuickFilters({
           type="button"
           className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
             filters.budgetRange !== 'Any Budget'
-              ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm'
-              : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
+              ? 'bg-purple-500/15 light:bg-purple-50 text-purple-200 light:text-purple-700 border-purple-500/40 light:border-purple-300 shadow-sm'
+              : 'bg-slate-900 light:bg-white border-white/10 light:border-slate-200 text-slate-300 light:text-slate-700 hover:border-white/20 light:hover:border-purple-300 light:shadow-sm'
           }`}
         >
           <span>Budget: {filters.budgetRange}</span>
           <ChevronDown className="w-3.5 h-3.5 opacity-70" />
         </button>
         {openDropdown === 'budget' && (
-          <div className="absolute top-full left-0 mt-1.5 w-56 max-h-64 overflow-y-auto bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+          <div className="absolute top-full left-0 mt-1.5 w-56 max-h-64 overflow-y-auto bg-slate-950 light:bg-white border border-purple-500/30 light:border-slate-200 rounded-xl shadow-2xl light:shadow-xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
             {budgetRanges.map((b) => (
               <button
                 key={b}
@@ -261,12 +261,12 @@ export default function CampaignQuickFilters({
                 }}
                 className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
                   filters.budgetRange === b
-                    ? 'bg-purple-500/20 text-purple-200 font-semibold border border-purple-500/30'
-                    : 'text-slate-300 hover:bg-slate-800/80'
+                    ? 'bg-purple-500/20 light:bg-purple-50 text-purple-200 light:text-purple-700 font-semibold border border-purple-500/30 light:border-purple-200'
+                    : 'text-slate-300 light:text-slate-700 hover:bg-slate-800/80 light:hover:bg-slate-100'
                 }`}
               >
                 <span>{b}</span>
-                {filters.budgetRange === b && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                {filters.budgetRange === b && <Check className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />}
               </button>
             ))}
           </div>
@@ -280,15 +280,15 @@ export default function CampaignQuickFilters({
           type="button"
           className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
             filters.minMatchScore > 0
-              ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm'
-              : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
+              ? 'bg-purple-500/15 light:bg-purple-50 text-purple-200 light:text-purple-700 border-purple-500/40 light:border-purple-300 shadow-sm'
+              : 'bg-slate-900 light:bg-white border-white/10 light:border-slate-200 text-slate-300 light:text-slate-700 hover:border-white/20 light:hover:border-purple-300 light:shadow-sm'
           }`}
         >
           <span>Match: {filters.minMatchScore > 0 ? `${filters.minMatchScore}%+` : 'Any'}</span>
           <ChevronDown className="w-3.5 h-3.5 opacity-70" />
         </button>
         {openDropdown === 'match' && (
-          <div className="absolute top-full left-0 mt-1.5 w-44 bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+          <div className="absolute top-full left-0 mt-1.5 w-44 bg-slate-950 light:bg-white border border-purple-500/30 light:border-slate-200 rounded-xl shadow-2xl light:shadow-xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
             {MATCH_SCORES.map((m) => (
               <button
                 key={m.label}
@@ -299,12 +299,12 @@ export default function CampaignQuickFilters({
                 }}
                 className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
                   filters.minMatchScore === m.value
-                    ? 'bg-purple-500/20 text-purple-200 font-semibold border border-purple-500/30'
-                    : 'text-slate-300 hover:bg-slate-800/80'
+                    ? 'bg-purple-500/20 light:bg-purple-50 text-purple-200 light:text-purple-700 font-semibold border border-purple-500/30 light:border-purple-200'
+                    : 'text-slate-300 light:text-slate-700 hover:bg-slate-800/80 light:hover:bg-slate-100'
                 }`}
               >
                 <span>{m.label}</span>
-                {filters.minMatchScore === m.value && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                {filters.minMatchScore === m.value && <Check className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />}
               </button>
             ))}
           </div>
@@ -318,15 +318,15 @@ export default function CampaignQuickFilters({
           type="button"
           className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
             filters.platform !== 'All Platforms'
-              ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm'
-              : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
+              ? 'bg-purple-500/15 light:bg-purple-50 text-purple-200 light:text-purple-700 border-purple-500/40 light:border-purple-300 shadow-sm'
+              : 'bg-slate-900 light:bg-white border-white/10 light:border-slate-200 text-slate-300 light:text-slate-700 hover:border-white/20 light:hover:border-purple-300 light:shadow-sm'
           }`}
         >
           <span>Platform: {filters.platform}</span>
           <ChevronDown className="w-3.5 h-3.5 opacity-70" />
         </button>
         {openDropdown === 'platform' && (
-          <div className="absolute top-full left-0 mt-1.5 w-48 bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+          <div className="absolute top-full left-0 mt-1.5 w-48 bg-slate-950 light:bg-white border border-purple-500/30 light:border-slate-200 rounded-xl shadow-2xl light:shadow-xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
             {PLATFORMS.map((p) => (
               <button
                 key={p}
@@ -337,12 +337,12 @@ export default function CampaignQuickFilters({
                 }}
                 className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
                   filters.platform === p
-                    ? 'bg-purple-500/20 text-purple-200 font-semibold border border-purple-500/30'
-                    : 'text-slate-300 hover:bg-slate-800/80'
+                    ? 'bg-purple-500/20 light:bg-purple-50 text-purple-200 light:text-purple-700 font-semibold border border-purple-500/30 light:border-purple-200'
+                    : 'text-slate-300 light:text-slate-700 hover:bg-slate-800/80 light:hover:bg-slate-100'
                 }`}
               >
                 <span>{p}</span>
-                {filters.platform === p && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                {filters.platform === p && <Check className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />}
               </button>
             ))}
           </div>
@@ -356,15 +356,15 @@ export default function CampaignQuickFilters({
           type="button"
           className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
             filters.campaignType !== 'All Types'
-              ? 'bg-purple-500/15 text-purple-200 border-purple-500/40 shadow-sm'
-              : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/20'
+              ? 'bg-purple-500/15 light:bg-purple-50 text-purple-200 light:text-purple-700 border-purple-500/40 light:border-purple-300 shadow-sm'
+              : 'bg-slate-900 light:bg-white border-white/10 light:border-slate-200 text-slate-300 light:text-slate-700 hover:border-white/20 light:hover:border-purple-300 light:shadow-sm'
           }`}
         >
           <span>Type: {filters.campaignType}</span>
           <ChevronDown className="w-3.5 h-3.5 opacity-70" />
         </button>
         {openDropdown === 'campaignType' && (
-          <div className="absolute top-full left-0 mt-1.5 w-52 bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+          <div className="absolute top-full left-0 mt-1.5 w-52 bg-slate-950 light:bg-white border border-purple-500/30 light:border-slate-200 rounded-xl shadow-2xl light:shadow-xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
             {CAMPAIGN_TYPES.map((t) => (
               <button
                 key={t}
@@ -375,12 +375,12 @@ export default function CampaignQuickFilters({
                 }}
                 className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
                   filters.campaignType === t
-                    ? 'bg-purple-500/20 text-purple-200 font-semibold border border-purple-500/30'
-                    : 'text-slate-300 hover:bg-slate-800/80'
+                    ? 'bg-purple-500/20 light:bg-purple-50 text-purple-200 light:text-purple-700 font-semibold border border-purple-500/30 light:border-purple-200'
+                    : 'text-slate-300 light:text-slate-700 hover:bg-slate-800/80 light:hover:bg-slate-100'
                 }`}
               >
                 <span>{t}</span>
-                {filters.campaignType === t && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                {filters.campaignType === t && <Check className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />}
               </button>
             ))}
           </div>
@@ -394,8 +394,8 @@ export default function CampaignQuickFilters({
           type="button"
           className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shrink-0 ${
             showSavedOnly
-              ? 'bg-purple-600/30 text-purple-200 border-purple-400/80 shadow-md shadow-purple-950/40 ring-1 ring-purple-500/50'
-              : 'bg-slate-900 border-white/10 text-slate-300 hover:border-purple-500/30 hover:text-white'
+              ? 'bg-purple-600/30 light:bg-purple-50 text-purple-200 light:text-purple-700 border-purple-400/80 light:border-purple-300 shadow-md shadow-purple-950/40 ring-1 ring-purple-500/50'
+              : 'bg-slate-900 light:bg-white border-white/10 light:border-slate-200 text-slate-300 light:text-slate-700 hover:border-purple-500/30 light:hover:border-purple-300 hover:text-white light:hover:text-slate-900 light:shadow-sm'
           }`}
           title={showSavedOnly ? 'Showing saved campaigns' : 'Show only saved campaigns'}
         >
@@ -405,8 +405,8 @@ export default function CampaignQuickFilters({
             <span
               className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
                 showSavedOnly
-                  ? 'bg-purple-500 text-white'
-                  : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                  ? 'bg-purple-500 text-white keep-white'
+                  : 'bg-purple-500/20 light:bg-purple-100 text-purple-300 light:text-purple-700 border border-purple-500/30 light:border-purple-200'
               }`}
             >
               {savedCount}
@@ -419,7 +419,7 @@ export default function CampaignQuickFilters({
       <button
         onClick={onOpenAdvancedModal}
         type="button"
-        className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black transition-all shrink-0 flex items-center gap-1.5 ml-auto shadow-md shadow-purple-950/40 border border-purple-400/30"
+        className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white keep-white text-xs font-black transition-all shrink-0 flex items-center gap-1.5 ml-auto shadow-md shadow-purple-950/40 border border-purple-400/30"
       >
         <SlidersHorizontal className="w-3.5 h-3.5" />
         <span>All Filters {activeCount > 0 ? `(${activeCount})` : ''}</span>

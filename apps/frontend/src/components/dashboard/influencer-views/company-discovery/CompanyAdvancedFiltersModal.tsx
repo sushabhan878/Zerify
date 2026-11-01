@@ -92,7 +92,7 @@ function FilterDropdown({ label, value, options, onChange }: FilterDropdownProps
 
   return (
     <div className="space-y-1.5 relative">
-      <label className="text-xs font-bold text-slate-300 block">{label}</label>
+      <label className="text-xs font-bold text-slate-300 light:text-slate-700 block">{label}</label>
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-transparent"
@@ -102,14 +102,14 @@ function FilterDropdown({ label, value, options, onChange }: FilterDropdownProps
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 hover:border-purple-500/40 text-xs font-semibold text-white transition-all relative z-40"
+        className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-900 light:bg-white border border-white/10 light:border-slate-200 hover:border-purple-500/40 light:hover:border-slate-300 text-xs font-semibold text-white light:text-slate-900 transition-all relative z-40 light:shadow-sm"
       >
         <span className="truncate">{value}</span>
-        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isOpen ? 'rotate-180 text-purple-400' : ''}`} />
+        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 light:text-slate-500 transition-transform ${isOpen ? 'rotate-180 text-purple-400 light:text-purple-600' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-slate-950 border border-purple-500/30 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
+        <div className="absolute top-full left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-slate-950 light:bg-white border border-purple-500/30 light:border-slate-200 rounded-xl shadow-2xl light:shadow-xl p-1.5 z-50 space-y-0.5 backdrop-blur-xl">
           {options.map((opt) => {
             const isSelected = value === opt;
             return (
@@ -121,12 +121,12 @@ function FilterDropdown({ label, value, options, onChange }: FilterDropdownProps
                   setIsOpen(false);
                 }}
                 className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${isSelected
-                    ? 'bg-purple-500/20 text-purple-200 font-semibold border border-purple-500/30'
-                    : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                    ? 'bg-purple-500/20 text-purple-200 font-semibold border border-purple-500/30 light:bg-purple-50 light:text-purple-700 light:border-purple-200'
+                    : 'text-slate-300 hover:bg-slate-800/80 hover:text-white light:text-slate-700 light:hover:bg-slate-50 light:hover:text-slate-900'
                   }`}
               >
                 <span className="truncate">{opt}</span>
-                {isSelected && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                {isSelected && <Check className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />}
               </button>
             );
           })}

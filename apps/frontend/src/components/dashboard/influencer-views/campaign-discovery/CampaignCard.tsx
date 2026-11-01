@@ -108,10 +108,10 @@ export default function CampaignCard({
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
-      className="group relative mt-4 rounded-3xl bg-slate-950/70 border border-purple-500/20 hover:border-purple-500/40 p-6 sm:p-7 flex flex-col justify-between backdrop-blur-2xl shadow-xl shadow-purple-950/20 transition-all duration-300 overflow-visible space-y-6 sm:space-y-7"
+      className="group relative mt-4 rounded-3xl bg-slate-950/70 light:bg-white border border-purple-500/20 light:border-slate-200/90 hover:border-purple-500/40 light:hover:border-purple-300 p-6 sm:p-7 flex flex-col justify-between backdrop-blur-2xl shadow-xl shadow-purple-950/20 light:shadow-sm light:hover:shadow-md transition-all duration-300 overflow-visible space-y-6 sm:space-y-7"
     >
       {/* Background Ambient Glow */}
-      <div className="absolute -top-20 -right-20 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl group-hover:bg-purple-600/20 transition-all pointer-events-none" />
+      <div className="absolute -top-20 -right-20 w-64 h-64 bg-purple-600/10 light:bg-purple-500/5 rounded-full blur-3xl group-hover:bg-purple-600/20 transition-all pointer-events-none" />
 
       {/* Floating Match Rate Badge Overlapping Top-Right Corner */}
       {typeof campaign.matchScore === 'number' && (
@@ -120,7 +120,7 @@ export default function CampaignCard({
           style={{ top: '-20px', transform: 'translateY(-50%)' }}
         >
           <span
-            className={`px-4 sm:px-5 py-2 rounded-full border text-xs sm:text-sm md:text-sm font-black tracking-wide text-white flex items-center gap-2 shadow-2xl ring-4 ring-[#080B14] group-hover:scale-105 transition-all duration-300 ${campaign.matchScore >= 90
+            className={`px-4 sm:px-5 py-2 rounded-full border text-xs sm:text-sm md:text-sm font-black tracking-wide text-white keep-white flex items-center gap-2 shadow-2xl ring-4 ring-[#080B14] light:ring-white group-hover:scale-105 transition-all duration-300 ${campaign.matchScore >= 90
               ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 border-emerald-400/50 shadow-emerald-950/80 group-hover:shadow-emerald-600/40'
               : campaign.matchScore >= 75
                 ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 border-purple-400/50 shadow-purple-950/80 group-hover:shadow-purple-600/40'
@@ -137,7 +137,7 @@ export default function CampaignCard({
         {/* Top Header Row: Brand Info (Left) and Badges (Right) */}
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-purple-500/20 overflow-hidden shrink-0 shadow-md">
+            <div className="w-12 h-12 rounded-2xl bg-slate-900 light:bg-slate-100 border border-purple-500/20 light:border-slate-200 overflow-hidden shrink-0 shadow-md">
               <img
                 src={campaign.brandLogo}
                 alt={campaign.brandName}
@@ -148,20 +148,20 @@ export default function CampaignCard({
               <div className="relative group/brand flex items-center gap-1.5">
                 <span
                   title={isBrandTruncated ? campaign.brandName : undefined}
-                  className="text-sm sm:text-base font-bold text-white group-hover:text-purple-300 transition-colors cursor-default"
+                  className="text-sm sm:text-base font-bold text-white light:text-slate-900 group-hover:text-purple-300 light:group-hover:text-purple-600 transition-colors cursor-default"
                 >
                   {displayBrandName}
                 </span>
                 {campaign.isVerifiedBrand && (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />
                 )}
                 {isBrandTruncated && (
-                  <div className="absolute bottom-full left-0 mb-1.5 hidden group-hover/brand:flex items-center px-2.5 py-1 rounded-lg bg-slate-900/95 border border-purple-500/30 text-xs font-semibold text-white shadow-xl shadow-purple-950/60 whitespace-nowrap z-30 pointer-events-none">
+                  <div className="absolute bottom-full left-0 mb-1.5 hidden group-hover/brand:flex items-center px-2.5 py-1 rounded-lg bg-slate-900/95 light:bg-white border border-purple-500/30 light:border-slate-200 text-xs font-semibold text-white light:text-slate-900 shadow-xl shadow-purple-950/60 light:shadow-md whitespace-nowrap z-30 pointer-events-none">
                     {campaign.brandName}
                   </div>
                 )}
               </div>
-              <span className="text-xs text-purple-300/80 font-medium block truncate">
+              <span className="text-xs text-purple-300/80 light:text-purple-600 font-medium block truncate">
                 {campaign.category}
               </span>
             </div>
@@ -169,7 +169,7 @@ export default function CampaignCard({
 
           <div className="flex items-center gap-2">
             {/* Desktop Deadline Badge */}
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900/80 border border-purple-500/20 text-xs font-semibold text-slate-300">
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900/80 light:bg-slate-50 border border-purple-500/20 light:border-slate-200 text-xs font-semibold text-slate-300 light:text-slate-700">
               <Clock className="w-3.5 h-3.5 text-amber-400" />
               <span>Ends in {campaign.daysRemaining} days</span>
             </div>
@@ -183,8 +183,8 @@ export default function CampaignCard({
                 }}
                 type="button"
                 className={`p-2 rounded-xl border transition-all ${isSaved
-                  ? 'bg-purple-600/30 border-purple-400/60 text-purple-300 shadow-md shadow-purple-950/40'
-                  : 'bg-slate-900/80 border-purple-500/20 text-slate-400 hover:text-white hover:border-purple-400/40 hover:bg-slate-800'
+                  ? 'bg-purple-600/30 light:bg-purple-50 border-purple-400/60 light:border-purple-300 text-purple-300 light:text-purple-700 shadow-md shadow-purple-950/40'
+                  : 'bg-slate-900/80 light:bg-white border-purple-500/20 light:border-slate-200 text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 hover:border-purple-400/40 hover:bg-slate-800 light:hover:bg-slate-50 light:shadow-sm'
                   }`}
                 title={isSaved ? 'Remove from saved' : 'Save campaign'}
                 aria-label={isSaved ? 'Remove from saved' : 'Save campaign'}
@@ -201,20 +201,20 @@ export default function CampaignCard({
           <div className="md:col-span-8 space-y-3">
             <h3
               title={campaign.title}
-              className="text-lg sm:text-xl font-bold text-white group-hover:text-purple-200 transition-colors leading-snug"
+              className="text-lg sm:text-xl font-bold text-white light:text-slate-900 group-hover:text-purple-200 light:group-hover:text-purple-600 transition-colors leading-snug"
             >
               {displayTitle}
             </h3>
             <p
               title={campaign.description}
-              className="text-xs sm:text-sm text-slate-300 line-clamp-2 leading-relaxed font-normal"
+              className="text-xs sm:text-sm text-slate-300 light:text-slate-600 line-clamp-2 leading-relaxed font-normal"
             >
               {campaign.description}
             </p>
 
             {/* Overlapping Platform Images with Thinner Purple Gradient Border (balanced size & 70% visible) */}
             <div className="flex items-center gap-2.5 pt-2">
-              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+              <span className="text-[10px] uppercase font-bold text-slate-400 light:text-slate-500 tracking-wider">
                 Platforms:
               </span>
               <div className="flex items-center -space-x-2 isolate">
@@ -227,7 +227,7 @@ export default function CampaignCard({
                       style={{ zIndex: 10 + idx }}
                       className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full p-[1px] bg-gradient-to-tr from-purple-600 via-indigo-500 to-purple-400 shadow-sm transition-transform duration-200 hover:scale-125 hover:z-30 cursor-pointer shrink-0"
                     >
-                      <div className="w-full h-full rounded-full bg-[#090C15] flex items-center justify-center p-0.5 overflow-hidden">
+                      <div className="w-full h-full rounded-full bg-[#090C15] light:bg-white flex items-center justify-center p-0.5 overflow-hidden">
                         <img
                           src={iconSrc}
                           alt={p}
@@ -243,21 +243,21 @@ export default function CampaignCard({
 
           {/* Right / Compensation & Free Product (col-span-4) */}
           <div className="md:col-span-4 flex flex-col md:items-end justify-center space-y-1.5">
-            <span className="text-[10px] uppercase font-bold text-purple-400/90 tracking-wider block">
+            <span className="text-[10px] uppercase font-bold text-purple-400/90 light:text-purple-700 tracking-wider block">
               Compensation
             </span>
-            <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <span className="text-2xl sm:text-3xl font-black text-white light:text-slate-900 tracking-tight">
               {formatBudgetCompact(campaign.payoutAmount)}
             </span>
 
             {campaign.hasFreeProduct && (
               <div className="md:text-right pt-1">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-purple-600/20 border border-purple-500/30 text-xs font-bold text-purple-200 shadow-sm">
-                  <Gift className="w-3.5 h-3.5 text-purple-300" />
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-purple-600/20 light:bg-purple-50 border border-purple-500/30 light:border-purple-200 text-xs font-bold text-purple-200 light:text-purple-700 shadow-sm">
+                  <Gift className="w-3.5 h-3.5 text-purple-300 light:text-purple-600" />
                   <span>+ Free Product</span>
                 </span>
                 {campaign.freeProductValue && (
-                  <span className="text-[11px] text-slate-400 block mt-1">
+                  <span className="text-[11px] text-slate-400 light:text-slate-500 block mt-1">
                     {campaign.freeProductValue}
                   </span>
                 )}
@@ -272,26 +272,26 @@ export default function CampaignCard({
         <button
           onClick={() => onViewBrief(campaign)}
           type="button"
-          className="group/brief w-full py-3 px-4 rounded-2xl bg-slate-900/80 hover:bg-purple-950/40 border border-purple-500/20 hover:border-purple-400/40 text-slate-300 hover:text-white text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer hover:shadow-md hover:shadow-purple-950/30 active:scale-[0.98]"
+          className="group/brief w-full py-3 px-4 rounded-2xl bg-slate-900/80 light:bg-white hover:bg-purple-950/40 light:hover:bg-slate-50 border border-purple-500/20 light:border-slate-200 hover:border-purple-400/40 light:hover:border-purple-300 text-slate-300 light:text-slate-700 hover:text-white light:hover:text-slate-900 text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer hover:shadow-md hover:shadow-purple-950/30 active:scale-[0.98]"
         >
           <span>View Brief</span>
-          <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover/brief:text-purple-300 group-hover/brief:translate-x-1.5 group-hover/brief:-translate-y-1.5 group-hover/brief:scale-110 transition-all duration-200 shrink-0" />
+          <ArrowUpRight className="w-4 h-4 text-slate-400 light:text-slate-500 group-hover/brief:text-purple-300 light:group-hover/brief:text-purple-700 group-hover/brief:translate-x-1.5 group-hover/brief:-translate-y-1.5 group-hover/brief:scale-110 transition-all duration-200 shrink-0" />
         </button>
 
         {campaign.isApplied ? (
           <button
             onClick={() => onViewBrief(campaign)}
             type="button"
-            className="group/applied w-full py-3 px-4 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 hover:border-emerald-400/60 text-emerald-300 hover:text-emerald-200 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm cursor-pointer transition-all duration-200 active:scale-[0.98]"
+            className="group/applied w-full py-3 px-4 rounded-2xl bg-emerald-500/15 light:bg-emerald-50 hover:bg-emerald-500/25 light:hover:bg-emerald-100 border border-emerald-500/40 light:border-emerald-200 hover:border-emerald-400/60 text-emerald-300 light:text-emerald-700 hover:text-emerald-200 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm cursor-pointer transition-all duration-200 active:scale-[0.98]"
           >
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 group-hover/applied:scale-125 group-hover/applied:rotate-12 transition-transform duration-200 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 light:text-emerald-600 group-hover/applied:scale-125 group-hover/applied:rotate-12 transition-transform duration-200 shrink-0" />
             <span>Applied</span>
           </button>
         ) : campaign.daysRemaining === 0 && campaign.deadline !== 'Rolling Deadline' ? (
           <button
             type="button"
             disabled
-            className="w-full py-3 px-4 rounded-2xl bg-slate-800/60 border border-slate-700/50 text-slate-400 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 cursor-not-allowed opacity-75"
+            className="w-full py-3 px-4 rounded-2xl bg-slate-800/60 light:bg-slate-100 border border-slate-700/50 light:border-slate-200 text-slate-400 light:text-slate-500 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 cursor-not-allowed opacity-75"
           >
             <Clock className="w-3.5 h-3.5 text-slate-500" />
             <span>Applications Closed</span>
@@ -300,7 +300,7 @@ export default function CampaignCard({
           <button
             onClick={() => onApply(campaign)}
             type="button"
-            className="group/apply w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-bold transition-all shadow-lg shadow-purple-950/40 hover:shadow-purple-900/60 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            className="group/apply w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white keep-white text-xs sm:text-sm font-bold transition-all shadow-lg shadow-purple-950/40 hover:shadow-purple-900/60 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           >
             <Send className="w-3.5 h-3.5 group-hover/apply:translate-x-1.5 group-hover/apply:-translate-y-1 group-hover/apply:scale-110 transition-transform duration-200 shrink-0" />
             <span>Apply Now</span>

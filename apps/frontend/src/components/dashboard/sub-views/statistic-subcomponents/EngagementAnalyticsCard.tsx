@@ -69,17 +69,17 @@ export default function EngagementAnalyticsCard({ deepDive, isLoading = false }:
   ];
 
   return (
-    <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-8">
+    <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200/90 backdrop-blur-xl shadow-xl light:shadow-sm space-y-8">
       {/* Background subtle ambient grid/glow */}
       <div className="absolute inset-0 bg-hero-gradient pointer-events-none opacity-20" />
 
       {/* Header with Icon & Matching Analytics Text Size */}
       <div className="relative z-10 space-y-1">
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-          <Heart className="w-6 h-6 sm:w-7 sm:h-7 text-pink-400 shrink-0" />
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-white light:text-slate-900 tracking-tight flex items-center gap-2.5 sm:gap-3">
+          <Heart className="w-6 h-6 sm:w-7 sm:h-7 text-pink-400 light:text-pink-600 shrink-0" />
           <span>Engagement Deep Dive</span>
         </h2>
-        <p className="text-xs sm:text-sm text-slate-400 mt-1">
+        <p className="text-xs sm:text-sm text-slate-400 light:text-slate-500 mt-1">
           Interaction breakdown across likes, saves, and video watch completion
         </p>
       </div>
@@ -89,10 +89,10 @@ export default function EngagementAnalyticsCard({ deepDive, isLoading = false }:
         {isLoading
           ? [1, 2, 3, 4].map((i) => (
               <div key={i} className="flex items-center gap-4 p-2 rounded-2xl relative overflow-hidden">
-                <div className="w-12 h-12 rounded-2xl bg-white/10 animate-pulse shrink-0" />
+                <div className="w-12 h-12 rounded-2xl bg-white/10 light:bg-slate-200 animate-pulse shrink-0" />
                 <div className="min-w-0 space-y-2 flex-1">
-                  <div className="h-3 w-24 bg-white/10 rounded animate-pulse" />
-                  <div className="h-6 w-16 bg-white/15 rounded animate-pulse" />
+                  <div className="h-3 w-24 bg-white/10 light:bg-slate-200 rounded animate-pulse" />
+                  <div className="h-6 w-16 bg-white/15 light:bg-slate-300 rounded animate-pulse" />
                 </div>
               </div>
             ))
@@ -101,7 +101,7 @@ export default function EngagementAnalyticsCard({ deepDive, isLoading = false }:
               return (
                 <div
                   key={idx}
-                  className="flex items-center gap-4 group p-2 rounded-2xl hover:bg-white/[0.02] transition-colors"
+                  className="flex items-center gap-4 group p-2 rounded-2xl hover:bg-white/[0.02] light:hover:bg-slate-50 transition-colors"
                 >
                   <div
                     className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${m.badgeBg} ${m.borderColor} ${m.color} shadow-md group-hover:scale-110 transition-transform duration-200`}
@@ -109,14 +109,14 @@ export default function EngagementAnalyticsCard({ deepDive, isLoading = false }:
                     <Icon className="w-6 h-6 shrink-0" />
                   </div>
                   <div className="min-w-0 space-y-0.5">
-                    <span className="text-xs font-semibold text-slate-400 block truncate">
+                    <span className="text-xs font-semibold text-slate-400 light:text-slate-500 block truncate">
                       {m.label}
                     </span>
                     <div className="flex items-baseline gap-2 mt-0.5">
-                      <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                      <span className="text-2xl sm:text-3xl font-black text-white light:text-slate-900 tracking-tight">
                         {m.val}
                       </span>
-                      <span className="text-[11px] font-bold text-emerald-400">
+                      <span className="text-[11px] font-bold text-emerald-400 light:text-emerald-700">
                         {m.sub}
                       </span>
                     </div>
@@ -127,34 +127,34 @@ export default function EngagementAnalyticsCard({ deepDive, isLoading = false }:
       </div>
 
       {/* Video & Content Retention: Enhanced spacing separated by vertical lines */}
-      <div className="pt-6 border-t border-white/10 space-y-4 relative z-10">
-        <span className="text-xs sm:text-sm font-bold text-slate-300 block">
+      <div className="pt-6 border-t border-white/10 light:border-slate-200 space-y-4 relative z-10">
+        <span className="text-xs sm:text-sm font-bold text-slate-300 light:text-slate-700 block">
           Video & Content Retention Metrics
         </span>
-        <div className="grid grid-cols-2 sm:grid-cols-4 divide-y divide-white/10 sm:divide-y-0 sm:divide-x sm:divide-white/10 py-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 divide-y divide-white/10 light:divide-slate-200 sm:divide-y-0 sm:divide-x sm:divide-white/10 light:sm:divide-slate-200 py-2">
           {isLoading
             ? [1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
                   className={`py-3 px-4 sm:px-6 text-center space-y-2 ${
-                    i % 2 === 0 ? 'border-l border-white/10 sm:border-l-0' : ''
+                    i % 2 === 0 ? 'border-l border-white/10 light:border-slate-200 sm:border-l-0' : ''
                   }`}
                 >
-                  <div className="h-6 w-16 mx-auto bg-white/15 rounded animate-pulse" />
-                  <div className="h-3 w-20 mx-auto bg-white/10 rounded animate-pulse" />
+                  <div className="h-6 w-16 mx-auto bg-white/15 light:bg-slate-300 rounded animate-pulse" />
+                  <div className="h-3 w-20 mx-auto bg-white/10 light:bg-slate-200 rounded animate-pulse" />
                 </div>
               ))
             : videoStats.map((vs, idx) => (
                 <div
                   key={idx}
                   className={`py-3 px-4 sm:px-6 text-center space-y-1 ${
-                    idx % 2 === 1 ? 'border-l border-white/10 sm:border-l-0' : ''
+                    idx % 2 === 1 ? 'border-l border-white/10 light:border-slate-200 sm:border-l-0' : ''
                   }`}
                 >
-                  <div className="text-lg sm:text-xl font-black text-white tracking-tight">
+                  <div className="text-lg sm:text-xl font-black text-white light:text-slate-900 tracking-tight">
                     {vs.val}
                   </div>
-                  <div className="text-xs text-slate-400 font-medium">
+                  <div className="text-xs text-slate-400 light:text-slate-500 font-medium">
                     {vs.label}
                   </div>
                 </div>

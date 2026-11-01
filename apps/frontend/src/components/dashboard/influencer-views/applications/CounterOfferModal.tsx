@@ -102,23 +102,23 @@ export default function CounterOfferModal({
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ duration: 0.2 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-md rounded-3xl bg-slate-950/95 border border-purple-500/30 p-6 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.8)] z-10 space-y-5 my-auto"
+          className="relative w-full max-w-md rounded-3xl bg-slate-950/95 light:bg-white border border-purple-500/30 light:border-slate-200/90 p-6 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.8)] light:shadow-xl z-10 space-y-5 my-auto"
         >
           {/* Header */}
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
-              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+              <h3 className="text-xl sm:text-2xl font-black text-white light:text-slate-900 tracking-tight">
                 Send Counter Offer
               </h3>
-              <p className="text-xs text-slate-400">
-                Propose your custom rate for <strong className="text-purple-300">{campaignTitle}</strong> by {brandName}.
+              <p className="text-xs text-slate-400 light:text-slate-500">
+                Propose your custom rate for <strong className="text-purple-300 light:text-purple-700">{campaignTitle}</strong> by {brandName}.
               </p>
             </div>
 
             <button
               onClick={onClose}
               disabled={isSubmitting}
-              className="p-2 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+              className="p-2 rounded-2xl bg-white/5 light:bg-slate-100 hover:bg-white/10 light:hover:bg-slate-200 text-slate-400 light:text-slate-500 hover:text-white light:hover:text-slate-900 transition-colors cursor-pointer shrink-0"
             >
               <X className="w-5 h-5" />
             </button>
@@ -128,19 +128,19 @@ export default function CounterOfferModal({
             {/* Amount Input with Brand Offered display inline */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <label htmlFor="counter-amount" className="font-bold text-slate-300">
+                <label htmlFor="counter-amount" className="font-bold text-slate-300 light:text-slate-700">
                   Proposed Compensation Amount
                 </label>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-slate-400 light:text-slate-500">
                   Brand Offered:{' '}
-                  <strong className="text-emerald-400 font-bold ml-1">
+                  <strong className="text-emerald-400 light:text-emerald-700 font-bold ml-1">
                     {formattedBrandOffered}
                   </strong>
                 </span>
               </div>
 
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 font-black text-base">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 light:text-slate-500 font-black text-base">
                   {symbol}
                 </div>
                 <input
@@ -154,9 +154,9 @@ export default function CounterOfferModal({
                     setCounterAmount(e.target.value === '' ? '' : Number(e.target.value))
                   }
                   placeholder={`e.g. ${convertedBrandOffered || 500}`}
-                  className="w-full pl-9 pr-14 py-3 rounded-2xl bg-slate-900/90 border border-purple-500/30 focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 text-white font-black text-base placeholder:text-slate-600 transition-all outline-none"
+                  className="w-full pl-9 pr-14 py-3 rounded-2xl bg-slate-900/90 light:bg-slate-50 border border-purple-500/30 light:border-slate-200 focus:border-purple-400 light:focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-white light:text-slate-900 font-black text-base placeholder:text-slate-600 light:placeholder:text-slate-400 transition-all outline-none"
                 />
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-xs font-bold text-purple-400 uppercase">
+                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-xs font-bold text-purple-400 light:text-purple-600 uppercase">
                   {currency}
                 </div>
               </div>
@@ -166,9 +166,9 @@ export default function CounterOfferModal({
             <div className="space-y-1.5">
               <label
                 htmlFor="counter-notes"
-                className="text-xs font-bold text-slate-300 flex items-center gap-1.5"
+                className="text-xs font-bold text-slate-300 light:text-slate-700 flex items-center gap-1.5"
               >
-                <MessageSquare className="w-3.5 h-3.5 text-purple-400" />
+                <MessageSquare className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />
                 <span>Pitch Note / Message (Optional)</span>
               </label>
               <textarea
@@ -177,7 +177,7 @@ export default function CounterOfferModal({
                 value={pitchMessage}
                 onChange={(e) => setPitchMessage(e.target.value)}
                 placeholder="Add an optional message or deliverables scope for the brand..."
-                className="w-full px-4 py-3 rounded-2xl bg-slate-900/90 border border-purple-500/30 focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 text-white text-xs placeholder:text-slate-600 transition-all outline-none resize-none"
+                className="w-full px-4 py-3 rounded-2xl bg-slate-900/90 light:bg-slate-50 border border-purple-500/30 light:border-slate-200 focus:border-purple-400 light:focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-white light:text-slate-900 text-xs placeholder:text-slate-600 light:placeholder:text-slate-400 transition-all outline-none resize-none"
               />
             </div>
 
@@ -187,7 +187,7 @@ export default function CounterOfferModal({
                 type="button"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-slate-400 hover:text-white border border-white/5 transition-all cursor-pointer"
+                className="px-4 py-2.5 rounded-xl bg-slate-900 light:bg-white hover:bg-slate-800 light:hover:bg-slate-50 text-xs font-bold text-slate-400 light:text-slate-700 hover:text-white light:hover:text-slate-900 border border-white/5 light:border-slate-200 transition-all cursor-pointer"
               >
                 Cancel
               </button>

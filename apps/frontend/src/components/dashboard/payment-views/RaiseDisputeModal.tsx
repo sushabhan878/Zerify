@@ -122,41 +122,41 @@ export default function RaiseDisputeModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-      <div className="relative w-full max-w-lg bg-slate-950 border border-white/10 rounded-2xl shadow-2xl overflow-hidden p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-lg bg-slate-950 light:bg-white border border-white/10 light:border-slate-200 rounded-2xl shadow-2xl light:shadow-xl overflow-hidden p-6 space-y-5 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="flex items-center justify-between pb-3 border-b border-white/10 light:border-slate-100">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 light:bg-amber-50 light:border-amber-200 light:text-amber-600">
               <AlertTriangle className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">Raise Escrow Dispute</h3>
-              <p className="text-[11px] text-slate-400">
+              <h3 className="text-sm font-bold text-white light:text-slate-900">Raise Escrow Dispute</h3>
+              <p className="text-[11px] text-slate-400 light:text-slate-500">
                 {campaignTitle ? `Disputing: ${campaignTitle}` : 'Freeze funds and initiate Zerify mediation'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 light:text-slate-500 hover:text-white light:hover:text-slate-900 hover:bg-white/10 light:hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Info Banner */}
-        <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-2.5 text-xs text-amber-300">
-          <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
+        <div className="p-3 rounded-xl bg-amber-500/10 light:bg-amber-50 border border-amber-500/20 light:border-amber-200 flex items-start gap-2.5 text-xs text-amber-300 light:text-amber-800">
+          <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 text-amber-400 light:text-amber-600" />
           <div className="space-y-1">
             <p className="font-bold">How Zerify Escrow Mediation Works</p>
-            <p className="text-[11px] text-amber-200/80 leading-relaxed">
+            <p className="text-[11px] text-amber-200/80 light:text-amber-700 leading-relaxed">
               When a dispute is raised, escrow funds are placed on a neutral legal hold. Both parties submit evidence, and an unbiased Zerify mediator reviews deliverables and contract terms within 48 hours.
             </p>
           </div>
         </div>
 
         {errorMsg && (
-          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 light:text-rose-700 light:bg-rose-50 light:border-rose-200 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorMsg}</span>
           </div>
@@ -165,27 +165,27 @@ export default function RaiseDisputeModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           {!paymentId && (
             <div>
-              <label className="block text-[11px] font-bold text-slate-300 mb-1">Contract / Payment Reference ID *</label>
+              <label className="block text-[11px] font-bold text-slate-300 light:text-slate-700 mb-1">Contract / Payment Reference ID *</label>
               <input
                 type="text"
                 value={targetPaymentId}
                 onChange={(e) => setTargetPaymentId(e.target.value)}
                 placeholder="e.g. pay_92014 or UUID"
-                className="w-full bg-slate-900/90 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono"
+                className="w-full bg-slate-900/90 light:bg-white border border-white/10 light:border-slate-200 rounded-xl px-3.5 py-2 text-xs text-white light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 focus:outline-none focus:border-amber-500 light:focus:border-purple-500 font-mono light:shadow-sm"
                 required
               />
             </div>
           )}
 
           <div>
-            <label className="block text-[11px] font-bold text-slate-300 mb-1">Reason for Dispute *</label>
+            <label className="block text-[11px] font-bold text-slate-300 light:text-slate-700 mb-1">Reason for Dispute *</label>
             <select
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full bg-slate-900/90 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+              className="w-full bg-slate-900/90 light:bg-white border border-white/10 light:border-slate-200 rounded-xl px-3.5 py-2 text-xs text-white light:text-slate-900 focus:outline-none focus:border-amber-500 light:focus:border-purple-500 light:shadow-sm"
             >
               {DISPUTE_REASONS.map((r) => (
-                <option key={r} value={r} className="bg-slate-950 text-white">
+                <option key={r} value={r} className="bg-slate-950 text-white light:bg-white light:text-slate-900">
                   {r}
                 </option>
               ))}
@@ -193,13 +193,13 @@ export default function RaiseDisputeModal({
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-slate-300 mb-1">Detailed Explanation & Summary *</label>
+            <label className="block text-[11px] font-bold text-slate-300 light:text-slate-700 mb-1">Detailed Explanation & Summary *</label>
             <textarea
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Explain clearly what happened, revision history, and why you are disputing the current status..."
-              className="w-full bg-slate-900/90 border border-white/10 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 leading-relaxed resize-none"
+              className="w-full bg-slate-900/90 light:bg-white border border-white/10 light:border-slate-200 rounded-xl p-3 text-xs text-white light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 focus:outline-none focus:border-amber-500 light:focus:border-purple-500 leading-relaxed resize-none light:shadow-sm"
               required
             />
           </div>
@@ -207,12 +207,12 @@ export default function RaiseDisputeModal({
           {/* Evidence URLs */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className="text-[11px] font-bold text-slate-300">Evidence Links (Deliverables, screenshots, drive folders)</label>
+              <label className="text-[11px] font-bold text-slate-300 light:text-slate-700">Evidence Links (Deliverables, screenshots, drive folders)</label>
               {evidenceUrls.length < 5 && (
                 <button
                   type="button"
                   onClick={handleAddEvidence}
-                  className="text-[10px] font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                  className="text-[10px] font-bold text-purple-400 light:text-purple-600 hover:text-purple-300 light:hover:text-purple-700 flex items-center gap-1 cursor-pointer"
                 >
                   <Plus className="w-3 h-3" /> Add Link
                 </button>
@@ -226,13 +226,13 @@ export default function RaiseDisputeModal({
                   value={url}
                   onChange={(e) => handleEvidenceChange(idx, e.target.value)}
                   placeholder="https://drive.google.com/... or post URL"
-                  className="flex-1 bg-slate-900/90 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                  className="flex-1 bg-slate-900/90 light:bg-white border border-white/10 light:border-slate-200 rounded-xl px-3 py-1.5 text-xs text-white light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 focus:outline-none focus:border-amber-500 light:focus:border-purple-500 light:shadow-sm"
                 />
                 {evidenceUrls.length > 1 && (
                   <button
                     type="button"
                     onClick={() => handleRemoveEvidence(idx)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 transition-colors"
+                    className="p-1.5 rounded-lg text-slate-400 light:text-slate-500 hover:text-rose-400 light:hover:text-rose-600 transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -242,7 +242,7 @@ export default function RaiseDisputeModal({
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-slate-300 mb-1">Requested Fair Resolution</label>
+            <label className="block text-[11px] font-bold text-slate-300 light:text-slate-700 mb-1">Requested Fair Resolution</label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {[
                 { id: 'RELEASE_INFLUENCER', label: 'Release to Creator' },
@@ -253,10 +253,10 @@ export default function RaiseDisputeModal({
                   type="button"
                   key={item.id}
                   onClick={() => setRequestedResolution(item.id as any)}
-                  className={`p-2.5 rounded-xl border text-[11px] font-bold text-center transition-all ${
+                  className={`p-2.5 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
                     requestedResolution === item.id
-                      ? 'bg-amber-500/20 border-amber-500 text-amber-300 shadow-md'
-                      : 'bg-slate-900 border-white/5 text-slate-400 hover:text-white'
+                      ? 'bg-amber-500/20 light:bg-amber-50 border-amber-500 light:border-amber-400 text-amber-300 light:text-amber-800 shadow-md'
+                      : 'bg-slate-900 light:bg-slate-50 border-white/5 light:border-slate-200 text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900'
                   }`}
                 >
                   {item.label}
@@ -270,14 +270,14 @@ export default function RaiseDisputeModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white border border-white/10 hover:bg-white/5 transition-all"
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 border border-white/10 light:border-slate-200 hover:bg-white/5 light:hover:bg-slate-50 transition-all cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-xl text-xs font-extrabold text-white bg-gradient-to-r from-amber-600 to-rose-600 hover:from-amber-500 hover:to-rose-500 shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50"
+              className="px-5 py-2 rounded-xl text-xs font-extrabold text-white keep-white bg-gradient-to-r from-amber-600 to-rose-600 hover:from-amber-500 hover:to-rose-500 shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
             >
               {isSubmitting ? (
                 <>

@@ -97,7 +97,7 @@ export default function ApplicationCardItem({
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-visible mt-4 p-5 sm:p-6 pr-6 sm:pr-8 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-4 hover:border-purple-500/40 transition-all"
+      className="relative overflow-visible mt-4 p-5 sm:p-6 pr-6 sm:pr-8 rounded-2xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200/90 backdrop-blur-xl shadow-xl light:shadow-sm space-y-4 hover:border-purple-500/40 light:hover:border-purple-300 light:hover:shadow-md transition-all"
     >
       {/* Floating Status Badge Overlapping Top-Right Corner */}
       <div
@@ -105,13 +105,13 @@ export default function ApplicationCardItem({
         style={{ top: '0px', transform: 'translateY(-50%)' }}
       >
         {application.isCounterOffer && (
-          <span className="px-3 py-1 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white text-[11px] font-black tracking-wide shadow-xl shadow-amber-950/80 ring-4 ring-[#080B14] flex items-center gap-1">
+          <span className="px-3 py-1 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white keep-white text-[11px] font-black tracking-wide shadow-xl shadow-amber-950/80 ring-4 ring-[#080B14] light:ring-white flex items-center gap-1">
             <RefreshCw className="w-3 h-3 text-amber-100" />
             <span>Counter Offer</span>
           </span>
         )}
         <span
-          className={`px-3.5 sm:px-4 py-1.5 rounded-full border text-xs sm:text-sm font-black tracking-wide text-white flex items-center gap-1.5 shadow-xl ring-4 ring-[#080B14] ${badge.gradient}`}
+          className={`px-3.5 sm:px-4 py-1.5 rounded-full border text-xs sm:text-sm font-black tracking-wide text-white keep-white flex items-center gap-1.5 shadow-xl ring-4 ring-[#080B14] light:ring-white ${badge.gradient}`}
         >
           <Sparkles className="w-3.5 h-3.5 text-white shrink-0" />
           <span>{badge.label}</span>
@@ -121,7 +121,7 @@ export default function ApplicationCardItem({
       {/* Header Row: Company Logo covering text height (Left) and Proposed Rate (Right) */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex gap-3.5 sm:gap-4 items-stretch min-w-0">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 flex items-center justify-center overflow-hidden rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-900/60 to-slate-900 shadow-md">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 flex items-center justify-center overflow-hidden rounded-2xl border border-purple-500/30 light:border-slate-200 bg-gradient-to-br from-purple-900/60 to-slate-900 light:from-purple-50 light:to-indigo-50 shadow-md">
             {application.brandLogo ? (
               <img
                 src={application.brandLogo}
@@ -129,22 +129,22 @@ export default function ApplicationCardItem({
                 className="h-full w-full object-cover"
               />
             ) : (
-              <Building2 className="h-7 w-7 sm:h-8 sm:w-8 text-purple-300" />
+              <Building2 className="h-7 w-7 sm:h-8 sm:w-8 text-purple-300 light:text-purple-600" />
             )}
           </div>
           <div className="min-w-0 flex flex-col justify-between py-0.5">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-xs font-bold text-purple-300">{application.brand}</span>
+              <span className="text-xs font-bold text-purple-300 light:text-purple-700">{application.brand}</span>
               {application.verifiedBrand && (
-                <span title="Verified Brand" className="inline-flex items-center text-purple-400">
+                <span title="Verified Brand" className="inline-flex items-center text-purple-400 light:text-purple-600">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                 </span>
               )}
             </div>
-            <h3 className="text-base sm:text-lg font-bold text-white truncate leading-snug">
+            <h3 className="text-base sm:text-lg font-bold text-white light:text-slate-900 truncate leading-snug">
               {application.role}
             </h3>
-            <p className="text-xs text-slate-400 font-medium">
+            <p className="text-xs text-slate-400 light:text-slate-500 font-medium">
               {application.industry}
             </p>
           </div>
@@ -154,25 +154,25 @@ export default function ApplicationCardItem({
         <div className="shrink-0 text-right self-end sm:self-center">
           {application.isCounterOffer && application.counterRate ? (
             <div className="flex flex-col items-end">
-              <span className="text-2xl sm:text-3xl font-black text-amber-400 tracking-tight">
+              <span className="text-2xl sm:text-3xl font-black text-amber-400 light:text-amber-600 tracking-tight">
                 {application.counterRate}
               </span>
               {application.originalCounterRate && (
-                <span className="text-[10px] text-slate-400 font-semibold">
+                <span className="text-[10px] text-slate-400 light:text-slate-500 font-semibold">
                   ≈ {application.originalCounterRate}
                 </span>
               )}
-              <span className="text-[11px] text-slate-400 line-through mt-0.5">
+              <span className="text-[11px] text-slate-400 light:text-slate-500 line-through mt-0.5">
                 Original Pitch: {application.proposedRate}
               </span>
             </div>
           ) : (
             <div className="flex flex-col items-end">
-              <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <span className="text-2xl sm:text-3xl font-black text-white light:text-slate-900 tracking-tight">
                 {application.proposedRate}
               </span>
               {application.originalProposedRate && (
-                <span className="text-[10px] text-slate-400 font-semibold">
+                <span className="text-[10px] text-slate-400 light:text-slate-500 font-semibold">
                   ≈ {application.originalProposedRate}
                 </span>
               )}
@@ -183,12 +183,12 @@ export default function ApplicationCardItem({
 
       {/* Middle: Brand Counter Offer Details Banner if active */}
       {application.isCounterOffer && application.counterNotes && (
-        <div className="p-3 sm:p-3.5 rounded-xl bg-amber-950/20 border border-amber-500/30 text-xs text-amber-200/90 space-y-1">
-          <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-400 uppercase tracking-wider">
-            <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
+        <div className="p-3 sm:p-3.5 rounded-xl bg-amber-950/20 light:bg-amber-50 border border-amber-500/30 light:border-amber-200 text-xs text-amber-200/90 light:text-amber-800 space-y-1">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-400 light:text-amber-700 uppercase tracking-wider">
+            <RefreshCw className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
             <span>Brand Counter Offer Rationale</span>
           </div>
-          <p className="leading-relaxed text-amber-100 text-xs">
+          <p className="leading-relaxed text-amber-100 light:text-amber-900 text-xs">
             {application.counterNotes.replace('[COUNTER_OFFER]', '').trim()}
           </p>
         </div>
@@ -196,20 +196,20 @@ export default function ApplicationCardItem({
 
       {/* Middle: Submitted Pitch / Proposal Details (Without background box) */}
       <div className="space-y-1">
-        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed line-clamp-3">
+        <p className="text-xs sm:text-sm text-slate-300 light:text-slate-600 leading-relaxed line-clamp-3">
           {application.pitchSummary || 'Pitch proposal submitted for brand review.'}
         </p>
       </div>
 
       {/* Footer Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-white/5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-white/5 light:border-slate-200">
         {/* Left: Submission Date & Message Brand */}
         <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300">
-            <Clock className="w-3.5 h-3.5 text-amber-400" />
-            Submitted on: <strong className="text-white font-bold">{application.appliedDate}</strong>
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300 light:text-slate-600">
+            <Clock className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
+            Submitted on: <strong className="text-white light:text-slate-900 font-bold">{application.appliedDate}</strong>
           </span>
-          <span className="text-slate-700">|</span>
+          <span className="text-slate-700 light:text-slate-300">|</span>
           <button
             type="button"
             disabled={isMessaging}
@@ -217,10 +217,10 @@ export default function ApplicationCardItem({
               e.stopPropagation();
               onMessageBrand?.(application);
             }}
-            className="group text-xs font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+            className="group text-xs font-bold text-purple-400 light:text-purple-600 hover:text-purple-300 light:hover:text-purple-800 flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
           >
             {isMessaging ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400 light:text-purple-600" />
             ) : (
               <MessageSquare className="w-3.5 h-3.5 group-hover:scale-125 transition-transform duration-200" />
             )}
@@ -235,15 +235,15 @@ export default function ApplicationCardItem({
               <button
                 onClick={() => onDeclineOffer?.(application.offerId, application.id)}
                 type="button"
-                className="group inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-rose-950/40 to-red-950/30 hover:from-rose-900/60 hover:to-red-900/50 border border-rose-500/30 hover:border-rose-400/60 px-3.5 py-2 text-xs font-bold text-rose-200 hover:text-white shadow-md shadow-rose-950/30 hover:shadow-lg hover:shadow-rose-950/60 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                className="group inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-rose-950/40 to-red-950/30 light:bg-rose-50 hover:from-rose-900/60 hover:to-red-900/50 light:hover:bg-rose-100 border border-rose-500/30 light:border-rose-200 hover:border-rose-400/60 px-3.5 py-2 text-xs font-bold text-rose-200 light:text-rose-700 hover:text-white light:hover:text-rose-900 shadow-md light:shadow-sm transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
               >
-                <XCircle className="w-3.5 h-3.5 text-rose-400 group-hover:text-rose-200 group-hover:scale-125 transition-transform duration-200 shrink-0" />
+                <XCircle className="w-3.5 h-3.5 text-rose-400 light:text-rose-600 group-hover:text-rose-200 group-hover:scale-125 transition-transform duration-200 shrink-0" />
                 <span>Decline Counter</span>
               </button>
               <button
                 onClick={() => onAcceptOffer?.(application.offerId, application.id)}
                 type="button"
-                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold text-white shadow-lg shadow-amber-950/50 hover:shadow-amber-900/70 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold text-white keep-white shadow-lg shadow-amber-950/50 hover:shadow-amber-900/70 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
               >
                 <Check className="w-4 h-4 text-white group-hover:scale-125 transition-transform duration-200 shrink-0" />
                 <span>Accept Counter Offer</span>
@@ -255,7 +255,7 @@ export default function ApplicationCardItem({
               {application.status === 'CONTRACT_SENT' && (
                 <button
                   type="button"
-                  className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:via-indigo-500 hover:to-pink-500 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-purple-950/50 hover:shadow-purple-900/70 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                  className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:via-indigo-500 hover:to-pink-500 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white keep-white shadow-lg shadow-purple-950/50 hover:shadow-purple-900/70 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <Check className="w-4 h-4 text-white group-hover:scale-125 transition-transform duration-200 shrink-0" />
                   <span>Review & Sign Contract</span>
@@ -265,9 +265,9 @@ export default function ApplicationCardItem({
                 <button
                   onClick={() => onWithdraw(application.id)}
                   type="button"
-                  className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-950/40 to-red-950/30 hover:from-rose-900/60 hover:to-red-900/50 border border-rose-500/30 hover:border-rose-400/60 px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-rose-200 hover:text-white shadow-md shadow-rose-950/30 hover:shadow-lg hover:shadow-rose-950/60 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                  className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-950/40 to-red-950/30 light:bg-rose-50 hover:from-rose-900/60 hover:to-red-900/50 light:hover:bg-rose-100 border border-rose-500/30 light:border-rose-200 hover:border-rose-400/60 px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-rose-200 light:text-rose-700 hover:text-white light:hover:text-rose-900 shadow-md light:shadow-sm transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <XCircle className="w-4 h-4 text-rose-400 group-hover:text-rose-200 group-hover:scale-125 transition-transform duration-200 shrink-0" />
+                  <XCircle className="w-4 h-4 text-rose-400 light:text-rose-600 group-hover:text-rose-200 group-hover:scale-125 transition-transform duration-200 shrink-0" />
                   <span>Withdraw Pitch</span>
                 </button>
               )}

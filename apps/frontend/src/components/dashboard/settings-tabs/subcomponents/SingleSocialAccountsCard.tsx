@@ -2,12 +2,6 @@
 
 import React, { useState } from 'react';
 import {
-  Instagram,
-  Youtube,
-  Linkedin,
-  Twitter,
-  Video,
-  Facebook,
   Globe,
   Sparkles,
   CheckCircle2,
@@ -51,90 +45,52 @@ interface SingleSocialAccountsCardProps {
   onRefreshAccounts?: () => void;
 }
 
-// 3D Styled Logo Badge Components
-const Social3DLogo = ({ id, platform }: { id: string; platform?: string }) => {
-  const key = (platform || id || '').toLowerCase();
+// Original High-Definition Social Media Platform Icon Component
+export const SOCIAL_ICONS: Record<string, string> = {
+  youtube: '/social/youtube.png',
+  instagram: '/social/instagram.png',
+  twitter: '/social/twitter.png',
+  x: '/social/twitter.png',
+  linkedin: '/social/linkedin.png',
+  facebook: '/social/facebook.png',
+  threads: '/social/threads.png',
+  tiktok: '/social/tik-tok.png',
+};
 
-  if (key.includes('meta')) {
-    return (
-      <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-purple-600 to-pink-500 p-[1.5px] shadow-[0_6px_16px_rgba(168,85,247,0.4)] transition-transform hover:scale-110 shrink-0">
-        <div className="w-full h-full rounded-[10px] bg-gradient-to-tr from-blue-900 via-slate-900 to-purple-950 flex items-center justify-center text-white border-t border-white/40 shadow-inner relative overflow-hidden">
-          <svg className="w-5 h-5 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 12c-1.5-2.3-3.6-3.8-5.8-3.8-3.1 0-5.2 2.3-5.2 5.3 0 3 2.1 5.3 5.2 5.3 2.5 0 4.7-1.8 6.4-4.5 1.7 2.7 3.9 4.5 6.4 4.5 3.1 0 5.2-2.3 5.2-5.3 0-3-2.1-5.3-5.2-5.3-2.2 0-4.3 1.5-5.8 3.8zm-5.8 5.1c-2 0-3.4-1.5-3.4-3.6 0-2.1 1.4-3.6 3.4-3.6 1.7 0 3.3 1.3 4.7 3.6-1.4 2.3-3 3.6-4.7 3.6zm11.6 0c-1.7 0-3.3-1.3-4.7-3.6 1.4-2.3 3-3.6 4.7-3.6 2 0 3.4 1.5 3.4 3.6 0 2.1-1.4 3.6-3.4 3.6z" />
-          </svg>
-        </div>
-      </div>
-    );
-  }
+export const getSocialIconSrc = (platformOrId?: string): string => {
+  const p = (platformOrId || '').toLowerCase().trim();
+  if (p.includes('youtube')) return SOCIAL_ICONS.youtube;
+  if (p.includes('instagram')) return SOCIAL_ICONS.instagram;
+  if (p.includes('twitter') || p === 'x' || p.includes(' x')) return SOCIAL_ICONS.twitter;
+  if (p.includes('linkedin')) return SOCIAL_ICONS.linkedin;
+  if (p.includes('facebook') || p.includes('meta')) return SOCIAL_ICONS.facebook;
+  if (p.includes('threads')) return SOCIAL_ICONS.threads;
+  if (p.includes('tiktok') || p.includes('tik-tok') || p.includes('tik tok')) return SOCIAL_ICONS.tiktok;
+  return SOCIAL_ICONS.facebook;
+};
 
-  if (key.includes('instagram')) {
-    return (
-      <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 p-[1.5px] shadow-[0_6px_16px_rgba(225,48,108,0.4)] transition-transform hover:scale-110 shrink-0">
-        <div className="w-full h-full rounded-[10px] bg-gradient-to-tr from-purple-700 via-pink-600 to-amber-500 flex items-center justify-center text-white border-t border-white/40 shadow-inner">
-          <Instagram className="w-4.5 h-4.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
-        </div>
-      </div>
-    );
-  }
+export const SocialPlatformIcon = ({
+  id,
+  platform,
+  className = 'w-11 h-11',
+}: {
+  id: string;
+  platform?: string;
+  className?: string;
+}) => {
+  const iconSrc = getSocialIconSrc(platform || id);
+  const name = platform || id;
 
-  if (key.includes('youtube')) {
-    return (
-      <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-red-700 via-red-600 to-rose-400 p-[1.5px] shadow-[0_6px_16px_rgba(239,68,68,0.4)] transition-transform hover:scale-110 shrink-0">
-        <div className="w-full h-full rounded-[10px] bg-gradient-to-tr from-red-700 via-red-600 to-rose-500 flex items-center justify-center text-white border-t border-white/40 shadow-inner">
-          <Youtube className="w-4.5 h-4.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
-        </div>
-      </div>
-    );
-  }
-
-  if (key.includes('tiktok')) {
-    return (
-      <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-400 via-slate-900 to-pink-500 p-[1.5px] shadow-[0_6px_16px_rgba(6,182,212,0.4)] transition-transform hover:scale-110 shrink-0">
-        <div className="w-full h-full rounded-[10px] bg-slate-950 flex items-center justify-center text-cyan-400 border-t border-white/30 shadow-inner">
-          <Video className="w-4.5 h-4.5 drop-shadow-[0_2px_4px_rgba(244,63,94,0.7)]" />
-        </div>
-      </div>
-    );
-  }
-
-  if (key.includes('x') || key.includes('twitter')) {
-    return (
-      <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-slate-800 via-slate-700 to-slate-500 p-[1.5px] shadow-[0_6px_16px_rgba(148,163,184,0.3)] transition-transform hover:scale-110 shrink-0">
-        <div className="w-full h-full rounded-[10px] bg-gradient-to-tr from-slate-950 via-slate-900 to-slate-800 flex items-center justify-center text-white border-t border-white/30 shadow-inner">
-          <Twitter className="w-4 h-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
-        </div>
-      </div>
-    );
-  }
-
-  if (key.includes('linkedin')) {
-    return (
-      <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-800 via-blue-600 to-sky-400 p-[1.5px] shadow-[0_6px_16px_rgba(37,99,235,0.4)] transition-transform hover:scale-110 shrink-0">
-        <div className="w-full h-full rounded-[10px] bg-gradient-to-tr from-blue-700 via-blue-600 to-sky-500 flex items-center justify-center text-white border-t border-white/40 shadow-inner">
-          <Linkedin className="w-4 h-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
-        </div>
-      </div>
-    );
-  }
-
-  if (key.includes('threads')) {
-    return (
-      <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-neutral-800 via-zinc-700 to-stone-600 p-[1.5px] shadow-[0_6px_16px_rgba(0,0,0,0.5)] transition-transform hover:scale-110 shrink-0">
-        <div className="w-full h-full rounded-[10px] bg-gradient-to-tr from-black via-zinc-950 to-neutral-900 flex items-center justify-center text-white border-t border-white/30 shadow-inner">
-          <svg className="w-4.5 h-4.5 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12.001 2c-5.522 0-9.999 4.477-9.999 10 0 5.523 4.477 10 9.999 10 5.522 0 10-4.477 10-10 0-5.523-4.478-10-10-10zm4.563 11.232c-.088 1.94-1.205 3.328-3.084 3.328-1.576 0-2.616-.929-2.92-2.13-.049-.196-.062-.423-.062-.686 0-1.879 1.139-3.262 2.983-3.262 1.83 0 2.993 1.34 3.083 2.75zm-3.083-4.148c-2.607 0-4.57 1.954-4.57 4.67 0 2.87 2.052 4.717 4.57 4.717 1.583 0 2.812-.663 3.479-1.748l1.396 1.05c-.991 1.574-2.732 2.378-4.875 2.378-3.702 0-6.425-2.684-6.425-6.397 0-3.693 2.743-6.423 6.425-6.423 3.52 0 6.136 2.457 6.136 5.864 0 3.39-2.28 5.617-5.26 5.617-1.385 0-2.348-.606-2.825-1.531l-.22.657h-1.632l.704-2.095c-.092-.375-.138-.797-.138-1.258 0-1.796.883-3.208 2.21-3.784.582-.254 1.257-.384 1.986-.384.453 0 .895.053 1.312.155-.38-.857-1.254-1.39-2.316-1.39-.933 0-1.724.436-2.115 1.144l-1.417-.991c.712-1.248 2.046-1.993 3.532-1.993 2.146 0 3.844 1.284 4.195 3.197.027.147.04.305.04.475 0 2.474-1.613 4.133-3.774 4.133z" />
-          </svg>
-        </div>
-      </div>
-    );
-  }
-
-  // Default Facebook
   return (
-    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-indigo-600 to-blue-400 p-[1.5px] shadow-[0_6px_16px_rgba(59,130,246,0.4)] transition-transform hover:scale-110 shrink-0">
-      <div className="w-full h-full rounded-[10px] bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-500 flex items-center justify-center text-white border-t border-white/40 shadow-inner">
-        <Facebook className="w-4 h-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
-      </div>
+    <div
+      className={`${className} rounded-2xl p-2 bg-slate-900/60 light:bg-slate-50 border border-white/10 light:border-slate-200/90 shadow-sm flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 overflow-hidden`}
+      title={name}
+    >
+      <img
+        src={iconSrc}
+        alt={name}
+        className="w-full h-full object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.25)]"
+      />
     </div>
   );
 };
@@ -448,28 +404,28 @@ export default function SingleSocialAccountsCard({
   });
 
   return (
-    <div className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-8 shadow-xl">
+    <div className="p-5 sm:p-6 rounded-xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200/90 backdrop-blur-xl space-y-8 shadow-xl light:shadow-sm">
       {/* 1. Header Section */}
-      <div className="flex items-center justify-between pb-4 border-b border-white/10">
+      <div className="flex items-center justify-between pb-4 border-b border-white/10 light:border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0 shadow-inner">
+          <div className="w-10 h-10 rounded-xl bg-purple-600/20 light:bg-purple-50 border border-purple-500/30 light:border-purple-200 flex items-center justify-center text-purple-400 light:text-purple-600 shrink-0 shadow-inner">
             <Globe className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+            <h3 className="text-xs font-bold text-white light:text-slate-900 flex items-center gap-1.5">
               <span>Social Media Platform Connections</span>
-              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+              <Sparkles className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />
             </h3>
-            <p className="text-[11px] text-slate-400/80">
+            <p className="text-[11px] text-slate-400/80 light:text-slate-500">
               Verified social accounts & authenticated live engagement metrics.
             </p>
           </div>
         </div>
 
 
-        <div className="hidden sm:flex items-center gap-1.5 bg-purple-500/10 px-3 py-1.5 rounded-lg border border-purple-500/20 shrink-0">
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="text-xs font-bold text-purple-200">
+        <div className="hidden sm:flex items-center gap-1.5 bg-purple-500/10 light:bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-500/20 light:border-purple-200 shrink-0">
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600" />
+          <span className="text-xs font-bold text-purple-200 light:text-purple-700">
             {connectedCount} of {accounts.length} Connected
           </span>
         </div>
@@ -486,39 +442,40 @@ export default function SingleSocialAccountsCard({
             <div
               key={acc.id}
               className={`p-3.5 sm:p-4 rounded-2xl border transition-all backdrop-blur-xl flex flex-col justify-between ${acc.connected
-                ? 'bg-slate-950/80 border-purple-500/30 shadow-lg shadow-purple-950/20 hover:border-purple-500/50 hover:bg-slate-950/95'
-                : 'bg-slate-950/40 border-white/10 hover:border-white/20'
+                ? 'bg-slate-950/80 light:bg-white border-purple-500/30 light:border-slate-200 shadow-lg light:shadow-sm hover:border-purple-500/50 light:hover:border-purple-300 hover:bg-slate-950/95 light:hover:bg-slate-50/50'
+                : 'bg-slate-950/40 light:bg-white border-white/10 light:border-slate-200 hover:border-white/20 light:hover:border-slate-300 light:shadow-sm'
                 }`}
             >
-              {/* Header row: Avatar + Platform Name & Handle + Actions */}
+              {/* Header row: Original Social Media Icon (+ User Avatar badge if connected) + Platform Name & Handle + Actions */}
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  {acc.connected && acc.avatar ? (
-                    <div className="relative shrink-0">
-                      <img
-                        src={acc.avatar}
-                        alt={acc.handle || acc.name}
-                        className="w-10 h-10 rounded-xl object-cover border border-purple-500/40 shadow-md ring-2 ring-purple-500/10"
-                      />
-                      <div className="absolute -bottom-1 -right-1 scale-75">
-                        <Social3DLogo id={acc.id} platform={acc.platform} />
+                  <div className="relative shrink-0">
+                    <SocialPlatformIcon id={acc.id} platform={acc.platform} className="w-11 h-11" />
+                    {acc.connected && acc.avatar && (
+                      <div
+                        className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full ring-2 ring-[#080B14] light:ring-white overflow-hidden shadow-md"
+                        title={`Connected as ${acc.handle || acc.name}`}
+                      >
+                        <img
+                          src={acc.avatar}
+                          alt={acc.handle || acc.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                    </div>
-                  ) : (
-                    <Social3DLogo id={acc.id} platform={acc.platform} />
-                  )}
+                    )}
+                  </div>
 
                   <div className="min-w-0 flex flex-col justify-center">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <h4 className="text-sm font-semibold text-white tracking-tight leading-tight whitespace-nowrap">
+                      <h4 className="text-sm font-semibold text-white light:text-slate-900 tracking-tight leading-tight whitespace-nowrap">
                         {acc.name}
                       </h4>
                       {acc.connected && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" title="Connected" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 light:bg-emerald-500 shrink-0" title="Connected" />
                       )}
                       {(acc.id || '').toLowerCase() === 'tiktok' && (
-                        <span className="px-2 py-0.5 text-[9px] font-semibold rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0 flex items-center gap-1 shadow-sm">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                        <span className="px-2 py-0.5 text-[9px] font-semibold rounded-md bg-amber-500/15 light:bg-amber-50 text-amber-300 light:text-amber-800 border border-amber-500/30 light:border-amber-200 shrink-0 flex items-center gap-1 shadow-sm">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 light:bg-amber-500 animate-pulse" />
                           Coming Soon
                         </span>
                       )}
@@ -531,18 +488,18 @@ export default function SingleSocialAccountsCard({
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="text-xs text-slate-400 hover:text-purple-300 transition-colors truncate max-w-[130px] sm:max-w-[170px] block mt-0.5"
+                          className="text-xs text-slate-400 light:text-slate-500 hover:text-purple-300 light:hover:text-purple-600 transition-colors truncate max-w-[130px] sm:max-w-[170px] block mt-0.5"
                           title={`Open profile: ${acc.profileUrl}`}
                         >
                           {acc.handle.startsWith('@') ? acc.handle : `@${acc.handle}`}
                         </a>
                       ) : (
-                        <span className="text-xs text-slate-400 truncate max-w-[130px] sm:max-w-[170px] block mt-0.5">
+                        <span className="text-xs text-slate-400 light:text-slate-500 truncate max-w-[130px] sm:max-w-[170px] block mt-0.5">
                           {acc.handle.startsWith('@') ? acc.handle : `@${acc.handle}`}
                         </span>
                       )
                     ) : (
-                      <span className="text-[11px] text-slate-500 font-medium mt-0.5">
+                      <span className="text-[11px] text-slate-500 light:text-slate-400 font-medium mt-0.5">
                         {acc.connected ? 'Connected' : 'Not Connected'}
                       </span>
                     )}
@@ -555,10 +512,13 @@ export default function SingleSocialAccountsCard({
                             .map((sp) => (
                               <span
                                 key={sp}
-                                className="px-1.5 py-0.5 text-[9px] font-medium rounded bg-white/10 text-slate-300 border border-white/10 flex items-center gap-1"
+                                className="px-1.5 py-0.5 text-[9px] font-medium rounded bg-white/10 light:bg-slate-100 text-slate-300 light:text-slate-700 border border-white/10 light:border-slate-200 flex items-center gap-1.5 shadow-sm"
                               >
-                                {sp === 'Instagram' && <Instagram className="w-2.5 h-2.5 text-pink-400" />}
-                                {sp === 'Threads' && <span className="font-bold text-slate-200 text-[9px]">@</span>}
+                                <img
+                                  src={getSocialIconSrc(sp)}
+                                  alt={sp}
+                                  className="w-3 h-3 object-contain shrink-0"
+                                />
                                 <span>{sp}</span>
                               </span>
                             ))}
@@ -578,11 +538,11 @@ export default function SingleSocialAccountsCard({
                         e.stopPropagation();
                         handleSyncClick(acc);
                       }}
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-purple-300 hover:bg-purple-500/10 border border-white/10 transition-colors"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 light:text-slate-500 hover:text-purple-300 light:hover:text-purple-600 hover:bg-purple-500/10 light:hover:bg-purple-50 border border-white/10 light:border-slate-200 light:bg-slate-50 transition-colors"
                       title="Sync live analytics & followers"
                       aria-label="Sync live analytics"
                     >
-                      <RefreshCw className={`w-3.5 h-3.5 ${syncingId === acc.id ? 'animate-spin text-purple-400' : ''}`} />
+                      <RefreshCw className={`w-3.5 h-3.5 ${syncingId === acc.id ? 'animate-spin text-purple-400 light:text-purple-600' : ''}`} />
                     </button>
 
                     {isLinkedIn && (
@@ -592,7 +552,7 @@ export default function SingleSocialAccountsCard({
                           e.stopPropagation();
                           setEditingAccount(acc);
                         }}
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-purple-300 hover:bg-purple-500/10 border border-white/10 transition-colors"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 light:text-slate-500 hover:text-purple-300 light:hover:text-purple-600 hover:bg-purple-500/10 light:hover:bg-purple-50 border border-white/10 light:border-slate-200 light:bg-slate-50 transition-colors"
                         title="Calibrate connections & engagement metrics"
                         aria-label="Calibrate metrics"
                       >
@@ -607,7 +567,7 @@ export default function SingleSocialAccountsCard({
                         e.stopPropagation();
                         handleActionClick(acc);
                       }}
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-rose-400/80 hover:text-rose-300 hover:bg-rose-500/15 border border-rose-500/20 transition-colors shadow-sm"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-rose-400/80 light:text-rose-500 hover:text-rose-300 light:hover:text-rose-600 hover:bg-rose-500/15 light:hover:bg-rose-50 border border-rose-500/20 light:border-rose-200 light:bg-rose-50/50 transition-colors shadow-sm"
                       title="Disconnect this account"
                       aria-label="Disconnect account"
                     >
@@ -620,10 +580,10 @@ export default function SingleSocialAccountsCard({
                   </div>
                 ) : (acc.id || '').toLowerCase() === 'tiktok' ? (
                   <div
-                    className="px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/25 flex items-center gap-1.5 shrink-0 shadow-sm cursor-default select-none"
+                    className="px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-amber-500/10 light:bg-amber-50 text-amber-300 light:text-amber-700 border border-amber-500/25 light:border-amber-200 flex items-center gap-1.5 shrink-0 shadow-sm cursor-default select-none"
                     title="TikTok integration is coming soon"
                   >
-                    <Clock className="w-3 h-3 text-amber-400" />
+                    <Clock className="w-3 h-3 text-amber-400 light:text-amber-600" />
                     <span>Coming Soon</span>
                   </div>
                 ) : (
@@ -634,7 +594,7 @@ export default function SingleSocialAccountsCard({
                       e.stopPropagation();
                       handleActionClick(acc);
                     }}
-                    className="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 shrink-0 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-md shadow-purple-950/40 border border-purple-400/20 hover:scale-105 active:scale-95"
+                    className="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 shrink-0 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white keep-white shadow-md shadow-purple-950/40 border border-purple-400/20 hover:scale-105 active:scale-95"
                   >
                     {isConnecting ? (
                       <>
@@ -650,15 +610,15 @@ export default function SingleSocialAccountsCard({
 
               {/* Visible Metrics Section for Connected Accounts */}
               {acc.connected && (
-                <div className="mt-3 pt-2.5 border-t border-white/10">
-                  <div className="grid grid-cols-2 gap-2 bg-white/[0.03] rounded-xl p-2 border border-white/5">
+                <div className="mt-3 pt-2.5 border-t border-white/10 light:border-slate-100">
+                  <div className="grid grid-cols-2 gap-2 bg-white/[0.03] light:bg-slate-50 rounded-xl p-2 border border-white/5 light:border-slate-200/60">
                     {/* Friends / Followers / Connections metric */}
                     <div className="flex flex-col items-center justify-center text-center">
-                      <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
-                        <Users className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                      <div className="flex items-center gap-1.5 text-[11px] text-slate-400 light:text-slate-500 font-medium">
+                        <Users className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />
                         <span>{((acc.id || acc.platform || '').toLowerCase().includes('linkedin')) ? 'Connections' : isFacebook && acc.accountType !== 'PAGE' ? 'Friends' : 'Followers'}</span>
                       </div>
-                      <span className="text-sm sm:text-base font-bold text-white tracking-tight mt-0.5">
+                      <span className="text-sm sm:text-base font-bold text-white light:text-slate-900 tracking-tight mt-0.5">
                         {(() => {
                           if (isLinkedIn) {
                             if (!acc.followers || acc.followers === '500' || acc.followers === '500+') {
@@ -673,12 +633,12 @@ export default function SingleSocialAccountsCard({
                     </div>
 
                     {/* Engagement Rate metric */}
-                    <div className="flex flex-col items-center justify-center text-center border-l border-white/10">
-                      <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
-                        <TrendingUp className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <div className="flex flex-col items-center justify-center text-center border-l border-white/10 light:border-slate-200">
+                      <div className="flex items-center gap-1.5 text-[11px] text-slate-400 light:text-slate-500 font-medium">
+                        <TrendingUp className="w-3.5 h-3.5 text-cyan-400 light:text-cyan-600 shrink-0" />
                         <span>Engagement</span>
                       </div>
-                      <span className="text-sm sm:text-base font-bold text-cyan-400 tracking-tight mt-0.5">
+                      <span className="text-sm sm:text-base font-bold text-cyan-400 light:text-cyan-600 tracking-tight mt-0.5">
                         {(() => {
                           const num = acc.engagementRate !== undefined && acc.engagementRate !== null && acc.engagementRate !== ''
                             ? parseFloat(String(acc.engagementRate).replace(/%/g, ''))

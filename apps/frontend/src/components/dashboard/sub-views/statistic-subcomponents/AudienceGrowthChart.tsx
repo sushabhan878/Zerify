@@ -33,34 +33,34 @@ export default function AudienceGrowthChart({
   const data = hasRealData && propGrowthData && propGrowthData.length > 0 ? propGrowthData : [];
 
   return (
-    <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-6">
+    <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200/90 backdrop-blur-xl shadow-xl light:shadow-sm space-y-6">
       {/* Background subtle ambient grid/glow */}
       <div className="absolute inset-0 bg-hero-gradient pointer-events-none opacity-20" />
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
         <div className="space-y-1">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-            <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-purple-400 shrink-0" />
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white light:text-slate-900 tracking-tight flex items-center gap-2.5 sm:gap-3">
+            <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-purple-400 light:text-purple-600 shrink-0" />
             <span>Audience Growth & AI Prediction</span>
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-400 light:text-slate-500 mt-1">
             Historical follower growth across connected platforms with AI forecast
           </p>
         </div>
 
         {isLoading ? (
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs font-semibold text-purple-300 self-start sm:self-auto shrink-0 shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-purple-400 animate-spin" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-500/10 light:bg-purple-50 border border-purple-500/20 light:border-purple-200 text-xs font-semibold text-purple-300 light:text-purple-700 self-start sm:self-auto shrink-0 shadow-sm">
+            <Sparkles className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 animate-spin" />
             <span>Calculating Forecast...</span>
           </div>
         ) : hasRealData ? (
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs font-bold text-purple-300 self-start sm:self-auto shrink-0 shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-500/10 light:bg-purple-50 border border-purple-500/20 light:border-purple-200 text-xs font-bold text-purple-300 light:text-purple-700 self-start sm:self-auto shrink-0 shadow-sm">
+            <Sparkles className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />
             <span>Forecast: +5.5% Next Month</span>
           </div>
         ) : (
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-800/60 border border-white/10 text-xs font-semibold text-slate-400 self-start sm:self-auto shrink-0">
-            <Info className="w-3.5 h-3.5 text-slate-400" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-800/60 light:bg-slate-100 border border-white/10 light:border-slate-200 text-xs font-semibold text-slate-400 light:text-slate-600 self-start sm:self-auto shrink-0">
+            <Info className="w-3.5 h-3.5 text-slate-400 light:text-slate-500" />
             <span>Awaiting Social Sync</span>
           </div>
         )}
@@ -69,7 +69,7 @@ export default function AudienceGrowthChart({
       {isLoading ? (
         /* Shimmering Skeleton for Audience Growth & Forecast */
         <div className="relative z-10 space-y-4">
-          <div className="pt-8 pb-2 px-2 flex items-end justify-between gap-3 h-52 border-b border-white/10 relative overflow-hidden">
+          <div className="pt-8 pb-2 px-2 flex items-end justify-between gap-3 h-52 border-b border-white/10 light:border-slate-200 relative overflow-hidden">
             {[45, 55, 65, 75, 85, 93, 100].map((h, i) => (
               <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
                 <div
@@ -80,7 +80,7 @@ export default function AudienceGrowthChart({
                       : 'bg-gradient-to-t from-purple-900/30 to-indigo-500/40 border-t border-x border-purple-500/20'
                   }`}
                 />
-                <div className="h-3 w-8 rounded bg-white/10 animate-pulse" />
+                <div className="h-3 w-8 rounded bg-white/10 light:bg-slate-200 animate-pulse" />
               </div>
             ))}
             <motion.div
@@ -89,7 +89,7 @@ export default function AudienceGrowthChart({
               transition={{ repeat: Infinity, duration: 1.8, ease: 'linear' }}
             />
           </div>
-          <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+          <div className="flex items-center justify-between text-xs text-slate-500 light:text-slate-500 pt-1">
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-indigo-500/50" /> Historical Snapshots
             </span>
@@ -101,10 +101,10 @@ export default function AudienceGrowthChart({
       ) : hasRealData && data.length > 0 ? (
         <>
           {/* Real Live Data Visual */}
-          <div className="pt-6 pb-2 px-2 flex items-end justify-between gap-3 h-52 border-b border-white/10 relative z-10">
+          <div className="pt-6 pb-2 px-2 flex items-end justify-between gap-3 h-52 border-b border-white/10 light:border-slate-200 relative z-10">
             {data.map((item, idx) => (
               <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
-                <span className="text-[11px] font-bold text-purple-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-[11px] font-bold text-purple-300 light:text-purple-700 opacity-0 group-hover:opacity-100 transition-opacity">
                   {item.followers}
                 </span>
                 <motion.div
@@ -119,7 +119,7 @@ export default function AudienceGrowthChart({
                 />
                 <span
                   className={`text-[11px] sm:text-xs font-bold ${
-                    item.isAi ? 'text-pink-300' : 'text-slate-400'
+                    item.isAi ? 'text-pink-300 light:text-pink-700' : 'text-slate-400 light:text-slate-600'
                   }`}
                 >
                   {item.period}
@@ -128,7 +128,7 @@ export default function AudienceGrowthChart({
             ))}
           </div>
 
-          <div className="flex items-center justify-between text-xs text-slate-400 pt-1 relative z-10">
+          <div className="flex items-center justify-between text-xs text-slate-400 light:text-slate-500 pt-1 relative z-10">
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Historical Snapshots
             </span>
@@ -139,22 +139,22 @@ export default function AudienceGrowthChart({
         </>
       ) : (
         /* Not enough real data empty state */
-        <div className="py-10 px-6 rounded-2xl bg-slate-900/40 border border-white/5 flex flex-col items-center justify-center text-center space-y-3 relative z-10">
-          <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shadow-md shadow-purple-950/40">
+        <div className="py-10 px-6 rounded-2xl bg-slate-900/40 light:bg-slate-50 border border-white/5 light:border-slate-200 flex flex-col items-center justify-center text-center space-y-3 relative z-10 shadow-sm">
+          <div className="w-12 h-12 rounded-2xl bg-purple-500/10 light:bg-purple-100 border border-purple-500/20 light:border-purple-200 flex items-center justify-center text-purple-400 light:text-purple-600 shadow-md shadow-purple-950/40 light:shadow-purple-100">
             <BarChart3 className="w-6 h-6" />
           </div>
           <div className="space-y-1.5 max-w-md">
-            <h3 className="text-sm sm:text-base font-bold text-white">
+            <h3 className="text-sm sm:text-base font-bold text-white light:text-slate-900">
               Not enough data to show audience growth & AI prediction
             </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-xs text-slate-400 light:text-slate-600 leading-relaxed">
               Historical trajectories and predictive forecasts require connected social accounts with follower records.
               Sync your accounts to unlock live month-over-month growth analytics and AI projections.
             </p>
           </div>
           <div className="pt-1">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-purple-300/80 bg-purple-950/40 px-3 py-1 rounded-full border border-purple-500/20">
-              <Sparkles className="w-3 h-3 text-purple-400" />
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-purple-300/80 light:text-purple-700 bg-purple-950/40 light:bg-purple-50 px-3 py-1 rounded-full border border-purple-500/20 light:border-purple-200">
+              <Sparkles className="w-3 h-3 text-purple-400 light:text-purple-600" />
               Sync accounts via Settings to activate AI forecast
             </span>
           </div>

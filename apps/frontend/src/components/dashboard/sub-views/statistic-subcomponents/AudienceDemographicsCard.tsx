@@ -358,18 +358,18 @@ export default function AudienceDemographicsCard({
   const unspecStrokeDash = (genderData.unspecifiedPct / totalPct) * circumference;
 
   return (
-    <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl space-y-8">
+    <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200/90 backdrop-blur-xl shadow-xl light:shadow-sm space-y-8">
       {/* Background subtle ambient grid/glow */}
       <div className="absolute inset-0 bg-hero-gradient pointer-events-none opacity-20" />
 
       {/* 1. Header & Platform Tabs */}
       <div className="space-y-4 relative z-10">
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-white light:text-slate-900 tracking-tight">
           Analytics
         </h2>
 
         {/* Platform selection tabs */}
-        <div className="flex items-center gap-6 sm:gap-8 border-b border-white/10 overflow-x-auto no-scrollbar pt-1">
+        <div className="flex items-center gap-6 sm:gap-8 border-b border-white/10 light:border-slate-200 overflow-x-auto no-scrollbar pt-1">
           {platforms.map((plat) => {
             const isActive = activePlatform === plat;
             const logo = getSocialLogo(plat);
@@ -385,7 +385,7 @@ export default function AudienceDemographicsCard({
                 type="button"
                 onClick={() => setActivePlatform(plat)}
                 className={`pb-3 text-sm sm:text-base font-bold flex items-center gap-2 transition-all relative shrink-0 cursor-pointer ${
-                  isActive ? 'text-white' : 'text-slate-400 hover:text-slate-200'
+                  isActive ? 'text-white light:text-slate-900' : 'text-slate-400 light:text-slate-500 hover:text-slate-200 light:hover:text-slate-900'
                 }`}
               >
                 {logo ? (
@@ -417,40 +417,40 @@ export default function AudienceDemographicsCard({
       <div className="grid grid-cols-3 gap-6 max-w-lg relative z-10">
         <div>
           {isLoading ? (
-            <div className="h-8 w-20 bg-white/15 rounded animate-pulse mb-1" />
+            <div className="h-8 w-20 bg-white/15 light:bg-slate-300 rounded animate-pulse mb-1" />
           ) : (
-            <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <div className="text-2xl sm:text-3xl font-extrabold text-white light:text-slate-900 tracking-tight">
               {followerDisplay}
             </div>
           )}
-          <div className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
+          <div className="text-xs sm:text-sm text-slate-400 light:text-slate-500 font-medium mt-0.5">
             {getMetricTerm(activePlatform)}
           </div>
         </div>
 
         <div>
           {isLoading ? (
-            <div className="h-8 w-20 bg-white/15 rounded animate-pulse mb-1" />
+            <div className="h-8 w-20 bg-white/15 light:bg-slate-300 rounded animate-pulse mb-1" />
           ) : (
-            <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <div className="text-2xl sm:text-3xl font-extrabold text-white light:text-slate-900 tracking-tight">
               {avgViews}
             </div>
           )}
-          <div className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
+          <div className="text-xs sm:text-sm text-slate-400 light:text-slate-500 font-medium mt-0.5">
             Average Views
           </div>
         </div>
 
         <div>
           {isLoading ? (
-            <div className="h-8 w-20 bg-white/15 rounded animate-pulse mb-1" />
+            <div className="h-8 w-20 bg-white/15 light:bg-slate-300 rounded animate-pulse mb-1" />
           ) : (
-            <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-1.5">
+            <div className="text-2xl sm:text-3xl font-extrabold text-white light:text-slate-900 tracking-tight flex items-center gap-1.5">
               <span>{engagement}</span>
-              <Info className="w-4 h-4 text-slate-400 cursor-help" />
+              <Info className="w-4 h-4 text-slate-400 light:text-slate-500 cursor-help" />
             </div>
           )}
-          <div className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
+          <div className="text-xs sm:text-sm text-slate-400 light:text-slate-500 font-medium mt-0.5">
             Engagement Rate
           </div>
         </div>
@@ -460,15 +460,15 @@ export default function AudienceDemographicsCard({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 items-start pt-2 relative z-10">
         {/* 1. Audience Location: Countries first, hover to reveal cities */}
         <div className="space-y-4">
-          <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5">
+          <h3 className="text-sm sm:text-base font-bold text-white light:text-slate-900 flex items-center gap-1.5">
             <span>Audience Location</span>
-            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+            <Info className="w-3.5 h-3.5 text-slate-400 light:text-slate-500 cursor-help" />
           </h3>
 
           {isLoading ? (
             <div className="space-y-2.5">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-8 rounded-lg bg-white/5 animate-pulse" />
+                <div key={i} className="h-8 rounded-lg bg-white/5 light:bg-slate-100 animate-pulse" />
               ))}
             </div>
           ) : locationItems.length > 0 ? (
@@ -476,49 +476,49 @@ export default function AudienceDemographicsCard({
               {locationItems.map((item, idx) => (
                 <div
                   key={item.countryName}
-                  className="relative group flex items-center justify-between text-xs sm:text-sm py-1 px-2 -mx-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                  className="relative group flex items-center justify-between text-xs sm:text-sm py-1 px-2 -mx-2 rounded-lg hover:bg-white/5 light:hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-2 truncate pr-2">
-                    <span className="text-slate-300 font-medium truncate group-hover:text-white transition-colors">
+                    <span className="text-slate-300 light:text-slate-700 font-medium truncate group-hover:text-white light:group-hover:text-slate-900 transition-colors">
                       {item.countryName}
                     </span>
                   </div>
-                  <span className="font-bold text-white shrink-0">{item.pct}%</span>
+                  <span className="font-bold text-white light:text-slate-900 shrink-0">{item.pct}%</span>
 
                   {/* Hover Popover showing top cities in this country */}
                   <div
-                    className={`pointer-events-none group-hover:pointer-events-auto opacity-0 group-hover:opacity-100 transition-all duration-200 absolute z-50 w-72 bg-slate-900/95 backdrop-blur-xl border border-white/15 shadow-2xl shadow-purple-950/40 rounded-xl p-3.5 ${
+                    className={`pointer-events-none group-hover:pointer-events-auto opacity-0 group-hover:opacity-100 transition-all duration-200 absolute z-50 w-72 bg-slate-900/95 light:bg-white backdrop-blur-xl border border-white/15 light:border-slate-200 shadow-2xl light:shadow-xl shadow-purple-950/40 rounded-xl p-3.5 ${
                       idx < 3 ? 'left-0 top-full mt-1.5' : 'left-0 bottom-full mb-1.5'
                     }`}
                   >
-                    <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-2.5">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-white">
-                        <MapPin className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                    <div className="flex items-center justify-between border-b border-white/10 light:border-slate-200 pb-2 mb-2.5">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-white light:text-slate-900">
+                        <MapPin className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />
                         <span className="truncate">Top Cities in {item.countryName}</span>
                       </div>
-                      <span className="text-[11px] font-black text-purple-300 shrink-0 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
+                      <span className="text-[11px] font-black text-purple-300 light:text-purple-700 shrink-0 bg-purple-500/10 light:bg-purple-50 px-2 py-0.5 rounded-full border border-purple-500/20 light:border-purple-200">
                         {item.pct}%
                       </span>
                     </div>
 
                     {item.cities && item.cities.length > 0 ? (
                       <div className="space-y-2">
-                        <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                        <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400 light:text-slate-500">
                           Top Cities
                         </div>
                         <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1 scrollbar-none">
                           {item.cities.map((city) => (
                             <div key={city.name} className="flex items-center justify-between text-xs">
-                              <span className="text-slate-300 font-medium truncate pr-2" title={city.name}>
+                              <span className="text-slate-300 light:text-slate-700 font-medium truncate pr-2" title={city.name}>
                                 {city.name}
                               </span>
-                              <span className="font-bold text-white shrink-0">{city.pct}%</span>
+                              <span className="font-bold text-white light:text-slate-900 shrink-0">{city.pct}%</span>
                             </div>
                           ))}
                         </div>
                       </div>
                     ) : (
-                      <div className="text-[11px] text-slate-400 py-1 font-medium">
+                      <div className="text-[11px] text-slate-400 light:text-slate-500 py-1 font-medium">
                         Nationwide audience (no regional city records)
                       </div>
                     )}
@@ -527,9 +527,9 @@ export default function AudienceDemographicsCard({
               ))}
             </div>
           ) : (
-            <div className="py-8 px-4 rounded-2xl bg-white/[0.02] border border-white/5 text-center space-y-1.5">
+            <div className="py-8 px-4 rounded-2xl bg-white/[0.02] light:bg-slate-50 border border-white/5 light:border-slate-200 text-center space-y-1.5">
               <MapPin className="w-5 h-5 text-slate-500 mx-auto" />
-              <div className="text-xs font-semibold text-slate-300">
+              <div className="text-xs font-semibold text-slate-300 light:text-slate-700">
                 {currentAccount ? 'No country demographics recorded' : 'Account not connected'}
               </div>
               <div className="text-[11px] text-slate-500">
@@ -543,17 +543,17 @@ export default function AudienceDemographicsCard({
 
         {/* 2. Audience Age: strictly 13-17, 18-24, 25-34, 35-44, 45-54, 55+ */}
         <div className="space-y-4">
-          <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5">
+          <h3 className="text-sm sm:text-base font-bold text-white light:text-slate-900 flex items-center gap-1.5">
             <span>Audience Age</span>
-            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+            <Info className="w-3.5 h-3.5 text-slate-400 light:text-slate-500 cursor-help" />
           </h3>
 
           {isLoading ? (
             <div className="space-y-3">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="space-y-1">
-                  <div className="h-3.5 w-16 bg-white/10 rounded animate-pulse" />
-                  <div className="h-1.5 w-full bg-white/5 rounded-full animate-pulse" />
+                  <div className="h-3.5 w-16 bg-white/10 light:bg-slate-200 rounded animate-pulse" />
+                  <div className="h-1.5 w-full bg-white/5 light:bg-slate-100 rounded-full animate-pulse" />
                 </div>
               ))}
             </div>
@@ -562,10 +562,10 @@ export default function AudienceDemographicsCard({
               {ageItems.map((item) => (
                 <div key={item.range} className="space-y-1">
                   <div className="flex items-center justify-between text-xs sm:text-sm">
-                    <span className="text-slate-300 font-medium">{item.range}</span>
-                    <span className="font-bold text-white">{item.displayPct}%</span>
+                    <span className="text-slate-300 light:text-slate-700 font-medium">{item.range}</span>
+                    <span className="font-bold text-white light:text-slate-900">{item.displayPct}%</span>
                   </div>
-                  <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-slate-800 light:bg-slate-200 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="bg-purple-500 h-1.5 rounded-full transition-all duration-500"
                       style={{ width: `${Math.min(100, Math.max(0, item.pct))}%` }}
@@ -575,9 +575,9 @@ export default function AudienceDemographicsCard({
               ))}
             </div>
           ) : (
-            <div className="py-8 px-4 rounded-2xl bg-white/[0.02] border border-white/5 text-center space-y-1.5">
+            <div className="py-8 px-4 rounded-2xl bg-white/[0.02] light:bg-slate-50 border border-white/5 light:border-slate-200 text-center space-y-1.5">
               <Info className="w-5 h-5 text-slate-500 mx-auto" />
-              <div className="text-xs font-semibold text-slate-300">
+              <div className="text-xs font-semibold text-slate-300 light:text-slate-700">
                 {currentAccount ? 'No age breakdown recorded' : 'Account not connected'}
               </div>
               <div className="text-[11px] text-slate-500">
@@ -591,17 +591,17 @@ export default function AudienceDemographicsCard({
 
         {/* 3. Audience Gender: Donut Chart on top, Male, Female, Unspecified below */}
         <div className="space-y-4">
-          <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5">
+          <h3 className="text-sm sm:text-base font-bold text-white light:text-slate-900 flex items-center gap-1.5">
             <span>Audience Gender</span>
-            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+            <Info className="w-3.5 h-3.5 text-slate-400 light:text-slate-500 cursor-help" />
           </h3>
 
           {isLoading ? (
             <div className="flex flex-col items-center justify-center pt-2 space-y-4">
-              <div className="w-32 h-32 rounded-full border-8 border-white/10 animate-pulse" />
+              <div className="w-32 h-32 rounded-full border-8 border-white/10 light:border-slate-200 animate-pulse" />
               <div className="flex gap-4">
-                <div className="h-4 w-16 bg-white/10 rounded animate-pulse" />
-                <div className="h-4 w-16 bg-white/10 rounded animate-pulse" />
+                <div className="h-4 w-16 bg-white/10 light:bg-slate-200 rounded animate-pulse" />
+                <div className="h-4 w-16 bg-white/10 light:bg-slate-200 rounded animate-pulse" />
               </div>
             </div>
           ) : genderData.hasData ? (
@@ -615,6 +615,7 @@ export default function AudienceDemographicsCard({
                     r={radius}
                     fill="transparent"
                     stroke="#1e293b"
+                    className="stroke-[#1e293b] light:stroke-slate-200"
                     strokeWidth="16"
                   />
                   {/* Female Slice (Pink) */}
@@ -662,23 +663,23 @@ export default function AudienceDemographicsCard({
               <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-5 w-full">
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-blue-500 shrink-0 shadow-sm shadow-blue-500/50" />
-                  <span className="text-xs sm:text-sm text-slate-300 font-medium">Male</span>
-                  <span className="text-xs sm:text-sm font-black text-white">
+                  <span className="text-xs sm:text-sm text-slate-300 light:text-slate-700 font-medium">Male</span>
+                  <span className="text-xs sm:text-sm font-black text-white light:text-slate-900">
                     {formatMaxOneDecimal(genderData.malePct)}%
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-pink-500 shrink-0 shadow-sm shadow-pink-500/50" />
-                  <span className="text-xs sm:text-sm text-slate-300 font-medium">Female</span>
-                  <span className="text-xs sm:text-sm font-black text-white">
+                  <span className="text-xs sm:text-sm text-slate-300 light:text-slate-700 font-medium">Female</span>
+                  <span className="text-xs sm:text-sm font-black text-white light:text-slate-900">
                     {formatMaxOneDecimal(genderData.femalePct)}%
                   </span>
                 </div>
                 {genderData.unspecifiedPct > 0 && (
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-purple-500 shrink-0 shadow-sm shadow-purple-500/50" />
-                    <span className="text-xs sm:text-sm text-slate-300 font-medium">Unspecified</span>
-                    <span className="text-xs sm:text-sm font-black text-white">
+                    <span className="text-xs sm:text-sm text-slate-300 light:text-slate-700 font-medium">Unspecified</span>
+                    <span className="text-xs sm:text-sm font-black text-white light:text-slate-900">
                       {formatMaxOneDecimal(genderData.unspecifiedPct)}%
                     </span>
                   </div>
@@ -686,9 +687,9 @@ export default function AudienceDemographicsCard({
               </div>
             </div>
           ) : (
-            <div className="py-8 px-4 rounded-2xl bg-white/[0.02] border border-white/5 text-center space-y-1.5">
+            <div className="py-8 px-4 rounded-2xl bg-white/[0.02] light:bg-slate-50 border border-white/5 light:border-slate-200 text-center space-y-1.5">
               <Info className="w-5 h-5 text-slate-500 mx-auto" />
-              <div className="text-xs font-semibold text-slate-300">
+              <div className="text-xs font-semibold text-slate-300 light:text-slate-700">
                 {currentAccount ? 'No gender breakdown recorded' : 'Account not connected'}
               </div>
               <div className="text-[11px] text-slate-500">

@@ -150,18 +150,18 @@ export default function SingleCreatorDetailsCard({
   const SUGGESTED_LANGUAGES = ['English', 'Hindi', 'Spanish', 'French', 'German', 'Japanese', 'Arabic'];
 
   return (
-    <div className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-8 shadow-xl">
+    <div className="p-5 sm:p-6 rounded-xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200/90 backdrop-blur-xl space-y-8 shadow-xl light:shadow-sm">
       {/* 1. Header Section */}
-      <div className="flex items-center gap-3 pb-4 border-b border-white/10">
-        <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0 shadow-inner">
+      <div className="flex items-center gap-3 pb-4 border-b border-white/10 light:border-slate-100">
+        <div className="w-10 h-10 rounded-xl bg-purple-600/20 light:bg-purple-50 border border-purple-500/30 light:border-purple-200 flex items-center justify-center text-purple-400 light:text-purple-600 shrink-0 shadow-inner">
           <Sliders className="w-5 h-5" />
         </div>
         <div>
-          <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+          <h3 className="text-xs font-bold text-white light:text-slate-900 flex items-center gap-1.5">
             <span>Creator Niche, Rates & Preferences</span>
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <Sparkles className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />
           </h3>
-          <p className="text-[11px] text-slate-400/80">
+          <p className="text-[11px] text-slate-400/80 light:text-slate-500">
             Define your content categories, language fluency, pricing structure & collaboration flexibility.
           </p>
         </div>
@@ -170,11 +170,11 @@ export default function SingleCreatorDetailsCard({
       {/* 2. Content Category — Show All Tags Possible */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider flex items-center gap-1.5">
-            <Tag className="w-3.5 h-3.5 text-purple-400" />
+          <label className="text-[11px] font-semibold text-slate-400/80 light:text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+            <Tag className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />
             <span>Content Categories / Niches</span>
           </label>
-          <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">
+          <span className="text-[10px] font-bold text-purple-400 light:text-purple-700 bg-purple-500/10 light:bg-purple-50 px-2 py-0.5 rounded border border-purple-500/20 light:border-purple-200">
             {categories.length} Selected
           </span>
         </div>
@@ -186,9 +186,9 @@ export default function SingleCreatorDetailsCard({
                 key={cat}
                 type="button"
                 onClick={() => toggleCategory(cat)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${isSelected
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold border-purple-400/50 shadow-md shadow-purple-950/40 scale-[1.02]'
-                    : 'bg-slate-900/80 text-slate-400 border-white/10 hover:text-white hover:bg-slate-800/80'
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border cursor-pointer ${isSelected
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white keep-white font-bold border-purple-400/50 shadow-md shadow-purple-950/40 scale-[1.02]'
+                    : 'bg-slate-900/80 light:bg-white text-slate-400 light:text-slate-700 border-white/10 light:border-slate-200 hover:text-white light:hover:text-slate-900 hover:bg-slate-800/80 light:hover:bg-slate-50 light:shadow-sm'
                   }`}
               >
                 <span>{cat}</span>
@@ -201,8 +201,8 @@ export default function SingleCreatorDetailsCard({
 
       {/* 3. Content Language — Text Box to Add Tags */}
       <div>
-        <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
-          <Globe className="w-3.5 h-3.5 text-purple-400" />
+        <label className="text-[11px] font-semibold text-slate-400/80 light:text-slate-600 uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
+          <Globe className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />
           <span>Content Languages</span>
         </label>
 
@@ -213,12 +213,12 @@ export default function SingleCreatorDetailsCard({
             value={languageInput}
             onChange={(e) => setLanguageInput(e.target.value)}
             placeholder="Type a language (e.g. French, Japanese) and press Enter or click Add..."
-            className="flex-1 px-3.5 py-2.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs text-white placeholder:text-slate-600/70 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all shadow-inner font-medium"
+            className="flex-1 px-3.5 py-2.5 rounded-lg bg-slate-950/70 light:bg-white border border-white/10 light:border-slate-200 text-xs text-white light:text-slate-900 placeholder:text-slate-600/70 light:placeholder:text-slate-400 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all shadow-inner light:shadow-sm font-medium"
           />
           <button
             type="button"
             onClick={() => handleAddLanguage()}
-            className="px-4 py-2.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md flex items-center gap-1 shrink-0"
+            className="px-4 py-2.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white keep-white text-xs font-bold transition-all shadow-md flex items-center gap-1 shrink-0 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Add Tag</span>
@@ -230,13 +230,13 @@ export default function SingleCreatorDetailsCard({
           {languages.map((lang) => (
             <span
               key={lang}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 text-purple-200 border border-purple-500/30 text-xs font-semibold shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 light:bg-purple-50 text-purple-200 light:text-purple-700 border border-purple-500/30 light:border-purple-200 text-xs font-semibold shadow-sm"
             >
               <span>{lang}</span>
               <button
                 type="button"
                 onClick={() => removeLanguage(lang)}
-                className="hover:text-white transition-colors"
+                className="hover:text-white light:hover:text-purple-900 transition-colors cursor-pointer"
                 title={`Remove ${lang}`}
               >
                 <X className="w-3 h-3" />
@@ -244,13 +244,13 @@ export default function SingleCreatorDetailsCard({
             </span>
           ))}
           {languages.length === 0 && (
-            <span className="text-xs text-slate-500 italic py-0.5">No languages added yet. Type above to add tags.</span>
+            <span className="text-xs text-slate-500 light:text-slate-400 italic py-0.5">No languages added yet. Type above to add tags.</span>
           )}
         </div>
 
         {/* Quick-Add Suggestions */}
         <div className="flex items-center gap-1.5 flex-wrap pt-1">
-          <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Quick Suggestions:</span>
+          <span className="text-[10px] font-semibold text-slate-500 light:text-slate-400 uppercase tracking-wider">Quick Suggestions:</span>
           {SUGGESTED_LANGUAGES.map((lang) => {
             const isSelected = languages.includes(lang);
             return (
@@ -258,9 +258,9 @@ export default function SingleCreatorDetailsCard({
                 key={lang}
                 type="button"
                 onClick={() => toggleSuggestedLanguage(lang)}
-                className={`text-[11px] px-2.5 py-0.5 rounded-full transition-colors font-medium ${isSelected
-                    ? 'bg-purple-600/40 text-purple-200 border border-purple-400/40'
-                    : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-white/5'
+                className={`text-[11px] px-2.5 py-0.5 rounded-full transition-colors font-medium cursor-pointer ${isSelected
+                    ? 'bg-purple-600/40 light:bg-purple-600 text-purple-200 light:text-white keep-white border border-purple-400/40 light:border-purple-600 shadow-sm'
+                    : 'bg-slate-900/60 light:bg-white text-slate-400 light:text-slate-700 hover:text-slate-200 light:hover:text-slate-900 border border-white/5 light:border-slate-200 light:shadow-sm'
                   }`}
               >
                 {isSelected ? `✓ ${lang}` : `+ ${lang}`}
@@ -273,20 +273,20 @@ export default function SingleCreatorDetailsCard({
       {/* 4 & 5. Toggles: Barter Deals & Travel Ready for Shoots */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
         {/* Barter Deal Toggle */}
-        <div className="p-3.5 rounded-lg bg-slate-950/60 border border-white/10 flex items-center justify-between gap-3 shadow-inner">
+        <div className="p-3.5 rounded-lg bg-slate-950/60 light:bg-slate-50 border border-white/10 light:border-slate-200 flex items-center justify-between gap-3 shadow-inner light:shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 light:bg-amber-50 border border-amber-500/20 light:border-amber-200 flex items-center justify-center text-amber-400 light:text-amber-600 shrink-0">
               <RefreshCw className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-xs font-bold text-white block">Available for Barter Deals</span>
-              <span className="text-[10px] text-slate-400 block">Open to product exchange / gift collabs</span>
+              <span className="text-xs font-bold text-white light:text-slate-900 block">Available for Barter Deals</span>
+              <span className="text-[10px] text-slate-400 light:text-slate-500 block">Open to product exchange / gift collabs</span>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setBarterAvailable(!barterAvailable)}
-            className={`w-11 h-6 rounded-full transition-colors relative shrink-0 p-1 ${barterAvailable ? 'bg-purple-600' : 'bg-slate-800'
+            className={`w-11 h-6 rounded-full transition-colors relative shrink-0 p-1 cursor-pointer ${barterAvailable ? 'bg-purple-600' : 'bg-slate-800 light:bg-slate-300'
               }`}
           >
             <div
@@ -297,20 +297,20 @@ export default function SingleCreatorDetailsCard({
         </div>
 
         {/* Travel Ready Toggle */}
-        <div className="p-3.5 rounded-lg bg-slate-950/60 border border-white/10 flex items-center justify-between gap-3 shadow-inner">
+        <div className="p-3.5 rounded-lg bg-slate-950/60 light:bg-slate-50 border border-white/10 light:border-slate-200 flex items-center justify-between gap-3 shadow-inner light:shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 light:bg-indigo-50 border border-indigo-500/20 light:border-indigo-200 flex items-center justify-center text-indigo-400 light:text-indigo-600 shrink-0">
               <Plane className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-xs font-bold text-white block">Travel Ready for Shoots</span>
-              <span className="text-[10px] text-slate-400 block">Available for outdoor/destinations</span>
+              <span className="text-xs font-bold text-white light:text-slate-900 block">Travel Ready for Shoots</span>
+              <span className="text-[10px] text-slate-400 light:text-slate-500 block">Available for outdoor/destinations</span>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setTravelReady(!travelReady)}
-            className={`w-11 h-6 rounded-full transition-colors relative shrink-0 p-1 ${travelReady ? 'bg-purple-600' : 'bg-slate-800'
+            className={`w-11 h-6 rounded-full transition-colors relative shrink-0 p-1 cursor-pointer ${travelReady ? 'bg-purple-600' : 'bg-slate-800 light:bg-slate-300'
               }`}
           >
             <div
@@ -323,8 +323,8 @@ export default function SingleCreatorDetailsCard({
 
       {/* 6. Collaboration Types & Pricing */}
       <div>
-        <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
-          <DollarSign className="w-3.5 h-3.5 text-purple-400" />
+        <label className="text-[11px] font-semibold text-slate-400/80 light:text-slate-600 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
+          <DollarSign className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />
           <span>Collaboration Types & Minimum Pricing</span>
         </label>
 
@@ -337,9 +337,9 @@ export default function SingleCreatorDetailsCard({
                 key={type}
                 type="button"
                 onClick={() => toggleCollabType(type)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${isSelected
-                    ? 'bg-purple-600/30 text-purple-200 border-purple-500/50 font-bold shadow-sm'
-                    : 'bg-slate-900/60 text-slate-400 border-white/5 hover:text-white'
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border cursor-pointer ${isSelected
+                    ? 'bg-purple-600/30 light:bg-purple-50 text-purple-200 light:text-purple-700 border-purple-500/50 light:border-purple-300 font-bold shadow-sm'
+                    : 'bg-slate-900/60 light:bg-white text-slate-400 light:text-slate-700 border-white/5 light:border-slate-200 hover:text-white light:hover:text-slate-900 light:shadow-sm'
                   }`}
               >
                 <span>{type}</span>
@@ -350,14 +350,14 @@ export default function SingleCreatorDetailsCard({
         </div>
 
         {/* Minimum Rate Input, Source Dropdown & Response Time in a Single Line */}
-        <div className="mt-6 pt-5 border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="mt-6 pt-5 border-t border-white/10 light:border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1 flex items-center gap-1">
-              <CircleDollarSign className="w-3 h-3 text-purple-400" />
+            <label className="text-[10px] font-bold text-slate-400 light:text-slate-600 uppercase tracking-wider block mb-1 flex items-center gap-1">
+              <CircleDollarSign className="w-3 h-3 text-purple-400 light:text-purple-600" />
               <span>Minimum Rate / Price</span>
             </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 light:text-slate-500 font-bold text-xs">
                 {currency === 'INR' ? '₹' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$'}
               </span>
               <input
@@ -365,14 +365,14 @@ export default function SingleCreatorDetailsCard({
                 value={minAmount}
                 onChange={(e) => setMinAmount(e.target.value)}
                 placeholder="10000"
-                className="w-full pl-8 pr-3.5 py-2.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs text-white placeholder:text-slate-600/70 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold shadow-inner"
+                className="w-full pl-8 pr-3.5 py-2.5 rounded-lg bg-slate-950/70 light:bg-white border border-white/10 light:border-slate-200 text-xs text-white light:text-slate-900 placeholder:text-slate-600/70 light:placeholder:text-slate-400 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold shadow-inner light:shadow-sm"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1 flex items-center gap-1">
-              <Share2 className="w-3 h-3 text-purple-400" />
+            <label className="text-[10px] font-bold text-slate-400 light:text-slate-600 uppercase tracking-wider block mb-1 flex items-center gap-1">
+              <Share2 className="w-3 h-3 text-purple-400 light:text-purple-600" />
               <span>From where did you hear about us?</span>
             </label>
             <CustomSelect
@@ -384,8 +384,8 @@ export default function SingleCreatorDetailsCard({
           </div>
 
           <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1 flex items-center gap-1">
-              <Clock className="w-3 h-3 text-purple-400" />
+            <label className="text-[10px] font-bold text-slate-400 light:text-slate-600 uppercase tracking-wider block mb-1 flex items-center gap-1">
+              <Clock className="w-3 h-3 text-purple-400 light:text-purple-600" />
               <span>Typical Response Time</span>
             </label>
             <CustomSelect

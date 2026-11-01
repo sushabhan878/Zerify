@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import RegisterProgressHeader from './subcomponents/RegisterProgressHeader';
 import RegisterRoleStep from './subcomponents/RegisterRoleStep';
@@ -11,6 +11,7 @@ import RegisterSuccessScreen from './subcomponents/RegisterSuccessScreen';
 import { isPublicEmail } from '@/lib/email-validator';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';
+import { authenticateWithGoogle } from '@/lib/google-auth';
 
 interface RegisterModalProps {
   step?: 1 | 2 | 3 | 4;
@@ -69,7 +70,25 @@ export default function RegisterModal({
   const [pricingRange, setPricingRange] = useState('₹10,000 - ₹50,000');
 
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Check URL query parameters if redirected from Login Google flow
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const gEmail = params.get('googleEmail');
+      const gName = params.get('googleName');
+      if (gEmail) {
+        setEmail(gEmail);
+        setEmailVerified(true);
+      }
+      if (gName) {
+        setFullName(gName);
+        setHandle(`@${gName.toLowerCase().replace(/[^a-z0-9_]/g, '')}`);
+      }
+    }
+  }, []);
 
   const handleSelectRole = (selectedRole: 'BRAND' | 'INFLUENCER') => {
     setRole(selectedRole);
@@ -107,13 +126,54 @@ export default function RegisterModal({
     setStep(3);
   };
 
-  const handleGoogleRegister = () => {
-    if (!fullName) setFullName('Google User');
-    if (!email) setEmail(role === 'BRAND' ? 'partner@googlecorp.com' : 'creator@gmail.com');
-    if (!companyName) setCompanyName('Google Business');
-    if (!handle) setHandle('@googleuser');
-    setEmailVerified(true);
-    setStep(3);
+  const handleGoogleRegister = async () => {
+    setErrorMessage('');
+    setGoogleLoading(true);
+
+    try {
+      const res = await authenticateWithGoogle({ role, action: 'register' });
+      if (!res.success && res.error) {
+        setErrorMessage(res.error);
+        return;
+      }
+
+      if (res.accessToken) {
+        localStorage.setItem('zerify_token', res.accessToken);
+        document.cookie = `zerify_token=${res.accessToken}; path=/; max-age=604800; SameSite=Lax`;
+        if (res.user) {
+          localStorage.setItem('zerify_user', JSON.stringify(res.user));
+        }
+        localStorage.setItem('zerify_preferred_currency', currency);
+        window.dispatchEvent(new Event('zerify_auth_change'));
+
+        toastSuccess(
+          res.isNewUser
+            ? 'Account created successfully with Google! Redirecting...'
+            : 'Signed in with Google! Redirecting...',
+          'Google Authentication'
+        );
+
+        setStep(4);
+        setTimeout(() => {
+          router.replace('/dashboard');
+        }, 1500);
+        return;
+      }
+
+      if (res.googleProfile) {
+        if (res.googleProfile.email) setEmail(res.googleProfile.email);
+        if (res.googleProfile.name) {
+          setFullName(res.googleProfile.name);
+          setHandle(`@${res.googleProfile.name.toLowerCase().replace(/[^a-z0-9_]/g, '')}`);
+        }
+        setEmailVerified(true);
+        setStep(3);
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Google registration failed. Please try again.');
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   const handleCompleteRegistration = async (e: React.FormEvent) => {
@@ -214,6 +274,7 @@ export default function RegisterModal({
               onSubmit={handleStep2Submit}
               onBack={() => setStep(1)}
               onGoogleRegister={handleGoogleRegister}
+              googleLoading={googleLoading}
             />
           )}
 

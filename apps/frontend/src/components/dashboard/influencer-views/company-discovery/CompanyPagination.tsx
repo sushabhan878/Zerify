@@ -55,11 +55,11 @@ export default function CompanyPagination({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-5 pb-2 border-t border-white/10 text-xs">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-5 pb-2 border-t border-white/10 light:border-slate-200 text-xs">
       {/* Left: Results Counter */}
-      <div className="text-slate-400">
-        Showing <strong className="text-white font-bold">{startItem}–{endItem}</strong> of{' '}
-        <strong className="text-white font-bold">{totalItems}</strong> brands
+      <div className="text-slate-400 light:text-slate-600">
+        Showing <strong className="text-white light:text-slate-900 font-bold">{startItem}–{endItem}</strong> of{' '}
+        <strong className="text-white light:text-slate-900 font-bold">{totalItems}</strong> brands
       </div>
 
       {/* Right: Pagination Controls */}
@@ -70,7 +70,7 @@ export default function CompanyPagination({
           onClick={() => onPageChange(1)}
           disabled={currentPage === 1}
           title="First Page"
-          className="p-1.5 rounded-xl bg-slate-900 border border-white/10 text-slate-400 hover:text-white hover:border-purple-500/30 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+          className="p-1.5 rounded-xl bg-slate-900 light:bg-white border border-white/10 light:border-slate-200 text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 hover:border-purple-500/30 light:shadow-sm disabled:opacity-40 disabled:pointer-events-none transition-colors"
         >
           <ChevronsLeft className="w-4 h-4" />
         </button>
@@ -81,7 +81,7 @@ export default function CompanyPagination({
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
           title="Previous Page"
-          className="p-1.5 rounded-xl bg-slate-900 border border-white/10 text-slate-400 hover:text-white hover:border-purple-500/30 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+          className="p-1.5 rounded-xl bg-slate-900 light:bg-white border border-white/10 light:border-slate-200 text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 hover:border-purple-500/30 light:shadow-sm disabled:opacity-40 disabled:pointer-events-none transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
@@ -107,8 +107,8 @@ export default function CompanyPagination({
                 onClick={() => onPageChange(pageNum)}
                 className={`min-w-[32px] h-8 px-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center ${
                   isActive
-                    ? 'bg-purple-500/20 text-purple-200 border-purple-500/40 shadow-sm shadow-purple-950/40'
-                    : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white hover:border-purple-500/30'
+                    ? 'bg-purple-500/20 light:bg-purple-50 text-purple-200 light:text-purple-700 border-purple-500/40 light:border-purple-300 shadow-sm shadow-purple-950/40'
+                    : 'bg-slate-900 light:bg-white border-white/10 light:border-slate-200 text-slate-400 light:text-slate-700 hover:text-white light:hover:text-slate-900 hover:border-purple-500/30 light:shadow-sm'
                 }`}
               >
                 {pageNum}
@@ -123,7 +123,7 @@ export default function CompanyPagination({
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
           title="Next Page"
-          className="p-1.5 rounded-xl bg-slate-900 border border-white/10 text-slate-400 hover:text-white hover:border-purple-500/30 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+          className="p-1.5 rounded-xl bg-slate-900 light:bg-white border border-white/10 light:border-slate-200 text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 hover:border-purple-500/30 light:shadow-sm disabled:opacity-40 disabled:pointer-events-none transition-colors"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
@@ -134,7 +134,7 @@ export default function CompanyPagination({
           onClick={() => onPageChange(totalPages)}
           disabled={currentPage === totalPages}
           title="Last Page"
-          className="p-1.5 rounded-xl bg-slate-900 border border-white/10 text-slate-400 hover:text-white hover:border-purple-500/30 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+          className="p-1.5 rounded-xl bg-slate-900 light:bg-white border border-white/10 light:border-slate-200 text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 hover:border-purple-500/30 light:shadow-sm disabled:opacity-40 disabled:pointer-events-none transition-colors"
         >
           <ChevronsRight className="w-4 h-4" />
         </button>

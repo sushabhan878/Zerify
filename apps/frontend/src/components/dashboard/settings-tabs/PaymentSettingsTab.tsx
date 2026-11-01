@@ -135,9 +135,9 @@ export default function PaymentSettingsTab({
 
   if (loading) {
     return (
-      <div className="p-12 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center min-h-[360px] gap-3">
-        <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
-        <span className="text-xs font-semibold text-slate-400">Loading payment methods...</span>
+      <div className="p-12 rounded-2xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200/90 backdrop-blur-xl shadow-xl light:shadow-sm flex flex-col items-center justify-center min-h-[360px] gap-3">
+        <Loader2 className="w-8 h-8 text-purple-400 light:text-purple-600 animate-spin" />
+        <span className="text-xs font-semibold text-slate-400 light:text-slate-600">Loading payment methods...</span>
       </div>
     );
   }
@@ -169,16 +169,16 @@ export default function PaymentSettingsTab({
   return (
     <div className="space-y-6">
       {/* Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200/90 backdrop-blur-xl shadow-xl light:shadow-sm">
         <div>
-          <h3 className="text-base font-extrabold text-white flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-purple-400" />
+          <h3 className="text-base font-extrabold text-white light:text-slate-900 flex items-center gap-2">
+            <CreditCard className="w-5 h-5 text-purple-400 light:text-purple-600" />
             <span>Saved Payment Methods</span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/15 light:bg-purple-50 text-purple-300 light:text-purple-700 border border-purple-500/30 light:border-purple-200">
               {linkedAccounts.length} Active
             </span>
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-400 light:text-slate-600 mt-0.5">
             Your verified payout methods for creator payouts and escrow settlements
           </p>
         </div>
@@ -186,7 +186,7 @@ export default function PaymentSettingsTab({
         <button
           type="button"
           onClick={handleOpenAddModal}
-          className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 active:bg-purple-700 text-white text-xs font-semibold transition-all flex items-center gap-2 shrink-0 self-start sm:self-auto cursor-pointer shadow-lg shadow-purple-600/20"
+          className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 active:bg-purple-700 text-white keep-white text-xs font-semibold transition-all flex items-center gap-2 shrink-0 self-start sm:self-auto cursor-pointer shadow-lg shadow-purple-600/20"
         >
           <PlusCircle className="w-4 h-4 text-white" />
           <span>Add New Payment Method</span>

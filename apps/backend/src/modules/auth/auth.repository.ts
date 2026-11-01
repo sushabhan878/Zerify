@@ -191,4 +191,57 @@ export class AuthRepository {
       });
     });
   }
+
+  /**
+   * Atomically creates a User record from Google OAuth and populates BrandProfile or InfluencerProfile
+   */
+  async createGoogleUser(params: {
+    email: string;
+    name?: string;
+    avatarUrl?: string;
+    googleId?: string;
+    role: UserRole;
+  }) {
+    const { email, name, avatarUrl, googleId, role } = params;
+    const cleanEmail = email.trim().toLowerCase();
+
+    return this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email: cleanEmail,
+          name: name || cleanEmail.split('@')[0],
+          neonAuthId: googleId || null,
+          role,
+          isEmailVerified: true,
+          emailVerifiedAt: new Date(),
+        },
+      });
+
+      if (role === UserRole.BRAND) {
+        await tx.brandProfile.create({
+          data: {
+            userId: user.id,
+            companyName: name || 'My Brand',
+            logoUrl: avatarUrl || null,
+            currency: 'INR',
+          },
+        });
+      } else {
+        const handle = `@${(name || cleanEmail.split('@')[0]).toLowerCase().replace(/[^a-z0-9_]/g, '') || 'creator'}`;
+        await tx.influencerProfile.create({
+          data: {
+            userId: user.id,
+            handle,
+            avatarUrl: avatarUrl || null,
+            currency: 'INR',
+          },
+        });
+      }
+
+      return tx.user.findUnique({
+        where: { id: user.id },
+        include: { brandProfile: true, influencer: true },
+      });
+    });
+  }
 }

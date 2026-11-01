@@ -24,11 +24,11 @@ export default function TransactionCardItem({ tx, onDownloadInvoice, onRaiseDisp
   const getStatusBadge = (status: TransactionItem['status']) => {
     switch (status) {
       case 'COMPLETED':
-        return { label: 'Completed', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' };
+        return { label: 'Completed', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 light:bg-emerald-50 light:text-emerald-700 light:border-emerald-200' };
       case 'PENDING_APPROVAL':
-        return { label: 'In Escrow', color: 'bg-amber-500/10 text-amber-400 border-amber-500/30' };
+        return { label: 'In Escrow', color: 'bg-amber-500/10 text-amber-400 border-amber-500/30 light:bg-amber-50 light:text-amber-700 light:border-amber-200' };
       case 'PROCESSING':
-        return { label: 'Processing Payout', color: 'bg-purple-500/10 text-purple-300 border-purple-500/30' };
+        return { label: 'Processing Payout', color: 'bg-purple-500/10 text-purple-300 border-purple-500/30 light:bg-purple-50 light:text-purple-700 light:border-purple-200' };
     }
   };
 
@@ -38,44 +38,44 @@ export default function TransactionCardItem({ tx, onDownloadInvoice, onRaiseDisp
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-4 rounded-xl bg-slate-950/60 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-purple-500/30 transition-all shadow-md"
+      className="p-4 rounded-xl bg-slate-950/60 light:bg-white border border-white/10 light:border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-purple-500/30 light:hover:border-purple-300 transition-all shadow-md light:shadow-sm"
     >
       <div className="flex items-center gap-3.5">
         <div
           className={`p-2.5 rounded-xl border shrink-0 ${
             tx.status === 'COMPLETED'
-              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-              : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 light:bg-emerald-50 light:text-emerald-600 light:border-emerald-200'
+              : 'bg-amber-500/10 text-amber-400 border-amber-500/20 light:bg-amber-50 light:text-amber-600 light:border-amber-200'
           }`}
         >
           {tx.status === 'COMPLETED' ? <ArrowDownRight className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
         </div>
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <h4 className="text-xs font-black text-white">{tx.brand}</h4>
+            <h4 className="text-xs font-black text-white light:text-slate-900">{tx.brand}</h4>
             <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${badge.color}`}>
               {badge.label}
             </span>
           </div>
-          <p className="text-xs font-semibold text-purple-300">{tx.campaign}</p>
-          <span className="text-[10px] text-slate-500 block mt-0.5 font-medium">
+          <p className="text-xs font-semibold text-purple-300 light:text-purple-700">{tx.campaign}</p>
+          <span className="text-[10px] text-slate-500 light:text-slate-400 block mt-0.5 font-medium">
             Ref ID: {tx.id} • {tx.date}
           </span>
         </div>
       </div>
 
-      <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5">
+      <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5 light:border-slate-100">
         <div className="text-right mr-1">
-          <span className={`text-base font-black ${tx.status === 'COMPLETED' ? 'text-emerald-400' : 'text-amber-400'}`}>
+          <span className={`text-base font-black ${tx.status === 'COMPLETED' ? 'text-emerald-400 light:text-emerald-600' : 'text-amber-400 light:text-amber-600'}`}>
             {tx.amount}
           </span>
-          <span className="text-[10px] text-slate-500 block uppercase font-bold">INR / USD</span>
+          <span className="text-[10px] text-slate-500 light:text-slate-400 block uppercase font-bold">INR / USD</span>
         </div>
 
         {onRaiseDispute && (
           <button
             onClick={() => onRaiseDispute(tx.id, tx.campaign)}
-            className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-colors flex items-center gap-1 text-xs font-bold"
+            className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 light:bg-rose-50 light:hover:bg-rose-100 light:text-rose-700 light:border-rose-200 transition-colors flex items-center gap-1 text-xs font-bold cursor-pointer"
             title="Raise a Dispute for this payment"
           >
             <AlertTriangle className="w-4 h-4" />
@@ -85,7 +85,7 @@ export default function TransactionCardItem({ tx, onDownloadInvoice, onRaiseDisp
 
         <button
           onClick={() => onDownloadInvoice(tx.id)}
-          className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-white/10 transition-colors"
+          className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-white/10 light:bg-slate-50 light:hover:bg-slate-100 light:text-slate-600 light:hover:text-slate-900 light:border-slate-200 transition-colors cursor-pointer"
           title="Download Receipt / Invoice"
         >
           <Download className="w-4 h-4" />

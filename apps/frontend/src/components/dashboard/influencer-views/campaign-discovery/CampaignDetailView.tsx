@@ -100,15 +100,15 @@ export default function CampaignDetailView({
         <button
           onClick={onBack}
           type="button"
-          className="group inline-flex items-center gap-2 text-slate-300 hover:text-purple-300 text-xs font-bold transition-colors w-fit py-1"
+          className="group inline-flex items-center gap-2 text-slate-300 light:text-slate-600 hover:text-purple-300 light:hover:text-purple-700 text-xs font-bold transition-colors w-fit py-1"
         >
-          <ArrowLeft className="w-4 h-4 text-purple-400 group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft className="w-4 h-4 text-purple-400 light:text-purple-600 group-hover:-translate-x-1 transition-transform" />
           <span>Back to Discover Campaigns</span>
         </button>
       </div>
 
       {/* 2. Hero Cover Banner */}
-      <div className="relative h-64 sm:h-80 w-full rounded-3xl overflow-hidden border border-purple-500/25 shadow-2xl shadow-purple-950/30">
+      <div className="relative h-64 sm:h-80 w-full rounded-3xl overflow-hidden border border-purple-500/25 light:border-slate-200 shadow-2xl light:shadow-md shadow-purple-950/30 light:shadow-slate-200/50">
         <img
           src={campaign.coverImage}
           alt={campaign.title}
@@ -158,14 +158,14 @@ export default function CampaignDetailView({
       </div>
 
       {/* 3. Main Brief Overview & Target Platforms */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-slate-950/70 border border-purple-500/20 backdrop-blur-2xl shadow-xl shadow-purple-950/20 space-y-6">
+      <div className="p-6 sm:p-8 rounded-3xl bg-slate-950/70 light:bg-white border border-purple-500/20 light:border-slate-200/90 backdrop-blur-2xl shadow-xl light:shadow-sm shadow-purple-950/20 light:shadow-slate-200/50 space-y-6">
         {/* Title, Description & Top-Right Apply Button */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="space-y-2 flex-1">
-            <h2 className="text-2xl sm:text-3xl font-black text-white leading-snug">
+            <h2 className="text-2xl sm:text-3xl font-black text-white light:text-slate-900 leading-snug">
               {campaign.title}
             </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
+            <p className="text-sm sm:text-base text-slate-300 light:text-slate-600 leading-relaxed font-normal">
               {campaign.description}
             </p>
           </div>
@@ -177,12 +177,12 @@ export default function CampaignDetailView({
                 type="button"
                 className={`px-4 py-2.5 rounded-2xl border text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm ${
                   isSaved
-                    ? 'bg-purple-600/30 border-purple-400/70 text-purple-200 shadow-purple-950/40'
-                    : 'bg-slate-900/80 border-purple-500/20 text-slate-300 hover:text-white hover:border-purple-400/40 hover:bg-slate-800'
+                    ? 'bg-purple-600/30 light:bg-purple-50 border-purple-400/70 light:border-purple-300 text-purple-200 light:text-purple-700 shadow-purple-950/40'
+                    : 'bg-slate-900/80 light:bg-white border-purple-500/20 light:border-slate-200 text-slate-300 light:text-slate-700 hover:text-white light:hover:text-slate-900 hover:border-purple-400/40 light:hover:border-slate-300 hover:bg-slate-800 light:hover:bg-slate-50'
                 }`}
                 title={isSaved ? 'Remove from saved' : 'Save campaign'}
               >
-                <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-current text-purple-400' : 'text-purple-400'}`} />
+                <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-current text-purple-400 light:text-purple-600' : 'text-purple-400 light:text-purple-600'}`} />
                 <span>{isSaved ? 'Saved' : 'Save Campaign'}</span>
               </button>
             )}
@@ -191,16 +191,16 @@ export default function CampaignDetailView({
               <button
                 disabled
                 type="button"
-                className="px-6 py-2.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2 shadow-sm cursor-default"
+                className="px-6 py-2.5 rounded-2xl bg-emerald-500/15 light:bg-emerald-50 border border-emerald-500/40 light:border-emerald-200 text-emerald-300 light:text-emerald-700 text-xs font-bold flex items-center gap-2 shadow-sm cursor-default"
               >
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600" />
                 <span>Applied</span>
               </button>
             ) : (
               <button
                 onClick={() => onApply(campaign)}
                 type="button"
-                className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold transition-all shadow-lg shadow-purple-950/50 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
+                className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white keep-white text-xs font-bold transition-all shadow-lg shadow-purple-950/50 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>Apply & Submit Pitch</span>
@@ -211,14 +211,14 @@ export default function CampaignDetailView({
 
         {/* Target Platforms */}
         <div className="flex items-center gap-3 flex-wrap pt-2">
-          <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">
+          <span className="text-xs uppercase font-bold text-slate-400 light:text-slate-500 tracking-wider">
             Target Platforms:
           </span>
           <div className="flex items-center gap-2 flex-wrap">
             {campaign.targetPlatforms.map((p) => (
               <span
                 key={p}
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-purple-500/25 text-xs font-semibold text-white shadow-sm"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/90 light:bg-slate-50 border border-purple-500/25 light:border-slate-200 text-xs font-semibold text-white light:text-slate-800 shadow-sm"
               >
                 {getPlatformIcon(p)}
                 <span>{p}</span>
@@ -228,14 +228,14 @@ export default function CampaignDetailView({
         </div>
 
         {/* 4. Line-Separated Key Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-purple-500/20 py-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-purple-500/20 light:divide-slate-200 py-2">
           {/* Compensation */}
           <div className="pb-3 sm:pb-0 sm:pr-6 space-y-1 flex flex-col justify-center">
-            <span className="text-2xl sm:text-3xl font-black text-white block tracking-tight">
+            <span className="text-2xl sm:text-3xl font-black text-white light:text-slate-900 block tracking-tight">
               {formatBudget(campaign.payoutAmount)}
             </span>
             {campaign.hasFreeProduct && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400">
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 light:text-emerald-600">
                 <Gift className="w-3.5 h-3.5" />
                 <span>+ Free Product Included</span>
               </span>
@@ -244,27 +244,27 @@ export default function CampaignDetailView({
 
           {/* Applications */}
           <div className="py-3 sm:py-0 sm:px-6 flex items-center">
-            <span className="text-2xl sm:text-3xl font-black text-white block tracking-tight">
+            <span className="text-2xl sm:text-3xl font-black text-white light:text-slate-900 block tracking-tight">
               {campaign.applicationsCount || 0} Applied
             </span>
           </div>
 
           {/* Deadline */}
           <div className="pt-3 sm:pt-0 sm:pl-6 flex items-center">
-            <span className="text-2xl sm:text-3xl font-black text-amber-400 block tracking-tight">
+            <span className="text-2xl sm:text-3xl font-black text-amber-400 light:text-amber-600 block tracking-tight">
               {campaign.daysRemaining} days left
             </span>
           </div>
         </div>
 
         {/* 5. Product & Service Being Promoted (Compact, Sleek Design) */}
-        <div className="p-5 sm:p-6 rounded-2xl bg-purple-950/20 border border-purple-500/20 space-y-4">
+        <div className="p-5 sm:p-6 rounded-2xl bg-purple-950/20 light:bg-slate-50/80 border border-purple-500/20 light:border-slate-200 space-y-4">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="text-xs uppercase font-black text-slate-400 tracking-wider">
+            <h3 className="text-xs uppercase font-black text-slate-400 light:text-slate-500 tracking-wider">
               Product & Service Being Promoted
             </h3>
             {product?.hasFreeProduct && product?.freeProductValue && (
-              <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-[11px] font-bold text-emerald-400 shadow-sm">
+              <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 light:bg-emerald-50 border border-emerald-500/30 light:border-emerald-200 text-[11px] font-bold text-emerald-400 light:text-emerald-700 shadow-sm">
                 Free Sample Valued at {symbol}{Number(product.freeProductValue).toLocaleString()}
               </span>
             )}
@@ -273,7 +273,7 @@ export default function CampaignDetailView({
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             {/* Compact Product Image Thumbnail */}
             {(product?.coverImageUrl || campaign.coverImage) && (
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-purple-500/30 shrink-0 bg-slate-900 shadow-md">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-purple-500/30 light:border-slate-200 shrink-0 bg-slate-900 light:bg-slate-100 shadow-md">
                 <img
                   src={product?.coverImageUrl || campaign.coverImage}
                   alt={product?.productName || campaign.title}
@@ -285,10 +285,10 @@ export default function CampaignDetailView({
             {/* Main Product Info */}
             <div className="flex-1 space-y-1 min-w-0">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <h4 className="text-base sm:text-lg font-bold text-white tracking-wide">
+                <h4 className="text-base sm:text-lg font-bold text-white light:text-slate-900 tracking-wide">
                   {product?.productName || campaign.title}
                 </h4>
-                <span className="px-2.5 py-0.5 rounded-lg bg-purple-950/60 border border-purple-500/30 text-xs font-semibold text-purple-300">
+                <span className="px-2.5 py-0.5 rounded-lg bg-purple-950/60 light:bg-purple-50 border border-purple-500/30 light:border-purple-200 text-xs font-semibold text-purple-300 light:text-purple-700">
                   {product?.productType === 'PHYSICAL'
                     ? 'Physical Goods'
                     : product?.productType === 'DIGITAL_SAAS'
@@ -303,7 +303,7 @@ export default function CampaignDetailView({
                     href={product.landingPageUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-purple-400 hover:text-purple-300 font-medium inline-flex items-center gap-1.5 transition-colors"
+                    className="text-xs text-purple-400 light:text-purple-600 hover:text-purple-300 light:hover:text-purple-700 font-medium inline-flex items-center gap-1.5 transition-colors"
                   >
                     <span>{product.landingPageUrl}</span>
                     <ExternalLink className="w-3 h-3" />
@@ -315,21 +315,21 @@ export default function CampaignDetailView({
 
           {/* Optional Shipping & Instructions if present */}
           {(product?.shippingDetails || product?.productInstructions) && (
-            <div className="pt-3 border-t border-purple-500/15 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div className="pt-3 border-t border-purple-500/15 light:border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               {product?.shippingDetails && (
                 <div>
-                  <span className="text-slate-500 text-[11px] font-semibold uppercase block mb-0.5">
+                  <span className="text-slate-500 light:text-slate-500 text-[11px] font-semibold uppercase block mb-0.5">
                     Shipping & Fulfillment:
                   </span>
-                  <span className="text-slate-300">{product.shippingDetails}</span>
+                  <span className="text-slate-300 light:text-slate-600">{product.shippingDetails}</span>
                 </div>
               )}
               {product?.productInstructions && (
                 <div>
-                  <span className="text-slate-500 text-[11px] font-semibold uppercase block mb-0.5">
+                  <span className="text-slate-500 light:text-slate-500 text-[11px] font-semibold uppercase block mb-0.5">
                     Promotion Instructions:
                   </span>
-                  <span className="text-slate-300">{product.productInstructions}</span>
+                  <span className="text-slate-300 light:text-slate-600">{product.productInstructions}</span>
                 </div>
               )}
             </div>
@@ -338,7 +338,7 @@ export default function CampaignDetailView({
 
         {/* 6. Required Deliverables & Assets */}
         <div className="space-y-4 pt-2">
-          <h3 className="text-sm font-black text-white uppercase tracking-wider">
+          <h3 className="text-sm font-black text-white light:text-slate-900 uppercase tracking-wider">
             Required Deliverables & Assets
           </h3>
 
@@ -347,40 +347,40 @@ export default function CampaignDetailView({
               {rawDels.map((del: any, idx: number) => (
                 <div
                   key={del.id || idx}
-                  className="p-5 rounded-2xl bg-slate-900/60 border border-purple-500/20 space-y-3"
+                  className="p-5 rounded-2xl bg-slate-900/60 light:bg-slate-50 border border-purple-500/20 light:border-slate-200 space-y-3"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5">
-                      <span className="w-7 h-7 rounded-xl bg-purple-600/25 border border-purple-500/30 text-purple-300 flex items-center justify-center font-bold text-xs">
+                      <span className="w-7 h-7 rounded-xl bg-purple-600/25 light:bg-purple-100 border border-purple-500/30 light:border-purple-200 text-purple-300 light:text-purple-700 flex items-center justify-center font-bold text-xs">
                         {del.quantity || 1}x
                       </span>
-                      <span className="text-sm font-bold text-white">
+                      <span className="text-sm font-bold text-white light:text-slate-900">
                         {del.type || 'Deliverable'}
                       </span>
                     </div>
                     {del.revisionLimit && (
-                      <span className="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 border border-white/5">
+                      <span className="text-xs px-2.5 py-1 rounded-lg bg-slate-800 light:bg-white text-slate-400 light:text-slate-600 border border-white/5 light:border-slate-200">
                         Up to {del.revisionLimit} revisions
                       </span>
                     )}
                   </div>
 
                   {del.requiredCta && (
-                    <div className="text-xs text-slate-300 bg-slate-950/60 p-3 rounded-xl border border-white/5 space-y-0.5">
-                      <span className="text-purple-400 font-bold block">Required CTA:</span>
+                    <div className="text-xs text-slate-300 light:text-slate-700 bg-slate-950/60 light:bg-white p-3 rounded-xl border border-white/5 light:border-slate-200 space-y-0.5">
+                      <span className="text-purple-400 light:text-purple-600 font-bold block">Required CTA:</span>
                       <span>&quot;{del.requiredCta}&quot;</span>
                     </div>
                   )}
 
                   {Array.isArray(del.mandatoryHashtags) && del.mandatoryHashtags.length > 0 && (
-                    <div className="flex items-center gap-1.5 flex-wrap text-xs text-purple-300">
-                      <Hash className="w-3.5 h-3.5 text-purple-400" />
+                    <div className="flex items-center gap-1.5 flex-wrap text-xs text-purple-300 light:text-purple-700">
+                      <Hash className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />
                       <span>{del.mandatoryHashtags.join(' ')}</span>
                     </div>
                   )}
 
                   {del.instructions && (
-                    <p className="text-xs text-slate-400 leading-relaxed italic">
+                    <p className="text-xs text-slate-400 light:text-slate-500 leading-relaxed italic">
                       &quot;{del.instructions}&quot;
                     </p>
                   )}
@@ -392,12 +392,12 @@ export default function CampaignDetailView({
               {campaign.deliverables.map((del, idx) => (
                 <div
                   key={idx}
-                  className="p-4 rounded-2xl bg-slate-900/60 border border-purple-500/20 flex items-center gap-3"
+                  className="p-4 rounded-2xl bg-slate-900/60 light:bg-slate-50 border border-purple-500/20 light:border-slate-200 flex items-center gap-3"
                 >
-                  <div className="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-300 border border-purple-500/30 flex items-center justify-center font-bold text-sm">
+                  <div className="w-8 h-8 rounded-xl bg-purple-600/20 light:bg-purple-100 text-purple-300 light:text-purple-700 border border-purple-500/30 light:border-purple-200 flex items-center justify-center font-bold text-sm">
                     {idx + 1}
                   </div>
-                  <span className="text-sm font-bold text-white">{del}</span>
+                  <span className="text-sm font-bold text-white light:text-slate-900">{del}</span>
                 </div>
               ))}
             </div>
@@ -406,30 +406,30 @@ export default function CampaignDetailView({
 
         {/* 8. Guidelines: Dos & Don'ts */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div className="p-5 rounded-2xl bg-emerald-950/25 border border-emerald-500/25 space-y-3">
-            <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+          <div className="p-5 rounded-2xl bg-emerald-950/25 light:bg-emerald-50/70 border border-emerald-500/25 light:border-emerald-200 space-y-3">
+            <h4 className="text-xs font-bold text-emerald-400 light:text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
               <Check className="w-4 h-4" />
               <span>Key Dos & Brand Requirements</span>
             </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-300">
+            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-300 light:text-slate-700">
               {campaign.dos.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2.5">
-                  <span className="text-emerald-400 font-bold">•</span>
+                  <span className="text-emerald-400 light:text-emerald-600 font-bold">•</span>
                   <span className="leading-relaxed">{item}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="p-5 rounded-2xl bg-rose-950/25 border border-rose-500/25 space-y-3">
-            <h4 className="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+          <div className="p-5 rounded-2xl bg-rose-950/25 light:bg-rose-50/70 border border-rose-500/25 light:border-rose-200 space-y-3">
+            <h4 className="text-xs font-bold text-rose-400 light:text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4" />
               <span>Strict Don&apos;ts & Exclusions</span>
             </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-300">
+            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-300 light:text-slate-700">
               {campaign.donts.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2.5">
-                  <span className="text-rose-400 font-bold">•</span>
+                  <span className="text-rose-400 light:text-rose-600 font-bold">•</span>
                   <span className="leading-relaxed">{item}</span>
                 </li>
               ))}
@@ -438,13 +438,13 @@ export default function CampaignDetailView({
         </div>
 
         {/* 9. Smart Escrow Protection Guarantee */}
-        <div className="p-5 rounded-2xl bg-slate-950/80 border border-purple-500/25 flex items-start sm:items-center gap-4 shadow-lg">
-          <ShieldCheck className="w-8 h-8 text-purple-400 shrink-0" />
+        <div className="p-5 rounded-2xl bg-slate-950/80 light:bg-purple-50/70 border border-purple-500/25 light:border-purple-200 flex items-start sm:items-center gap-4 shadow-lg light:shadow-sm">
+          <ShieldCheck className="w-8 h-8 text-purple-400 light:text-purple-600 shrink-0" />
           <div className="space-y-1">
-            <span className="text-sm font-bold text-white block">
+            <span className="text-sm font-bold text-white light:text-slate-900 block">
               Zerify 100% Escrow Protection Guaranteed
             </span>
-            <span className="text-xs text-slate-400 block leading-relaxed">
+            <span className="text-xs text-slate-400 light:text-slate-600 block leading-relaxed">
               Campaign compensation is pre-funded into Zerify smart escrow before content creation begins. Once your submitted deliverables are approved, funds are immediately deposited into your creator wallet without delays.
             </span>
           </div>

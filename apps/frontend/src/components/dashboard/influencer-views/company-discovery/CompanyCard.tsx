@@ -68,11 +68,11 @@ export default function CompanyCard({
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4, scale: 1.008 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className={`relative mt-4 p-5 rounded-2xl bg-slate-950/70 border border-white/10 backdrop-blur-xl shadow-xl hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-950/40 hover:bg-slate-950/90 transition-all flex flex-col justify-between group overflow-visible ${viewMode === 'list' ? 'md:flex-row md:items-center gap-4' : 'space-y-4'
+      className={`relative mt-4 p-5 rounded-2xl bg-slate-950/70 light:bg-white border border-white/10 light:border-slate-200/90 backdrop-blur-xl shadow-xl light:shadow-sm hover:border-purple-500/50 light:hover:border-purple-300 hover:shadow-2xl light:hover:shadow-md hover:shadow-purple-950/40 hover:bg-slate-950/90 light:hover:bg-white transition-all flex flex-col justify-between group overflow-visible ${viewMode === 'list' ? 'md:flex-row md:items-center gap-4' : 'space-y-4'
         }`}
     >
       {/* Background Ambient Glow */}
-      <div className="absolute -top-20 -right-20 w-48 h-48 bg-purple-600/10 rounded-full blur-3xl pointer-events-none group-hover:bg-purple-600/20 transition-all duration-500" />
+      <div className="absolute -top-20 -right-20 w-48 h-48 bg-purple-600/10 light:bg-purple-600/5 rounded-full blur-3xl pointer-events-none group-hover:bg-purple-600/20 light:group-hover:bg-purple-600/10 transition-all duration-500" />
 
       {/* Floating Match Rate Badge Overlapping Top-Right Corner */}
       <div
@@ -80,7 +80,7 @@ export default function CompanyCard({
         style={{ top: '-8px', transform: 'translateY(-50%)' }}
       >
         <span
-          className={`px-4 sm:px-5 py-2 rounded-full border text-xs sm:text-sm md:text-sm font-black tracking-wide text-white flex items-center gap-2 shadow-2xl ring-4 ring-[#080B14] group-hover:scale-105 transition-all duration-300 ${company.matchScore >= 90
+          className={`px-4 sm:px-5 py-2 rounded-full border text-xs sm:text-sm md:text-sm font-black tracking-wide text-white flex items-center gap-2 shadow-2xl ring-4 ring-[#080B14] light:ring-white group-hover:scale-105 transition-all duration-300 ${company.matchScore >= 90
               ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 border-emerald-400/50 shadow-emerald-950/80 group-hover:shadow-emerald-600/40'
               : company.matchScore >= 75
                 ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 border-purple-400/50 shadow-purple-950/80 group-hover:shadow-purple-600/40'
@@ -106,7 +106,7 @@ export default function CompanyCard({
                 <img
                   src={company.logoUrl}
                   alt={company.companyName}
-                  className="w-12 h-12 rounded-xl object-cover border border-white/10 bg-slate-900 shrink-0"
+                  className="w-12 h-12 rounded-xl object-cover border border-white/10 light:border-slate-200 bg-slate-900 light:bg-slate-100 shrink-0"
                 />
               ) : (
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center font-black text-white text-lg shadow-lg shrink-0">
@@ -122,18 +122,18 @@ export default function CompanyCard({
                 className="group/brand inline-flex items-center gap-1.5 text-left transition-colors focus:outline-none cursor-pointer max-w-full"
                 title="View brand details"
               >
-                <h3 className="text-sm font-extrabold text-white group-hover/brand:text-purple-300 group-hover/brand:underline underline-offset-4 decoration-purple-400/60 transition-all truncate">
+                <h3 className="text-sm font-extrabold text-white light:text-slate-900 group-hover/brand:text-purple-300 light:group-hover/brand:text-purple-600 group-hover/brand:underline underline-offset-4 decoration-purple-400/60 transition-all truncate">
                   {company.companyName}
                 </h3>
                 {company.isVerified !== false && (
                   <span title="Verified Brand">
-                    <ShieldCheck className="w-4 h-4 text-purple-400 shrink-0" />
+                    <ShieldCheck className="w-4 h-4 text-purple-400 light:text-purple-600 shrink-0" />
                   </span>
                 )}
-                <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover/brand:text-purple-300 group-hover/brand:scale-125 group-hover/brand:translate-x-0.5 group-hover/brand:-translate-y-0.5 transition-all duration-200 shrink-0" />
+                <ArrowUpRight className="w-4 h-4 text-slate-400 light:text-slate-500 group-hover/brand:text-purple-300 light:group-hover/brand:text-purple-600 group-hover/brand:scale-125 group-hover/brand:translate-x-0.5 group-hover/brand:-translate-y-0.5 transition-all duration-200 shrink-0" />
               </button>
-              <div className="flex items-center gap-2 text-[11px] text-slate-400 truncate">
-                <span className="font-bold text-slate-300 truncate">{company.industry || 'General Industry'}</span>
+              <div className="flex items-center gap-2 text-[11px] text-slate-400 light:text-slate-500 truncate">
+                <span className="font-bold text-slate-300 light:text-slate-700 truncate">{company.industry || 'General Industry'}</span>
                 {company.location && <span className="truncate">• {company.location}</span>}
               </div>
             </div>
@@ -141,7 +141,7 @@ export default function CompanyCard({
         </div>
 
         {/* Short Campaign Goal / Description */}
-        <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+        <p className="text-xs text-slate-300 light:text-slate-600 line-clamp-2 leading-relaxed">
           {company.description ||
             `Looking for content creators for ${company.primaryGoals?.join(', ') || 'brand promotion & product showcase'
             }.`}
@@ -150,14 +150,14 @@ export default function CompanyCard({
 
       {/* Footer: Budget & Pitch Action */}
       <div
-        className={`pt-3.5 border-t border-white/10 flex items-center justify-between gap-3 shrink-0 ${viewMode === 'list' ? 'md:border-t-0 md:pt-0 md:gap-6' : ''
+        className={`pt-3.5 border-t border-white/10 light:border-slate-200/90 flex items-center justify-between gap-3 shrink-0 ${viewMode === 'list' ? 'md:border-t-0 md:pt-0 md:gap-6' : ''
           }`}
       >
         <div className="min-w-0">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+          <span className="text-[10px] font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider block">
             Budget
           </span>
-          <span className="text-base sm:text-lg font-black text-white tracking-tight">
+          <span className="text-base sm:text-lg font-black text-white light:text-slate-900 tracking-tight">
             {formatBudgetCompact(company.campaignBudget)}
           </span>
         </div>
@@ -165,10 +165,10 @@ export default function CompanyCard({
         <button
           onClick={() => onPitchBrand(company)}
           type="button"
-          className="group/pitch px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 active:scale-[0.98] text-xs sm:text-sm font-extrabold text-white flex items-center gap-2 shadow-lg shadow-purple-950/60 hover:shadow-purple-900/80 hover:scale-[1.02] transition-all shrink-0 cursor-pointer"
+          className="group/pitch px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 active:scale-[0.98] text-xs sm:text-sm font-extrabold text-white keep-white flex items-center gap-2 shadow-lg shadow-purple-950/60 light:shadow-purple-500/20 hover:shadow-purple-900/80 hover:scale-[1.02] transition-all shrink-0 cursor-pointer"
         >
-          <Send className="w-3.5 h-3.5 group-hover/pitch:translate-x-1 group-hover/pitch:-translate-y-0.5 group-hover/pitch:scale-110 transition-transform duration-200" />
-          <span>Pitch Brand</span>
+          <Send className="w-3.5 h-3.5 text-white keep-white group-hover/pitch:translate-x-1 group-hover/pitch:-translate-y-0.5 group-hover/pitch:scale-110 transition-transform duration-200" />
+          <span className="text-white keep-white">Pitch Brand</span>
         </button>
       </div>
     </motion.div>

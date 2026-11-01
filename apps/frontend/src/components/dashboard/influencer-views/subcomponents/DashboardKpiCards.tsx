@@ -27,16 +27,16 @@ export default function DashboardKpiCards() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.06 }}
-            className="p-5 rounded-2xl bg-slate-950/45 border border-white/10 backdrop-blur-xl shadow-xl hover:border-purple-500/30 transition-all group"
+            className="p-5 rounded-2xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200/90 backdrop-blur-xl shadow-xl light:shadow-sm hover:border-purple-500/30 light:hover:border-purple-300 light:hover:shadow-md transition-all group"
           >
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-slate-400 group-hover:text-slate-200 transition-colors">{stat.label}</span>
-              <div className={`p-2 rounded-xl bg-slate-950/60 border border-white/10 ${stat.color}`}>
+              <span className="text-xs font-semibold text-slate-400 light:text-slate-500 group-hover:text-slate-200 light:group-hover:text-slate-800 transition-colors">{stat.label}</span>
+              <div className={`p-2 rounded-xl bg-slate-950/60 light:bg-slate-50 border border-white/10 light:border-slate-200 ${stat.color}`}>
                 <Icon className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-2xl font-black text-white">{stat.value}</div>
-            <span className="text-[11px] font-bold text-emerald-400 mt-1 inline-block">{stat.change}</span>
+            <div className="text-2xl font-black text-white light:text-slate-900">{stat.value}</div>
+            <span className="text-[11px] font-bold text-emerald-400 light:text-emerald-700 mt-1 inline-block">{stat.change}</span>
           </motion.div>
         );
       })}

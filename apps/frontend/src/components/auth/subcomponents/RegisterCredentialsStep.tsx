@@ -38,6 +38,7 @@ interface RegisterCredentialsStepProps {
   onSubmit: (e: React.FormEvent) => void;
   onBack: () => void;
   onGoogleRegister: () => void;
+  googleLoading?: boolean;
 }
 
 export default function RegisterCredentialsStep({
@@ -56,6 +57,7 @@ export default function RegisterCredentialsStep({
   onSubmit,
   onBack: _onBack,
   onGoogleRegister,
+  googleLoading = false,
 }: RegisterCredentialsStepProps) {
   const { toastSuccess, toastError } = useToast();
   const [showPassword, setShowPassword] = useState(false);
@@ -447,7 +449,11 @@ export default function RegisterCredentialsStep({
         </span>
       </div>
 
-      <AuthGoogleButton onClick={onGoogleRegister} label="Continue with Google" />
+      <AuthGoogleButton
+        onClick={onGoogleRegister}
+        label="Continue with Google"
+        isLoading={googleLoading}
+      />
     </motion.div>
   );
 }

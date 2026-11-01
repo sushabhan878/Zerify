@@ -43,12 +43,12 @@ export default function CampaignPagination({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 pb-2 border-t border-white/10">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 pb-2 border-t border-white/10 light:border-slate-200">
       {/* Result Counter Info */}
-      <div className="text-xs text-slate-400 font-medium">
-        Showing <span className="text-white font-bold">{startItem}</span> to{' '}
-        <span className="text-white font-bold">{endItem}</span> of{' '}
-        <span className="text-white font-bold">{totalItems}</span> campaigns
+      <div className="text-xs text-slate-400 light:text-slate-600 font-medium">
+        Showing <span className="text-white light:text-slate-900 font-bold">{startItem}</span> to{' '}
+        <span className="text-white light:text-slate-900 font-bold">{endItem}</span> of{' '}
+        <span className="text-white light:text-slate-900 font-bold">{totalItems}</span> campaigns
       </div>
 
       {/* Pagination Controls */}
@@ -59,7 +59,7 @@ export default function CampaignPagination({
           disabled={currentPage === 1}
           type="button"
           title="First Page"
-          className="p-2 rounded-xl bg-slate-900/80 border border-white/10 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-all"
+          className="p-2 rounded-xl bg-slate-900/80 light:bg-white border border-white/10 light:border-slate-200 text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 hover:bg-slate-800 light:hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-all"
         >
           <ChevronsLeft className="w-3.5 h-3.5" />
         </button>
@@ -70,7 +70,7 @@ export default function CampaignPagination({
           disabled={currentPage === 1}
           type="button"
           title="Previous Page"
-          className="p-2 rounded-xl bg-slate-900/80 border border-white/10 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-all"
+          className="p-2 rounded-xl bg-slate-900/80 light:bg-white border border-white/10 light:border-slate-200 text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 hover:bg-slate-800 light:hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-all"
         >
           <ChevronLeft className="w-3.5 h-3.5" />
         </button>
@@ -99,8 +99,8 @@ export default function CampaignPagination({
                 type="button"
                 className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${
                   isActive
-                    ? 'bg-purple-600/30 border border-purple-500/60 text-purple-300 shadow-md shadow-purple-950/50 scale-105'
-                    : 'bg-slate-900/60 border border-white/5 text-slate-400 hover:text-white hover:bg-slate-800'
+                    ? 'bg-purple-600/30 light:bg-purple-100 border border-purple-500/60 light:border-purple-300 text-purple-300 light:text-purple-700 shadow-md shadow-purple-950/50 light:shadow-sm scale-105'
+                    : 'bg-slate-900/60 light:bg-white border border-white/5 light:border-slate-200 text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 hover:bg-slate-800 light:hover:bg-slate-100'
                 }`}
               >
                 {pageNum}
@@ -115,7 +115,7 @@ export default function CampaignPagination({
           disabled={currentPage === totalPages}
           type="button"
           title="Next Page"
-          className="p-2 rounded-xl bg-slate-900/80 border border-white/10 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-all"
+          className="p-2 rounded-xl bg-slate-900/80 light:bg-white border border-white/10 light:border-slate-200 text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 hover:bg-slate-800 light:hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-all"
         >
           <ChevronRight className="w-3.5 h-3.5" />
         </button>
@@ -126,7 +126,7 @@ export default function CampaignPagination({
           disabled={currentPage === totalPages}
           type="button"
           title="Last Page"
-          className="p-2 rounded-xl bg-slate-900/80 border border-white/10 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-all"
+          className="p-2 rounded-xl bg-slate-900/80 light:bg-white border border-white/10 light:border-slate-200 text-slate-400 light:text-slate-600 hover:text-white light:hover:text-slate-900 hover:bg-slate-800 light:hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-all"
         >
           <ChevronsRight className="w-3.5 h-3.5" />
         </button>

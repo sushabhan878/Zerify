@@ -168,13 +168,13 @@ export default function CampaignPitchModal({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-lg max-h-[90vh] bg-slate-950/95 border border-purple-500/30 rounded-3xl shadow-2xl shadow-purple-950/50 overflow-hidden flex flex-col z-10 backdrop-blur-2xl"
+          className="relative w-full max-w-lg max-h-[90vh] bg-slate-950/95 light:bg-white border border-purple-500/30 light:border-slate-200/90 rounded-3xl shadow-2xl light:shadow-xl shadow-purple-950/50 light:shadow-slate-200/50 overflow-hidden flex flex-col z-10 backdrop-blur-2xl"
         >
           {/* Floating Close Button */}
           <button
             onClick={onClose}
             type="button"
-            className="absolute top-5 right-5 z-20 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 border border-transparent hover:border-purple-500/20 transition-all"
+            className="absolute top-5 right-5 z-20 p-2 rounded-xl text-slate-400 light:text-slate-500 hover:text-white light:hover:text-slate-900 hover:bg-slate-800/80 light:hover:bg-slate-100 border border-transparent hover:border-purple-500/20 light:hover:border-slate-200 transition-all"
           >
             <X className="w-4 h-4" />
           </button>
@@ -184,28 +184,28 @@ export default function CampaignPitchModal({
             {/* Header Title with AI Enhance */}
             <div className="flex items-center justify-between pt-1">
               <div>
-                <h3 className="text-base font-black text-white">Apply to Campaign</h3>
-                <p className="text-[11px] text-slate-400">Pitch to <strong className="text-purple-300">{campaign.brandName}</strong></p>
+                <h3 className="text-base font-black text-white light:text-slate-900">Apply to Campaign</h3>
+                <p className="text-[11px] text-slate-400 light:text-slate-500">Pitch to <strong className="text-purple-300 light:text-purple-700">{campaign.brandName}</strong></p>
               </div>
 
               <button
                 type="button"
                 onClick={handleGenerateAiPitch}
                 disabled={isGeneratingAi}
-                className="text-[11px] text-purple-300 hover:text-purple-200 font-bold flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-950/60 border border-purple-500/30 hover:border-purple-400/50 transition-all shadow-sm mr-8"
+                className="text-[11px] text-purple-300 light:text-purple-700 hover:text-purple-200 light:hover:text-purple-800 font-bold flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-950/60 light:bg-purple-50 border border-purple-500/30 light:border-purple-200 hover:border-purple-400/50 light:hover:border-purple-300 transition-all shadow-sm mr-8"
               >
-                <Sparkles className={`w-3 h-3 text-purple-300 ${isGeneratingAi ? 'animate-spin' : ''}`} />
+                <Sparkles className={`w-3 h-3 text-purple-300 light:text-purple-600 ${isGeneratingAi ? 'animate-spin' : ''}`} />
                 <span>{isGeneratingAi ? 'Drafting...' : 'AI Enhance Pitch'}</span>
               </button>
             </div>
 
             {/* Proposed Rate */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 light:text-slate-500 block">
                 Your Proposed Fee ({currencyLabel})
               </label>
               <div className="relative">
-                <span className="w-5 h-5 flex items-center justify-center text-purple-400 font-black text-sm absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                <span className="w-5 h-5 flex items-center justify-center text-purple-400 light:text-purple-600 font-black text-sm absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
                   {currencySymbol}
                 </span>
                 <input
@@ -214,21 +214,21 @@ export default function CampaignPitchModal({
                   value={proposedRate}
                   onChange={(e) => setProposedRate(e.target.value)}
                   placeholder={isRupee ? 'e.g. 50,000' : 'e.g. 1,500'}
-                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-900/80 border border-purple-500/20 hover:border-purple-500/40 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-400 font-bold transition-colors"
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-900/80 light:bg-slate-50 border border-purple-500/20 light:border-slate-200 hover:border-purple-500/40 light:hover:border-slate-300 text-xs text-white light:text-slate-900 placeholder:text-slate-500 light:placeholder:text-slate-400 focus:outline-none focus:border-purple-400 light:focus:border-purple-500 font-bold transition-colors"
                 />
               </div>
-              <span className="text-[11px] text-slate-400 block pt-0.5">
-                Brand budget guide: <strong className="text-purple-300 font-bold">{campaign.payoutAmount}</strong>
+              <span className="text-[11px] text-slate-400 light:text-slate-500 block pt-0.5">
+                Brand budget guide: <strong className="text-purple-300 light:text-purple-700 font-bold">{campaign.payoutAmount}</strong>
               </span>
             </div>
 
             {/* 1. Application Pitch (300 Char Limit) */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 light:text-slate-500">
                   Application Pitch
                 </label>
-                <span className={`text-[10.5px] font-semibold ${pitchMessage.length >= 280 ? 'text-amber-400' : 'text-slate-500'}`}>
+                <span className={`text-[10.5px] font-semibold ${pitchMessage.length >= 280 ? 'text-amber-400 light:text-amber-600' : 'text-slate-500 light:text-slate-400'}`}>
                   {pitchMessage.length}/300
                 </span>
               </div>
@@ -239,17 +239,17 @@ export default function CampaignPitchModal({
                 value={pitchMessage}
                 onChange={(e) => setPitchMessage(e.target.value)}
                 placeholder="Briefly state why you're a great fit for this campaign (max 300 characters)..."
-                className="w-full px-4 py-2.5 rounded-2xl bg-slate-900/80 border border-purple-500/20 hover:border-purple-500/40 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-400 resize-none leading-relaxed transition-colors"
+                className="w-full px-4 py-2.5 rounded-2xl bg-slate-900/80 light:bg-slate-50 border border-purple-500/20 light:border-slate-200 hover:border-purple-500/40 light:hover:border-slate-300 text-xs text-white light:text-slate-900 placeholder:text-slate-500 light:placeholder:text-slate-400 focus:outline-none focus:border-purple-400 light:focus:border-purple-500 resize-none leading-relaxed transition-colors"
               />
             </div>
 
             {/* 2. Proposed Content Concept (300 Char Limit) */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 light:text-slate-500">
                   Proposed Content Concept
                 </label>
-                <span className={`text-[10.5px] font-semibold ${contentIdea.length >= 280 ? 'text-amber-400' : 'text-slate-500'}`}>
+                <span className={`text-[10.5px] font-semibold ${contentIdea.length >= 280 ? 'text-amber-400 light:text-amber-600' : 'text-slate-500 light:text-slate-400'}`}>
                   {contentIdea.length}/300
                 </span>
               </div>
@@ -259,46 +259,46 @@ export default function CampaignPitchModal({
                 value={contentIdea}
                 onChange={(e) => setContentIdea(e.target.value)}
                 placeholder="Describe the format, hooks, storytelling flow, or deliverables concept (max 300 characters)..."
-                className="w-full px-4 py-2.5 rounded-2xl bg-slate-900/80 border border-purple-500/20 hover:border-purple-500/40 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-400 resize-none leading-relaxed transition-colors"
+                className="w-full px-4 py-2.5 rounded-2xl bg-slate-900/80 light:bg-slate-50 border border-purple-500/20 light:border-slate-200 hover:border-purple-500/40 light:hover:border-slate-300 text-xs text-white light:text-slate-900 placeholder:text-slate-500 light:placeholder:text-slate-400 focus:outline-none focus:border-purple-400 light:focus:border-purple-500 resize-none leading-relaxed transition-colors"
               />
             </div>
 
             {/* Sample Link */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
-                Past Relevant Content / Reel Link <span className="text-slate-500 font-normal lowercase">(optional)</span>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 light:text-slate-500 block">
+                Past Relevant Content / Reel Link <span className="text-slate-500 light:text-slate-400 font-normal lowercase">(optional)</span>
               </label>
               <div className="relative">
-                <LinkIcon className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <LinkIcon className="w-4 h-4 text-slate-500 light:text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="url"
                   value={sampleLink}
                   onChange={(e) => setSampleLink(e.target.value)}
                   placeholder="https://instagram.com/reel/... or https://youtube.com/watch?v=..."
-                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-900/80 border border-purple-500/20 hover:border-purple-500/40 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-400 transition-colors"
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-900/80 light:bg-slate-50 border border-purple-500/20 light:border-slate-200 hover:border-purple-500/40 light:hover:border-slate-300 text-xs text-white light:text-slate-900 placeholder:text-slate-500 light:placeholder:text-slate-400 focus:outline-none focus:border-purple-400 light:focus:border-purple-500 transition-colors"
                 />
               </div>
             </div>
 
             {/* Custom Delivery Timeline Dropdown */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 light:text-slate-500 block">
                 Delivery Timeline
               </label>
               <div className="relative">
                 <button
                   type="button"
                   onClick={() => setIsTimelineDropdownOpen(!isTimelineDropdownOpen)}
-                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-900/80 border border-purple-500/20 hover:border-purple-500/40 text-xs text-white focus:outline-none focus:border-purple-400 transition-colors flex items-center justify-between text-left"
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-900/80 light:bg-slate-50 border border-purple-500/20 light:border-slate-200 hover:border-purple-500/40 light:hover:border-slate-300 text-xs text-white light:text-slate-900 focus:outline-none focus:border-purple-400 light:focus:border-purple-500 transition-colors flex items-center justify-between text-left"
                 >
-                  <Clock className="w-4 h-4 text-purple-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  <span className="font-semibold text-slate-200">{selectedTimelineObj.label}</span>
-                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isTimelineDropdownOpen ? 'rotate-180' : ''}`} />
+                  <Clock className="w-4 h-4 text-purple-400 light:text-purple-600 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <span className="font-semibold text-slate-200 light:text-slate-800">{selectedTimelineObj.label}</span>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 light:text-slate-500 transition-transform ${isTimelineDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* Dropdown Menu */}
                 {isTimelineDropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-slate-950 border border-purple-500/30 rounded-2xl shadow-2xl p-1.5 z-30 space-y-1 backdrop-blur-2xl">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-slate-950 light:bg-white border border-purple-500/30 light:border-slate-200 rounded-2xl shadow-2xl light:shadow-lg p-1.5 z-30 space-y-1 backdrop-blur-2xl">
                     {TIMELINE_OPTIONS.map((opt) => (
                       <button
                         key={opt.value}
@@ -308,12 +308,12 @@ export default function CampaignPitchModal({
                           setIsTimelineDropdownOpen(false);
                         }}
                         className={`w-full px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between transition-colors ${turnaroundDays === opt.value
-                            ? 'bg-purple-500/20 text-purple-200 font-bold border border-purple-500/30'
-                            : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                            ? 'bg-purple-500/20 light:bg-purple-50 text-purple-200 light:text-purple-700 font-bold border border-purple-500/30 light:border-purple-200'
+                            : 'text-slate-300 light:text-slate-700 hover:bg-slate-900 light:hover:bg-slate-50 hover:text-white light:hover:text-slate-900'
                           }`}
                       >
                         <span>{opt.label}</span>
-                        {turnaroundDays === opt.value && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                        {turnaroundDays === opt.value && <Check className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 shrink-0" />}
                       </button>
                     ))}
                   </div>
@@ -326,26 +326,26 @@ export default function CampaignPitchModal({
               <div
                 onClick={() => setNeedsShipping(!needsShipping)}
                 className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start gap-3.5 select-none ${needsShipping
-                    ? 'bg-purple-950/30 border-purple-500/40 shadow-sm'
-                    : 'bg-slate-900/40 border-purple-500/15 hover:border-purple-500/30'
+                    ? 'bg-purple-950/30 light:bg-purple-50/70 border-purple-500/40 light:border-purple-300 shadow-sm'
+                    : 'bg-slate-900/40 light:bg-slate-50 border-purple-500/15 light:border-slate-200 hover:border-purple-500/30 light:hover:border-slate-300'
                   }`}
               >
                 {/* Custom Checkbox Indicator */}
                 <div
                   className={`w-5 h-5 rounded-lg border shrink-0 mt-0.5 flex items-center justify-center transition-colors ${needsShipping
                       ? 'bg-gradient-to-tr from-purple-600 to-indigo-600 border-purple-400 text-white shadow-sm'
-                      : 'border-slate-600 bg-slate-900'
+                      : 'border-slate-600 light:border-slate-300 bg-slate-900 light:bg-white'
                     }`}
                 >
-                  {needsShipping && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                  {needsShipping && <Check className="w-3.5 h-3.5 stroke-[3] text-white" />}
                 </div>
 
                 <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <Gift className="w-3.5 h-3.5 text-purple-300" />
+                  <span className="text-xs font-bold text-white light:text-slate-900 flex items-center gap-1.5">
+                    <Gift className="w-3.5 h-3.5 text-purple-300 light:text-purple-600" />
                     <span>Confirm Free Product Delivery</span>
                   </span>
-                  <span className="text-[11px] text-slate-400 block leading-relaxed">
+                  <span className="text-[11px] text-slate-400 light:text-slate-600 block leading-relaxed">
                     Product sample will be dispatched to your verified creator shipping address upon brand acceptance.
                   </span>
                 </div>
@@ -353,8 +353,8 @@ export default function CampaignPitchModal({
             )}
 
             {campaign.daysRemaining === 0 && campaign.deadline !== 'Rolling Deadline' && (
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
-                <Clock className="w-4 h-4 shrink-0 text-amber-400" />
+              <div className="p-3 rounded-xl bg-amber-500/10 light:bg-amber-50 border border-amber-500/30 light:border-amber-200 text-amber-300 light:text-amber-800 text-xs flex items-center gap-2">
+                <Clock className="w-4 h-4 shrink-0 text-amber-400 light:text-amber-600" />
                 <span>The deadline for this campaign has closed ({campaign.deadline}). New applications are no longer accepted.</span>
               </div>
             )}
@@ -364,7 +364,7 @@ export default function CampaignPitchModal({
               <button
                 type="submit"
                 disabled={isSubmitting || (campaign.daysRemaining === 0 && campaign.deadline !== 'Rolling Deadline')}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs sm:text-sm font-bold shadow-xl shadow-purple-950/50 flex items-center justify-center gap-2 transition-all disabled:opacity-50 hover:scale-[1.01] active:scale-[0.99]"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white keep-white text-xs sm:text-sm font-bold shadow-xl shadow-purple-950/50 flex items-center justify-center gap-2 transition-all disabled:opacity-50 hover:scale-[1.01] active:scale-[0.99]"
               >
                 {isSubmitting ? (
                   <>

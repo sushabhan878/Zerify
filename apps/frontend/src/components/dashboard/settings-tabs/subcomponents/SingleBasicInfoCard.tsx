@@ -132,32 +132,32 @@ export default function SingleBasicInfoCard({
   }, [currencies]);
 
   return (
-    <div className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-5 shadow-xl">
+    <div className="p-5 sm:p-6 rounded-xl bg-slate-950/45 light:bg-white border border-white/10 light:border-slate-200/90 backdrop-blur-xl space-y-5 shadow-xl light:shadow-sm">
       {/* 1. Identity & Profile Photo Header */}
-      <div className="flex items-center gap-4 pb-3 border-b border-white/10">
+      <div className="flex items-center gap-4 pb-3 border-b border-white/10 light:border-slate-100">
         {/* Avatar Box */}
         <div
           onClick={() => fileInputRef.current?.click()}
           className="relative group shrink-0 cursor-pointer"
         >
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-purple-950/30 border-2 border-purple-500/40 overflow-hidden flex items-center justify-center shadow-md group-hover:border-purple-400 transition-colors">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-purple-950/30 light:bg-purple-50 border-2 border-purple-500/40 light:border-purple-200 overflow-hidden flex items-center justify-center shadow-md group-hover:border-purple-400 light:group-hover:border-purple-400 transition-colors">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
                 alt={name || 'Creator Avatar'}
-                className="w-full h-full object-cover rounded-full bg-slate-900"
+                className="w-full h-full object-cover rounded-full bg-slate-900 light:bg-slate-100"
               />
             ) : (
-              <User className="w-7 h-7 text-purple-400 group-hover:scale-105 transition-transform" />
+              <User className="w-7 h-7 text-purple-400 light:text-purple-600 group-hover:scale-105 transition-transform" />
             )}
           </div>
 
           {/* Camera Badge */}
           <div
-            className="absolute bottom-0 right-0 p-1.5 rounded-full bg-purple-600 hover:bg-purple-500 text-white shadow-md border-2 border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110"
+            className="absolute bottom-0 right-0 p-1.5 rounded-full bg-purple-600 hover:bg-purple-500 text-white shadow-md border-2 border-slate-950 light:border-white flex items-center justify-center transition-transform group-hover:scale-110"
             title="Upload Photo from Device"
           >
-            <Camera className="w-3 h-3" />
+            <Camera className="w-3 h-3 text-white" />
           </div>
           <input
             ref={fileInputRef}
@@ -180,15 +180,15 @@ export default function SingleBasicInfoCard({
                 onBlur={() => setIsEditingNameInline(false)}
                 onKeyDown={(e) => e.key === 'Enter' && setIsEditingNameInline(false)}
                 placeholder="Enter Full Name"
-                className="bg-slate-900 border border-purple-500 rounded-lg px-2.5 py-1 text-sm font-bold text-white focus:outline-none"
+                className="bg-slate-900 light:bg-white border border-purple-500 rounded-lg px-2.5 py-1 text-sm font-bold text-white light:text-slate-900 focus:outline-none"
               />
             ) : (
-              <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+              <h2 className="text-base font-bold text-white light:text-slate-900 tracking-tight flex items-center gap-2">
                 <span>{name || 'Full Name'}</span>
                 <button
                   type="button"
                   onClick={handlePencilClick}
-                  className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-purple-300 transition-colors cursor-pointer"
+                  className="p-1 rounded-lg hover:bg-white/10 light:hover:bg-slate-100 text-slate-400 light:text-slate-500 hover:text-purple-300 light:hover:text-purple-700 transition-colors cursor-pointer"
                   title="Edit Name"
                 >
                   <Pencil className="w-3.5 h-3.5" />
@@ -197,22 +197,22 @@ export default function SingleBasicInfoCard({
             )}
           </div>
 
-          <p className="text-xs text-slate-400 flex items-center gap-2 font-medium">
-            <span className="text-purple-300 font-semibold">{handle ? `@${handle.replace(/^@/, '')}` : '@handle'}</span>
+          <p className="text-xs text-slate-400 light:text-slate-500 flex items-center gap-2 font-medium">
+            <span className="text-purple-300 light:text-purple-700 font-semibold">{handle ? `@${handle.replace(/^@/, '')}` : '@handle'}</span>
             <span>•</span>
             <span className="flex items-center gap-1">
-              <MapPin className="w-3 h-3 text-slate-500" />
+              <MapPin className="w-3 h-3 text-slate-500 light:text-slate-400" />
               {location ? formatFirstLocation(location) : 'Location not set'}
             </span>
           </p>
 
           <div className="flex items-center gap-3 pt-0.5">
-            <span className="text-[11px] text-slate-500">JPG, PNG or GIF. Rec. 400x400px.</span>
+            <span className="text-[11px] text-slate-500 light:text-slate-400">JPG, PNG or GIF. Rec. 400x400px.</span>
             {avatarUrl && (
               <button
                 type="button"
                 onClick={onRemoveAvatar}
-                className="text-[11px] font-semibold text-pink-400 hover:text-pink-300 transition-colors"
+                className="text-[11px] font-semibold text-pink-400 light:text-pink-600 hover:text-pink-300 light:hover:text-pink-700 transition-colors cursor-pointer"
               >
                 Remove Photo
               </button>
@@ -224,23 +224,23 @@ export default function SingleBasicInfoCard({
       {/* 2. Username / Handle & Contact Number (Side by side at top) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
+          <label className="text-[11px] font-semibold text-slate-400/80 light:text-slate-600 uppercase tracking-wider block mb-1.5">
             Username / Handle
           </label>
           <div className="relative">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500/70 text-xs font-semibold">@</span>
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500/70 light:text-slate-400 text-xs font-semibold">@</span>
             <input
               type="text"
               value={handle}
               onChange={(e) => setHandle(e.target.value)}
               placeholder="username"
-              className="w-full pl-8 pr-3.5 py-2.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs text-white placeholder:text-slate-600/70 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all font-medium shadow-inner"
+              className="w-full pl-8 pr-3.5 py-2.5 rounded-lg bg-slate-950/70 light:bg-white border border-white/10 light:border-slate-200 text-xs text-white light:text-slate-900 placeholder:text-slate-600/70 light:placeholder:text-slate-400 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all font-medium shadow-inner light:shadow-sm"
             />
           </div>
         </div>
 
         <div>
-          <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
+          <label className="text-[11px] font-semibold text-slate-400/80 light:text-slate-600 uppercase tracking-wider block mb-1.5">
             Contact Number
           </label>
           <div className="flex gap-2">
@@ -255,13 +255,13 @@ export default function SingleBasicInfoCard({
               showCheckmark={false}
             />
             <div className="relative flex-1 min-w-0">
-              <Phone className="w-4 h-4 text-slate-500/70 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Phone className="w-4 h-4 text-slate-500/70 light:text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="415-555-0192"
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs text-white placeholder:text-slate-600/70 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all font-medium shadow-inner"
+                className="w-full pl-10 pr-3.5 py-2.5 rounded-lg bg-slate-950/70 light:bg-white border border-white/10 light:border-slate-200 text-xs text-white light:text-slate-900 placeholder:text-slate-600/70 light:placeholder:text-slate-400 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all font-medium shadow-inner light:shadow-sm"
               />
             </div>
           </div>
@@ -270,7 +270,7 @@ export default function SingleBasicInfoCard({
 
       {/* 3. Bio & Creative Pitch */}
       <div>
-        <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
+        <label className="text-[11px] font-semibold text-slate-400/80 light:text-slate-600 uppercase tracking-wider block mb-1.5">
           Bio & Creative Pitch
         </label>
         <textarea
@@ -278,9 +278,9 @@ export default function SingleBasicInfoCard({
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           placeholder="e.g. Content creator focused on tech gadgets, productivity workflows, and modern lifestyle aesthetics..."
-          className="w-full px-3.5 py-2.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs text-white placeholder:text-slate-600/70 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all leading-relaxed shadow-inner resize-none"
+          className="w-full px-3.5 py-2.5 rounded-lg bg-slate-950/70 light:bg-white border border-white/10 light:border-slate-200 text-xs text-white light:text-slate-900 placeholder:text-slate-600/70 light:placeholder:text-slate-400 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all leading-relaxed shadow-inner light:shadow-sm resize-none"
         />
-        <span className="text-[10px] text-slate-500/80 font-medium block text-right mt-1">
+        <span className="text-[10px] text-slate-500/80 light:text-slate-400 font-medium block text-right mt-1">
           {bio.length} / 300 characters
         </span>
       </div>
@@ -288,7 +288,7 @@ export default function SingleBasicInfoCard({
       {/* 4. Location with Auto-Suggestions & Email Address */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
+          <label className="text-[11px] font-semibold text-slate-400/80 light:text-slate-600 uppercase tracking-wider block mb-1.5">
             Location (City / Region)
           </label>
           <LocationAutocomplete
@@ -299,16 +299,16 @@ export default function SingleBasicInfoCard({
         </div>
 
         <div>
-          <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
+          <label className="text-[11px] font-semibold text-slate-400/80 light:text-slate-600 uppercase tracking-wider block mb-1.5">
             Email Address
           </label>
           <div className="relative">
-            <Mail className="w-4 h-4 text-slate-500/70 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Mail className="w-4 h-4 text-slate-500/70 light:text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="email"
               defaultValue={userEmail}
               readOnly
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-lg bg-slate-950/40 border border-white/5 text-xs text-slate-400/80 cursor-not-allowed font-medium"
+              className="w-full pl-10 pr-3.5 py-2.5 rounded-lg bg-slate-950/40 light:bg-slate-100 border border-white/5 light:border-slate-200 text-xs text-slate-400/80 light:text-slate-600 cursor-not-allowed font-medium"
             />
           </div>
         </div>
@@ -317,7 +317,7 @@ export default function SingleBasicInfoCard({
       {/* 5. DOB, Gender Selection & Preferred Currency */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
+          <label className="text-[11px] font-semibold text-slate-400/80 light:text-slate-600 uppercase tracking-wider block mb-1.5">
             Date of Birth (DOB)
           </label>
           <CustomDatePicker
@@ -325,30 +325,30 @@ export default function SingleBasicInfoCard({
             onChange={setDob}
             placeholder="Select date of birth..."
             position="top"
-            iconLeft={<Calendar className="w-4 h-4 text-purple-400" />}
+            iconLeft={<Calendar className="w-4 h-4 text-purple-400 light:text-purple-600" />}
             className="w-full"
           />
         </div>
 
         <div>
-          <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block mb-1.5">
+          <label className="text-[11px] font-semibold text-slate-400/80 light:text-slate-600 uppercase tracking-wider block mb-1.5">
             Gender Identity
           </label>
           <CustomSelect
             options={genderOptions}
             value={gender}
             onChange={setGender}
-            iconLeft={<Users className="w-4 h-4 text-purple-400" />}
+            iconLeft={<Users className="w-4 h-4 text-purple-400 light:text-purple-600" />}
             placement="top"
           />
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-[11px] font-semibold text-slate-400/80 uppercase tracking-wider block">
+            <label className="text-[11px] font-semibold text-slate-400/80 light:text-slate-600 uppercase tracking-wider block">
               Preferred Currency
             </label>
-            <span className="text-[10px] text-purple-400 font-medium">Default: INR (₹)</span>
+            <span className="text-[10px] text-purple-400 light:text-purple-700 font-medium">Default: INR (₹)</span>
           </div>
           <CustomSelect
             options={currencyOptions}
@@ -370,7 +370,7 @@ export default function SingleBasicInfoCard({
                 'Coming Soon'
               );
             }}
-            iconLeft={<Coins className="w-4 h-4 text-purple-400" />}
+            iconLeft={<Coins className="w-4 h-4 text-purple-400 light:text-purple-600" />}
             placement="top"
             searchable={true}
             searchPlaceholder="Search currency..."
