@@ -75,7 +75,7 @@ export default function MessagingWorkspace({ role }: { role: 'BRAND' | 'INFLUENC
     counterpartId && typingPeers[counterpartId] ? active?.counterpart?.name ?? 'They' : null;
 
   return (
-    <div className="h-[calc(100vh-175px)] min-h-[560px] md:min-h-[620px] w-full rounded-3xl bg-slate-900/60 border border-white/10 backdrop-blur-xl flex flex-col md:flex-row overflow-hidden shadow-xl shadow-purple-950/10">
+    <div className="h-[calc(100vh-175px)] min-h-[560px] md:min-h-[620px] w-full rounded-3xl bg-slate-900/60 border border-white/10 backdrop-blur-xl flex flex-col md:flex-row overflow-hidden shadow-xl shadow-purple-950/10 light:bg-white light:border-slate-200/80 light:shadow-sm">
       <div className={`${active ? 'hidden md:flex' : 'flex'} min-h-0`}>
         <ConversationSidebar
           conversations={visible}
@@ -91,7 +91,7 @@ export default function MessagingWorkspace({ role }: { role: 'BRAND' | 'INFLUENC
         />
       </div>
 
-      <div className="flex-1 flex flex-col justify-between bg-slate-950/30 min-h-0">
+      <div className="flex-1 flex flex-col justify-between bg-slate-950/30 light:bg-slate-50/50 min-h-0">
         {active ? (
           <>
             <ConversationHeader

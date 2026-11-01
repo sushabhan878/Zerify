@@ -39,10 +39,10 @@ export default function ConversationListItem({
   return (
     <button
       onClick={onSelect}
-      className={`w-full text-left py-2 px-2.5 sm:px-3 rounded-2xl transition-all flex items-center gap-2.5 relative border ${
+      className={`w-full text-left py-2 px-2.5 sm:px-3 rounded-2xl transition-all flex items-center gap-2.5 relative border cursor-pointer ${
         active
-          ? 'bg-gradient-to-r from-purple-600/25 via-purple-600/10 to-transparent border-purple-500/40 shadow-md shadow-purple-950/30'
-          : 'border-transparent hover:bg-white/5 hover:border-white/10'
+          ? 'bg-gradient-to-r from-purple-600/25 via-purple-600/10 to-transparent border-purple-500/40 shadow-md shadow-purple-950/30 light:from-purple-50 light:via-purple-50/50 light:to-transparent light:border-purple-200 light:shadow-sm'
+          : 'border-transparent hover:bg-white/5 hover:border-white/10 light:hover:bg-slate-50 light:hover:border-slate-200/60'
       }`}
     >
       {active && (
@@ -60,7 +60,7 @@ export default function ConversationListItem({
         <div className="flex items-center justify-between gap-2 min-w-0">
           <span
             className={`text-sm font-bold truncate leading-tight ${
-              unread > 0 ? 'text-white font-extrabold' : 'text-slate-100'
+              unread > 0 ? 'text-white font-extrabold light:text-slate-900' : 'text-slate-100 light:text-slate-800'
             }`}
             title={name}
           >
@@ -74,7 +74,7 @@ export default function ConversationListItem({
             )}
             <span
               className={`text-[10px] font-medium shrink-0 leading-none ${
-                unread > 0 ? 'text-purple-300 font-bold' : 'text-slate-500'
+                unread > 0 ? 'text-purple-300 light:text-purple-700 font-bold' : 'text-slate-500 light:text-slate-400'
               }`}
             >
               {relativeTime(conversation.lastMessageAt)}
@@ -85,7 +85,7 @@ export default function ConversationListItem({
         {/* Line 2: Campaign title in simple text (One-liner, truncated) */}
         {subtitle && (
           <p
-            className="text-xs text-slate-400 font-normal truncate mt-0.5 leading-tight"
+            className="text-xs text-slate-400 light:text-slate-500 font-normal truncate mt-0.5 leading-tight"
             title={subtitle}
           >
             {subtitle}

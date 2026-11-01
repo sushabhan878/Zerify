@@ -50,7 +50,7 @@ export default function MessageBubble({
       className={`flex flex-col ${own ? 'items-end' : 'items-start'} ${grouped ? 'mt-0.5' : 'mt-2.5'}`}
     >
       {!own && !grouped && message.sender?.name && (
-        <span className="text-[11px] font-bold text-purple-300/90 mb-1 ml-1 select-none">
+        <span className="text-[11px] font-bold text-purple-300/90 light:text-purple-700 mb-1 ml-1 select-none">
           {message.sender.name}
         </span>
       )}
@@ -58,8 +58,8 @@ export default function MessageBubble({
       <div
         className={`max-w-[85%] sm:max-w-md px-3.5 py-2.5 text-xs space-y-1.5 ${corner} ${
           own
-            ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-950/40'
-            : 'bg-slate-900/90 border border-white/10 text-slate-100 shadow-md'
+            ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white keep-white shadow-lg shadow-purple-950/40'
+            : 'bg-slate-900/90 border border-white/10 text-slate-100 light:bg-white light:border-slate-200/80 light:text-slate-900 shadow-md light:shadow-sm'
         } ${failed ? 'ring-1 ring-rose-500/60' : ''}`}
       >
         {message.content && (
@@ -75,7 +75,7 @@ export default function MessageBubble({
 
         <div
           className={`flex items-center justify-end gap-1.5 text-[9.5px] font-semibold pt-0.5 ${
-            own ? 'text-white/70' : 'text-slate-500'
+            own ? 'text-white/70 keep-white' : 'text-slate-500 light:text-slate-400'
           }`}
         >
           {failed && message.clientMessageId && (

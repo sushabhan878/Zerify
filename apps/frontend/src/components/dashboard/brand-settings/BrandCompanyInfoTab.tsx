@@ -313,7 +313,7 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
   };
 
   return (
-    <form onSubmit={handleSave} className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-5 shadow-xl">
+    <form onSubmit={handleSave} className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-5 shadow-xl light:bg-white light:border-slate-200/80 light:shadow-sm">
 
       {/* Minimal Brand Identity Header with Default Building Logo */}
       <div className="flex items-center gap-4 pb-2">
@@ -322,7 +322,7 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
           onClick={() => fileInputRef.current?.click()}
           className="relative group shrink-0 cursor-pointer"
         >
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-purple-950/30 border border-purple-500/30 overflow-hidden flex items-center justify-center shadow-inner group-hover:border-purple-400 transition-colors">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-purple-950/30 border border-purple-500/30 overflow-hidden flex items-center justify-center shadow-inner group-hover:border-purple-400 light:bg-purple-50 light:border-purple-200 transition-colors">
             {logoUrl ? (
               <img
                 src={logoUrl}
@@ -330,13 +330,13 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
                 className="w-full h-full object-cover rounded-xl bg-slate-900"
               />
             ) : (
-              <Building2 className="w-7 h-7 text-purple-400 group-hover:scale-105 transition-transform" />
+              <Building2 className="w-7 h-7 text-purple-400 light:text-purple-600 group-hover:scale-105 transition-transform" />
             )}
           </div>
 
           {/* Camera Badge */}
           <div
-            className="absolute -bottom-1 -right-1 p-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white shadow-md border border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110"
+            className="absolute -bottom-1 -right-1 p-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white keep-white shadow-md border border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110"
             title="Upload Logo from Device"
           >
             {isUploadingLogo ? <Loader2 className="w-3 h-3 animate-spin" /> : <Camera className="w-3 h-3" />}
@@ -362,15 +362,15 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
                 onBlur={() => setIsEditingNameInline(false)}
                 onKeyDown={(e) => e.key === 'Enter' && setIsEditingNameInline(false)}
                 placeholder="Enter Company / Brand Name"
-                className="bg-slate-900 border border-purple-500 rounded-lg px-2.5 py-1 text-sm font-bold text-white focus:outline-none"
+                className="bg-slate-900 border border-purple-500 rounded-lg px-2.5 py-1 text-sm font-bold text-white light:bg-white light:border-purple-500 light:text-slate-900 focus:outline-none"
               />
             ) : (
-              <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+              <h2 className="text-base font-bold text-white light:text-slate-900 tracking-tight flex items-center gap-2">
                 <span>{companyName || 'My Company Name'}</span>
                 <button
                   type="button"
                   onClick={handlePencilClick}
-                  className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-purple-300 transition-colors cursor-pointer"
+                  className="p-1 rounded-lg hover:bg-white/10 light:hover:bg-slate-100 text-slate-400 hover:text-purple-300 light:hover:text-purple-600 transition-colors cursor-pointer"
                   title="Edit Brand Name"
                 >
                   <Pencil className="w-3.5 h-3.5" />
@@ -379,7 +379,7 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
             )}
           </div>
 
-          <p className="text-xs text-slate-400 flex items-center gap-2 font-medium">
+          <p className="text-xs text-slate-400 light:text-slate-500 flex items-center gap-2 font-medium">
             <span>{industry || 'Category not set'}</span>
             <span>•</span>
             <span className="flex items-center gap-1">
@@ -393,7 +393,7 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
       {/* Grid Form Fields */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1.5">Website URL</label>
+          <label className="block text-xs font-semibold text-slate-300 light:text-slate-700 mb-1.5">Website URL</label>
           <div className="relative">
             <Globe className="w-3.5 h-3.5 absolute left-3 top-3 text-slate-400" />
             <input
@@ -401,26 +401,26 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
               placeholder="https://acmewear.com"
-              className="w-full bg-slate-950/80 border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              className="w-full bg-slate-950/80 border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 light:bg-slate-50 light:border-slate-200 light:text-slate-900 light:placeholder-slate-400 light:focus:bg-white focus:outline-none focus:border-purple-500"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1.5">Industry Sector</label>
+          <label className="block text-xs font-semibold text-slate-300 light:text-slate-700 mb-1.5">Industry Sector</label>
           <CustomSelect
             options={EXTENSIVE_INDUSTRY_OPTIONS}
             value={industry}
             onChange={(val) => setIndustry(val)}
             searchable
             searchPlaceholder="Search 40+ industry sectors..."
-            iconLeft={<Building2 className="w-3.5 h-3.5 text-purple-400" />}
+            iconLeft={<Building2 className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />}
             dropdownHeight="max-h-64"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1.5">HQ Location</label>
+          <label className="block text-xs font-semibold text-slate-300 light:text-slate-700 mb-1.5">HQ Location</label>
           <LocationAutocomplete
             value={location}
             onChange={(val) => setLocation(val)}
@@ -429,7 +429,7 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1.5">Founded Year</label>
+          <label className="block text-xs font-semibold text-slate-300 light:text-slate-700 mb-1.5">Founded Year</label>
           <div className="relative">
             <Calendar className="w-3.5 h-3.5 absolute left-3 top-3 text-slate-400" />
             <input
@@ -437,15 +437,15 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
               value={foundedYear}
               onChange={(e) => setFoundedYear(e.target.value)}
               placeholder="e.g. 2021"
-              className="w-full bg-slate-950/80 border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              className="w-full bg-slate-950/80 border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 light:bg-slate-50 light:border-slate-200 light:text-slate-900 light:placeholder-slate-400 light:focus:bg-white focus:outline-none focus:border-purple-500"
             />
           </div>
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-semibold text-slate-300">Billing &amp; Platform Currency</label>
-            <span className="text-[10px] text-purple-400 font-medium">Default: INR (₹)</span>
+            <label className="block text-xs font-semibold text-slate-300 light:text-slate-700">Billing &amp; Platform Currency</label>
+            <span className="text-[10px] text-purple-400 light:text-purple-600 font-medium">Default: INR (₹)</span>
           </div>
           <CustomSelect
             options={currencyOptions}
@@ -461,11 +461,11 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
             onDisabledSelect={(opt) => {
               toastError(`Coming Soon: ${opt.value} billing is coming soon! Platform billing & escrow currently operates exclusively in INR (₹).`);
             }}
-            iconLeft={<Coins className="w-4 h-4 text-purple-400" />}
+            iconLeft={<Coins className="w-4 h-4 text-purple-400 light:text-purple-600" />}
             searchable={true}
             searchPlaceholder="Search currency (INR, USD, EUR...)..."
           />
-          <p className="text-[10px] text-slate-400 mt-1">
+          <p className="text-[10px] text-slate-400 light:text-slate-500 mt-1">
             All campaign budgets, escrow deposits, and creator payouts are settled in INR (₹).
           </p>
         </div>
@@ -473,19 +473,19 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
 
       {/* Description */}
       <div>
-        <label className="block text-xs font-semibold text-slate-300 mb-1.5">Brand Description</label>
+        <label className="block text-xs font-semibold text-slate-300 light:text-slate-700 mb-1.5">Brand Description</label>
         <textarea
           rows={3}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Brief summary of your brand story, mission, and key offerings..."
-          className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 resize-none"
+          className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 light:bg-slate-50 light:border-slate-200 light:text-slate-900 light:placeholder-slate-400 light:focus:bg-white focus:outline-none focus:border-purple-500 resize-none"
         />
       </div>
 
       {/* Brand Values */}
       <div>
-        <label className="block text-xs font-semibold text-slate-300 mb-2">Brand Core Values</label>
+        <label className="block text-xs font-semibold text-slate-300 light:text-slate-700 mb-2">Brand Core Values</label>
         <div className="flex flex-wrap gap-2">
           {BRAND_VALUES_OPTIONS.map((val) => {
             const isSelected = selectedValues.includes(val);
@@ -495,11 +495,11 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
                 key={val}
                 onClick={() => toggleValue(val)}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${isSelected
-                    ? 'bg-purple-600/30 border-purple-500/60 text-purple-200 shadow-sm'
-                    : 'bg-slate-950/50 border-white/10 text-slate-400 hover:text-white hover:border-white/20'
+                    ? 'bg-purple-600/30 border-purple-500/60 text-purple-200 shadow-sm light:bg-purple-50 light:border-purple-300 light:text-purple-700'
+                    : 'bg-slate-950/50 border-white/10 text-slate-400 hover:text-white hover:border-white/20 light:bg-slate-100 light:border-slate-200 light:text-slate-700 light:hover:bg-slate-200/60'
                   }`}
               >
-                {isSelected && <Check className="w-3 h-3 text-purple-400" />}
+                {isSelected && <Check className="w-3 h-3 text-purple-400 light:text-purple-600" />}
                 <span>{val}</span>
               </button>
             );
@@ -509,59 +509,59 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
 
       {/* Social Media Links */}
       <div className="space-y-3 pt-1">
-        <label className="block text-xs font-semibold text-slate-300">Brand Social Media Handles</label>
+        <label className="block text-xs font-semibold text-slate-300 light:text-slate-700">Brand Social Media Handles</label>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="flex items-center gap-2 bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2">
+          <div className="flex items-center gap-2 bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2 light:bg-slate-50 light:border-slate-200">
             <Instagram className="w-4 h-4 text-pink-400 shrink-0" />
             <input
               type="text"
               value={instagram}
               onChange={(e) => setInstagram(e.target.value)}
               placeholder="Instagram URL / handle"
-              className="w-full bg-transparent text-xs text-white focus:outline-none placeholder-slate-600"
+              className="w-full bg-transparent text-xs text-white light:text-slate-900 focus:outline-none placeholder-slate-600 light:placeholder-slate-400"
             />
           </div>
-          <div className="flex items-center gap-2 bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2">
+          <div className="flex items-center gap-2 bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2 light:bg-slate-50 light:border-slate-200">
             <Linkedin className="w-4 h-4 text-blue-400 shrink-0" />
             <input
               type="text"
               value={linkedin}
               onChange={(e) => setLinkedin(e.target.value)}
               placeholder="LinkedIn URL"
-              className="w-full bg-transparent text-xs text-white focus:outline-none placeholder-slate-600"
+              className="w-full bg-transparent text-xs text-white light:text-slate-900 focus:outline-none placeholder-slate-600 light:placeholder-slate-400"
             />
           </div>
-          <div className="flex items-center gap-2 bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2">
+          <div className="flex items-center gap-2 bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2 light:bg-slate-50 light:border-slate-200">
             <Twitter className="w-4 h-4 text-sky-400 shrink-0" />
             <input
               type="text"
               value={twitter}
               onChange={(e) => setTwitter(e.target.value)}
               placeholder="X / Twitter handle"
-              className="w-full bg-transparent text-xs text-white focus:outline-none placeholder-slate-600"
+              className="w-full bg-transparent text-xs text-white light:text-slate-900 focus:outline-none placeholder-slate-600 light:placeholder-slate-400"
             />
           </div>
-          <div className="flex items-center gap-2 bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2">
+          <div className="flex items-center gap-2 bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2 light:bg-slate-50 light:border-slate-200">
             <Youtube className="w-4 h-4 text-rose-500 shrink-0" />
             <input
               type="text"
               value={youtube}
               onChange={(e) => setYoutube(e.target.value)}
               placeholder="YouTube Channel URL"
-              className="w-full bg-transparent text-xs text-white focus:outline-none placeholder-slate-600"
+              className="w-full bg-transparent text-xs text-white light:text-slate-900 focus:outline-none placeholder-slate-600 light:placeholder-slate-400"
             />
           </div>
 
           {/* Additional Dynamic Social / Portfolio Links */}
           {customLinks.map((link) => (
-            <div key={link.id} className="flex items-center gap-2 bg-slate-950/90 border border-purple-500/30 rounded-xl px-2.5 py-1.5 shadow-sm">
+            <div key={link.id} className="flex items-center gap-2 bg-slate-950/90 border border-purple-500/30 rounded-xl px-2.5 py-1.5 shadow-sm light:bg-slate-50 light:border-slate-200">
               <div className="flex items-center gap-1 shrink-0">
-                <LinkIcon className="w-3.5 h-3.5 text-purple-400" />
+                <LinkIcon className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />
                 <select
                   value={link.platform}
                   onChange={(e) => handleUpdateCustomLink(link.id, 'platform', e.target.value)}
-                  className="bg-slate-900 border border-white/10 text-[11px] font-bold text-purple-300 rounded-lg px-2 py-1 focus:outline-none focus:border-purple-500 cursor-pointer"
+                  className="bg-slate-900 border border-white/10 text-[11px] font-bold text-purple-300 light:bg-white light:border-slate-200 light:text-purple-700 rounded-lg px-2 py-1 focus:outline-none focus:border-purple-500 cursor-pointer"
                 >
                   <option value="Facebook">Facebook</option>
                   <option value="TikTok">TikTok</option>
@@ -578,7 +578,7 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
                 value={link.url}
                 onChange={(e) => handleUpdateCustomLink(link.id, 'url', e.target.value)}
                 placeholder={`Enter ${link.platform} URL / handle`}
-                className="w-full bg-transparent text-xs text-white focus:outline-none placeholder-slate-600"
+                className="w-full bg-transparent text-xs text-white light:text-slate-900 focus:outline-none placeholder-slate-600 light:placeholder-slate-400"
               />
               <button
                 type="button"
@@ -597,10 +597,10 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
           <button
             type="button"
             onClick={handleAddCustomLink}
-            className="flex items-center gap-1.5 text-xs font-bold text-purple-300 hover:text-white bg-purple-600/20 hover:bg-purple-600/30 px-3.5 py-2 rounded-xl border border-purple-500/40 transition-all cursor-pointer shadow-sm hover:scale-[1.02]"
+            className="flex items-center gap-1.5 text-xs font-bold text-purple-300 light:text-purple-700 hover:text-white light:hover:text-purple-900 bg-purple-600/20 light:bg-purple-50 hover:bg-purple-600/30 light:hover:bg-purple-100 px-3.5 py-2 rounded-xl border border-purple-500/40 light:border-purple-200 transition-all cursor-pointer shadow-sm hover:scale-[1.02]"
             title="Add custom social media link or website handle"
           >
-            <Plus className="w-4 h-4 text-purple-400" />
+            <Plus className="w-4 h-4 text-purple-400 light:text-purple-600" />
             <span>Add Link</span>
           </button>
         </div>
@@ -610,7 +610,7 @@ export default function BrandCompanyInfoTab({ initialData, onSaveSuccess }: Bran
         <button
           type="submit"
           disabled={saving || isUploadingLogo}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-600/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white keep-white font-bold text-xs shadow-lg shadow-purple-600/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
           <span>Save Company Info</span>

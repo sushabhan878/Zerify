@@ -65,7 +65,7 @@ export default function MessageComposer({
         e.preventDefault();
         submit();
       }}
-      className="p-3 border-t border-white/10 bg-slate-950/50 backdrop-blur-xl shrink-0"
+      className="p-3 border-t border-white/10 light:border-slate-200/80 bg-slate-950/50 light:bg-white backdrop-blur-xl shrink-0"
     >
       <div className="flex items-end gap-2">
         <AttachmentButton disabled={disabled || uploading} onPick={onPickFile} />
@@ -87,7 +87,7 @@ export default function MessageComposer({
                 submit();
               }
             }}
-            className="w-full h-10 min-h-[40px] max-h-[120px] px-4 py-2.5 rounded-2xl bg-slate-950/80 border border-white/10 text-xs font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/60 focus:ring-1 focus:ring-purple-500/20 transition-all resize-none overflow-y-auto no-scrollbar disabled:opacity-60 leading-[18px] block"
+            className="w-full h-10 min-h-[40px] max-h-[120px] px-4 py-2.5 rounded-2xl bg-slate-950/80 border border-white/10 text-xs font-semibold text-white placeholder-slate-500 light:bg-slate-50 light:border-slate-200/80 light:text-slate-900 light:placeholder-slate-400 light:focus:bg-white focus:outline-none focus:border-purple-500/60 focus:ring-1 focus:ring-purple-500/20 transition-all resize-none overflow-y-auto no-scrollbar disabled:opacity-60 leading-[18px] block"
           />
           {text.length > COUNTER_THRESHOLD && (
             <span className="absolute right-3 -top-5 text-[10px] font-bold text-amber-400">
@@ -100,7 +100,7 @@ export default function MessageComposer({
           type="submit"
           disabled={disabled || !text.trim()}
           aria-label="Send message"
-          className="h-10 px-4 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-xs font-black text-white shadow-lg shadow-purple-950/50 transition-all flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] shrink-0"
+          className="h-10 px-4 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-xs font-black text-white keep-white shadow-lg shadow-purple-950/50 transition-all flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] shrink-0 cursor-pointer"
         >
           <Send className="w-4 h-4" />
           <span className="hidden sm:inline">Send</span>

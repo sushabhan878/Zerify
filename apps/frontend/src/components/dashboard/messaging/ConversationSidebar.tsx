@@ -58,8 +58,8 @@ export default function ConversationSidebar({
   const empty = EMPTY_COPY[filter];
 
   return (
-    <div className="w-full md:w-[350px] lg:w-[380px] border-r border-white/10 shrink-0 bg-slate-950/40 flex flex-col min-h-0">
-      <div className="p-3 pb-2 border-b border-white/5 space-y-2">
+    <div className="w-full md:w-[350px] lg:w-[380px] border-r border-white/10 light:border-slate-200/80 shrink-0 bg-slate-950/40 light:bg-white flex flex-col min-h-0">
+      <div className="p-3 pb-2 border-b border-white/5 light:border-slate-100 space-y-2">
         <ConversationSearch value={searchQuery} onChange={onSearch} />
 
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
@@ -71,10 +71,10 @@ export default function ConversationSidebar({
                 key={tab.id}
                 type="button"
                 onClick={() => onFilterChange(tab.id)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap leading-none ${
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap leading-none cursor-pointer ${
                   isSelected
-                    ? 'bg-purple-600 text-white shadow-sm shadow-purple-900/40'
-                    : 'text-slate-400 hover:text-white bg-slate-900/80 hover:bg-slate-800/80 border border-white/5'
+                    ? 'bg-purple-600 text-white keep-white shadow-sm shadow-purple-900/40'
+                    : 'text-slate-400 hover:text-white bg-slate-900/80 hover:bg-slate-800/80 border border-white/5 light:bg-slate-100 light:hover:bg-slate-200 light:text-slate-600 light:border-slate-200'
                 }`}
               >
                 <span>{tab.label}</span>
@@ -82,8 +82,8 @@ export default function ConversationSidebar({
                   <span
                     className={`min-w-[15px] h-[15px] px-1 rounded-full text-[9px] font-bold flex items-center justify-center ${
                       isSelected
-                        ? 'bg-purple-950/70 text-purple-200'
-                        : 'bg-slate-800 text-slate-300'
+                        ? 'bg-purple-950/70 text-purple-200 light:bg-purple-700 light:text-white'
+                        : 'bg-slate-800 text-slate-300 light:bg-slate-200 light:text-slate-700'
                     }`}
                   >
                     {count}
@@ -110,10 +110,10 @@ export default function ConversationSidebar({
               )}
             </div>
             <div className="space-y-1">
-              <p className="text-xs font-black text-white">
+              <p className="text-xs font-black text-white light:text-slate-900">
                 {searchQuery ? 'No matches' : empty.title}
               </p>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
+              <p className="text-[11px] text-slate-400 light:text-slate-500 leading-relaxed">
                 {searchQuery
                   ? `Nothing matched “${searchQuery}”. Try a different name.`
                   : empty.body}

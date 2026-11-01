@@ -148,23 +148,23 @@ export default function BrandSettingsSection({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
-            <Settings className="w-5 h-5 text-purple-400" />
+          <h2 className="text-xl font-extrabold text-white light:text-slate-900 flex items-center gap-2">
+            <Settings className="w-5 h-5 text-purple-400 light:text-purple-600" />
             <span>Brand Enterprise Setup & Settings</span>
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-400 light:text-slate-500">
             Dedicated company portal for company details, campaign parameters, product catalogs & escrow billing
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-slate-900/70 px-3 py-1.5 rounded-lg border border-white/10 shrink-0 shadow-sm">
-          <Sparkles className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
-          <span className="text-xs font-bold text-white">Brand Setup {completion}%</span>
+        <div className="flex items-center gap-2 bg-slate-900/70 light:bg-white px-3 py-1.5 rounded-lg border border-white/10 light:border-slate-200/80 shrink-0 shadow-sm">
+          <Sparkles className="w-3.5 h-3.5 text-purple-400 light:text-purple-600 animate-pulse" />
+          <span className="text-xs font-bold text-white light:text-slate-900">Brand Setup {completion}%</span>
         </div>
       </div>
 
       {/* Glassmorphic Tab Navigation Bar */}
-      <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/70 border border-white/10 backdrop-blur-xl overflow-x-auto no-scrollbar shadow-lg">
+      <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/70 border border-white/10 light:bg-white light:border-slate-200/80 backdrop-blur-xl overflow-x-auto no-scrollbar shadow-lg light:shadow-sm">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -173,18 +173,18 @@ export default function BrandSettingsSection({
               key={tab.id}
               onClick={() => changeTab(tab.id as BrandTabType)}
               type="button"
-              className={`relative px-3.5 py-2 rounded-lg text-xs transition-all shrink-0 flex items-center gap-2 ${
-                isActive ? 'text-white font-bold' : 'text-slate-400/90 hover:text-white font-medium hover:bg-white/5'
+              className={`relative px-3.5 py-2 rounded-lg text-xs transition-all shrink-0 flex items-center gap-2 cursor-pointer ${
+                isActive ? 'text-white font-bold light:text-purple-700' : 'text-slate-400/90 hover:text-white font-medium hover:bg-white/5 light:text-slate-600 light:hover:text-slate-900 light:hover:bg-slate-100'
               }`}
             >
               {isActive && (
                 <motion.div
                   layoutId="activeBrandSettingsTabHighlight"
-                  className="absolute inset-0 bg-gradient-to-r from-purple-600/30 via-indigo-600/20 to-pink-600/30 border border-purple-500/40 rounded-lg shadow-md"
+                  className="absolute inset-0 bg-gradient-to-r from-purple-600/30 via-indigo-600/20 to-pink-600/30 border border-purple-500/40 rounded-lg shadow-md light:bg-purple-50 light:border-purple-200 light:shadow-none"
                   transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                 />
               )}
-              <Icon className={`w-3.5 h-3.5 relative z-10 ${isActive ? 'text-purple-300' : 'text-slate-400/80'}`} />
+              <Icon className={`w-3.5 h-3.5 relative z-10 ${isActive ? 'text-purple-300 light:text-purple-600' : 'text-slate-400/80 light:text-slate-500'}`} />
               <span className="relative z-10">{tab.label}</span>
             </button>
           );

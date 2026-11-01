@@ -202,13 +202,13 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
   };
 
   return (
-    <form onSubmit={handleSave} className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-5 shadow-xl">
+    <form onSubmit={handleSave} className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-5 shadow-xl light:bg-white light:border-slate-200/80 light:shadow-sm">
 
       {/* 1. Primary Goals */}
       <div>
         <div className="flex items-center justify-between mb-1.5">
-          <label className="block text-xs font-semibold text-slate-300">Primary Campaign Objectives</label>
-          <span className="text-[11px] text-purple-400 font-semibold">{goals.length} Selected</span>
+          <label className="block text-xs font-semibold text-slate-300 light:text-slate-700">Primary Campaign Objectives</label>
+          <span className="text-[11px] text-purple-400 light:text-purple-600 font-semibold">{goals.length} Selected</span>
         </div>
         <div className="flex flex-wrap gap-2 mb-3">
           {allPrimaryGoals.map((goal) => {
@@ -220,11 +220,11 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
                 onClick={() => toggleArrayItem(goals, goal, setGoals)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
                   isSelected
-                    ? 'bg-purple-600/30 border-purple-500/60 text-purple-200 shadow-sm scale-[1.02]'
-                    : 'bg-slate-950/50 border-white/10 text-slate-400 hover:text-white hover:border-white/20'
+                    ? 'bg-purple-600/30 border-purple-500/60 text-purple-200 shadow-sm scale-[1.02] light:bg-purple-50 light:border-purple-300 light:text-purple-700'
+                    : 'bg-slate-950/50 border-white/10 text-slate-400 hover:text-white hover:border-white/20 light:bg-slate-100 light:border-slate-200 light:text-slate-700 light:hover:bg-slate-200/60'
                 }`}
               >
-                {isSelected && <Check className="w-3 h-3 text-purple-400" />}
+                {isSelected && <Check className="w-3 h-3 text-purple-400 light:text-purple-600" />}
                 <span>{goal}</span>
               </button>
             );
@@ -244,12 +244,12 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
               }
             }}
             placeholder="Add custom campaign objective..."
-            className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+            className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 light:bg-slate-50 light:border-slate-200 light:text-slate-900 light:placeholder-slate-400 light:focus:bg-white focus:outline-none focus:border-purple-500"
           />
           <button
             type="button"
             onClick={handleAddCustomGoal}
-            className="px-3.5 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-purple-300 hover:text-white text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
+            className="px-3.5 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-purple-300 hover:text-white light:bg-purple-50 light:border-purple-200 light:text-purple-700 light:hover:bg-purple-100 text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add</span>
@@ -260,8 +260,8 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
       {/* 2. Target Platforms */}
       <div>
         <div className="flex items-center justify-between mb-1.5">
-          <label className="block text-xs font-semibold text-slate-300">Target Marketing Platforms</label>
-          <span className="text-[11px] text-purple-400 font-semibold">{platforms.length} Selected</span>
+          <label className="block text-xs font-semibold text-slate-300 light:text-slate-700">Target Marketing Platforms</label>
+          <span className="text-[11px] text-purple-400 light:text-purple-600 font-semibold">{platforms.length} Selected</span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
           {PLATFORMS_OPTIONS.map((item) => {
@@ -274,13 +274,13 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
                 onClick={() => toggleArrayItem(platforms, item.id, setPlatforms)}
                 className={`p-3 rounded-xl border text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-slate-950 border-purple-500/60 text-white shadow-md scale-[1.02]'
-                    : 'bg-slate-950/40 border-white/10 text-slate-400 hover:text-white hover:border-white/20'
+                    ? 'bg-slate-950 border-purple-500/60 text-white shadow-md scale-[1.02] light:bg-purple-50 light:border-purple-300 light:text-slate-900'
+                    : 'bg-slate-950/40 border-white/10 text-slate-400 hover:text-white hover:border-white/20 light:bg-slate-50 light:border-slate-200 light:text-slate-700 light:hover:bg-slate-100'
                 }`}
               >
                 <Icon className={`w-4 h-4 ${item.color}`} />
                 <span>{item.label}</span>
-                {isSelected && <Check className="w-3.5 h-3.5 ml-auto text-purple-400" />}
+                {isSelected && <Check className="w-3.5 h-3.5 ml-auto text-purple-400 light:text-purple-600" />}
               </button>
             );
           })}
@@ -288,17 +288,17 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
       </div>
 
       {/* 3. Targeted Audience Demographics */}
-      <div className="space-y-4 pt-3 border-t border-white/10">
-        <h4 className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-          <Users className="w-3.5 h-3.5 text-purple-400" />
+      <div className="space-y-4 pt-3 border-t border-white/10 light:border-slate-100">
+        <h4 className="text-xs font-bold text-slate-200 light:text-slate-800 flex items-center gap-1.5">
+          <Users className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />
           <span>Target Audience Demographics</span>
         </h4>
 
         {/* Age Groups */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-semibold text-slate-300">Target Age Groups</label>
-            <span className="text-[11px] text-purple-400 font-semibold">{ageRanges.length} Selected</span>
+            <label className="block text-xs font-semibold text-slate-300 light:text-slate-700">Target Age Groups</label>
+            <span className="text-[11px] text-purple-400 light:text-purple-600 font-semibold">{ageRanges.length} Selected</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {AGE_RANGE_OPTIONS.map((age) => {
@@ -310,11 +310,11 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
                   onClick={() => toggleArrayItem(ageRanges, age, setAgeRanges)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-purple-600/30 border-purple-500/60 text-purple-200 shadow-sm scale-[1.02]'
-                      : 'bg-slate-950/50 border-white/10 text-slate-400 hover:text-white hover:border-white/20'
+                      ? 'bg-purple-600/30 border-purple-500/60 text-purple-200 shadow-sm scale-[1.02] light:bg-purple-50 light:border-purple-300 light:text-purple-700'
+                      : 'bg-slate-950/50 border-white/10 text-slate-400 hover:text-white hover:border-white/20 light:bg-slate-100 light:border-slate-200 light:text-slate-700 light:hover:bg-slate-200/60'
                   }`}
                 >
-                  {isSelected && <Check className="w-3 h-3 text-purple-400" />}
+                  {isSelected && <Check className="w-3 h-3 text-purple-400 light:text-purple-600" />}
                   <span>{age}</span>
                 </button>
               );
@@ -324,7 +324,7 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
 
         {/* Gender Preference */}
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1.5">Target Gender</label>
+          <label className="block text-xs font-semibold text-slate-300 light:text-slate-700 mb-1.5">Target Gender</label>
           <div className="flex flex-wrap gap-2">
             {GENDER_OPTIONS.map((g) => {
               const isSelected = targetGender === g;
@@ -335,11 +335,11 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
                   onClick={() => setTargetGender(g)}
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-purple-600/30 border-purple-500/60 text-purple-200 shadow-sm scale-[1.02]'
-                      : 'bg-slate-950/50 border-white/10 text-slate-400 hover:text-white hover:border-white/20'
+                      ? 'bg-purple-600/30 border-purple-500/60 text-purple-200 shadow-sm scale-[1.02] light:bg-purple-50 light:border-purple-300 light:text-purple-700'
+                      : 'bg-slate-950/50 border-white/10 text-slate-400 hover:text-white hover:border-white/20 light:bg-slate-100 light:border-slate-200 light:text-slate-700 light:hover:bg-slate-200/60'
                   }`}
                 >
-                  {isSelected && <Check className="w-3 h-3 text-purple-400" />}
+                  {isSelected && <Check className="w-3 h-3 text-purple-400 light:text-purple-600" />}
                   <span>{g}</span>
                 </button>
               );
@@ -350,8 +350,8 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
         {/* Target Locations */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-semibold text-slate-300">Target Audience Locations</label>
-            <span className="text-[11px] text-purple-400 font-semibold">{locations.length} Selected</span>
+            <label className="block text-xs font-semibold text-slate-300 light:text-slate-700">Target Audience Locations</label>
+            <span className="text-[11px] text-purple-400 light:text-purple-600 font-semibold">{locations.length} Selected</span>
           </div>
           <div className="flex flex-wrap gap-2 mb-3">
             {allAudienceLocations.map((loc) => {
@@ -363,11 +363,11 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
                   onClick={() => toggleArrayItem(locations, loc, setLocations)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-purple-600/30 border-purple-500/60 text-purple-200 shadow-sm scale-[1.02]'
-                      : 'bg-slate-950/50 border-white/10 text-slate-400 hover:text-white hover:border-white/20'
+                      ? 'bg-purple-600/30 border-purple-500/60 text-purple-200 shadow-sm scale-[1.02] light:bg-purple-50 light:border-purple-300 light:text-purple-700'
+                      : 'bg-slate-950/50 border-white/10 text-slate-400 hover:text-white hover:border-white/20 light:bg-slate-100 light:border-slate-200 light:text-slate-700 light:hover:bg-slate-200/60'
                   }`}
                 >
-                  {isSelected && <Check className="w-3 h-3 text-purple-400" />}
+                  {isSelected && <Check className="w-3 h-3 text-purple-400 light:text-purple-600" />}
                   <span>{loc}</span>
                 </button>
               );
@@ -387,12 +387,12 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
                 }
               }}
               placeholder="Add custom target location (e.g. Brazil)..."
-              className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 light:bg-slate-50 light:border-slate-200 light:text-slate-900 light:placeholder-slate-400 light:focus:bg-white focus:outline-none focus:border-purple-500"
             />
             <button
               type="button"
               onClick={handleAddCustomLocation}
-              className="px-3.5 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-purple-300 hover:text-white text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-purple-300 hover:text-white light:bg-purple-50 light:border-purple-200 light:text-purple-700 light:hover:bg-purple-100 text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add</span>
@@ -403,8 +403,8 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
         {/* Target Interests & Niches */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-semibold text-slate-300">Target Interests & Niches</label>
-            <span className="text-[11px] text-purple-400 font-semibold">{interests.length} Selected</span>
+            <label className="block text-xs font-semibold text-slate-300 light:text-slate-700">Target Interests & Niches</label>
+            <span className="text-[11px] text-purple-400 light:text-purple-600 font-semibold">{interests.length} Selected</span>
           </div>
           <div className="flex flex-wrap gap-2 mb-3">
             {allInterestTags.map((tag) => {
@@ -416,11 +416,11 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
                   onClick={() => toggleArrayItem(interests, tag, setInterests)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-purple-600/30 border-purple-500/60 text-purple-200 shadow-sm scale-[1.02]'
-                      : 'bg-slate-950/50 border-white/10 text-slate-400 hover:text-white hover:border-white/20'
+                      ? 'bg-purple-600/30 border-purple-500/60 text-purple-200 shadow-sm scale-[1.02] light:bg-purple-50 light:border-purple-300 light:text-purple-700'
+                      : 'bg-slate-950/50 border-white/10 text-slate-400 hover:text-white hover:border-white/20 light:bg-slate-100 light:border-slate-200 light:text-slate-700 light:hover:bg-slate-200/60'
                   }`}
                 >
-                  {isSelected && <Check className="w-3 h-3 text-purple-400" />}
+                  {isSelected && <Check className="w-3 h-3 text-purple-400 light:text-purple-600" />}
                   <span>{tag}</span>
                 </button>
               );
@@ -440,12 +440,12 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
                 }
               }}
               placeholder="Add custom niche tag (e.g. Vintage Watches)..."
-              className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 light:bg-slate-50 light:border-slate-200 light:text-slate-900 light:placeholder-slate-400 light:focus:bg-white focus:outline-none focus:border-purple-500"
             />
             <button
               type="button"
               onClick={handleAddCustomNiche}
-              className="px-3.5 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-purple-300 hover:text-white text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-purple-300 hover:text-white light:bg-purple-50 light:border-purple-200 light:text-purple-700 light:hover:bg-purple-100 text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Tag</span>
@@ -458,7 +458,7 @@ export default function BrandCampaignGoalsTab({ initialData, onSaveSuccess }: Br
         <button
           type="submit"
           disabled={saving}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white keep-white font-bold text-xs shadow-lg shadow-indigo-600/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
           <span>Save Campaign Goals</span>

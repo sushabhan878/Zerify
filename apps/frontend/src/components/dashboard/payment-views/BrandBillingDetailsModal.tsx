@@ -31,24 +31,24 @@ export default function BrandBillingDetailsModal({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-slate-950/95 border border-white/10 shadow-2xl p-6 space-y-4"
+          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-slate-950/95 border border-white/10 shadow-2xl p-6 space-y-4 light:bg-white light:border-slate-200/80 light:shadow-2xl"
         >
           {/* Header */}
-          <div className="flex items-start justify-between pb-3 border-b border-white/10">
+          <div className="flex items-start justify-between pb-3 border-b border-white/10 light:border-slate-100">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-purple-500/15 border border-purple-500/25 text-purple-400">
+              <div className="p-2.5 rounded-2xl bg-purple-500/15 border border-purple-500/25 text-purple-400 light:bg-purple-50 light:border-purple-200 light:text-purple-600">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-black text-white">Business GSTIN Verification</h3>
-                <p className="text-xs text-slate-400">
+                <h3 className="text-base font-black text-white light:text-slate-900">Business GSTIN Verification</h3>
+                <p className="text-xs text-slate-400 light:text-slate-500">
                   Manage corporate tax identity, multi-state GSTINs, and Cashfree invoice validation
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 light:text-slate-500 light:hover:text-slate-900 light:hover:bg-slate-100 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>

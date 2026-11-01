@@ -215,9 +215,9 @@ export default function GstVerificationManager() {
 
       {/* Sleek Text Box with "Add GSTIN" Button on the right side */}
       <form onSubmit={handleAddGstin} className="space-y-2">
-        <div className="relative flex items-center rounded-2xl bg-slate-900/90 border border-white/10 hover:border-purple-500/40 focus-within:border-purple-500 transition-all p-1.5 shadow-lg backdrop-blur-xl">
+        <div className="relative flex items-center rounded-2xl bg-slate-900/90 border border-white/10 hover:border-purple-500/40 focus-within:border-purple-500 transition-all p-1.5 shadow-lg backdrop-blur-xl light:bg-white light:border-slate-200/80 light:shadow-sm">
           <div className="pl-3 pr-2 text-slate-500">
-            <FileText className="w-4 h-4 text-purple-400" />
+            <FileText className="w-4 h-4 text-purple-400 light:text-purple-600" />
           </div>
 
           <input
@@ -231,14 +231,14 @@ export default function GstVerificationManager() {
             }}
             placeholder="Enter 15-digit GSTIN (e.g. 29AAICP2912R1ZR)..."
             maxLength={15}
-            className="flex-1 bg-transparent px-2 py-2 text-xs font-mono font-medium text-white placeholder-slate-500 focus:outline-none uppercase"
+            className="flex-1 bg-transparent px-2 py-2 text-xs font-mono font-medium text-white light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 focus:outline-none uppercase"
           />
 
           {/* Right side Add GSTIN button */}
           <button
             type="submit"
             disabled={!cleanGstin || actionLoading}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md shadow-purple-600/20 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white keep-white text-xs font-bold shadow-md shadow-purple-600/20 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
           >
             {actionLoading ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -254,13 +254,13 @@ export default function GstVerificationManager() {
           <div className="px-2 flex flex-wrap items-center justify-between gap-2 text-[11px] animate-fadeIn">
             <div className="flex items-center gap-2">
               {detectedState && (
-                <span className="text-emerald-400 font-medium flex items-center gap-1 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                <span className="text-emerald-400 light:text-emerald-700 font-medium flex items-center gap-1 bg-emerald-500/10 light:bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-500/20 light:border-emerald-200">
                   <MapPin className="w-3 h-3" />
                   {detectedState} ({stateCode})
                 </span>
               )}
               {cleanGstin.length === 15 && isValidFormat && (
-                <span className="text-emerald-400 flex items-center gap-1 text-[11px]">
+                <span className="text-emerald-400 light:text-emerald-600 flex items-center gap-1 text-[11px]">
                   <CheckCircle2 className="w-3 h-3" /> Valid format
                 </span>
               )}
@@ -274,7 +274,7 @@ export default function GstVerificationManager() {
                   onChange={(e) => setBusinessNameInput(e.target.value)}
                   placeholder={`Legal name (default: ${profile?.legalName || 'Company'})`}
                   maxLength={100}
-                  className="px-2.5 py-1 rounded-lg bg-slate-950/80 border border-white/10 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                  className="px-2.5 py-1 rounded-lg bg-slate-950/80 border border-white/10 text-[11px] text-white placeholder-slate-500 light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 focus:outline-none focus:border-purple-500"
                 />
               </div>
             )}
@@ -285,9 +285,9 @@ export default function GstVerificationManager() {
       {/* Registrations List */}
       <div className="space-y-3 pt-1">
         {registrations.length === 0 ? (
-          <div className="py-8 px-4 text-center rounded-2xl bg-slate-900/20 border border-dashed border-white/10 space-y-1.5">
-            <p className="text-xs font-semibold text-slate-300">No GSTIN registrations linked yet</p>
-            <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+          <div className="py-8 px-4 text-center rounded-2xl bg-slate-900/20 light:bg-white border border-dashed border-white/10 light:border-slate-200 space-y-1.5">
+            <p className="text-xs font-semibold text-slate-300 light:text-slate-700">No GSTIN registrations linked yet</p>
+            <p className="text-[11px] text-slate-500 light:text-slate-500 max-w-sm mx-auto">
               Type your 15-digit GSTIN in the bar above and click &quot;Add GSTIN&quot; to verify and auto-populate your verified tax details.
             </p>
           </div>

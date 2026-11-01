@@ -17,8 +17,8 @@ export default function EmptyConversationState({ role }: { role: 'BRAND' | 'INFL
       </div>
 
       <div className="space-y-1.5">
-        <h3 className="text-sm font-black text-white">Select a conversation</h3>
-        <p className="text-[11px] text-slate-400 max-w-xs leading-relaxed">
+        <h3 className="text-sm font-black text-white light:text-slate-900">Select a conversation</h3>
+        <p className="text-[11px] text-slate-400 light:text-slate-500 max-w-xs leading-relaxed">
           {role === 'BRAND'
             ? 'Pick a creator from the list to review their application and talk terms.'
             : 'Pick a brand from the list to continue your collaboration chat.'}
@@ -30,10 +30,10 @@ export default function EmptyConversationState({ role }: { role: 'BRAND' | 'INFL
           const Icon = perk.icon;
           return (
             <div key={perk.label} className="flex items-center gap-2 text-left">
-              <div className="w-6 h-6 rounded-lg bg-slate-900/80 border border-white/10 flex items-center justify-center shrink-0">
-                <Icon className="w-3 h-3 text-purple-400" />
+              <div className="w-6 h-6 rounded-lg bg-slate-900/80 border border-white/10 light:bg-purple-50 light:border-purple-200/60 flex items-center justify-center shrink-0">
+                <Icon className="w-3 h-3 text-purple-400 light:text-purple-600" />
               </div>
-              <span className="text-[10.5px] font-semibold text-slate-500">{perk.label}</span>
+              <span className="text-[10.5px] font-semibold text-slate-500 light:text-slate-600">{perk.label}</span>
             </div>
           );
         })}

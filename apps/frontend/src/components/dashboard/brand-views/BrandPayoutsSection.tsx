@@ -222,11 +222,11 @@ export default function BrandPayoutsSection() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-purple-400" />
+          <h2 className="text-xl font-extrabold text-white light:text-slate-900 flex items-center gap-2">
+            <DollarSign className="w-5 h-5 text-purple-400 light:text-purple-600" />
             <span>Campaign Escrow & Creator Payments</span>
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-400 light:text-slate-500">
             Deposit funds upfront before hiring creators. Withdraw unspent balances anytime.
           </p>
         </div>
@@ -234,13 +234,13 @@ export default function BrandPayoutsSection() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsBillingOpen(true)}
-            className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-xs font-bold text-slate-300 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-xs font-bold text-slate-300 light:bg-white light:border-slate-200/80 light:text-slate-700 light:hover:bg-slate-50 light:shadow-sm transition-colors cursor-pointer"
           >
             Billing Profile (Optional)
           </button>
           <button
             onClick={() => alert('Exporting tax invoices & GST receipts...')}
-            className="px-3.5 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-xs font-bold text-purple-300 flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-xs font-bold text-purple-300 light:bg-purple-50 light:border-purple-200 light:text-purple-700 light:hover:bg-purple-100 flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Export Invoices</span>

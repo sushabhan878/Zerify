@@ -198,13 +198,13 @@ export default function BrandProductServicesTab({ initialProducts = [], onSaveSu
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 15 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10 w-full max-w-2xl bg-slate-900/95 border border-purple-500/30 rounded-3xl p-7 sm:p-8 shadow-2xl text-left my-auto backdrop-blur-xl space-y-6"
+            className="relative z-10 w-full max-w-2xl bg-slate-900/95 border border-purple-500/30 light:bg-white light:border-slate-200/80 rounded-3xl p-7 sm:p-8 shadow-2xl text-left my-auto backdrop-blur-xl space-y-6"
           >
             {/* Top Right Close Button (No Heading Section) */}
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
-              className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer z-10"
+              className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-white light:bg-slate-100 light:hover:bg-slate-200 light:text-slate-600 transition-colors cursor-pointer z-10"
             >
               <X className="w-4 h-4" />
             </button>
@@ -362,22 +362,22 @@ export default function BrandProductServicesTab({ initialProducts = [], onSaveSu
   );
 
   return (
-    <div className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-5 shadow-xl">
+    <div className="p-5 sm:p-6 rounded-xl bg-slate-950/45 border border-white/10 backdrop-blur-xl space-y-5 shadow-xl light:bg-white light:border-slate-200/80 light:shadow-sm">
       {mounted && typeof document !== 'undefined' ? createPortal(modalMarkup, document.body) : null}
 
       <div className="flex items-center justify-between mb-2">
         <div>
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <ShoppingBag className="w-4 h-4 text-purple-400" />
+          <h3 className="text-sm font-bold text-white light:text-slate-900 flex items-center gap-2">
+            <ShoppingBag className="w-4 h-4 text-purple-400 light:text-purple-600" />
             <span>Product & Service Offerings</span>
           </h3>
-          <p className="text-xs text-slate-400">Manage products or services available for influencer campaigns</p>
+          <p className="text-xs text-slate-400 light:text-slate-500">Manage products or services available for influencer campaigns</p>
         </div>
 
         <button
           type="button"
           onClick={() => setShowAddForm(true)}
-          className="px-3.5 py-1.5 rounded-xl bg-purple-600/30 border border-purple-500/50 hover:bg-purple-600/40 text-purple-200 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+          className="px-3.5 py-1.5 rounded-xl bg-purple-600/30 border border-purple-500/50 hover:bg-purple-600/40 text-purple-200 light:bg-purple-50 light:border-purple-200 light:text-purple-700 light:hover:bg-purple-100 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Add Product</span>
@@ -392,29 +392,29 @@ export default function BrandProductServicesTab({ initialProducts = [], onSaveSu
 
       {/* Product List Grid */}
       {products.length === 0 ? (
-        <div className="text-center py-10 border border-dashed border-white/10 rounded-2xl p-6">
-          <ShoppingBag className="w-8 h-8 mx-auto text-slate-600 mb-2" />
-          <p className="text-xs text-slate-400 font-medium">No products or services registered yet.</p>
-          <p className="text-[11px] text-slate-500 mt-1">Click "Add Product" above to catalog offerings for creators.</p>
+        <div className="text-center py-10 border border-dashed border-white/10 light:border-slate-200 rounded-2xl p-6">
+          <ShoppingBag className="w-8 h-8 mx-auto text-slate-600 light:text-slate-400 mb-2" />
+          <p className="text-xs text-slate-400 light:text-slate-500 font-medium">No products or services registered yet.</p>
+          <p className="text-[11px] text-slate-500 light:text-slate-400 mt-1">Click "Add Product" above to catalog offerings for creators.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((item) => (
-            <div key={item.id} className="relative group bg-slate-950/70 border border-white/10 rounded-2xl p-4 flex flex-col justify-between hover:border-purple-500/40 transition-all">
+            <div key={item.id} className="relative group bg-slate-950/70 border border-white/10 rounded-2xl p-4 flex flex-col justify-between hover:border-purple-500/40 light:bg-white light:border-slate-200/80 light:shadow-sm light:hover:border-purple-300 transition-all">
               <div>
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
                     {item.imageUrl ? (
-                      <img src={item.imageUrl} alt={item.name} className="w-10 h-10 rounded-lg object-cover border border-white/10" />
+                      <img src={item.imageUrl} alt={item.name} className="w-10 h-10 rounded-lg object-cover border border-white/10 light:border-slate-200" />
                     ) : (
-                      <div className="w-10 h-10 rounded-lg bg-purple-600/20 border border-purple-500/30 flex items-center justify-center">
-                        <ImageIcon className="w-4 h-4 text-purple-400" />
+                      <div className="w-10 h-10 rounded-lg bg-purple-600/20 border border-purple-500/30 light:bg-purple-50 light:border-purple-200 flex items-center justify-center">
+                        <ImageIcon className="w-4 h-4 text-purple-400 light:text-purple-600" />
                       </div>
                     )}
                     <div>
-                      <h4 className="text-xs font-bold text-white line-clamp-1">{item.name}</h4>
-                      <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                        <Tag className="w-2.5 h-2.5 text-pink-400" />
+                      <h4 className="text-xs font-bold text-white light:text-slate-900 line-clamp-1">{item.name}</h4>
+                      <span className="text-[10px] text-slate-400 light:text-slate-500 flex items-center gap-1">
+                        <Tag className="w-2.5 h-2.5 text-pink-400 light:text-pink-600" />
                         {item.category || 'General'}
                       </span>
                     </div>
@@ -430,11 +430,11 @@ export default function BrandProductServicesTab({ initialProducts = [], onSaveSu
                   </button>
                 </div>
 
-                {item.description && <p className="text-[11px] text-slate-400/90 line-clamp-2 mt-1">{item.description}</p>}
+                {item.description && <p className="text-[11px] text-slate-400/90 light:text-slate-600 line-clamp-2 mt-1">{item.description}</p>}
               </div>
 
-              <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between">
-                <span className="text-xs font-extrabold text-purple-300">{item.price || 'N/A'}</span>
+              <div className="mt-3 pt-2 border-t border-white/5 light:border-slate-100 flex items-center justify-between">
+                <span className="text-xs font-extrabold text-purple-300 light:text-purple-700">{item.price || 'N/A'}</span>
                 {item.productUrl && (
                   <a
                     href={item.productUrl}

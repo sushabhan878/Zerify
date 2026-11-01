@@ -19,7 +19,7 @@ export default function ConversationSearch({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-label="Search conversations"
-        className="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/60 focus:ring-1 focus:ring-purple-500/20 transition-all"
+        className="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs font-semibold text-white placeholder-slate-500 light:bg-slate-50 light:border-slate-200/80 light:text-slate-900 light:placeholder-slate-400 light:focus:bg-white focus:outline-none focus:border-purple-500/60 focus:ring-1 focus:ring-purple-500/20 transition-all"
       />
       {value && (
         <button
