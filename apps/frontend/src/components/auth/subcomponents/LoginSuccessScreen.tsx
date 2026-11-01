@@ -29,16 +29,16 @@ export default function LoginSuccessScreen({ userEmail }: LoginSuccessScreenProp
       </div>
 
       <div className="space-y-1.5">
-        <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight [font-family:'Playfair_Display',Georgia,serif]">
-          Welcome <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300">Back!</span>
+        <h2 className="text-2xl sm:text-3xl font-semibold text-white light:text-slate-900 tracking-tight [font-family:'Playfair_Display',Georgia,serif]">
+          Welcome <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 light:from-purple-600 light:via-pink-600 light:to-indigo-600">Back!</span>
         </h2>
-        <p className="text-xs sm:text-sm text-slate-300">
-          Authenticated as <span className="font-semibold text-purple-300">{userEmail}</span>
+        <p className="text-xs sm:text-sm text-slate-300 light:text-slate-600">
+          Authenticated as <span className="font-semibold text-purple-300 light:text-purple-700">{userEmail}</span>
         </p>
       </div>
 
-      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs text-purple-300 shadow-inner">
-        <ShieldCheck className="w-4 h-4 text-purple-400" />
+      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 light:bg-purple-50 border border-purple-500/20 light:border-purple-200 text-xs text-purple-300 light:text-purple-700 shadow-inner">
+        <ShieldCheck className="w-4 h-4 text-purple-400 light:text-purple-600" />
         <span>Redirecting to your dashboard...</span>
       </div>
     </motion.div>

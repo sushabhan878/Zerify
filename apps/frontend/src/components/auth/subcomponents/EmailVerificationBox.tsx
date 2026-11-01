@@ -131,9 +131,9 @@ export default function EmailVerificationBox({
     <div className="space-y-2.5">
       {/* Verified State Display */}
       {isVerified ? (
-        <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs shadow-inner">
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-500/10 light:bg-emerald-50 border border-emerald-500/30 light:border-emerald-200 text-emerald-300 light:text-emerald-700 text-xs shadow-inner">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 light:text-emerald-600 shrink-0" />
             <span className="font-semibold">
               {isBrand ? 'Official Business Email Verified' : 'Email Verified'}
             </span>
@@ -142,7 +142,7 @@ export default function EmailVerificationBox({
             <button
               type="button"
               onClick={onResetEmail}
-              className="text-[11px] font-bold text-slate-400 hover:text-white underline underline-offset-2 transition-colors cursor-pointer"
+              className="text-[11px] font-bold text-slate-400 light:text-slate-600 hover:text-white light:hover:text-purple-600 underline underline-offset-2 transition-colors cursor-pointer"
             >
               Change
             </button>
@@ -155,16 +155,16 @@ export default function EmailVerificationBox({
             type="button"
             disabled={sendingOtp || !email || hasPublicDomain}
             onClick={handleSendOtp}
-            className="px-3 py-1.5 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/40 text-[11px] font-bold text-purple-200 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-sm cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-purple-600/30 light:bg-purple-100 hover:bg-purple-600/50 light:hover:bg-purple-200 border border-purple-500/40 light:border-purple-300 text-[11px] font-bold text-purple-200 light:text-purple-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-sm cursor-pointer"
           >
             {sendingOtp ? (
               <>
-                <Loader2 className="w-3 h-3 animate-spin text-purple-300" />
+                <Loader2 className="w-3 h-3 animate-spin text-purple-300 light:text-purple-600" />
                 <span>Sending Code...</span>
               </>
             ) : (
               <>
-                <Mail className="w-3 h-3 text-purple-300" />
+                <Mail className="w-3 h-3 text-purple-300 light:text-purple-600" />
                 <span>{otpSent ? 'Resend Code' : 'Verify Email'}</span>
               </>
             )}
@@ -177,9 +177,9 @@ export default function EmailVerificationBox({
         <motion.div
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300 flex items-start gap-2"
+          className="p-2.5 rounded-xl bg-amber-500/10 light:bg-amber-50 border border-amber-500/30 light:border-amber-200 text-[11px] text-amber-300 light:text-amber-800 flex items-start gap-2"
         >
-          <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <AlertCircle className="w-4 h-4 text-amber-400 light:text-amber-600 shrink-0 mt-0.5" />
           <p className="leading-relaxed">
             <span className="font-bold">Work email required:</span> Zerify Brands cannot register with public email providers (@gmail, @yahoo, @hotmail, etc.). Please enter your company domain email (e.g. name@brand.com).
           </p>
@@ -193,11 +193,11 @@ export default function EmailVerificationBox({
             initial={{ opacity: 0, height: 0, y: -6 }}
             animate={{ opacity: 1, height: 'auto', y: 0 }}
             exit={{ opacity: 0, height: 0, y: -6 }}
-            className="p-3.5 rounded-2xl bg-slate-900/90 border border-purple-500/40 shadow-xl space-y-3 overflow-hidden backdrop-blur-md"
+            className="p-3.5 rounded-2xl bg-slate-900/90 light:bg-white border border-purple-500/40 light:border-purple-200 shadow-xl light:shadow-md space-y-3 overflow-hidden backdrop-blur-md"
           >
-            <div className="flex items-center justify-between text-xs text-purple-200">
+            <div className="flex items-center justify-between text-xs text-purple-200 light:text-purple-900">
               <span className="flex items-center gap-1.5 font-medium">
-                <KeyRound className="w-3.5 h-3.5 text-purple-400" />
+                <KeyRound className="w-3.5 h-3.5 text-purple-400 light:text-purple-600" />
                 <span>Enter 6-digit code sent to your email:</span>
               </span>
               {resendCountdown > 0 ? (

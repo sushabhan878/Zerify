@@ -189,7 +189,13 @@ html.light .bg-\[\#0A0E18\],
 html.light .bg-\[\#0A0E18\]\/90,
 html.light .bg-\[\#0c091f\],
 html.light .bg-\[\#0c091f\]\/95,
-html.light .bg-\[\#0d0a21\] {
+html.light .bg-\[\#0d0a21\],
+html.light .bg-\[\#07090e\]\/30,
+html.light .bg-\[\#07090E\]\/30,
+html.light .bg-\[\#07090e\]\/20,
+html.light .bg-\[\#07090E\]\/20,
+html.light .auth-card,
+html.light .light\:bg-white {
   background-color: #FFFFFF !important;
 }
 

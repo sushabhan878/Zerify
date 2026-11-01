@@ -108,20 +108,20 @@ export default function BrandOnboardingWizard() {
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
       {/* Step Progress Header */}
-      <div className="bg-slate-900/70 border border-white/10 p-4 sm:p-6 rounded-3xl backdrop-blur-2xl">
+      <div className="bg-slate-900/70 light:bg-white border border-white/10 light:border-slate-200/90 p-4 sm:p-6 rounded-3xl backdrop-blur-2xl shadow-xl light:shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <span className="text-[10px] font-extrabold text-purple-400 uppercase tracking-widest flex items-center gap-1.5">
+            <span className="text-[10px] font-extrabold text-purple-400 light:text-purple-600 uppercase tracking-widest flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
               Company / Brand Onboarding
             </span>
-            <h2 className="text-lg font-bold text-white">Step {currentStep} of 5 — {steps[currentStep - 1].title}</h2>
+            <h2 className="text-lg font-bold text-white light:text-slate-900">Step {currentStep} of 5 — {steps[currentStep - 1].title}</h2>
           </div>
-          <span className="text-xs font-bold text-slate-400">{Math.round((currentStep / 5) * 100)}% Completed</span>
+          <span className="text-xs font-bold text-slate-400 light:text-slate-500">{Math.round((currentStep / 5) * 100)}% Completed</span>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden mb-6 border border-white/5">
+        <div className="w-full h-2 bg-slate-950 light:bg-slate-200 rounded-full overflow-hidden mb-6 border border-white/5 light:border-slate-200">
           <motion.div
             className="h-full bg-gradient-to-r from-purple-600 via-indigo-500 to-pink-500 rounded-full"
             animate={{ width: `${(currentStep / 5) * 100}%` }}
@@ -142,19 +142,19 @@ export default function BrandOnboardingWizard() {
                 onClick={() => setCurrentStep(step.number as any)}
                 className={`p-2 sm:p-3 rounded-2xl border flex flex-col items-center text-center transition-all cursor-pointer ${
                   isCurrent
-                    ? 'bg-purple-600/20 border-purple-500 text-white shadow-lg shadow-purple-600/10'
+                    ? 'bg-purple-600/20 light:bg-purple-50 border-purple-500 light:border-purple-400 text-white light:text-purple-900 shadow-lg shadow-purple-600/10'
                     : isDone
-                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
-                    : 'bg-slate-950/40 border-white/5 text-slate-500 hover:text-slate-300'
+                    ? 'bg-emerald-500/10 light:bg-emerald-50 border-emerald-500/40 light:border-emerald-200 text-emerald-300 light:text-emerald-700'
+                    : 'bg-slate-950/40 light:bg-slate-50 border-white/5 light:border-slate-200 text-slate-500 light:text-slate-500 hover:text-slate-300 light:hover:text-slate-800'
                 }`}
               >
                 {isDone ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 mb-1" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 light:text-emerald-600 mb-1" />
                 ) : (
-                  <Icon className={`w-4 h-4 mb-1 ${isCurrent ? 'text-purple-400' : 'text-slate-400'}`} />
+                  <Icon className={`w-4 h-4 mb-1 ${isCurrent ? 'text-purple-400 light:text-purple-600' : 'text-slate-400 light:text-slate-400'}`} />
                 )}
                 <span className="text-[11px] font-bold hidden sm:inline">{step.title}</span>
-                <span className="text-[9px] text-slate-400 hidden lg:inline">{step.subtitle}</span>
+                <span className="text-[9px] text-slate-400 light:text-slate-500 hidden lg:inline">{step.subtitle}</span>
               </button>
             );
           })}
@@ -194,19 +194,19 @@ export default function BrandOnboardingWizard() {
           type="button"
           onClick={handlePrev}
           disabled={currentStep === 1}
-          className="px-4 py-2.5 rounded-xl bg-slate-900 border border-white/10 hover:border-white/20 text-slate-300 text-xs font-semibold flex items-center gap-2 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+          className="px-4 py-2.5 rounded-xl bg-slate-900 light:bg-white border border-white/10 light:border-slate-200 hover:border-white/20 light:hover:border-slate-300 text-slate-300 light:text-slate-700 text-xs font-semibold flex items-center gap-2 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
         >
-          <ArrowLeft className="w-4 h-4 text-slate-400" />
+          <ArrowLeft className="w-4 h-4 text-slate-400 light:text-slate-500" />
           <span>Previous Step</span>
         </button>
 
         <button
           type="button"
           onClick={handleNext}
-          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-xs shadow-xl shadow-purple-600/20 flex items-center gap-2 cursor-pointer"
+          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white keep-white font-bold text-xs shadow-xl shadow-purple-600/20 flex items-center gap-2 cursor-pointer"
         >
-          <span>{currentStep === 5 ? 'Complete Onboarding & Enter Portal' : 'Save & Continue'}</span>
-          <ArrowRight className="w-4 h-4" />
+          <span className="text-white keep-white">{currentStep === 5 ? 'Complete Onboarding & Enter Portal' : 'Save & Continue'}</span>
+          <ArrowRight className="w-4 h-4 text-white keep-white" />
         </button>
       </div>
     </div>

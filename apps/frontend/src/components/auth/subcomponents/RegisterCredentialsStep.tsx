@@ -181,17 +181,17 @@ export default function RegisterCredentialsStep({
     >
       {/* Title Centered with Landing Page Typography */}
       <div className="text-center mb-2">
-        <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight [font-family:'Playfair_Display',Georgia,serif]">
-          Create Your <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300">Credentials</span>
+        <h2 className="text-2xl sm:text-3xl font-semibold text-white light:text-slate-900 tracking-tight [font-family:'Playfair_Display',Georgia,serif]">
+          Create Your <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 light:from-purple-600 light:via-pink-600 light:to-indigo-600">Credentials</span>
         </h2>
       </div>
 
       {/* Business Email Verified Badge Note Banner (For Brand role only) */}
       {role === 'BRAND' && (
-        <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-xs text-purple-200 flex items-center gap-3 shadow-inner backdrop-blur-md">
-          <ShieldCheck className="w-5 h-5 text-purple-400 flex-shrink-0" />
+        <div className="p-3.5 rounded-2xl bg-purple-500/10 light:bg-purple-50 border border-purple-500/20 light:border-purple-200 text-xs text-purple-200 light:text-purple-900 flex items-center gap-3 shadow-inner backdrop-blur-md">
+          <ShieldCheck className="w-5 h-5 text-purple-400 light:text-purple-600 flex-shrink-0" />
           <p className="leading-snug">
-            Brands must register using an official <span className="font-bold text-white">work email</span> (example: manager@zerify.in) to receive their verification badge.
+            Brands must register using an official <span className="font-bold text-white light:text-purple-950">work email</span> (example: manager@zerify.in) to receive their verification badge.
           </p>
         </div>
       )}
@@ -215,16 +215,16 @@ export default function RegisterCredentialsStep({
       >
         {/* 1. Your Name */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-slate-300">Your Name</label>
+          <label className="block text-xs font-semibold text-slate-300 light:text-slate-700">Your Name</label>
           <div className="relative group">
-            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 light:text-slate-400 group-focus-within:text-purple-400 light:group-focus-within:text-purple-600 transition-colors" />
             <input
               type="text"
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="e.g. Jane Doe"
-              className="w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-2xl bg-slate-950/70 border border-white/10 hover:border-white/20 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition-all shadow-inner"
+              className="w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-2xl bg-slate-950/70 light:bg-slate-50 border border-white/10 light:border-slate-200/90 hover:border-white/20 light:hover:border-slate-300 focus:border-purple-500 light:focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-xs sm:text-sm text-white light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 light:focus:bg-white outline-none transition-all shadow-inner"
             />
           </div>
         </div>
@@ -232,18 +232,18 @@ export default function RegisterCredentialsStep({
         {/* 2. Email Address */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className="block text-xs font-semibold text-slate-300">
+            <label className="block text-xs font-semibold text-slate-300 light:text-slate-700">
               {role === 'BRAND' ? 'Official Work Email' : 'Email Address'}
             </label>
             {emailVerified && (
-              <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-1">
+              <span className="text-[11px] font-bold text-emerald-400 light:text-emerald-600 flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 Verified
               </span>
             )}
           </div>
           <div className="relative group">
-            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 light:text-slate-400 group-focus-within:text-purple-400 light:group-focus-within:text-purple-600 transition-colors" />
             <input
               type="email"
               required
@@ -255,10 +255,10 @@ export default function RegisterCredentialsStep({
                 if (otpSent) setOtpSent(false);
               }}
               placeholder={role === 'BRAND' ? 'manager@zerify.in' : 'jane@creator.com'}
-              className={`w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-2xl bg-slate-950/70 border text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition-all shadow-inner disabled:opacity-75 ${
+              className={`w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-2xl bg-slate-950/70 light:bg-slate-50 border text-xs sm:text-sm text-white light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 light:focus:bg-white outline-none transition-all shadow-inner disabled:opacity-75 ${
                 emailVerified
-                  ? 'border-emerald-500/40 focus:border-emerald-500'
-                  : 'border-white/10 hover:border-white/20 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20'
+                  ? 'border-emerald-500/40 light:border-emerald-500 focus:border-emerald-500 light:bg-emerald-50/50'
+                  : 'border-white/10 light:border-slate-200/90 hover:border-white/20 light:hover:border-slate-300 focus:border-purple-500 light:focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20'
               }`}
             />
             {emailVerified && (
@@ -268,7 +268,7 @@ export default function RegisterCredentialsStep({
                   setEmailVerified(false);
                   setOtpSent(false);
                 }}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-purple-300 hover:text-purple-200 underline cursor-pointer"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-purple-300 light:text-purple-600 hover:text-purple-200 light:hover:text-purple-700 underline cursor-pointer"
               >
                 Change
               </button>
@@ -278,21 +278,21 @@ export default function RegisterCredentialsStep({
 
         {/* 3. Set Password */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-slate-300">Set Password</label>
+          <label className="block text-xs font-semibold text-slate-300 light:text-slate-700">Set Password</label>
           <div className="relative group">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 light:text-slate-400 group-focus-within:text-purple-400 light:group-focus-within:text-purple-600 transition-colors" />
             <input
               type={showPassword ? 'text' : 'password'}
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 6 characters"
-              className="w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-2xl bg-slate-950/70 border border-white/10 hover:border-white/20 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition-all shadow-inner"
+              className="w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-2xl bg-slate-950/70 light:bg-slate-50 border border-white/10 light:border-slate-200/90 hover:border-white/20 light:hover:border-slate-300 focus:border-purple-500 light:focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-xs sm:text-sm text-white light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 light:focus:bg-white outline-none transition-all shadow-inner"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 light:text-slate-400 hover:text-slate-300 light:hover:text-slate-600 transition-colors cursor-pointer"
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -309,13 +309,13 @@ export default function RegisterCredentialsStep({
               transition={{ duration: 0.25 }}
               className="overflow-hidden"
             >
-              <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/30 backdrop-blur-xl space-y-3 shadow-xl">
+              <div className="p-4 rounded-2xl bg-purple-950/30 light:bg-purple-50/80 border border-purple-500/30 light:border-purple-200 backdrop-blur-xl space-y-3 shadow-xl light:shadow-sm">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-bold text-purple-200">
-                    <KeyRound className="w-4 h-4 text-purple-400" />
+                  <div className="flex items-center gap-2 text-xs font-bold text-purple-200 light:text-purple-900">
+                    <KeyRound className="w-4 h-4 text-purple-400 light:text-purple-600" />
                     <span>Enter 6-Digit Verification Code</span>
                   </div>
-                  <span className="text-[11px] text-slate-400 font-medium">Sent to your email</span>
+                  <span className="text-[11px] text-slate-400 light:text-slate-500 font-medium">Sent to your email</span>
                 </div>
 
                 <div className="relative">
@@ -328,7 +328,7 @@ export default function RegisterCredentialsStep({
                       setOtpCode(val);
                     }}
                     placeholder="••••••"
-                    className="w-full py-2.5 px-4 rounded-xl bg-slate-950/90 border border-purple-500/40 focus:border-purple-400 focus:ring-2 focus:ring-purple-500/30 text-center font-mono text-lg font-black tracking-[0.5em] text-white placeholder-slate-600 outline-none transition-all shadow-inner"
+                    className="w-full py-2.5 px-4 rounded-xl bg-slate-950/90 light:bg-white border border-purple-500/40 light:border-purple-300 focus:border-purple-400 light:focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 text-center font-mono text-lg font-black tracking-[0.5em] text-white light:text-slate-900 placeholder-slate-600 light:placeholder-slate-400 outline-none transition-all shadow-inner"
                   />
                 </div>
 
@@ -337,21 +337,21 @@ export default function RegisterCredentialsStep({
                   <button
                     type="button"
                     onClick={() => setOtpCode(devCode)}
-                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-400/30 text-[11px] font-bold text-purple-300 transition-colors cursor-pointer"
+                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-purple-500/15 light:bg-purple-100/70 hover:bg-purple-500/25 light:hover:bg-purple-100 border border-purple-400/30 light:border-purple-200 text-[11px] font-bold text-purple-300 light:text-purple-700 transition-colors cursor-pointer"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-pink-400" />
-                    <span>Dev OTP: <span className="font-mono text-white tracking-widest">{devCode}</span> (Click to Paste)</span>
+                    <Sparkles className="w-3.5 h-3.5 text-pink-400 light:text-pink-600" />
+                    <span>Dev OTP: <span className="font-mono text-white light:text-purple-950 tracking-widest">{devCode}</span> (Click to Paste)</span>
                   </button>
                 )}
 
                 {/* Resend Code Button & Countdown */}
                 <div className="flex items-center justify-between pt-1 text-[11px]">
-                  <span className="text-slate-400">Didn&apos;t receive the code?</span>
+                  <span className="text-slate-400 light:text-slate-500">Didn&apos;t receive the code?</span>
                   <button
                     type="button"
                     disabled={resendCountdown > 0 || sendingOtp}
                     onClick={handleSendOtp}
-                    className="text-purple-400 hover:text-purple-300 font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+                    className="text-purple-400 light:text-purple-600 hover:text-purple-300 light:hover:text-purple-700 font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
                   >
                     {sendingOtp ? (
                       <Loader2 className="w-3 h-3 animate-spin" />
@@ -372,15 +372,15 @@ export default function RegisterCredentialsStep({
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center justify-between shadow-inner"
+              className="p-3 rounded-2xl bg-emerald-500/10 light:bg-emerald-50 border border-emerald-500/30 light:border-emerald-200 text-xs text-emerald-300 light:text-emerald-700 flex items-center justify-between shadow-inner"
             >
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 light:text-emerald-600 flex-shrink-0" />
                 <span className="font-semibold">
                   {role === 'BRAND' ? 'Official Work Email Verified' : 'Email Verified Successfully'}
                 </span>
               </div>
-              <span className="text-[10px] text-emerald-400/70 font-mono">Ready to proceed</span>
+              <span className="text-[10px] text-emerald-400/70 light:text-emerald-600 font-mono">Ready to proceed</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -392,17 +392,17 @@ export default function RegisterCredentialsStep({
               type="button"
               disabled={sendingOtp}
               onClick={handleSendOtp}
-              className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:opacity-95 text-white font-bold text-xs sm:text-sm shadow-xl shadow-purple-600/30 transition-all duration-200 flex items-center justify-center gap-2 mt-4 cursor-pointer disabled:opacity-60"
+              className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:opacity-95 text-white keep-white font-bold text-xs sm:text-sm shadow-xl shadow-purple-600/30 transition-all duration-200 flex items-center justify-center gap-2 mt-4 cursor-pointer disabled:opacity-60"
             >
               {sendingOtp ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Sending Verification Code...</span>
+                  <Loader2 className="w-4 h-4 animate-spin text-white keep-white" />
+                  <span className="text-white keep-white">Sending Verification Code...</span>
                 </>
               ) : (
                 <>
-                  <Mail className="w-4 h-4" />
-                  <span>Verify Email</span>
+                  <Mail className="w-4 h-4 text-white keep-white" />
+                  <span className="text-white keep-white">Verify Email</span>
                 </>
               )}
             </button>
@@ -411,17 +411,17 @@ export default function RegisterCredentialsStep({
               type="button"
               disabled={verifyingOtp || otpCode.length !== 6}
               onClick={handleVerifyOtp}
-              className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:opacity-95 text-white font-bold text-xs sm:text-sm shadow-xl shadow-purple-600/30 transition-all duration-200 flex items-center justify-center gap-2 mt-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:opacity-95 text-white keep-white font-bold text-xs sm:text-sm shadow-xl shadow-purple-600/30 transition-all duration-200 flex items-center justify-center gap-2 mt-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {verifyingOtp ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Verifying Code...</span>
+                  <Loader2 className="w-4 h-4 animate-spin text-white keep-white" />
+                  <span className="text-white keep-white">Verifying Code...</span>
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Confirm Code</span>
+                  <CheckCircle2 className="w-4 h-4 text-white keep-white" />
+                  <span className="text-white keep-white">Confirm Code</span>
                 </>
               )}
             </button>
@@ -429,10 +429,10 @@ export default function RegisterCredentialsStep({
         ) : (
           <button
             type="submit"
-            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:opacity-95 text-white font-bold text-xs sm:text-sm shadow-xl shadow-purple-600/30 transition-all duration-200 flex items-center justify-center gap-2 mt-4 cursor-pointer"
+            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:opacity-95 text-white keep-white font-bold text-xs sm:text-sm shadow-xl shadow-purple-600/30 transition-all duration-200 flex items-center justify-center gap-2 mt-4 cursor-pointer"
           >
-            <span>Continue to Profile Details</span>
-            <ArrowRight className="w-4 h-4" />
+            <span className="text-white keep-white">Continue to Profile Details</span>
+            <ArrowRight className="w-4 h-4 text-white keep-white" />
           </button>
         )}
       </form>
@@ -440,9 +440,9 @@ export default function RegisterCredentialsStep({
       {/* Social Registration Divider & Button */}
       <div className="relative my-4 text-center">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-white/10" />
+          <div className="w-full border-t border-white/10 light:border-slate-200" />
         </div>
-        <span className="relative px-3 bg-slate-900/90 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+        <span className="relative px-3 bg-slate-900/90 light:bg-white text-[10px] font-semibold text-slate-500 light:text-slate-500 uppercase tracking-wider">
           Or Quick Signup
         </span>
       </div>

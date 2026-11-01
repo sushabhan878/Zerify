@@ -15,7 +15,7 @@ export default function AuthGoogleButton({
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-slate-900 border border-white/10 hover:border-white/20 text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-sm"
+      className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-slate-900 light:bg-white border border-white/10 light:border-slate-200 hover:border-white/20 light:hover:border-slate-300 light:hover:bg-slate-50 text-xs font-semibold text-slate-200 light:text-slate-700 hover:text-white light:hover:text-slate-900 transition-all shadow-sm cursor-pointer"
     >
       <svg className="w-4 h-4" viewBox="0 0 24 24">
         <path

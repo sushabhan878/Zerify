@@ -43,6 +43,7 @@ export const metadata = {
 
 import { ToastProvider } from '@/components/ui/Toast';
 import { CurrencyProvider } from '@/context/CurrencyContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 
 export default function RootLayout({
   children,
@@ -50,11 +51,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`dark ${syne.variable}`}>
-      <body className="bg-[#07090E] text-slate-100 antialiased selection:bg-purple-500 selection:text-white">
-        <CurrencyProvider>
-          <ToastProvider>{children}</ToastProvider>
-        </CurrencyProvider>
+    <html lang="en" className={`light ${syne.variable}`}>
+      <body className="bg-[#07090E] light:bg-[#F1F3F7] text-slate-100 light:text-slate-900 antialiased selection:bg-purple-500 selection:text-white">
+        <ThemeProvider>
+          <CurrencyProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </CurrencyProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

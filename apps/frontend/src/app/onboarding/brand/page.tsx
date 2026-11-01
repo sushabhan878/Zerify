@@ -34,10 +34,11 @@ export default function BrandOnboardingPage() {
   }
 
   return (
-    <main className="relative min-h-screen bg-[#07090E] flex flex-col justify-between overflow-x-hidden selection:bg-purple-500 selection:text-white">
+    <main className="relative min-h-screen bg-[#07090E] light:bg-[#F1F3F7] flex flex-col justify-between overflow-x-hidden selection:bg-purple-500 selection:text-white">
       {/* Background Interactive Elements */}
       <InteractiveDotGrid />
-      <div className="absolute inset-0 bg-hero-gradient pointer-events-none" />
+      <div className="absolute inset-0 bg-hero-gradient pointer-events-none opacity-80 light:opacity-30" />
+      <div className="absolute inset-0 dashboard-grid-pattern opacity-40 light:opacity-60 pointer-events-none" />
 
       {/* Header Bar */}
       <header className="relative z-20 w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
@@ -51,7 +52,7 @@ export default function BrandOnboardingPage() {
               className="object-contain w-full h-full"
             />
           </div>
-          <span className="text-lg font-extrabold tracking-tight text-white group-hover:text-purple-300 transition-colors">
+          <span className="text-lg font-extrabold tracking-tight text-white light:text-slate-900 group-hover:text-purple-300 light:group-hover:text-purple-600 transition-colors">
             Zerify
           </span>
         </Link>
@@ -59,9 +60,9 @@ export default function BrandOnboardingPage() {
         <button
           type="button"
           onClick={() => router.push('/dashboard')}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 border border-white/10 text-xs font-semibold text-slate-300 hover:text-white transition-all cursor-pointer shadow-lg"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 light:bg-white border border-white/10 light:border-slate-200 text-xs font-semibold text-slate-300 light:text-slate-700 hover:text-white light:hover:text-slate-900 transition-all cursor-pointer shadow-sm"
         >
-          <ArrowLeft className="w-4 h-4 text-purple-400" />
+          <ArrowLeft className="w-4 h-4 text-purple-400 light:text-purple-600" />
           <span>Skip to Dashboard</span>
         </button>
       </header>

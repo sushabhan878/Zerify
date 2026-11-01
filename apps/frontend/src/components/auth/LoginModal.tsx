@@ -91,11 +91,11 @@ export default function LoginModal() {
         initial={{ opacity: 0, y: 20, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
-        className="relative rounded-3xl bg-[#07090e]/30 border border-white/10 p-6 sm:p-10 backdrop-blur-2xl shadow-2xl overflow-hidden transition-all duration-300"
+        className="relative rounded-3xl bg-slate-900/90 light:bg-white border border-white/10 light:border-slate-200/90 p-6 sm:p-10 backdrop-blur-2xl shadow-2xl light:shadow-xl overflow-hidden transition-all duration-300 auth-card"
       >
         {/* Full-Width Bottom Ambient Lighting Rim */}
-        <div className="absolute -bottom-0.5 left-6 right-6 h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent blur-[2px] rounded-full pointer-events-none" />
-        <div className="absolute -top-28 left-1/2 -translate-x-1/2 w-80 h-36 bg-purple-600/05 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-0.5 left-6 right-6 h-1 bg-gradient-to-r from-transparent via-white/10 light:via-purple-500/20 to-transparent blur-[2px] rounded-full pointer-events-none" />
+        <div className="absolute -top-28 left-1/2 -translate-x-1/2 w-80 h-36 bg-purple-600/05 light:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
 
         {success ? (
           <LoginSuccessScreen userEmail={loggedInUser?.email || email} />
@@ -124,9 +124,9 @@ export default function LoginModal() {
 
             <div className="relative my-6 text-center">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/10" />
+                <div className="w-full border-t border-white/10 light:border-slate-200" />
               </div>
-              <span className="relative px-3 bg-[#090D16] text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+              <span className="relative px-3 bg-[#090D16] light:bg-white text-[11px] font-semibold text-slate-500 light:text-slate-500 uppercase tracking-wider">
                 Or continue with
               </span>
             </div>
@@ -134,11 +134,11 @@ export default function LoginModal() {
             <AuthGoogleButton onClick={handleGoogleLogin} />
 
             <div className="mt-8 text-center">
-              <p className="text-xs text-slate-400">
-                Don't have an account yet?{' '}
+              <p className="text-xs text-slate-400 light:text-slate-600">
+                Don&apos;t have an account yet?{' '}
                 <Link
                   href="/register"
-                  className="font-bold text-purple-400 hover:text-purple-300 transition-colors underline underline-offset-4"
+                  className="font-bold text-purple-400 light:text-purple-600 hover:text-purple-300 light:hover:text-purple-700 transition-colors underline underline-offset-4"
                 >
                   Create an Account
                 </Link>

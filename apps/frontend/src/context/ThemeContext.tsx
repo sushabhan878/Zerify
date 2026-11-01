@@ -13,7 +13,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('dark');
+  const [theme, setThemeState] = useState<Theme>('light');
   const [mounted, setMounted] = useState(false);
 
   const applyThemeToDom = (targetTheme: Theme) => {
@@ -31,11 +31,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const storedTheme = localStorage.getItem('zerify_theme') as Theme;
-      const activeTheme = (storedTheme === 'light' || storedTheme === 'dark') ? storedTheme : 'dark';
+      const activeTheme = (storedTheme === 'light' || storedTheme === 'dark') ? storedTheme : 'light';
       setThemeState(activeTheme);
       applyThemeToDom(activeTheme);
     } catch {
-      applyThemeToDom('dark');
+      applyThemeToDom('light');
     } finally {
       setMounted(true);
     }

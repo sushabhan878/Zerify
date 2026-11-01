@@ -47,37 +47,37 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="relative min-h-screen bg-[#07090E] flex flex-col justify-between overflow-hidden selection:bg-purple-500 selection:text-white">
+    <main className="relative min-h-screen bg-[#07090E] light:bg-[#F1F3F7] flex flex-col justify-between overflow-hidden selection:bg-purple-500 selection:text-white">
       {/* Interactive Cursor-Reactive Dotted Grid Background */}
       <InteractiveDotGrid />
 
       {/* Motion Background Graphics */}
-      <div className="absolute inset-0 bg-hero-gradient pointer-events-none" />
+      <div className="absolute inset-0 bg-hero-gradient pointer-events-none opacity-80 light:opacity-30" />
 
       {/* Motion Background Glowing Spheres */}
       <motion.div
         animate={{
           scale: [1, 1.15, 1],
           opacity: [0.05, 0.12, 0.05],
-          x: [0, 30, 0],
-          y: [0, -20, 0],
+          x: [30, 0, 30],
+          y: [-20, 0, -20],
         }}
         transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-1/6 left-1/5 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[160px] pointer-events-none"
+        className="absolute top-1/6 left-1/5 w-[500px] h-[500px] bg-purple-600/10 light:bg-purple-400/10 rounded-full blur-[160px] pointer-events-none"
       />
       <motion.div
         animate={{
           scale: [1, 1.2, 1],
           opacity: [0.04, 0.10, 0.04],
-          x: [0, -30, 0],
-          y: [0, 30, 0],
+          x: [-30, 0, -30],
+          y: [30, 0, 30],
         }}
         transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute bottom-1/6 right-1/5 w-[450px] h-[450px] bg-pink-600/10 rounded-full blur-[150px] pointer-events-none"
+        className="absolute bottom-1/6 right-1/5 w-[450px] h-[450px] bg-pink-600/10 light:bg-pink-400/10 rounded-full blur-[150px] pointer-events-none"
       />
 
       {/* Grid Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+      <div className="absolute inset-0 dashboard-grid-pattern opacity-40 light:opacity-60 pointer-events-none" />
 
       {/* Header Bar */}
       <header className="relative z-20 w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
@@ -91,7 +91,7 @@ export default function RegisterPage() {
               className="object-contain w-full h-full"
             />
           </div>
-          <span className="text-lg font-extrabold tracking-tight text-white group-hover:text-purple-300 transition-colors">
+          <span className="text-lg font-extrabold tracking-tight text-white light:text-slate-900 group-hover:text-purple-300 light:group-hover:text-purple-600 transition-colors">
             Zerify
           </span>
         </Link>
@@ -100,9 +100,9 @@ export default function RegisterPage() {
         <button
           type="button"
           onClick={handleGoBack}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors cursor-pointer group py-2 px-3"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 light:bg-white border border-white/10 light:border-slate-200/90 text-xs font-semibold text-slate-300 light:text-slate-700 hover:text-white light:hover:text-slate-900 shadow-sm transition-all cursor-pointer group"
         >
-          <ArrowLeft className="w-4 h-4 text-slate-400 group-hover:text-purple-400 group-hover:-translate-x-0.5 transition-all" />
+          <ArrowLeft className="w-4 h-4 text-purple-400 light:text-purple-600 group-hover:-translate-x-0.5 transition-all" />
           <span>Go Back</span>
         </button>
       </header>
@@ -115,13 +115,13 @@ export default function RegisterPage() {
       </section>
 
       {/* Footer copyright */}
-      <footer className="relative z-20 py-6 text-center text-xs text-slate-500">
+      <footer className="relative z-20 py-6 text-center text-xs text-slate-500 light:text-slate-500">
         &copy; {new Date().getFullYear()} Zerify Inc. All rights reserved. •{' '}
-        <Link href="#" className="hover:text-slate-300 transition-colors">
+        <Link href="#" className="hover:text-slate-300 light:hover:text-purple-600 transition-colors">
           Privacy Policy
         </Link>{' '}
         •{' '}
-        <Link href="#" className="hover:text-slate-300 transition-colors">
+        <Link href="#" className="hover:text-slate-300 light:hover:text-purple-600 transition-colors">
           Terms of Service
         </Link>
       </footer>

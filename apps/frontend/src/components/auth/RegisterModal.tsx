@@ -190,7 +190,7 @@ export default function RegisterModal({
   return (
     <div className={`relative w-full mx-auto p-1 transition-all duration-300 ${step === 1 ? 'max-w-3xl sm:max-w-4xl' : 'max-w-lg'}`}>
       {/* Main Glassmorphic Card Container */}
-      <div className="relative rounded-3xl bg-slate-900/90 border border-white/10 backdrop-blur-2xl p-6 sm:p-9 shadow-2xl shadow-black/80 overflow-hidden transition-all duration-300">
+      <div className="relative rounded-3xl bg-slate-900/90 light:bg-white border border-white/10 light:border-slate-200/90 backdrop-blur-2xl p-6 sm:p-9 shadow-2xl light:shadow-xl overflow-hidden transition-all duration-300 auth-card">
         <RegisterProgressHeader step={step} />
 
         <AnimatePresence mode="wait">
