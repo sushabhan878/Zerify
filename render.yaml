@@ -17,10 +17,42 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
+      - key: FRONTEND_URL
+        sync: false
+      - key: SOCIAL_ENCRYPTION_SECRET
+        sync: false
       - key: RESEND_API_KEY
         sync: false
       - key: EMAIL_FROM
         value: Zerify <notifications@zerify.in>
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: CASHFREE_CLIENT_ID
+        sync: false
+      - key: CASHFREE_CLIENT_SECRET
+        sync: false
+      - key: CASHFREE_ENVIRONMENT
+        value: sandbox
+      - key: CASHFREE_API_VERSION
+        value: 2023-08-01
+      - key: CASHFREE_WEBHOOK_SECRET
+        sync: false
+      - key: CASHFREE_RETURN_URL
+        sync: false
+      - key: CASHFREE_WEBHOOK_URL
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT
