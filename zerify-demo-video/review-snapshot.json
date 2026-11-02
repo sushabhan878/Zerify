@@ -1,0 +1,2289 @@
+{
+  "ok": true,
+  "outputDir": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28",
+  "frames": [
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-01-at-0.3s.png",
+      "time": 0.3,
+      "role": "beat",
+      "label": "brand-overview"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-02-at-3s.png",
+      "time": 3,
+      "role": "beat",
+      "label": "brand-overview mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-03-at-6.3s.png",
+      "time": 6.3,
+      "role": "beat",
+      "label": "campaigns"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-04-at-9s.png",
+      "time": 9,
+      "role": "beat",
+      "label": "campaigns mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-05-at-12.3s.png",
+      "time": 12.3,
+      "role": "beat",
+      "label": "basic-info"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-06-at-16s.png",
+      "time": 16,
+      "role": "beat",
+      "label": "basic-info mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-07-at-20.3s.png",
+      "time": 20.3,
+      "role": "beat",
+      "label": "product"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-08-at-23s.png",
+      "time": 23,
+      "role": "beat",
+      "label": "product mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-09-at-26.3s.png",
+      "time": 26.3,
+      "role": "beat",
+      "label": "requirements"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-10-at-29.5s.png",
+      "time": 29.5,
+      "role": "beat",
+      "label": "requirements mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-11-at-33.3s.png",
+      "time": 33.3,
+      "role": "beat",
+      "label": "deliverables"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-12-at-37s.png",
+      "time": 37,
+      "role": "beat",
+      "label": "deliverables mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-13-at-41.3s.png",
+      "time": 41.3,
+      "role": "beat",
+      "label": "budget"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-14-at-44.5s.png",
+      "time": 44.5,
+      "role": "beat",
+      "label": "budget mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-15-at-48.3s.png",
+      "time": 48.3,
+      "role": "beat",
+      "label": "review"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-16-at-51.5s.png",
+      "time": 51.5,
+      "role": "beat",
+      "label": "review mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-17-at-55.3s.png",
+      "time": 55.3,
+      "role": "beat",
+      "label": "published"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-18-at-58.5s.png",
+      "time": 58.5,
+      "role": "beat",
+      "label": "published mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-19-at-62.3s.png",
+      "time": 62.3,
+      "role": "beat",
+      "label": "discovery"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-20-at-64.5s.png",
+      "time": 64.5,
+      "role": "beat",
+      "label": "discovery mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-21-at-67.3s.png",
+      "time": 67.3,
+      "role": "beat",
+      "label": "profile"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-22-at-70s.png",
+      "time": 70,
+      "role": "beat",
+      "label": "profile mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-23-at-73.3s.png",
+      "time": 73.3,
+      "role": "beat",
+      "label": "linkedin"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-24-at-76.5s.png",
+      "time": 76.5,
+      "role": "beat",
+      "label": "linkedin mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-25-at-80.3s.png",
+      "time": 80.3,
+      "role": "beat",
+      "label": "instagram"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-26-at-83.5s.png",
+      "time": 83.5,
+      "role": "beat",
+      "label": "instagram mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-27-at-87.3s.png",
+      "time": 87.3,
+      "role": "beat",
+      "label": "threads"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-28-at-90.5s.png",
+      "time": 90.5,
+      "role": "beat",
+      "label": "threads mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-29-at-94.3s.png",
+      "time": 94.3,
+      "role": "beat",
+      "label": "invitation"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-30-at-98s.png",
+      "time": 98,
+      "role": "beat",
+      "label": "invitation mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-31-at-102.3s.png",
+      "time": 102.3,
+      "role": "beat",
+      "label": "invited"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-32-at-104.5s.png",
+      "time": 104.5,
+      "role": "beat",
+      "label": "invited mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-33-at-107.3s.png",
+      "time": 107.3,
+      "role": "beat",
+      "label": "messages"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-34-at-110s.png",
+      "time": 110,
+      "role": "beat",
+      "label": "messages mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-35-at-113.3s.png",
+      "time": 113.3,
+      "role": "beat",
+      "label": "payouts"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-36-at-116s.png",
+      "time": 116,
+      "role": "beat",
+      "label": "payouts mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-37-at-119.3s.png",
+      "time": 119.3,
+      "role": "beat",
+      "label": "settings"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-38-at-121.5s.png",
+      "time": 121.5,
+      "role": "beat",
+      "label": "settings mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-39-at-124.3s.png",
+      "time": 124.3,
+      "role": "beat",
+      "label": "creator-invitation"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-40-at-127.5s.png",
+      "time": 127.5,
+      "role": "beat",
+      "label": "creator-invitation mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-41-at-131.3s.png",
+      "time": 131.3,
+      "role": "beat",
+      "label": "accept"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-42-at-134s.png",
+      "time": 134,
+      "role": "beat",
+      "label": "accept mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-43-at-137.3s.png",
+      "time": 137.3,
+      "role": "beat",
+      "label": "accepted"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-44-at-139.5s.png",
+      "time": 139.5,
+      "role": "beat",
+      "label": "accepted mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-45-at-142.3s.png",
+      "time": 142.3,
+      "role": "beat",
+      "label": "active"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-46-at-145s.png",
+      "time": 145,
+      "role": "beat",
+      "label": "active mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-47-at-148.3s.png",
+      "time": 148.3,
+      "role": "beat",
+      "label": "new-brief"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-48-at-152s.png",
+      "time": 152,
+      "role": "beat",
+      "label": "new-brief mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-49-at-156.3s.png",
+      "time": 156.3,
+      "role": "beat",
+      "label": "completed-list"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-50-at-159s.png",
+      "time": 159,
+      "role": "beat",
+      "label": "completed-list mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-51-at-162.3s.png",
+      "time": 162.3,
+      "role": "beat",
+      "label": "completed-brief"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-52-at-165.5s.png",
+      "time": 165.5,
+      "role": "beat",
+      "label": "completed-brief mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-53-at-169.3s.png",
+      "time": 169.3,
+      "role": "beat",
+      "label": "deliverable"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-54-at-172s.png",
+      "time": 172,
+      "role": "beat",
+      "label": "deliverable mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-55-at-175.3s.png",
+      "time": 175.3,
+      "role": "beat",
+      "label": "history"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-56-at-178s.png",
+      "time": 178,
+      "role": "beat",
+      "label": "history mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-57-at-181.3s.png",
+      "time": 181.3,
+      "role": "beat",
+      "label": "versions"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-58-at-186s.png",
+      "time": 186,
+      "role": "beat",
+      "label": "versions mid"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-01-1-at-5.8s.png",
+      "time": 5.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-01-2-at-5.9s.png",
+      "time": 5.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-01-3-at-6s.png",
+      "time": 6,
+      "role": "seam",
+      "label": "cut brand-overview -> campaigns"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-01-4-at-6.1s.png",
+      "time": 6.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-01-5-at-6.2s.png",
+      "time": 6.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-02-1-at-11.8s.png",
+      "time": 11.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-02-2-at-11.9s.png",
+      "time": 11.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-02-3-at-12s.png",
+      "time": 12,
+      "role": "seam",
+      "label": "cut campaigns -> basic-info"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-02-4-at-12.1s.png",
+      "time": 12.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-02-5-at-12.2s.png",
+      "time": 12.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-03-1-at-19.8s.png",
+      "time": 19.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-03-2-at-19.9s.png",
+      "time": 19.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-03-3-at-20s.png",
+      "time": 20,
+      "role": "seam",
+      "label": "cut basic-info -> product"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-03-4-at-20.1s.png",
+      "time": 20.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-03-5-at-20.2s.png",
+      "time": 20.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-04-1-at-25.8s.png",
+      "time": 25.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-04-2-at-25.9s.png",
+      "time": 25.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-04-3-at-26s.png",
+      "time": 26,
+      "role": "seam",
+      "label": "cut product -> requirements"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-04-4-at-26.1s.png",
+      "time": 26.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-04-5-at-26.2s.png",
+      "time": 26.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-05-1-at-32.8s.png",
+      "time": 32.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-05-2-at-32.9s.png",
+      "time": 32.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-05-3-at-33s.png",
+      "time": 33,
+      "role": "seam",
+      "label": "cut requirements -> deliverables"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-05-4-at-33.1s.png",
+      "time": 33.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-05-5-at-33.2s.png",
+      "time": 33.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-06-1-at-40.8s.png",
+      "time": 40.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-06-2-at-40.9s.png",
+      "time": 40.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-06-3-at-41s.png",
+      "time": 41,
+      "role": "seam",
+      "label": "cut deliverables -> budget"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-06-4-at-41.1s.png",
+      "time": 41.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-06-5-at-41.2s.png",
+      "time": 41.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-07-1-at-47.8s.png",
+      "time": 47.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-07-2-at-47.9s.png",
+      "time": 47.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-07-3-at-48s.png",
+      "time": 48,
+      "role": "seam",
+      "label": "cut budget -> review"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-07-4-at-48.1s.png",
+      "time": 48.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-07-5-at-48.2s.png",
+      "time": 48.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-08-1-at-54.8s.png",
+      "time": 54.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-08-2-at-54.9s.png",
+      "time": 54.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-08-3-at-55s.png",
+      "time": 55,
+      "role": "seam",
+      "label": "cut review -> published"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-08-4-at-55.1s.png",
+      "time": 55.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-08-5-at-55.2s.png",
+      "time": 55.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-09-1-at-61.8s.png",
+      "time": 61.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-09-2-at-61.9s.png",
+      "time": 61.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-09-3-at-62s.png",
+      "time": 62,
+      "role": "seam",
+      "label": "cut published -> discovery"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-09-4-at-62.1s.png",
+      "time": 62.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-09-5-at-62.2s.png",
+      "time": 62.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-10-1-at-66.8s.png",
+      "time": 66.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-10-2-at-66.9s.png",
+      "time": 66.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-10-3-at-67s.png",
+      "time": 67,
+      "role": "seam",
+      "label": "cut discovery -> profile"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-10-4-at-67.1s.png",
+      "time": 67.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-10-5-at-67.2s.png",
+      "time": 67.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-11-1-at-72.8s.png",
+      "time": 72.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-11-2-at-72.9s.png",
+      "time": 72.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-11-3-at-73s.png",
+      "time": 73,
+      "role": "seam",
+      "label": "cut profile -> linkedin"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-11-4-at-73.1s.png",
+      "time": 73.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-11-5-at-73.2s.png",
+      "time": 73.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-12-1-at-79.8s.png",
+      "time": 79.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-12-2-at-79.9s.png",
+      "time": 79.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-12-3-at-80s.png",
+      "time": 80,
+      "role": "seam",
+      "label": "cut linkedin -> instagram"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-12-4-at-80.1s.png",
+      "time": 80.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-12-5-at-80.2s.png",
+      "time": 80.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-13-1-at-86.8s.png",
+      "time": 86.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-13-2-at-86.9s.png",
+      "time": 86.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-13-3-at-87s.png",
+      "time": 87,
+      "role": "seam",
+      "label": "cut instagram -> threads"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-13-4-at-87.1s.png",
+      "time": 87.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-13-5-at-87.2s.png",
+      "time": 87.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-14-1-at-93.8s.png",
+      "time": 93.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-14-2-at-93.9s.png",
+      "time": 93.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-14-3-at-94s.png",
+      "time": 94,
+      "role": "seam",
+      "label": "cut threads -> invitation"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-14-4-at-94.1s.png",
+      "time": 94.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-14-5-at-94.2s.png",
+      "time": 94.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-15-1-at-101.8s.png",
+      "time": 101.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-15-2-at-101.9s.png",
+      "time": 101.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-15-3-at-102s.png",
+      "time": 102,
+      "role": "seam",
+      "label": "cut invitation -> invited"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-15-4-at-102.1s.png",
+      "time": 102.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-15-5-at-102.2s.png",
+      "time": 102.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-16-1-at-106.8s.png",
+      "time": 106.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-16-2-at-106.9s.png",
+      "time": 106.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-16-3-at-107s.png",
+      "time": 107,
+      "role": "seam",
+      "label": "cut invited -> messages"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-16-4-at-107.1s.png",
+      "time": 107.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-16-5-at-107.2s.png",
+      "time": 107.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-17-1-at-112.8s.png",
+      "time": 112.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-17-2-at-112.9s.png",
+      "time": 112.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-17-3-at-113s.png",
+      "time": 113,
+      "role": "seam",
+      "label": "cut messages -> payouts"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-17-4-at-113.1s.png",
+      "time": 113.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-17-5-at-113.2s.png",
+      "time": 113.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-18-1-at-118.8s.png",
+      "time": 118.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-18-2-at-118.9s.png",
+      "time": 118.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-18-3-at-119s.png",
+      "time": 119,
+      "role": "seam",
+      "label": "cut payouts -> settings"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-18-4-at-119.1s.png",
+      "time": 119.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-18-5-at-119.2s.png",
+      "time": 119.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-19-1-at-123.8s.png",
+      "time": 123.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-19-2-at-123.9s.png",
+      "time": 123.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-19-3-at-124s.png",
+      "time": 124,
+      "role": "seam",
+      "label": "cut settings -> creator-invitation"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-19-4-at-124.1s.png",
+      "time": 124.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-19-5-at-124.2s.png",
+      "time": 124.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-20-1-at-130.8s.png",
+      "time": 130.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-20-2-at-130.9s.png",
+      "time": 130.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-20-3-at-131s.png",
+      "time": 131,
+      "role": "seam",
+      "label": "cut creator-invitation -> accept"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-20-4-at-131.1s.png",
+      "time": 131.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-20-5-at-131.2s.png",
+      "time": 131.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-21-1-at-136.8s.png",
+      "time": 136.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-21-2-at-136.9s.png",
+      "time": 136.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-21-3-at-137s.png",
+      "time": 137,
+      "role": "seam",
+      "label": "cut accept -> accepted"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-21-4-at-137.1s.png",
+      "time": 137.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-21-5-at-137.2s.png",
+      "time": 137.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-22-1-at-141.8s.png",
+      "time": 141.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-22-2-at-141.9s.png",
+      "time": 141.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-22-3-at-142s.png",
+      "time": 142,
+      "role": "seam",
+      "label": "cut accepted -> active"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-22-4-at-142.1s.png",
+      "time": 142.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-22-5-at-142.2s.png",
+      "time": 142.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-23-1-at-147.8s.png",
+      "time": 147.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-23-2-at-147.9s.png",
+      "time": 147.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-23-3-at-148s.png",
+      "time": 148,
+      "role": "seam",
+      "label": "cut active -> new-brief"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-23-4-at-148.1s.png",
+      "time": 148.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-23-5-at-148.2s.png",
+      "time": 148.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-24-1-at-155.8s.png",
+      "time": 155.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-24-2-at-155.9s.png",
+      "time": 155.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-24-3-at-156s.png",
+      "time": 156,
+      "role": "seam",
+      "label": "cut new-brief -> completed-list"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-24-4-at-156.1s.png",
+      "time": 156.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-24-5-at-156.2s.png",
+      "time": 156.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-25-1-at-161.8s.png",
+      "time": 161.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-25-2-at-161.9s.png",
+      "time": 161.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-25-3-at-162s.png",
+      "time": 162,
+      "role": "seam",
+      "label": "cut completed-list -> completed-brief"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-25-4-at-162.1s.png",
+      "time": 162.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-25-5-at-162.2s.png",
+      "time": 162.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-26-1-at-168.8s.png",
+      "time": 168.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-26-2-at-168.9s.png",
+      "time": 168.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-26-3-at-169s.png",
+      "time": 169,
+      "role": "seam",
+      "label": "cut completed-brief -> deliverable"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-26-4-at-169.1s.png",
+      "time": 169.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-26-5-at-169.2s.png",
+      "time": 169.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-27-1-at-174.8s.png",
+      "time": 174.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-27-2-at-174.9s.png",
+      "time": 174.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-27-3-at-175s.png",
+      "time": 175,
+      "role": "seam",
+      "label": "cut deliverable -> history"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-27-4-at-175.1s.png",
+      "time": 175.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-27-5-at-175.2s.png",
+      "time": 175.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-28-1-at-180.8s.png",
+      "time": 180.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-28-2-at-180.9s.png",
+      "time": 180.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-28-3-at-181s.png",
+      "time": 181,
+      "role": "seam",
+      "label": "cut history -> versions"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-28-4-at-181.1s.png",
+      "time": 181.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-28-5-at-181.2s.png",
+      "time": 181.2,
+      "role": "seam",
+      "label": "+0.2"
+    }
+  ],
+  "contactSheets": [
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-beats-1.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-beats-2.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-beats-3.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-beats-4.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-01.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-02.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-03.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-04.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-05.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-06.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-07.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-08.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-09.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-10.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-11.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-12.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-13.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-14.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-15.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-16.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-17.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-18.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-19.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-20.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-21.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-22.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-23.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-24.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-25.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-26.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-27.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-28.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-phone-1.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-phone-2.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-phone-3.jpg",
+    "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-phone-4.jpg"
+  ],
+  "review": {
+    "window": [
+      0,
+      191
+    ],
+    "scenes": [
+      {
+        "id": "brand-overview",
+        "start": 0,
+        "end": 6
+      },
+      {
+        "id": "campaigns",
+        "start": 6,
+        "end": 12
+      },
+      {
+        "id": "basic-info",
+        "start": 12,
+        "end": 20
+      },
+      {
+        "id": "product",
+        "start": 20,
+        "end": 26
+      },
+      {
+        "id": "requirements",
+        "start": 26,
+        "end": 33
+      },
+      {
+        "id": "deliverables",
+        "start": 33,
+        "end": 41
+      },
+      {
+        "id": "budget",
+        "start": 41,
+        "end": 48
+      },
+      {
+        "id": "review",
+        "start": 48,
+        "end": 55
+      },
+      {
+        "id": "published",
+        "start": 55,
+        "end": 62
+      },
+      {
+        "id": "discovery",
+        "start": 62,
+        "end": 67
+      },
+      {
+        "id": "profile",
+        "start": 67,
+        "end": 73
+      },
+      {
+        "id": "linkedin",
+        "start": 73,
+        "end": 80
+      },
+      {
+        "id": "instagram",
+        "start": 80,
+        "end": 87
+      },
+      {
+        "id": "threads",
+        "start": 87,
+        "end": 94
+      },
+      {
+        "id": "invitation",
+        "start": 94,
+        "end": 102
+      },
+      {
+        "id": "invited",
+        "start": 102,
+        "end": 107
+      },
+      {
+        "id": "messages",
+        "start": 107,
+        "end": 113
+      },
+      {
+        "id": "payouts",
+        "start": 113,
+        "end": 119
+      },
+      {
+        "id": "settings",
+        "start": 119,
+        "end": 124
+      },
+      {
+        "id": "creator-invitation",
+        "start": 124,
+        "end": 131
+      },
+      {
+        "id": "accept",
+        "start": 131,
+        "end": 137
+      },
+      {
+        "id": "accepted",
+        "start": 137,
+        "end": 142
+      },
+      {
+        "id": "active",
+        "start": 142,
+        "end": 148
+      },
+      {
+        "id": "new-brief",
+        "start": 148,
+        "end": 156
+      },
+      {
+        "id": "completed-list",
+        "start": 156,
+        "end": 162
+      },
+      {
+        "id": "completed-brief",
+        "start": 162,
+        "end": 169
+      },
+      {
+        "id": "deliverable",
+        "start": 169,
+        "end": 175
+      },
+      {
+        "id": "history",
+        "start": 175,
+        "end": 181
+      },
+      {
+        "id": "versions",
+        "start": 181,
+        "end": 191
+      }
+    ],
+    "beats": [
+      {
+        "time": 0.3,
+        "label": "brand-overview",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-01-at-0.3s.png"
+      },
+      {
+        "time": 3,
+        "label": "brand-overview mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-02-at-3s.png"
+      },
+      {
+        "time": 6.3,
+        "label": "campaigns",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-03-at-6.3s.png"
+      },
+      {
+        "time": 9,
+        "label": "campaigns mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-04-at-9s.png"
+      },
+      {
+        "time": 12.3,
+        "label": "basic-info",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-05-at-12.3s.png"
+      },
+      {
+        "time": 16,
+        "label": "basic-info mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-06-at-16s.png"
+      },
+      {
+        "time": 20.3,
+        "label": "product",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-07-at-20.3s.png"
+      },
+      {
+        "time": 23,
+        "label": "product mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-08-at-23s.png"
+      },
+      {
+        "time": 26.3,
+        "label": "requirements",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-09-at-26.3s.png"
+      },
+      {
+        "time": 29.5,
+        "label": "requirements mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-10-at-29.5s.png"
+      },
+      {
+        "time": 33.3,
+        "label": "deliverables",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-11-at-33.3s.png"
+      },
+      {
+        "time": 37,
+        "label": "deliverables mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-12-at-37s.png"
+      },
+      {
+        "time": 41.3,
+        "label": "budget",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-13-at-41.3s.png"
+      },
+      {
+        "time": 44.5,
+        "label": "budget mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-14-at-44.5s.png"
+      },
+      {
+        "time": 48.3,
+        "label": "review",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-15-at-48.3s.png"
+      },
+      {
+        "time": 51.5,
+        "label": "review mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-16-at-51.5s.png"
+      },
+      {
+        "time": 55.3,
+        "label": "published",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-17-at-55.3s.png"
+      },
+      {
+        "time": 58.5,
+        "label": "published mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-18-at-58.5s.png"
+      },
+      {
+        "time": 62.3,
+        "label": "discovery",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-19-at-62.3s.png"
+      },
+      {
+        "time": 64.5,
+        "label": "discovery mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-20-at-64.5s.png"
+      },
+      {
+        "time": 67.3,
+        "label": "profile",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-21-at-67.3s.png"
+      },
+      {
+        "time": 70,
+        "label": "profile mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-22-at-70s.png"
+      },
+      {
+        "time": 73.3,
+        "label": "linkedin",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-23-at-73.3s.png"
+      },
+      {
+        "time": 76.5,
+        "label": "linkedin mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-24-at-76.5s.png"
+      },
+      {
+        "time": 80.3,
+        "label": "instagram",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-25-at-80.3s.png"
+      },
+      {
+        "time": 83.5,
+        "label": "instagram mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-26-at-83.5s.png"
+      },
+      {
+        "time": 87.3,
+        "label": "threads",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-27-at-87.3s.png"
+      },
+      {
+        "time": 90.5,
+        "label": "threads mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-28-at-90.5s.png"
+      },
+      {
+        "time": 94.3,
+        "label": "invitation",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-29-at-94.3s.png"
+      },
+      {
+        "time": 98,
+        "label": "invitation mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-30-at-98s.png"
+      },
+      {
+        "time": 102.3,
+        "label": "invited",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-31-at-102.3s.png"
+      },
+      {
+        "time": 104.5,
+        "label": "invited mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-32-at-104.5s.png"
+      },
+      {
+        "time": 107.3,
+        "label": "messages",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-33-at-107.3s.png"
+      },
+      {
+        "time": 110,
+        "label": "messages mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-34-at-110s.png"
+      },
+      {
+        "time": 113.3,
+        "label": "payouts",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-35-at-113.3s.png"
+      },
+      {
+        "time": 116,
+        "label": "payouts mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-36-at-116s.png"
+      },
+      {
+        "time": 119.3,
+        "label": "settings",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-37-at-119.3s.png"
+      },
+      {
+        "time": 121.5,
+        "label": "settings mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-38-at-121.5s.png"
+      },
+      {
+        "time": 124.3,
+        "label": "creator-invitation",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-39-at-124.3s.png"
+      },
+      {
+        "time": 127.5,
+        "label": "creator-invitation mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-40-at-127.5s.png"
+      },
+      {
+        "time": 131.3,
+        "label": "accept",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-41-at-131.3s.png"
+      },
+      {
+        "time": 134,
+        "label": "accept mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-42-at-134s.png"
+      },
+      {
+        "time": 137.3,
+        "label": "accepted",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-43-at-137.3s.png"
+      },
+      {
+        "time": 139.5,
+        "label": "accepted mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-44-at-139.5s.png"
+      },
+      {
+        "time": 142.3,
+        "label": "active",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-45-at-142.3s.png"
+      },
+      {
+        "time": 145,
+        "label": "active mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-46-at-145s.png"
+      },
+      {
+        "time": 148.3,
+        "label": "new-brief",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-47-at-148.3s.png"
+      },
+      {
+        "time": 152,
+        "label": "new-brief mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-48-at-152s.png"
+      },
+      {
+        "time": 156.3,
+        "label": "completed-list",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-49-at-156.3s.png"
+      },
+      {
+        "time": 159,
+        "label": "completed-list mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-50-at-159s.png"
+      },
+      {
+        "time": 162.3,
+        "label": "completed-brief",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-51-at-162.3s.png"
+      },
+      {
+        "time": 165.5,
+        "label": "completed-brief mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-52-at-165.5s.png"
+      },
+      {
+        "time": 169.3,
+        "label": "deliverable",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-53-at-169.3s.png"
+      },
+      {
+        "time": 172,
+        "label": "deliverable mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-54-at-172s.png"
+      },
+      {
+        "time": 175.3,
+        "label": "history",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-55-at-175.3s.png"
+      },
+      {
+        "time": 178,
+        "label": "history mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-56-at-178s.png"
+      },
+      {
+        "time": 181.3,
+        "label": "versions",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-57-at-181.3s.png"
+      },
+      {
+        "time": 186,
+        "label": "versions mid",
+        "path": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\beat-58-at-186s.png"
+      }
+    ],
+    "seams": [
+      {
+        "time": 6,
+        "from": "brand-overview",
+        "to": "campaigns",
+        "times": [
+          5.8,
+          5.9,
+          6,
+          6.1,
+          6.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-01-1-at-5.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-01-2-at-5.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-01-3-at-6s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-01-4-at-6.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-01-5-at-6.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-01.jpg"
+      },
+      {
+        "time": 12,
+        "from": "campaigns",
+        "to": "basic-info",
+        "times": [
+          11.8,
+          11.9,
+          12,
+          12.1,
+          12.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-02-1-at-11.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-02-2-at-11.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-02-3-at-12s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-02-4-at-12.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-02-5-at-12.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-02.jpg"
+      },
+      {
+        "time": 20,
+        "from": "basic-info",
+        "to": "product",
+        "times": [
+          19.8,
+          19.9,
+          20,
+          20.1,
+          20.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-03-1-at-19.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-03-2-at-19.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-03-3-at-20s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-03-4-at-20.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-03-5-at-20.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-03.jpg"
+      },
+      {
+        "time": 26,
+        "from": "product",
+        "to": "requirements",
+        "times": [
+          25.8,
+          25.9,
+          26,
+          26.1,
+          26.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-04-1-at-25.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-04-2-at-25.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-04-3-at-26s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-04-4-at-26.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-04-5-at-26.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-04.jpg"
+      },
+      {
+        "time": 33,
+        "from": "requirements",
+        "to": "deliverables",
+        "times": [
+          32.8,
+          32.9,
+          33,
+          33.1,
+          33.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-05-1-at-32.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-05-2-at-32.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-05-3-at-33s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-05-4-at-33.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-05-5-at-33.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-05.jpg"
+      },
+      {
+        "time": 41,
+        "from": "deliverables",
+        "to": "budget",
+        "times": [
+          40.8,
+          40.9,
+          41,
+          41.1,
+          41.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-06-1-at-40.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-06-2-at-40.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-06-3-at-41s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-06-4-at-41.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-06-5-at-41.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-06.jpg"
+      },
+      {
+        "time": 48,
+        "from": "budget",
+        "to": "review",
+        "times": [
+          47.8,
+          47.9,
+          48,
+          48.1,
+          48.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-07-1-at-47.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-07-2-at-47.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-07-3-at-48s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-07-4-at-48.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-07-5-at-48.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-07.jpg"
+      },
+      {
+        "time": 55,
+        "from": "review",
+        "to": "published",
+        "times": [
+          54.8,
+          54.9,
+          55,
+          55.1,
+          55.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-08-1-at-54.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-08-2-at-54.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-08-3-at-55s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-08-4-at-55.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-08-5-at-55.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-08.jpg"
+      },
+      {
+        "time": 62,
+        "from": "published",
+        "to": "discovery",
+        "times": [
+          61.8,
+          61.9,
+          62,
+          62.1,
+          62.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-09-1-at-61.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-09-2-at-61.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-09-3-at-62s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-09-4-at-62.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-09-5-at-62.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-09.jpg"
+      },
+      {
+        "time": 67,
+        "from": "discovery",
+        "to": "profile",
+        "times": [
+          66.8,
+          66.9,
+          67,
+          67.1,
+          67.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-10-1-at-66.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-10-2-at-66.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-10-3-at-67s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-10-4-at-67.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-10-5-at-67.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-10.jpg"
+      },
+      {
+        "time": 73,
+        "from": "profile",
+        "to": "linkedin",
+        "times": [
+          72.8,
+          72.9,
+          73,
+          73.1,
+          73.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-11-1-at-72.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-11-2-at-72.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-11-3-at-73s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-11-4-at-73.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-11-5-at-73.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-11.jpg"
+      },
+      {
+        "time": 80,
+        "from": "linkedin",
+        "to": "instagram",
+        "times": [
+          79.8,
+          79.9,
+          80,
+          80.1,
+          80.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-12-1-at-79.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-12-2-at-79.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-12-3-at-80s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-12-4-at-80.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-12-5-at-80.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-12.jpg"
+      },
+      {
+        "time": 87,
+        "from": "instagram",
+        "to": "threads",
+        "times": [
+          86.8,
+          86.9,
+          87,
+          87.1,
+          87.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-13-1-at-86.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-13-2-at-86.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-13-3-at-87s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-13-4-at-87.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-13-5-at-87.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-13.jpg"
+      },
+      {
+        "time": 94,
+        "from": "threads",
+        "to": "invitation",
+        "times": [
+          93.8,
+          93.9,
+          94,
+          94.1,
+          94.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-14-1-at-93.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-14-2-at-93.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-14-3-at-94s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-14-4-at-94.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-14-5-at-94.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-14.jpg"
+      },
+      {
+        "time": 102,
+        "from": "invitation",
+        "to": "invited",
+        "times": [
+          101.8,
+          101.9,
+          102,
+          102.1,
+          102.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-15-1-at-101.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-15-2-at-101.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-15-3-at-102s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-15-4-at-102.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-15-5-at-102.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-15.jpg"
+      },
+      {
+        "time": 107,
+        "from": "invited",
+        "to": "messages",
+        "times": [
+          106.8,
+          106.9,
+          107,
+          107.1,
+          107.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-16-1-at-106.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-16-2-at-106.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-16-3-at-107s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-16-4-at-107.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-16-5-at-107.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-16.jpg"
+      },
+      {
+        "time": 113,
+        "from": "messages",
+        "to": "payouts",
+        "times": [
+          112.8,
+          112.9,
+          113,
+          113.1,
+          113.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-17-1-at-112.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-17-2-at-112.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-17-3-at-113s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-17-4-at-113.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-17-5-at-113.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-17.jpg"
+      },
+      {
+        "time": 119,
+        "from": "payouts",
+        "to": "settings",
+        "times": [
+          118.8,
+          118.9,
+          119,
+          119.1,
+          119.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-18-1-at-118.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-18-2-at-118.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-18-3-at-119s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-18-4-at-119.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-18-5-at-119.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-18.jpg"
+      },
+      {
+        "time": 124,
+        "from": "settings",
+        "to": "creator-invitation",
+        "times": [
+          123.8,
+          123.9,
+          124,
+          124.1,
+          124.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-19-1-at-123.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-19-2-at-123.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-19-3-at-124s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-19-4-at-124.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-19-5-at-124.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-19.jpg"
+      },
+      {
+        "time": 131,
+        "from": "creator-invitation",
+        "to": "accept",
+        "times": [
+          130.8,
+          130.9,
+          131,
+          131.1,
+          131.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-20-1-at-130.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-20-2-at-130.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-20-3-at-131s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-20-4-at-131.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-20-5-at-131.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-20.jpg"
+      },
+      {
+        "time": 137,
+        "from": "accept",
+        "to": "accepted",
+        "times": [
+          136.8,
+          136.9,
+          137,
+          137.1,
+          137.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-21-1-at-136.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-21-2-at-136.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-21-3-at-137s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-21-4-at-137.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-21-5-at-137.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-21.jpg"
+      },
+      {
+        "time": 142,
+        "from": "accepted",
+        "to": "active",
+        "times": [
+          141.8,
+          141.9,
+          142,
+          142.1,
+          142.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-22-1-at-141.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-22-2-at-141.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-22-3-at-142s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-22-4-at-142.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-22-5-at-142.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-22.jpg"
+      },
+      {
+        "time": 148,
+        "from": "active",
+        "to": "new-brief",
+        "times": [
+          147.8,
+          147.9,
+          148,
+          148.1,
+          148.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-23-1-at-147.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-23-2-at-147.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-23-3-at-148s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-23-4-at-148.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-23-5-at-148.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-23.jpg"
+      },
+      {
+        "time": 156,
+        "from": "new-brief",
+        "to": "completed-list",
+        "times": [
+          155.8,
+          155.9,
+          156,
+          156.1,
+          156.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-24-1-at-155.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-24-2-at-155.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-24-3-at-156s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-24-4-at-156.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-24-5-at-156.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-24.jpg"
+      },
+      {
+        "time": 162,
+        "from": "completed-list",
+        "to": "completed-brief",
+        "times": [
+          161.8,
+          161.9,
+          162,
+          162.1,
+          162.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-25-1-at-161.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-25-2-at-161.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-25-3-at-162s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-25-4-at-162.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-25-5-at-162.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-25.jpg"
+      },
+      {
+        "time": 169,
+        "from": "completed-brief",
+        "to": "deliverable",
+        "times": [
+          168.8,
+          168.9,
+          169,
+          169.1,
+          169.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-26-1-at-168.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-26-2-at-168.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-26-3-at-169s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-26-4-at-169.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-26-5-at-169.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-26.jpg"
+      },
+      {
+        "time": 175,
+        "from": "deliverable",
+        "to": "history",
+        "times": [
+          174.8,
+          174.9,
+          175,
+          175.1,
+          175.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-27-1-at-174.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-27-2-at-174.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-27-3-at-175s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-27-4-at-175.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-27-5-at-175.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-27.jpg"
+      },
+      {
+        "time": 181,
+        "from": "history",
+        "to": "versions",
+        "times": [
+          180.8,
+          180.9,
+          181,
+          181.1,
+          181.2
+        ],
+        "paths": [
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-28-1-at-180.8s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-28-2-at-180.9s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-28-3-at-181s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-28-4-at-181.1s.png",
+          "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\seam-28-5-at-181.2s.png"
+        ],
+        "sheet": "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-28.jpg"
+      }
+    ],
+    "sheets": {
+      "beats": [
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-beats-1.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-beats-2.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-beats-3.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-beats-4.jpg"
+      ],
+      "seams": [
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-01.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-02.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-03.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-04.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-05.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-06.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-07.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-08.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-09.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-10.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-11.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-12.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-13.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-14.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-15.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-16.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-17.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-18.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-19.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-20.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-21.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-22.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-23.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-24.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-25.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-26.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-27.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-seam-28.jpg"
+      ],
+      "phone": [
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-phone-1.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-phone-2.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-phone-3.jpg",
+        "C:\\Users\\susha\\OneDrive\\Desktop\\Zerify\\zerify-demo-video\\.hyperframes\\artifacts\\snapshots\\93858da3-6abe-4403-8d41-a1a8534acf28\\review-phone-4.jpg"
+      ]
+    },
+    "notes": []
+  },
+  "_meta": {
+    "version": "0.8.231",
+    "latestVersion": "0.8.92",
+    "updateAvailable": false
+  }
+}

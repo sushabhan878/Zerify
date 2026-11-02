@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" data-composition-variables="[{&quot;id&quot;:&quot;title&quot;,&quot;type&quot;:&quot;string&quot;,&quot;label&quot;:&quot;Scene title&quot;,&quot;default&quot;:&quot;Manage the brand workspace&quot;,&quot;maxLength&quot;:80},{&quot;id&quot;:&quot;subtitle&quot;,&quot;type&quot;:&quot;string&quot;,&quot;label&quot;:&quot;Context&quot;,&quot;default&quot;:&quot;Brand workspace · Settings&quot;,&quot;maxLength&quot;:100},{&quot;id&quot;:&quot;capture&quot;,&quot;type&quot;:&quot;image&quot;,&quot;label&quot;:&quot;App capture&quot;,&quot;default&quot;:&quot;assets/captures/19-brand-settings.png&quot;}]">
+<body><template>
+  <style>
+    #root { position:absolute; inset:0; overflow:hidden; font-family:Inter,sans-serif; color:#171326; }
+    #settings-ground { position:absolute; inset:0; background:#f4f2fa; }
+    #settings-context { position:absolute; left:192px; top:56px; width:1536px; height:42px; font-size:28px; line-height:42px; font-weight:400; color:#65586f; }
+    #settings-title { position:absolute; left:192px; top:103px; width:1536px; height:55px; margin:0; font-size:40px; line-height:55px; font-weight:700; letter-spacing:-1px; color:#171326; }
+    #settings-screen { position:absolute; left:182.4px; top:190px; width:1555.2px; height:810px; overflow:hidden; border-radius:20px; box-shadow:0 18px 50px rgba(23,19,38,.12); background:white; }
+    #settings-camera { position:absolute; inset:0; width:100%; height:100%; transform-origin:0 0; }
+    #settings-capture { position:absolute; left:0; top:-64.8px; width:1555.2px; height:874.8px; max-width:none; object-fit:fill; }
+    #settings-cursor { position:absolute; left:0; top:0; width:40px; height:40px; transform-origin:8.33px 5px; z-index:3; }
+    #settings-cursor path { fill:#fff; stroke:#171326; stroke-width:1.35; stroke-linejoin:round; }
+    .settings-click-ring { position:absolute; left:0; top:0; width:44px; height:44px; border:2px solid var(--accent,#902BF5); border-radius:50%; opacity:0; z-index:2; }
+  </style>
+  <div id="root" data-composition-id="settings" data-duration="5" data-width="1920" data-height="1080">
+    <div id="settings-ground"></div>
+    <div id="settings-context" data-var-text="subtitle">Brand workspace · Settings</div>
+    <h1 id="settings-title" data-var-text="title">Manage the brand workspace</h1>
+    <div id="settings-screen" data-layout-allow-overflow>
+      <div id="settings-camera">
+        <img id="settings-capture" class="clip" data-start="0" data-duration="5" data-track-index="1" data-var-src="capture" src="assets/captures/19-brand-settings.png" alt="Manage the brand workspace" />
+      </div>
+    </div>
+  </div>
+  <script>
+    (function(){
+      var tl=gsap.timeline({paused:true});
+      tl.fromTo('#settings-camera',{x:0,y:0,scale:1},{x:-155.52,y:-22.68,scale:1.1,duration:.85,ease:'power2.inOut',immediateRender:false},2);
+      tl.to('#settings-camera',{x:0,y:0,scale:1,duration:.65,ease:'power2.inOut'},3.9);
+      
+      window.__timelines=window.__timelines||{};
+      window.__timelines['settings']=tl;
+    })();
+  </script>
+</template></body></html>

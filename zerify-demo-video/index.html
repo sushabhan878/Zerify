@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape" data-composition-variables="[{&quot;id&quot;:&quot;headline&quot;,&quot;type&quot;:&quot;string&quot;,&quot;label&quot;:&quot;Opening headline&quot;,&quot;default&quot;:&quot;Start in the brand workspace&quot;,&quot;maxLength&quot;:80},{&quot;id&quot;:&quot;accent&quot;,&quot;type&quot;:&quot;color&quot;,&quot;label&quot;:&quot;Zerify accent&quot;,&quot;default&quot;:&quot;#902BF5&quot;}]">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1920,height=1080" />
+  <title>Zerify · From campaign to collaboration</title>
+  <script src="assets/vendor/gsap.min.js"></script>
+  <style>
+    *{box-sizing:border-box;} html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#f4f2fa;}
+    :root{--accent:#902BF5;} #root{position:relative;width:100%;height:100%;overflow:hidden;}
+    .clip{position:absolute;inset:0;width:100%;height:100%;}
+  </style>
+</head>
+<body>
+  <div id="root" data-composition-id="zerify-demo" data-start="0" data-duration="191" data-fps="30" data-width="1920" data-height="1080">
+    <div id="brand-overview" class="clip" data-composition-id="brand-overview" data-composition-src="compositions/scenes/brand-overview.html" data-start="0" data-duration="6" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:1"></div>
+    <div id="campaigns" class="clip" data-composition-id="campaigns" data-composition-src="compositions/scenes/campaigns.html" data-start="6" data-duration="6" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:2"></div>
+    <div id="basic-info" class="clip" data-composition-id="basic-info" data-composition-src="compositions/scenes/basic-info.html" data-start="12" data-duration="8" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:3"></div>
+    <div id="product" class="clip" data-composition-id="product" data-composition-src="compositions/scenes/product.html" data-start="20" data-duration="6" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:4"></div>
+    <div id="requirements" class="clip" data-composition-id="requirements" data-composition-src="compositions/scenes/requirements.html" data-start="26" data-duration="7" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:5"></div>
+    <div id="deliverables" class="clip" data-composition-id="deliverables" data-composition-src="compositions/scenes/deliverables.html" data-start="33" data-duration="8" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:6"></div>
+    <div id="budget" class="clip" data-composition-id="budget" data-composition-src="compositions/scenes/budget.html" data-start="41" data-duration="7" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:7"></div>
+    <div id="review" class="clip" data-composition-id="review" data-composition-src="compositions/scenes/review.html" data-start="48" data-duration="7" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:8"></div>
+    <div id="published" class="clip" data-composition-id="published" data-composition-src="compositions/scenes/published.html" data-start="55" data-duration="7" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:9"></div>
+    <div id="discovery" class="clip" data-composition-id="discovery" data-composition-src="compositions/scenes/discovery.html" data-start="62" data-duration="5" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:10"></div>
+    <div id="profile" class="clip" data-composition-id="profile" data-composition-src="compositions/scenes/profile.html" data-start="67" data-duration="6" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:11"></div>
+    <div id="linkedin" class="clip" data-composition-id="linkedin" data-composition-src="compositions/scenes/linkedin.html" data-start="73" data-duration="7" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:12"></div>
+    <div id="instagram" class="clip" data-composition-id="instagram" data-composition-src="compositions/scenes/instagram.html" data-start="80" data-duration="7" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:13"></div>
+    <div id="threads" class="clip" data-composition-id="threads" data-composition-src="compositions/scenes/threads.html" data-start="87" data-duration="7" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:14"></div>
+    <div id="invitation" class="clip" data-composition-id="invitation" data-composition-src="compositions/scenes/invitation.html" data-start="94" data-duration="8" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:15"></div>
+    <div id="invited" class="clip" data-composition-id="invited" data-composition-src="compositions/scenes/invited.html" data-start="102" data-duration="5" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:16"></div>
+    <div id="messages" class="clip" data-composition-id="messages" data-composition-src="compositions/scenes/messages.html" data-start="107" data-duration="6" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:17"></div>
+    <div id="payouts" class="clip" data-composition-id="payouts" data-composition-src="compositions/scenes/payouts.html" data-start="113" data-duration="6" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:18"></div>
+    <div id="settings" class="clip" data-composition-id="settings" data-composition-src="compositions/scenes/settings.html" data-start="119" data-duration="5" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:19"></div>
+    <div id="creator-invitation" class="clip" data-composition-id="creator-invitation" data-composition-src="compositions/scenes/creator-invitation.html" data-start="124" data-duration="7" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:20"></div>
+    <div id="accept" class="clip" data-composition-id="accept" data-composition-src="compositions/scenes/accept.html" data-start="131" data-duration="6" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:21"></div>
+    <div id="accepted" class="clip" data-composition-id="accepted" data-composition-src="compositions/scenes/accepted.html" data-start="137" data-duration="5" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:22"></div>
+    <div id="active" class="clip" data-composition-id="active" data-composition-src="compositions/scenes/active.html" data-start="142" data-duration="6" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:23"></div>
+    <div id="new-brief" class="clip" data-composition-id="new-brief" data-composition-src="compositions/scenes/new-brief.html" data-start="148" data-duration="8" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:24"></div>
+    <div id="completed-list" class="clip" data-composition-id="completed-list" data-composition-src="compositions/scenes/completed-list.html" data-start="156" data-duration="6" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:25"></div>
+    <div id="completed-brief" class="clip" data-composition-id="completed-brief" data-composition-src="compositions/scenes/completed-brief.html" data-start="162" data-duration="7" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:26"></div>
+    <div id="deliverable" class="clip" data-composition-id="deliverable" data-composition-src="compositions/scenes/deliverable.html" data-start="169" data-duration="6" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:27"></div>
+    <div id="history" class="clip" data-composition-id="history" data-composition-src="compositions/scenes/history.html" data-start="175" data-duration="6" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:28"></div>
+    <div id="versions" class="clip" data-composition-id="versions" data-composition-src="compositions/scenes/versions.html" data-start="181" data-duration="10" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index:29"></div>
+  </div>
+  <script>window.__timelines=window.__timelines||{};window.__timelines["zerify-demo"]=gsap.timeline({paused:true});</script>
+</body></html>

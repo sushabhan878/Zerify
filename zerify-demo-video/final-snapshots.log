@@ -1,0 +1,21 @@
+◆  Capturing 5 frames at [37s, 98s, 134s, 186s, 190.9s] from zerify-demo-video
+[INFO] [Compiler] Fetched 11 font face(s) for "Inter" from Google Fonts (cached to C:\Users\susha\.cache\hyperframes\fonts\inter)
+[INFO] [Compiler] Injected deterministic @font-face rules for 1 requested font families
+[hyperframes] browserGpuMode probe → hardware (WebGL renderer vendor="Google Inc. (NVIDIA)" renderer="ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 6GB Laptop GPU (0x000025AC) Direct3D11 vs_5_0 ps_5_0, D3D11)")
+
+   Fonts: 5 loaded
+[hyperframes] snapshot: frame 1/5 at 37s
+[hyperframes] snapshot: frame 2/5 at 98s
+[hyperframes] snapshot: frame 3/5 at 134s
+[hyperframes] snapshot: frame 4/5 at 186s
+[hyperframes] snapshot: frame 5/5 at 190.9s
+   Revision: none (inputs-changed)
+   State: C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\.hyperframes\video-state.json
+
+◇  5 snapshots saved to C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-final
+   C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-final\frame-00-at-37s.png
+   C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-final\frame-01-at-98s.png
+   C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-final\frame-02-at-134s.png
+   C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-final\frame-03-at-186s.png
+   C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-final\frame-04-at-190.9s.png
+   C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-final\contact-sheet.jpg (grid view for AI review)

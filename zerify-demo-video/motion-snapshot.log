@@ -1,0 +1,28 @@
+◆  Capturing 8 frames from zerify-demo-video
+[INFO] [Compiler] Fetched 11 font face(s) for "Inter" from Google Fonts (cached to C:\Users\susha\.cache\hyperframes\fonts\inter)
+[INFO] [Compiler] Injected deterministic @font-face rules for 1 requested font families
+[hyperframes] browserGpuMode probe → hardware (WebGL renderer vendor="Google Inc. (NVIDIA)" renderer="ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 6GB Laptop GPU (0x000025AC) Direct3D11 vs_5_0 ps_5_0, D3D11)")
+
+   Fonts: 5 loaded
+   Sampling 8 frames within 129.9–137.1s
+[hyperframes] snapshot: frame 1/8 at 129.9s
+[hyperframes] snapshot: frame 2/8 at 130.92857142857144s
+[hyperframes] snapshot: frame 3/8 at 131.95714285714286s
+[hyperframes] snapshot: frame 4/8 at 132.9857142857143s
+[hyperframes] snapshot: frame 5/8 at 134.0142857142857s
+[hyperframes] snapshot: frame 6/8 at 135.04285714285714s
+[hyperframes] snapshot: frame 7/8 at 136.07142857142856s
+[hyperframes] snapshot: frame 8/8 at 137.1s
+   Revision: none (inputs-changed)
+   State: C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\.hyperframes\video-state.json
+
+◇  8 snapshots saved to C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-motion
+   C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-motion\frame-00-at-129.9s.png
+   C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-motion\frame-01-at-130.929s.png
+   C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-motion\frame-02-at-131.957s.png
+   C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-motion\frame-03-at-132.986s.png
+   C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-motion\frame-04-at-134.014s.png
+   C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-motion\frame-05-at-135.043s.png
+   C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-motion\frame-06-at-136.071s.png
+   C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-motion\frame-07-at-137.1s.png
+   C:\Users\susha\OneDrive\Desktop\Zerify\zerify-demo-video\review-motion\contact-sheet.jpg (grid view for AI review)

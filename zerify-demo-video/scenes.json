@@ -1,0 +1,510 @@
+{
+  "headline": "Zerify · From campaign to collaboration",
+  "accent": "#902BF5",
+  "fps": 30,
+  "status": "Complete walkthrough: brand campaign, creator invitation, acceptance and submission history",
+  "scenes": [
+    {
+      "id": "brand-overview",
+      "file": "01-brand-overview",
+      "title": "Start in the brand workspace",
+      "subtitle": "Brand workspace · Real product walkthrough",
+      "seconds": 6,
+      "cropTop": 0,
+      "cleanCursor": false
+    },
+    {
+      "id": "campaigns",
+      "file": "02-campaigns",
+      "title": "Create a new campaign",
+      "subtitle": "Brand workspace",
+      "seconds": 6,
+      "cropTop": 0,
+      "cleanCursor": false,
+      "focus": {
+        "x": 0.67,
+        "y": 0.3,
+        "scale": 1.12,
+        "at": 2
+      }
+    },
+    {
+      "id": "basic-info",
+      "file": "03-basic-info",
+      "title": "Set the brief, goals and timeline",
+      "subtitle": "PulseFit · Imaginary product promotion",
+      "seconds": 8,
+      "cropTop": 80,
+      "cleanCursor": false,
+      "focus": {
+        "x": 0.5,
+        "y": 0.49,
+        "scale": 1.16,
+        "at": 2
+      }
+    },
+    {
+      "id": "product",
+      "file": "04-product",
+      "title": "Introduce the product",
+      "subtitle": "PulseFit Smart Fitness Band",
+      "seconds": 6,
+      "cropTop": 80,
+      "cleanCursor": false,
+      "focus": {
+        "x": 0.5,
+        "y": 0.49,
+        "scale": 1.18,
+        "at": 2
+      }
+    },
+    {
+      "id": "requirements",
+      "file": "05-creator-requirements",
+      "title": "Define the creator requirements",
+      "subtitle": "Platform, audience size and region",
+      "seconds": 7,
+      "cropTop": 80,
+      "cleanCursor": false,
+      "focus": {
+        "x": 0.5,
+        "y": 0.49,
+        "scale": 1.18,
+        "at": 2
+      }
+    },
+    {
+      "id": "deliverables",
+      "file": "06-deliverables",
+      "title": "Specify the content and review workflow",
+      "subtitle": "Instagram Reel · Creative instructions",
+      "seconds": 8,
+      "cropTop": 80,
+      "cleanCursor": false,
+      "focus": {
+        "x": 0.5,
+        "y": 0.57,
+        "scale": 1.15,
+        "at": 2
+      },
+      "cropBottom": 90
+    },
+    {
+      "id": "budget",
+      "file": "07-budget",
+      "title": "Set the budget and creator fee",
+      "subtitle": "Illustrative campaign values",
+      "seconds": 7,
+      "cropTop": 80,
+      "cleanCursor": false,
+      "focus": {
+        "x": 0.5,
+        "y": 0.65,
+        "scale": 1.18,
+        "at": 2
+      }
+    },
+    {
+      "id": "review",
+      "file": "08-review",
+      "title": "Review before publishing",
+      "subtitle": "Check the brief, budget and deliverables",
+      "seconds": 7,
+      "cropTop": 80,
+      "cleanCursor": false,
+      "focus": {
+        "x": 0.5,
+        "y": 0.58,
+        "scale": 1.18,
+        "at": 2
+      }
+    },
+    {
+      "id": "published",
+      "file": "09-published-campaign",
+      "title": "The campaign is live",
+      "subtitle": "PulseFit - Smart Fitness Band Launch",
+      "seconds": 7,
+      "cropTop": 80,
+      "cleanCursor": false,
+      "focus": {
+        "x": 0.57,
+        "y": 0.3,
+        "scale": 1.1,
+        "at": 2
+      }
+    },
+    {
+      "id": "discovery",
+      "file": "10-discovery",
+      "title": "Find a creator for the campaign",
+      "subtitle": "Review available creators",
+      "seconds": 5,
+      "cropTop": 80,
+      "cleanCursor": false,
+      "focus": {
+        "x": 0.43,
+        "y": 0.32,
+        "scale": 1.16,
+        "at": 2
+      }
+    },
+    {
+      "id": "profile",
+      "file": "11-profile-overview",
+      "title": "Open Sushabhan’s creator profile",
+      "subtitle": "Portfolio · Connected social accounts",
+      "seconds": 6,
+      "cropTop": 80,
+      "cropBottom": 200,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.54,
+        "y": 0.42,
+        "scale": 1.12,
+        "at": 2
+      }
+    },
+    {
+      "id": "linkedin",
+      "file": "12-linkedin-analytics",
+      "title": "Inspect platform-specific analytics",
+      "subtitle": "LinkedIn · Audience and engagement",
+      "seconds": 7,
+      "cropTop": 80,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.57,
+        "y": 0.27,
+        "scale": 1.2,
+        "at": 2
+      },
+      "clicks": [
+        {
+          "at": 5.8,
+          "x": 704,
+          "y": 140
+        }
+      ]
+    },
+    {
+      "id": "instagram",
+      "file": "13-instagram-analytics",
+      "title": "Compare Instagram performance",
+      "subtitle": "Audience location, age and gender",
+      "seconds": 7,
+      "cropTop": 80,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.57,
+        "y": 0.27,
+        "scale": 1.2,
+        "at": 2
+      },
+      "clicks": [
+        {
+          "at": 5.8,
+          "x": 810,
+          "y": 140
+        }
+      ]
+    },
+    {
+      "id": "threads",
+      "file": "14-threads-analytics",
+      "title": "Review another social platform",
+      "subtitle": "Threads · Creator evaluation",
+      "seconds": 7,
+      "cropTop": 80,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.57,
+        "y": 0.27,
+        "scale": 1.2,
+        "at": 2
+      }
+    },
+    {
+      "id": "invitation",
+      "file": "15-invitation",
+      "title": "Invite the creator to PulseFit",
+      "subtitle": "Campaign, proposed fee and personal message",
+      "seconds": 8,
+      "cropTop": 80,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.5,
+        "y": 0.497,
+        "scale": 2.2,
+        "at": 1.2
+      },
+      "clicks": [
+        {
+          "at": 7.55,
+          "x": 1068,
+          "y": 738
+        }
+      ]
+    },
+    {
+      "id": "invited",
+      "file": "16-invitation-sent",
+      "title": "The invitation has been sent",
+      "subtitle": "Continue managing the collaboration",
+      "seconds": 5,
+      "cropTop": 80,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.57,
+        "y": 0.48,
+        "scale": 1.1,
+        "at": 2
+      }
+    },
+    {
+      "id": "messages",
+      "file": "17-brand-messages",
+      "title": "Keep the conversation in one place",
+      "subtitle": "Brand workspace · Messages",
+      "seconds": 6,
+      "cropTop": 80,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.57,
+        "y": 0.48,
+        "scale": 1.1,
+        "at": 2
+      }
+    },
+    {
+      "id": "payouts",
+      "file": "18-brand-payouts",
+      "title": "Track payouts and campaign funds",
+      "subtitle": "Brand workspace · Payouts",
+      "seconds": 6,
+      "cropTop": 80,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.57,
+        "y": 0.48,
+        "scale": 1.1,
+        "at": 2
+      }
+    },
+    {
+      "id": "settings",
+      "file": "19-brand-settings",
+      "title": "Manage the brand workspace",
+      "subtitle": "Brand workspace · Settings",
+      "seconds": 5,
+      "cropTop": 80,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.57,
+        "y": 0.48,
+        "scale": 1.1,
+        "at": 2
+      }
+    },
+    {
+      "id": "creator-invitation",
+      "file": "20-creator-invitation",
+      "title": "Switch to the creator workspace",
+      "subtitle": "Invitations · PulseFit from Zerify",
+      "seconds": 7,
+      "cropTop": 87,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.57,
+        "y": 0.48,
+        "scale": 1.1,
+        "at": 2
+      },
+      "clicks": [
+        {
+          "at": 6.55,
+          "x": 1576,
+          "y": 795
+        }
+      ]
+    },
+    {
+      "id": "accept",
+      "file": "21-accept-dialog",
+      "title": "Review and accept the invitation",
+      "subtitle": "Creator workspace · Confirm acceptance",
+      "seconds": 6,
+      "cropTop": 87,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.5,
+        "y": 0.5,
+        "scale": 2.4,
+        "at": 1.1
+      },
+      "clicks": [
+        {
+          "at": 5.55,
+          "x": 1080,
+          "y": 702
+        }
+      ]
+    },
+    {
+      "id": "accepted",
+      "file": "22-accepted",
+      "title": "The offer is accepted",
+      "subtitle": "The conversation records the acceptance",
+      "seconds": 5,
+      "cropTop": 87,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.57,
+        "y": 0.48,
+        "scale": 1.1,
+        "at": 2
+      },
+      "clicks": [
+        {
+          "at": 4.55,
+          "x": 133,
+          "y": 482
+        }
+      ]
+    },
+    {
+      "id": "active",
+      "file": "23-active-campaigns",
+      "title": "Find the accepted campaign",
+      "subtitle": "Creator workspace · Active Campaigns",
+      "seconds": 6,
+      "cropTop": 87,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.57,
+        "y": 0.48,
+        "scale": 1.1,
+        "at": 2
+      },
+      "clicks": [
+        {
+          "at": 5.55,
+          "x": 1582,
+          "y": 797
+        }
+      ]
+    },
+    {
+      "id": "new-brief",
+      "file": "24-new-campaign-brief",
+      "title": "Open the PulseFit campaign brief",
+      "subtitle": "Accepted · Ready for the creator to review",
+      "seconds": 8,
+      "cropTop": 87,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.57,
+        "y": 0.48,
+        "scale": 1.1,
+        "at": 2
+      },
+      "clicks": [
+        {
+          "at": 7.55,
+          "x": 594,
+          "y": 270
+        }
+      ]
+    },
+    {
+      "id": "completed-list",
+      "file": "25-completed-campaign-list",
+      "title": "Back to campaigns: open Test campaign 2.O",
+      "subtitle": "An existing completed campaign",
+      "seconds": 6,
+      "cropTop": 87,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.57,
+        "y": 0.48,
+        "scale": 1.1,
+        "at": 2
+      },
+      "clicks": [
+        {
+          "at": 5.55,
+          "x": 1608,
+          "y": 797
+        }
+      ]
+    },
+    {
+      "id": "completed-brief",
+      "file": "26-completed-brief",
+      "title": "Review the completed campaign",
+      "subtitle": "Test campaign 2.O · Brief and payment progress",
+      "seconds": 7,
+      "cropTop": 87,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.57,
+        "y": 0.48,
+        "scale": 1.1,
+        "at": 2
+      }
+    },
+    {
+      "id": "deliverable",
+      "file": "27-deliverable-complete",
+      "title": "Inspect the approved deliverable",
+      "subtitle": "Instagram Reel · Version 3",
+      "seconds": 6,
+      "cropTop": 87,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.57,
+        "y": 0.48,
+        "scale": 1.1,
+        "at": 2
+      },
+      "clicks": [
+        {
+          "at": 5.55,
+          "x": 790,
+          "y": 780
+        }
+      ]
+    },
+    {
+      "id": "history",
+      "file": "28-submission-history",
+      "title": "Expand the submission history",
+      "subtitle": "Test campaign 2.O · Three versions",
+      "seconds": 6,
+      "cropTop": 87,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.57,
+        "y": 0.48,
+        "scale": 1.1,
+        "at": 2
+      }
+    },
+    {
+      "id": "versions",
+      "file": "29-submission-versions",
+      "title": "Follow revisions through final approval",
+      "subtitle": "Submission history · Feedback, drafts and approved content",
+      "seconds": 10,
+      "cropTop": 87,
+      "cleanCursor": true,
+      "focus": {
+        "x": 0.48,
+        "y": 0.57,
+        "scale": 1.28,
+        "at": 1.3,
+        "hold": true
+      }
+    }
+  ]
+}

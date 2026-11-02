@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" data-composition-variables="[{&quot;id&quot;:&quot;title&quot;,&quot;type&quot;:&quot;string&quot;,&quot;label&quot;:&quot;Scene title&quot;,&quot;default&quot;:&quot;Open the PulseFit campaign brief&quot;,&quot;maxLength&quot;:80},{&quot;id&quot;:&quot;subtitle&quot;,&quot;type&quot;:&quot;string&quot;,&quot;label&quot;:&quot;Context&quot;,&quot;default&quot;:&quot;Accepted · Ready for the creator to review&quot;,&quot;maxLength&quot;:100},{&quot;id&quot;:&quot;capture&quot;,&quot;type&quot;:&quot;image&quot;,&quot;label&quot;:&quot;App capture&quot;,&quot;default&quot;:&quot;assets/captures/24-new-campaign-brief.png&quot;}]">
+<body><template>
+  <style>
+    #root { position:absolute; inset:0; overflow:hidden; font-family:Inter,sans-serif; color:#171326; }
+    #new-brief-ground { position:absolute; inset:0; background:#f4f2fa; }
+    #new-brief-context { position:absolute; left:192px; top:56px; width:1536px; height:42px; font-size:28px; line-height:42px; font-weight:400; color:#65586f; }
+    #new-brief-title { position:absolute; left:192px; top:103px; width:1536px; height:55px; margin:0; font-size:40px; line-height:55px; font-weight:700; letter-spacing:-1px; color:#171326; }
+    #new-brief-screen { position:absolute; left:176.919px; top:190px; width:1566.163px; height:810px; overflow:hidden; border-radius:20px; box-shadow:0 18px 50px rgba(23,19,38,.12); background:white; }
+    #new-brief-camera { position:absolute; inset:0; width:100%; height:100%; transform-origin:0 0; }
+    #new-brief-capture { position:absolute; left:0; top:-70.967px; width:1566.163px; height:880.967px; max-width:none; object-fit:fill; }
+    #new-brief-cursor { position:absolute; left:0; top:0; width:40px; height:40px; transform-origin:8.33px 5px; z-index:3; }
+    #new-brief-cursor path { fill:#fff; stroke:#171326; stroke-width:1.35; stroke-linejoin:round; }
+    .new-brief-click-ring { position:absolute; left:0; top:0; width:44px; height:44px; border:2px solid var(--accent,#902BF5); border-radius:50%; opacity:0; z-index:2; }
+  </style>
+  <div id="root" data-composition-id="new-brief" data-duration="8" data-width="1920" data-height="1080">
+    <div id="new-brief-ground"></div>
+    <div id="new-brief-context" data-var-text="subtitle">Accepted · Ready for the creator to review</div>
+    <h1 id="new-brief-title" data-var-text="title">Open the PulseFit campaign brief</h1>
+    <div id="new-brief-screen" data-layout-allow-overflow>
+      <div id="new-brief-camera">
+        <img id="new-brief-capture" class="clip" data-start="0" data-duration="8" data-track-index="1" data-var-src="capture" src="assets/captures/24-new-campaign-brief.png" alt="Open the PulseFit campaign brief" />
+        <svg id="new-brief-cursor" viewBox="0 0 24 24" aria-hidden="true" data-layout-ignore><path d="M5 3 L5 19 L9 15 L12 22 L15 20.5 L11.5 14 L18 14 Z" /></svg>
+        <div id="new-brief-click-1" class="new-brief-click-ring" data-layout-ignore></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function(){
+      var tl=gsap.timeline({paused:true});
+      tl.fromTo('#new-brief-camera',{x:0,y:0,scale:1},{x:-156.616,y:-22.68,scale:1.1,duration:.85,ease:'power2.inOut',immediateRender:false},2);
+      tl.to('#new-brief-camera',{x:0,y:0,scale:1,duration:.65,ease:'power2.inOut'},6.9);
+      tl.set('#new-brief-cursor',{x:1307.247,y:659.2} ,0);
+tl.fromTo('#new-brief-cursor',{x:1307.247,y:659.2},{x:476.202,y:144.275,duration:0.65,ease:'power2.inOut',immediateRender:false},6.8);
+tl.fromTo('#new-brief-cursor',{scale:1},{scale:0.88,duration:0.07,ease:'power2.out',immediateRender:false},7.55);
+tl.to('#new-brief-cursor',{scale:1,duration:0.16,ease:'power2.out'},7.62);
+tl.fromTo('#new-brief-click-1',{x:462.532,y:127.275,opacity:0.6,scale:.25},{opacity:0,scale:1.3,duration:.32,ease:'power2.out',immediateRender:false},7.55);
+
+      window.__timelines=window.__timelines||{};
+      window.__timelines['new-brief']=tl;
+    })();
+  </script>
+</template></body></html>

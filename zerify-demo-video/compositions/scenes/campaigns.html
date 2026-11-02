@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" data-composition-variables="[{&quot;id&quot;:&quot;title&quot;,&quot;type&quot;:&quot;string&quot;,&quot;label&quot;:&quot;Scene title&quot;,&quot;default&quot;:&quot;Create a new campaign&quot;,&quot;maxLength&quot;:80},{&quot;id&quot;:&quot;subtitle&quot;,&quot;type&quot;:&quot;string&quot;,&quot;label&quot;:&quot;Context&quot;,&quot;default&quot;:&quot;Brand workspace&quot;,&quot;maxLength&quot;:100},{&quot;id&quot;:&quot;capture&quot;,&quot;type&quot;:&quot;image&quot;,&quot;label&quot;:&quot;App capture&quot;,&quot;default&quot;:&quot;assets/captures/02-campaigns.png&quot;}]">
+<body><template>
+  <style>
+    #root { position:absolute; inset:0; overflow:hidden; font-family:Inter,sans-serif; color:#171326; }
+    #campaigns-ground { position:absolute; inset:0; background:#f4f2fa; }
+    #campaigns-context { position:absolute; left:192px; top:56px; width:1536px; height:42px; font-size:28px; line-height:42px; font-weight:400; color:#65586f; }
+    #campaigns-title { position:absolute; left:192px; top:103px; width:1536px; height:55px; margin:0; font-size:40px; line-height:55px; font-weight:700; letter-spacing:-1px; color:#171326; }
+    #campaigns-screen { position:absolute; left:240px; top:190px; width:1440px; height:810px; overflow:hidden; border-radius:20px; box-shadow:0 18px 50px rgba(23,19,38,.12); background:white; }
+    #campaigns-camera { position:absolute; inset:0; width:100%; height:100%; transform-origin:0 0; }
+    #campaigns-capture { position:absolute; left:0; top:0px; width:1440px; height:810px; max-width:none; object-fit:fill; }
+    #campaigns-cursor { position:absolute; left:0; top:0; width:40px; height:40px; transform-origin:8.33px 5px; z-index:3; }
+    #campaigns-cursor path { fill:#fff; stroke:#171326; stroke-width:1.35; stroke-linejoin:round; }
+    .campaigns-click-ring { position:absolute; left:0; top:0; width:44px; height:44px; border:2px solid var(--accent,#902BF5); border-radius:50%; opacity:0; z-index:2; }
+  </style>
+  <div id="root" data-composition-id="campaigns" data-duration="6" data-width="1920" data-height="1080">
+    <div id="campaigns-ground"></div>
+    <div id="campaigns-context" data-var-text="subtitle">Brand workspace</div>
+    <h1 id="campaigns-title" data-var-text="title">Create a new campaign</h1>
+    <div id="campaigns-screen" data-layout-allow-overflow>
+      <div id="campaigns-camera">
+        <img id="campaigns-capture" class="clip" data-start="0" data-duration="6" data-track-index="1" data-var-src="capture" src="assets/captures/02-campaigns.png" alt="Create a new campaign" />
+      </div>
+    </div>
+  </div>
+  <script>
+    (function(){
+      var tl=gsap.timeline({paused:true});
+      tl.fromTo('#campaigns-camera',{x:0,y:0,scale:1},{x:-172.8,y:0,scale:1.12,duration:.85,ease:'power2.inOut',immediateRender:false},2);
+      tl.to('#campaigns-camera',{x:0,y:0,scale:1,duration:.65,ease:'power2.inOut'},4.9);
+      
+      window.__timelines=window.__timelines||{};
+      window.__timelines['campaigns']=tl;
+    })();
+  </script>
+</template></body></html>

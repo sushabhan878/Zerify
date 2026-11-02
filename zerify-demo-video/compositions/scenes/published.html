@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" data-composition-variables="[{&quot;id&quot;:&quot;title&quot;,&quot;type&quot;:&quot;string&quot;,&quot;label&quot;:&quot;Scene title&quot;,&quot;default&quot;:&quot;The campaign is live&quot;,&quot;maxLength&quot;:80},{&quot;id&quot;:&quot;subtitle&quot;,&quot;type&quot;:&quot;string&quot;,&quot;label&quot;:&quot;Context&quot;,&quot;default&quot;:&quot;PulseFit - Smart Fitness Band Launch&quot;,&quot;maxLength&quot;:100},{&quot;id&quot;:&quot;capture&quot;,&quot;type&quot;:&quot;image&quot;,&quot;label&quot;:&quot;App capture&quot;,&quot;default&quot;:&quot;assets/captures/09-published-campaign.png&quot;}]">
+<body><template>
+  <style>
+    #root { position:absolute; inset:0; overflow:hidden; font-family:Inter,sans-serif; color:#171326; }
+    #published-ground { position:absolute; inset:0; background:#f4f2fa; }
+    #published-context { position:absolute; left:192px; top:56px; width:1536px; height:42px; font-size:28px; line-height:42px; font-weight:400; color:#65586f; }
+    #published-title { position:absolute; left:192px; top:103px; width:1536px; height:55px; margin:0; font-size:40px; line-height:55px; font-weight:700; letter-spacing:-1px; color:#171326; }
+    #published-screen { position:absolute; left:182.4px; top:190px; width:1555.2px; height:810px; overflow:hidden; border-radius:20px; box-shadow:0 18px 50px rgba(23,19,38,.12); background:white; }
+    #published-camera { position:absolute; inset:0; width:100%; height:100%; transform-origin:0 0; }
+    #published-capture { position:absolute; left:0; top:-64.8px; width:1555.2px; height:874.8px; max-width:none; object-fit:fill; }
+    #published-cursor { position:absolute; left:0; top:0; width:40px; height:40px; transform-origin:8.33px 5px; z-index:3; }
+    #published-cursor path { fill:#fff; stroke:#171326; stroke-width:1.35; stroke-linejoin:round; }
+    .published-click-ring { position:absolute; left:0; top:0; width:44px; height:44px; border:2px solid var(--accent,#902BF5); border-radius:50%; opacity:0; z-index:2; }
+  </style>
+  <div id="root" data-composition-id="published" data-duration="7" data-width="1920" data-height="1080">
+    <div id="published-ground"></div>
+    <div id="published-context" data-var-text="subtitle">PulseFit - Smart Fitness Band Launch</div>
+    <h1 id="published-title" data-var-text="title">The campaign is live</h1>
+    <div id="published-screen" data-layout-allow-overflow>
+      <div id="published-camera">
+        <img id="published-capture" class="clip" data-start="0" data-duration="7" data-track-index="1" data-var-src="capture" src="assets/captures/09-published-campaign.png" alt="The campaign is live" />
+      </div>
+    </div>
+  </div>
+  <script>
+    (function(){
+      var tl=gsap.timeline({paused:true});
+      tl.fromTo('#published-camera',{x:0,y:0,scale:1},{x:-155.52,y:0,scale:1.1,duration:.85,ease:'power2.inOut',immediateRender:false},2);
+      tl.to('#published-camera',{x:0,y:0,scale:1,duration:.65,ease:'power2.inOut'},5.9);
+      
+      window.__timelines=window.__timelines||{};
+      window.__timelines['published']=tl;
+    })();
+  </script>
+</template></body></html>

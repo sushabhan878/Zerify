@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" data-composition-variables="[{&quot;id&quot;:&quot;title&quot;,&quot;type&quot;:&quot;string&quot;,&quot;label&quot;:&quot;Scene title&quot;,&quot;default&quot;:&quot;Set the brief, goals and timeline&quot;,&quot;maxLength&quot;:80},{&quot;id&quot;:&quot;subtitle&quot;,&quot;type&quot;:&quot;string&quot;,&quot;label&quot;:&quot;Context&quot;,&quot;default&quot;:&quot;PulseFit · Imaginary product promotion&quot;,&quot;maxLength&quot;:100},{&quot;id&quot;:&quot;capture&quot;,&quot;type&quot;:&quot;image&quot;,&quot;label&quot;:&quot;App capture&quot;,&quot;default&quot;:&quot;assets/captures/03-basic-info.png&quot;}]">
+<body><template>
+  <style>
+    #root { position:absolute; inset:0; overflow:hidden; font-family:Inter,sans-serif; color:#171326; }
+    #basic-info-ground { position:absolute; inset:0; background:#f4f2fa; }
+    #basic-info-context { position:absolute; left:192px; top:56px; width:1536px; height:42px; font-size:28px; line-height:42px; font-weight:400; color:#65586f; }
+    #basic-info-title { position:absolute; left:192px; top:103px; width:1536px; height:55px; margin:0; font-size:40px; line-height:55px; font-weight:700; letter-spacing:-1px; color:#171326; }
+    #basic-info-screen { position:absolute; left:182.4px; top:190px; width:1555.2px; height:810px; overflow:hidden; border-radius:20px; box-shadow:0 18px 50px rgba(23,19,38,.12); background:white; }
+    #basic-info-camera { position:absolute; inset:0; width:100%; height:100%; transform-origin:0 0; }
+    #basic-info-capture { position:absolute; left:0; top:-64.8px; width:1555.2px; height:874.8px; max-width:none; object-fit:fill; }
+    #basic-info-cursor { position:absolute; left:0; top:0; width:40px; height:40px; transform-origin:8.33px 5px; z-index:3; }
+    #basic-info-cursor path { fill:#fff; stroke:#171326; stroke-width:1.35; stroke-linejoin:round; }
+    .basic-info-click-ring { position:absolute; left:0; top:0; width:44px; height:44px; border:2px solid var(--accent,#902BF5); border-radius:50%; opacity:0; z-index:2; }
+  </style>
+  <div id="root" data-composition-id="basic-info" data-duration="8" data-width="1920" data-height="1080">
+    <div id="basic-info-ground"></div>
+    <div id="basic-info-context" data-var-text="subtitle">PulseFit · Imaginary product promotion</div>
+    <h1 id="basic-info-title" data-var-text="title">Set the brief, goals and timeline</h1>
+    <div id="basic-info-screen" data-layout-allow-overflow>
+      <div id="basic-info-camera">
+        <img id="basic-info-capture" class="clip" data-start="0" data-duration="8" data-track-index="1" data-var-src="capture" src="assets/captures/03-basic-info.png" alt="Set the brief, goals and timeline" />
+      </div>
+    </div>
+  </div>
+  <script>
+    (function(){
+      var tl=gsap.timeline({paused:true});
+      tl.fromTo('#basic-info-camera',{x:0,y:0,scale:1},{x:-124.416,y:-55.404,scale:1.16,duration:.85,ease:'power2.inOut',immediateRender:false},2);
+      tl.to('#basic-info-camera',{x:0,y:0,scale:1,duration:.65,ease:'power2.inOut'},6.9);
+      
+      window.__timelines=window.__timelines||{};
+      window.__timelines['basic-info']=tl;
+    })();
+  </script>
+</template></body></html>

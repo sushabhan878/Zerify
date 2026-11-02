@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" data-composition-variables="[{&quot;id&quot;:&quot;title&quot;,&quot;type&quot;:&quot;string&quot;,&quot;label&quot;:&quot;Scene title&quot;,&quot;default&quot;:&quot;Review and accept the invitation&quot;,&quot;maxLength&quot;:80},{&quot;id&quot;:&quot;subtitle&quot;,&quot;type&quot;:&quot;string&quot;,&quot;label&quot;:&quot;Context&quot;,&quot;default&quot;:&quot;Creator workspace · Confirm acceptance&quot;,&quot;maxLength&quot;:100},{&quot;id&quot;:&quot;capture&quot;,&quot;type&quot;:&quot;image&quot;,&quot;label&quot;:&quot;App capture&quot;,&quot;default&quot;:&quot;assets/captures/21-accept-dialog.png&quot;}]">
+<body><template>
+  <style>
+    #root { position:absolute; inset:0; overflow:hidden; font-family:Inter,sans-serif; color:#171326; }
+    #accept-ground { position:absolute; inset:0; background:#f4f2fa; }
+    #accept-context { position:absolute; left:192px; top:56px; width:1536px; height:42px; font-size:28px; line-height:42px; font-weight:400; color:#65586f; }
+    #accept-title { position:absolute; left:192px; top:103px; width:1536px; height:55px; margin:0; font-size:40px; line-height:55px; font-weight:700; letter-spacing:-1px; color:#171326; }
+    #accept-screen { position:absolute; left:176.919px; top:190px; width:1566.163px; height:810px; overflow:hidden; border-radius:20px; box-shadow:0 18px 50px rgba(23,19,38,.12); background:white; }
+    #accept-camera { position:absolute; inset:0; width:100%; height:100%; transform-origin:0 0; }
+    #accept-capture { position:absolute; left:0; top:-70.967px; width:1566.163px; height:880.967px; max-width:none; object-fit:fill; }
+    #accept-cursor { position:absolute; left:0; top:0; width:40px; height:40px; transform-origin:8.33px 5px; z-index:3; }
+    #accept-cursor path { fill:#fff; stroke:#171326; stroke-width:1.35; stroke-linejoin:round; }
+    .accept-click-ring { position:absolute; left:0; top:0; width:44px; height:44px; border:2px solid var(--accent,#902BF5); border-radius:50%; opacity:0; z-index:2; }
+  </style>
+  <div id="root" data-composition-id="accept" data-duration="6" data-width="1920" data-height="1080">
+    <div id="accept-ground"></div>
+    <div id="accept-context" data-var-text="subtitle">Creator workspace · Confirm acceptance</div>
+    <h1 id="accept-title" data-var-text="title">Review and accept the invitation</h1>
+    <div id="accept-screen" data-layout-allow-overflow>
+      <div id="accept-camera">
+        <img id="accept-capture" class="clip" data-start="0" data-duration="6" data-track-index="1" data-var-src="capture" src="assets/captures/21-accept-dialog.png" alt="Review and accept the invitation" />
+        <svg id="accept-cursor" viewBox="0 0 24 24" aria-hidden="true" data-layout-ignore><path d="M5 3 L5 19 L9 15 L12 22 L15 20.5 L11.5 14 L18 14 Z" /></svg>
+        <div id="accept-click-1" class="accept-click-ring" data-layout-ignore></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function(){
+      var tl=gsap.timeline({paused:true});
+      tl.fromTo('#accept-camera',{x:0,y:0,scale:1},{x:-1096.314,y:-567,scale:2.4,duration:.85,ease:'power2.inOut',immediateRender:false},1.1);
+      tl.to('#accept-camera',{x:0,y:0,scale:1,duration:.65,ease:'power2.inOut'},4.9);
+      tl.set('#accept-cursor',{x:1307.247,y:659.2} ,0);
+tl.fromTo('#accept-cursor',{x:1307.247,y:659.2},{x:872.637,y:496.662,duration:0.65,ease:'power2.inOut',immediateRender:false},4.8);
+tl.fromTo('#accept-cursor',{scale:1},{scale:0.88,duration:0.07,ease:'power2.out',immediateRender:false},5.55);
+tl.to('#accept-cursor',{scale:1,duration:0.16,ease:'power2.out'},5.62);
+tl.fromTo('#accept-click-1',{x:858.967,y:479.662,opacity:0.6,scale:.25},{opacity:0,scale:1.3,duration:.32,ease:'power2.out',immediateRender:false},5.55);
+
+      window.__timelines=window.__timelines||{};
+      window.__timelines['accept']=tl;
+    })();
+  </script>
+</template></body></html>
