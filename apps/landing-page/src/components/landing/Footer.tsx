@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Footer() {
   return (
@@ -17,7 +18,7 @@ export default function Footer() {
               <div className="space-y-2.5">
                 <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">By business type</h5>
                 <ul className="space-y-2 font-medium text-slate-200 text-sm">
-                  <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">For brands</a></li>
+                  <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">For brands</a></li>
                   <li>
                     <a
                       href="https://agency.zerify.in"
@@ -35,8 +36,8 @@ export default function Footer() {
               <div className="space-y-2.5">
                 <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">By feature</h5>
                 <ul className="space-y-2 font-medium text-slate-200 text-sm">
-                  <li><a href="#showcase" className="hover:text-purple-400 transition-colors">Partnerships hub</a></li>
-                  <li><a href="#showcase" className="hover:text-purple-400 transition-colors">CreativeOps</a></li>
+                  <li><a href="/#platform" className="hover:text-purple-400 transition-colors">Partnerships hub</a></li>
+                  <li><a href="/#platform" className="hover:text-purple-400 transition-colors">CreativeOps</a></li>
                 </ul>
               </div>
             </div>
@@ -45,10 +46,10 @@ export default function Footer() {
             <div className="space-y-2.5">
               <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Resources</h5>
               <ul className="space-y-2 font-medium text-slate-200 text-sm">
-                <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">Creators</a></li>
-                <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">Help center</a></li>
-                <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">Success stories</a></li>
-                <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">Creative insider</a></li>
+                <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">Creators</a></li>
+                <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">Help center</a></li>
+                <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">Success stories</a></li>
+                <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">Creative insider</a></li>
               </ul>
             </div>
 
@@ -59,14 +60,14 @@ export default function Footer() {
                 <span className="text-[10px]">↗</span>
               </h5>
               <ul className="space-y-2 font-medium text-slate-200 text-sm">
-                <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">Ad performance</a></li>
-                <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">Zerify news</a></li>
-                <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">Creator resources</a></li>
-                <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">eCommerce marketing</a></li>
-                <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">Influencer marketing</a></li>
-                <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">Paid social news</a></li>
-                <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">Social media marketing</a></li>
-                <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">User-generated content</a></li>
+                <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">Ad performance</a></li>
+                <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">Zerify news</a></li>
+                <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">Creator resources</a></li>
+                <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">eCommerce marketing</a></li>
+                <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">Influencer marketing</a></li>
+                <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">Paid social news</a></li>
+                <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">Social media marketing</a></li>
+                <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">User-generated content</a></li>
               </ul>
             </div>
 
@@ -75,8 +76,8 @@ export default function Footer() {
               <div className="space-y-2.5">
                 <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Company</h5>
                 <ul className="space-y-2 font-medium text-slate-200 text-sm">
-                  <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">About us</a></li>
-                  <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">Careers</a></li>
+                  <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">About us</a></li>
+                  <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">Careers</a></li>
                 </ul>
               </div>
 
@@ -96,7 +97,7 @@ export default function Footer() {
                       <span className="text-[10px]">↗</span>
                     </a>
                   </li>
-                  <li><a href="#waitlist" className="hover:text-purple-400 transition-colors">Book a call</a></li>
+                  <li><a href="/#waitlist" className="hover:text-purple-400 transition-colors">Book a call</a></li>
                 </ul>
               </div>
             </div>
@@ -138,7 +139,7 @@ export default function Footer() {
 
             {/* Become a creator link */}
             <div>
-              <a href="#waitlist" className="text-xs font-semibold text-slate-400 hover:text-white transition-colors flex items-center gap-1">
+              <a href="/#waitlist" className="text-xs font-semibold text-slate-400 hover:text-white transition-colors flex items-center gap-1">
                 <span>Become a creator</span>
                 <span>↗</span>
               </a>
@@ -147,13 +148,13 @@ export default function Footer() {
             {/* App Store & Play Store Pills */}
             <div className="flex flex-wrap items-center gap-3 pt-1">
               <a
-                href="#waitlist"
+                href="/#waitlist"
                 className="px-4 py-2.5 rounded-full bg-slate-900 border border-white/15 hover:border-purple-400 text-white text-xs font-bold transition-all flex items-center gap-2"
               >
                 <span> App store</span>
               </a>
               <a
-                href="#waitlist"
+                href="/#waitlist"
                 className="px-4 py-2.5 rounded-full bg-slate-900 border border-white/15 hover:border-purple-400 text-white text-xs font-bold transition-all flex items-center gap-2"
               >
                 <span>▶ Play store</span>
@@ -172,7 +173,7 @@ export default function Footer() {
             {['in', 'IG', 'TT', '𝕏', 'f', '▶'].map((icon, idx) => (
               <a
                 key={idx}
-                href="#"
+                href="/#"
                 className="w-8 h-8 rounded-full bg-slate-900 border border-white/10 hover:border-purple-400 flex items-center justify-center font-bold text-xs text-slate-300 hover:text-white transition-all"
               >
                 {icon}
@@ -182,9 +183,9 @@ export default function Footer() {
 
           {/* Legal & Copyright */}
           <div className="flex flex-wrap items-center justify-center md:justify-end gap-x-4 gap-y-2 text-center md:text-right">
-            <a href="#waitlist" className="hover:text-white transition-colors">Terms of service</a>
+            <Link href="/terms-of-service" className="hover:text-white transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400">Terms of service</Link>
             <span>•</span>
-            <a href="#waitlist" className="hover:text-white transition-colors">Privacy policy</a>
+            <Link href="/privacy-policy" className="hover:text-white transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400">Privacy policy</Link>
             <span className="hidden sm:inline">•</span>
             <span>584 Castro St. 2163 San Francisco, CA 94114</span>
             <span>•</span>
