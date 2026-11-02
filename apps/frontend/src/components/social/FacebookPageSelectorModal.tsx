@@ -57,10 +57,15 @@ export default function FacebookPageSelectorModal({
       })
       .then((res) => {
         if (!isMounted) return;
-        const fetchedPages: FacebookPage[] = Array.isArray(res.pages) ? res.pages : [];
+        const payload = res.data || res;
+        const fetchedPages: FacebookPage[] = Array.isArray(payload.pages)
+          ? payload.pages
+          : Array.isArray(res.pages)
+          ? res.pages
+          : [];
         setPages(fetchedPages);
-        if (res.user?.username) {
-          setUserName(res.user.username);
+        if (payload.user?.name || payload.user?.username || res.user?.username) {
+          setUserName(payload.user?.name || payload.user?.username || res.user?.username);
         }
 
         // Auto-select pages that are already connected, or select all if none are connected yet
@@ -154,7 +159,7 @@ export default function FacebookPageSelectorModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.2 }}
-          className="w-full max-w-lg rounded-2xl bg-slate-950/95 border border-purple-500/30 shadow-2xl p-6 text-white space-y-5 relative overflow-hidden"
+          className="w-full max-w-lg rounded-2xl bg-slate-950/95 light:bg-white border border-purple-500/30 light:border-slate-200 shadow-2xl p-6 text-white light:text-slate-900 space-y-5 relative overflow-hidden"
         >
           {/* Header */}
           <div className="flex items-center justify-between pb-4 border-b border-white/10">

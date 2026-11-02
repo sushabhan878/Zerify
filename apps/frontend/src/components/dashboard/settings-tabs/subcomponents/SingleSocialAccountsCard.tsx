@@ -13,10 +13,12 @@ import {
   Clock,
   Edit2,
   Unlink,
+  Layers,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/components/ui/Toast';
 import EditSocialMetricsModal from './EditSocialMetricsModal';
+import FacebookPageSelectorModal from '@/components/social/FacebookPageSelectorModal';
 
 export interface SocialAccountItem {
   id: string;
@@ -104,6 +106,7 @@ export default function SingleSocialAccountsCard({
   const [connectingId, setConnectingId] = useState<string | null>(null);
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [editingAccount, setEditingAccount] = useState<SocialAccountItem | null>(null);
+  const [isPageSelectorOpen, setIsPageSelectorOpen] = useState(false);
   const [isSavingMetrics, setIsSavingMetrics] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
@@ -544,6 +547,21 @@ export default function SingleSocialAccountsCard({
                     >
                       <RefreshCw className={`w-3.5 h-3.5 ${syncingId === acc.id ? 'animate-spin text-purple-400 light:text-purple-600' : ''}`} />
                     </button>
+
+                    {isFacebook && acc.connected && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsPageSelectorOpen(true);
+                        }}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 light:text-slate-500 hover:text-blue-400 light:hover:text-blue-600 hover:bg-blue-500/10 light:hover:bg-blue-50 border border-white/10 light:border-slate-200 light:bg-slate-50 transition-colors shadow-sm"
+                        title="Manage / Select Facebook Pages"
+                        aria-label="Manage Facebook Pages"
+                      >
+                        <Layers className="w-3.5 h-3.5" />
+                      </button>
+                    )}
 
                     {isLinkedIn && (
                       <button

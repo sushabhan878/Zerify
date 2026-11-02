@@ -87,7 +87,7 @@ const DEFAULT_ACCOUNTS: SocialAccountItem[] = [
 ];
 
 function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): SocialAccountItem[] {
-  return DEFAULT_ACCOUNTS.map((acc) => {
+  const baseCards = DEFAULT_ACCOUNTS.map((acc) => {
     let matched: any = null;
     if (acc.id === 'instagram') {
       matched = dbAccounts.find(
@@ -102,21 +102,8 @@ function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): Social
           ['TWITTER', 'X'].includes((item.platform || '').toUpperCase()),
       );
     } else if (acc.id === 'facebook') {
-      // Prioritize connected Facebook Page with followers or connected page/personal profile
+      // Prioritize Personal Facebook Account for the main Facebook card
       matched =
-        dbAccounts.find(
-          (item: any) =>
-            (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
-            ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()) &&
-            item.accountType === 'PAGE' &&
-            (item.followerCount || 0) > 0,
-        ) ||
-        dbAccounts.find(
-          (item: any) =>
-            (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
-            ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()) &&
-            item.accountType === 'PAGE',
-        ) ||
         dbAccounts.find(
           (item: any) =>
             (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
@@ -212,6 +199,37 @@ function mapDbAccountsToCards(dbAccounts: any[], profileAccounts: any[]): Social
       dbId: undefined,
     };
   });
+
+  // Find any connected Facebook Pages to render as individual cards
+  const primaryFb = baseCards.find((c) => c.id === 'facebook' && c.connected);
+  const connectedPages = dbAccounts.filter(
+    (item: any) =>
+      (item.status ? (item.status || '').toUpperCase() === 'CONNECTED' : true) &&
+      ['FACEBOOK', 'META'].includes((item.platform || '').toUpperCase()) &&
+      item.accountType === 'PAGE' &&
+      item.id !== primaryFb?.dbId &&
+      item.platformUserId !== primaryFb?.platformUserId,
+  );
+
+  const pageCards: SocialAccountItem[] = connectedPages.map((page) => ({
+    id: `facebook_page_${page.platformUserId || page.id}`,
+    name: `Facebook Page: ${page.displayName || page.username}`,
+    platform: 'facebook',
+    accountType: 'PAGE',
+    icon: Facebook,
+    gradientColor: 'from-blue-700 via-indigo-600 to-blue-400',
+    connected: true,
+    handle: page.handle ? (page.handle.startsWith('@') ? page.handle : `@${page.handle}`) : `@${page.username}`,
+    userName: page.displayName || page.username,
+    profileUrl: page.profileUrl || (page.platformUserId ? `https://facebook.com/${page.platformUserId}` : undefined),
+    engagementRate: page.engagementRate ? (typeof page.engagementRate === 'number' ? page.engagementRate.toFixed(1) : String(page.engagementRate)) : undefined,
+    platformUserId: page.platformUserId,
+    avatar: page.avatar,
+    followers: page.followerCount ? page.followerCount.toLocaleString() : '—',
+    dbId: page.id,
+  }));
+
+  return [...baseCards, ...pageCards];
 }
 
 function buildInitialAccountsFromCache(initialData?: any): SocialAccountItem[] {
