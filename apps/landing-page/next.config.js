@@ -7,6 +7,15 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: normalizedApiUrl,
   },
+  async redirects() {
+    return [
+      {
+        source: '/social/callback',
+        destination: 'https://app.zerify.in/social/callback',
+        permanent: false,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

@@ -77,7 +77,11 @@ export class SocialService implements OnModuleInit {
   }
 
   private getFrontendUrl(): string {
-    return this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    const url = this.configService.get<string>('FRONTEND_URL') || 'https://app.zerify.in';
+    if (url === 'https://zerify.in' || url === 'https://www.zerify.in' || url === 'http://zerify.in' || url === 'http://www.zerify.in') {
+      return 'https://app.zerify.in';
+    }
+    return url;
   }
 
   getMetaAuthUrl(userId: string, forceReauth: boolean = true): { url: string; state: string } {
